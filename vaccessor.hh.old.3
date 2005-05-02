@@ -1,0 +1,268 @@
+//     Copyright (C) 2002 Tom Drummond (twd20@eng.cam.ac.uk)
+
+//     This library is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 2.1 of the License, or (at your option) any later version.
+
+//     This library is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//     Lesser General Public License for more details.
+
+//     You should have received a copy of the GNU Lesser General Public
+//     License along with this library; if not, write to the Free Software
+//     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+#ifndef __VACCESSOR_HH
+#define __VACCESSOR_HH
+
+
+///////////////////////////////
+//                           //
+//  Vector Accessor classes  //
+//                           //
+///////////////////////////////
+
+/////////////  FIXED SIZED ACCESSORS ////////////////
+
+#define TOON_CHECK_INDEX_A(S) TOON_ASSERT(i < S && i >= 0, TooNError::BadIndex)
+
+#define TOON_CHECK_SLICE_A(S) TOON_ASSERT(Start < S && Start >=0, TooNError::BadSliceStart);\
+                              TOON_ASSERT(Start + Length <= S, TooNError::SliceTooBig);\
+						      TOON_ASSERT(Length > 0, TooNError::SillySlice)
+
+#define TOON_CHECK_INDEX TOON_CHECK_INDEX_A(Size)
+#define TOON_CHECK_SLICE TOON_CHECK_SLICE_A(Size)
+
+
+template <int Size, class AllocZone>
+class FixedVAccessor : public AllocZone {
+ public:
+  inline const double& operator[] (int i)const TOON_THROW
+  {
+  	TOON_CHECK_INDEX;
+    return my_values[i];
+  }
+
+  inline double& operator[] (int i) TOON_THROW
+  {
+    TOON_CHECK_INDEX;	
+    return my_values[i];
+  }
+
+
+  inline static int size() {return Size;}
+
+  template<int Start, int Length>
+  inline FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice() TOON_THROW
+  {
+ 	TOON_CHECK_SLICE; 
+    return reinterpret_cast<FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (my_values[Start]);
+  }
+
+  
+  template<int Start, int Length>
+  inline const FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice() const TOON_THROW
+  {
+	TOON_CHECK_SLICE;
+    return reinterpret_cast<const FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (my_values[Start]);
+  }
+
+  // convert to Matrices
+  inline FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >& as_col() throw()
+  {
+    return reinterpret_cast<FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >&>(*my_values);
+  }
+
+  inline const FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >& as_col() const throw()
+  {
+    return reinterpret_cast<const FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >&> (*my_values);
+  }
+
+  inline FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >& as_row() throw()
+  {
+    return reinterpret_cast<FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >&> (*my_values);
+  }
+  
+  inline const FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >& as_row() const throw()
+  {
+    return reinterpret_cast<const FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >&> (*my_values);
+  }
+  
+};
+
+
+template <int Size, int Skip>
+class SkipAccessor : public Stack<Size*Skip>{
+ public:
+  inline const double& operator[] (int i) const  TOON_THROW
+  {
+    TOON_CHECK_INDEX;
+	return my_values[i*Skip];
+  }
+
+  inline double& operator[] (int i) TOON_THROW
+  {
+    TOON_CHECK_INDEX;
+	return my_values[i*Skip];
+  }
+
+  inline static int size() throw()
+  {
+    return Size;
+  }
+
+  template<int Start, int Length>
+  inline FixedVector<Size, SkipAccessor<Size, Skip> >& slice() TOON_THROW
+  {
+    TOON_CHECK_SLICE;
+	return reinterpret_cast<FixedVector<Size, SkipAccessor<Size, Skip> >&>(my_values[Start*Skip]);
+  }
+
+  template<int Start, int Length>
+  inline const FixedVector<Size, SkipAccessor<Size, Skip> >& slice() const TOON_THROW
+  {
+  	TOON_CHECK_SLICE;
+    return reinterpret_cast<const FixedVector<Size, SkipAccessor<Size, Skip> >&>(my_values[Start*Skip]);
+  }
+
+  // convert to Matrices
+  inline FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >& as_col() throw()
+  {
+    return reinterpret_cast<FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >&>(*my_values);
+  }
+
+  inline const FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >& as_col() const throw()
+  {
+    return reinterpret_cast<FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >&>(*my_values);
+  }
+
+  inline FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >& as_row() throw()
+  {
+    return reinterpret_cast<FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >&>(*my_values);
+  }
+
+  inline const FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >& as_row() const throw()
+  {
+    return reinterpret_cast<const FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >&>(*my_values);
+  }
+
+};
+
+/////////////  DYNAMIC SIZED ACCESSORS ////////////////
+#undef TOON_CHECK_INDEX
+#undef TOON_CHECK_SLICE
+
+#define TOON_CHECK_INDEX TOON_CHECK_INDEX_A(my_size)
+#define TOON_CHECK_SLICE TOON_CHECK_SLICE_A(my_size)
+
+
+
+class DynamicVAccessor {
+  friend class VSizer;
+ public:
+  template<int Start, int Length>
+  inline FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() TOON_THROW
+  {
+	TOON_CHECK_SLICE;
+    return reinterpret_cast<FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >&> (my_values[Start]);
+  }
+
+  template<int Start, int Length>
+  const inline FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() const TOON_THROW
+  {
+	TOON_CHECK_SLICE;
+    return reinterpret_cast<const FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >&> (my_values[Start]);
+  }
+
+  inline const double& operator[] (int i)const TOON_THROW
+  {
+  	TOON_CHECK_INDEX;
+    return my_values[i];
+  }
+
+  inline double& operator[] (int i) TOON_THROW
+  {
+  	TOON_CHECK_INDEX;
+    return my_values[i];
+  }
+
+  inline int size() const throw()
+  {
+    return my_size;
+  }
+
+  inline RefMatrix<RowMajor> as_row(); // implemented in linoperators.hh
+  inline RefMatrix<ColMajor> as_col(); //
+
+ protected:
+  int my_size;
+  double* my_values;
+};
+
+class DynamicSkipAccessor{
+ public:
+
+  //CHECK THIS
+  template<int Start, int Length>
+  inline DynamicVector<DynamicSkipAccessor> slice() TOON_THROW
+  {
+    //DynamicSkipAccessors do not own memory, so destruction of one will not free it 
+	TOON_CHECK_SLICE;
+	
+	DynamicVector<DynamicSkipAccessor> r;
+	r.my_size = Length;
+	r.my_skip = my_skip;
+	r.my_values = my_values + my_skip * Start;
+	
+	return r;
+  }
+
+  template<int Start, int Length>
+  inline const DynamicVector<DynamicSkipAccessor> slice() const TOON_THROW
+  {
+    //DynamicSkipAccessors do not own memory, so destruction of one will not free it 
+	TOON_CHECK_SLICE;
+	
+	DynamicVector<DynamicSkipAccessor> r;
+	r.my_size = Length;
+	r.my_skip = my_skip;
+	r.my_values = my_values + my_skip * Start;
+	
+	return r;
+  }
+
+  inline const double& operator[] (int i)const TOON_THROW
+  {
+  	TOON_CHECK_INDEX;
+    return my_values[i*my_skip];
+  }
+
+  inline double& operator[] (int i) TOON_THROW
+  {
+  	TOON_CHECK_INDEX;
+    return my_values[i*my_skip];	
+  }
+  
+  inline int size() const throw()
+  {
+    return my_size;
+  }
+
+  inline RefSkipMatrix<ColMajor> as_row(); // implemented in linoperators.hh
+  inline RefSkipMatrix<RowMajor> as_col(); //
+
+
+ protected:
+  int my_size;
+  int my_skip;
+  double* my_values;
+};
+
+#undef TOON_CHECK_SLICE
+#undef TOON_CHECK_SLICE_A
+#undef TOON_CHECK_INDEX
+#undef TOON_CHECK_INDEX_A
+
+#endif

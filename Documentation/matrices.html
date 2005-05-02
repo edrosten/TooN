@@ -1,0 +1,166 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+
+<H2>Matrices</H2>
+
+The library provides classes for statically and dynamically sized matrices.  Again
+statically sized matrices are more efficient.
+
+<H3>Statically sized matrics</H3>
+
+To create a 3x4 matrix, use:
+<br>
+<br><tt> Matrix&lt;3,4&gt; M;</tt>
+<br>
+<br> again replace 3 and 4 with the dimensions of your choice.  If the matrix is square, it
+can be declared as:
+<br><tt> Matrix&lt;3&gt; M;</tt>
+<br>
+<br> which just is a synonym for Matrix&lt;3,3&gt;.
+Matrices can also be constructed from pointers or static 1d or 2d arrays of doubles:
+<br>
+<br><tt> void foo(double* dptr) {
+<br>
+<br> &nbsp;&nbsp;Matrix&lt;3&gt; M1 (dptr);
+<br>
+<br> &nbsp;&nbsp;double dvals1[9]={1,2,3,4,5,6};
+<br> &nbsp;&nbsp;Matrix&lt;2,3&gt; M2 (dvals1);
+<br>
+<br> &nbsp;&nbsp;double dvals2[2][3]={{1,2,3},{4,5,6}};
+<br> &nbsp;&nbsp;Matrix&lt;2,3&gt; M3 (dvals2);
+<br>
+<br> &nbsp;&nbsp;// ...
+<br>}</tt>
+<br>
+<br> Again g++ allows the construction of M2 and M3 in the example above to be contracted to:
+<br>
+<br><tt> &nbsp;&nbsp;Matrix&lt;2,3&gt; vM2((double[]){1,2,3,4,5,6});</tt>
+<br><tt> &nbsp;&nbsp;Matrix&lt;2,3&gt; vM3((double[2][3]){1,2,3,4,5,6});</tt>
+
+<H3>Dynamically sized matrices</H3>
+
+To create a dynamically sized matrix, use:
+<br>
+<br><tt>  Matrix<> M(num_rows, num_cols); </tt>
+<br>
+<br> where num_rows and num_cols are integers which will be evaluated at run time.
+Dynamic sized matrices
+can be constructed from pointers in a similar manner to static sized matrices:
+<br>
+<br><tt> void bar(int r, int c, double* dptr) {
+<br> &nbsp;&nbsp;Matrix&lt;&gt; M (r,c,dptr);
+<br> &nbsp;&nbsp;// ...
+<br>}</tt>
+<br>
+<br> Matrix&lt;&gt; is a synonym for Matrix&lt;-1,-1&gt;
+
+<H3>RowMajor and ColMajor</H3>
+
+The library supports both row major (the default - but you can change this if you prefer)
+and column major layout ordering.  Row major implies that the matrix is laid out in memory
+in raster scan order:
+<br>
+<br>
+<tt> Row major &nbsp;&nbsp; Col major
+<br>
+<br> [ 1 2 3 ]  &nbsp;&nbsp; [ 1 4 7 ]
+<br> [ 4 5 6 ]  &nbsp;&nbsp; [ 2 5 8 ]
+<br> [ 7 8 9 ]  &nbsp;&nbsp; [ 3 6 9 ] </tt>
+<br>
+<br> You can override the default for a specific matrix by specifying the layout when
+you construct it:
+<br>
+<br> <tt> Matrix&lt;3,3,ColMajor&gt; M1;
+<br> Matrix&lt;-1,-1,RowMajor&gt; M2(nrows, ncols); </tt>
+
+<H3>Matrix operations</H3>
+
+<li> The [] notation can be used to yield a vector from a matrix (that can be used as an l-value):
+<br>
+<br><tt> M[0] = v; <b> // set the top row of M to be equal to v </b> </tt>
+<br>
+<br>
+<li> The () notation can be used to access elements directly:
+<br>
+<br><tt> double d = M(1,2); </tt>
+<br>
+<br>
+<li> Matrices can be transposed (and the transpose used as an l-value):
+<br>
+<br><tt> M.T()[0] = v; <b> // set the left hand colum of M to be equal to v </b> </tt>
+<br>
+<br>The transpose operation is *very* efficient (in fact it does nothing at all but
+return a reference to a matrix with the opposite memory layout).
+<br><b>This means that the semantics of M=M.T() are broken.</b> In general it's not
+necessary to say M=M.T() since you can use M.T() for free whenever you need the transpose.
+If you do need to, you have to use the Transpose() function found in numhelpers.h:
+<br>
+<br><tt> Transpose(M); <b> // set M equal to its transpose </b> </tt>
+<br>
+<br>
+<li> Matrices can be added or subtracted:
+<br>
+<br><tt> M3=M1+M2;
+<br> M4=M1-M2;
+<br> M5+=M1;
+<br> M6-=M2; </tt>
+<br>
+<br> with the same rules for size and static/dynamic as vectors.
+<br>
+<br>
+<li> Matrices can be multiplied (on either side) or divided (on the right) by a scalar.
+<br>
+<br><tt> M2 = M1*0.7;
+<br> M3 = 1.2*M1;
+<br> M4 = M1/10;</tt>
+<br>
+<br>
+<li> Matrices can be multiplied by matrices or vectors:
+<br>
+<br> <tt> M1 = M2*M3;
+<br> v2 = M1 * v1;
+<br> v3 = v1 * M1 <b> // remember a vector on the left of * implies it is a row vector </b>
+<br> v4 = M1.T() * v1; <b> // v4 is now the same as v3 </b> </tt>
+<br>
+<br>
+<li> Sub-matrices can be extracted using a templated slice() member function;
+<br>
+<br> <tt> Matrix<6,6> M;
+<br> Vector<3> v1;
+<br> <b> // ... </b>
+<br> Vector<3> v2 = M.slice<1,2,3,3>() * v1; </tt>
+<br>
+<br> The template arguments are the row and column of the first element and the
+number of rows and columns of the sub-matrix to be extracted.
+<br>
+<br>
+<li> Inverse is not supported as a matrix primitive, only via the various
+<A HREF="decompositions.html">Matrix Decompositions</A>
+<br>
+<br>
+<br>-------
+<br>
+<br>
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>

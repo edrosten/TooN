@@ -1,0 +1,91 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+
+<H2>Implementation</H2>
+
+<H3>Static sized vectors and matrices</H3>
+
+One aspect that makes this library efficient is that when you declare a 3-vector, all you
+get are 3 doubles - there's no metadata.  So <tt> sizeof(Vector<3>) </tt> is 24.
+This means that when you write:
+<br>
+<br> <tt> Vector<3> v; </tt>
+<br>
+<br> v is allocated on the stack and hence new/delete (malloc/free) overhead is avoided.
+However, for large vectors and matrices, this would be a Bad Thing since:
+<br>
+<br><tt> Vector<1000000> v; </tt>
+<br>
+<br> would result in an object of 8 megabytes being allocated on the stack.  I don't know about
+you, but my whole stack is only that big.  TooN gets around that problem by having a
+cutoff at which statically sized vectors are allocated on the heap.  This is completely
+transparent to the programmer, the objects' behaviour is unchanged and you still get
+the type safety offered by statically sized vectors and matrices.  The cutoff size at which
+the library changes the representation is defined in numerics.h as the const int
+MaxStackSize in the class NUMERICS.
+<br>
+<br>When you apply the subscript operator to a <tt> Matrix<3,3> </tt>
+and the function simply returns the apropriate hunk of memory as a vector
+*reference* (ie it basically does no work).  This avoids copying and also allows the
+resulting vector to be used as an l-value.  Similarly the transpose operation applied to a
+matrix returns the memory corresponding to the matrix as a reference to a matrix with the
+opposite layout which also means the transpose can be used as an l-value so:
+<br>
+<br> <tt> M1 = M2.T(); </tt>
+<br>
+<br> and
+<br>
+<br> <tt> M1.T() = M2; </tt>
+<br>
+<br> do exactly the same thing.
+
+<H3> Dynamic sized vectors and matrices </H3>
+
+These are implemented in the obvious way using metadata with the rule that the object
+that allocated on the heap also deallocates.  Other objects may reference the data (e.g.
+when you subscript a matrix and get a vector).
+
+<H3> If you want to know more </H3>
+
+and can understand idioms like:
+<br>
+<br> <tt> template &lt;int Size, class AllocZone&gt;
+<br> class FixedVAccessor : public AllocZone {
+<br> &nbsp;&nbsp; ...
+<br> }; </tt>
+<br>
+<br> and
+<br>
+<br> <tt> template &lt;int Size&gt;
+<br> class Vector : public FixedVector&lt;Size,
+FixedVAccessor&lt;Size,typename SizeTraits&lt;Size&gt;::get_zone&gt; &gt; {
+<br> &nbsp;&nbsp; ...
+<br> }; </tt>
+<br>
+<br> Then take a look at the source code ...
+<br>
+<br>
+<br>
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>

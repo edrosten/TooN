@@ -1,0 +1,88 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+<P align="center"
+<FONT SIZE=+3>TooN </FONT><br>
+<FONT SIZE=+3>(T</FONT><FONT SIZE=+2>om's</FONT>
+<FONT SIZE=+3>o</FONT><FONT SIZE=+2>bject</FONT>
+<FONT SIZE=+3>o</FONT><FONT SIZE=+2>riented</FONT>
+<FONT SIZE=+3>N</FONT><FONT SIZE=+2>umerics library</FONT><FONT SIZE=+3>)</FONT>
+</P>
+
+<H3>Intro</H3>
+<br>
+This is the documentation for my simple C++ numerics libarary.
+<br><br>
+The library is currently just a set of C++ header files which provide basic numerics
+facilities (vectors, matrices and some matrix decompositions).  It provides
+classes for statically (known at compile time) and dynamically (unknown at compile time)
+sized vectors and  matrices and it delegates advanced functions (like SVD or multiplication
+of large matrices) to  LAPACK and BLAS (this means you will need libblas and liblapack).
+<br><br>
+The library makes substantial internal use of templates to achieve 
+run-time speed efficiency whilst retaining a (reasonably) clear
+programming syntax.  Because of this use of templates, you will need
+a recent compiler (for example it does not work with g++ before version 3.0).
+Programs that use it can also take a *long* time to compile with -O3 under g++.
+<br><br>
+Currently the library only supports double precision vectors and matrices.
+I plan to support single precision as well as single and
+double precision complex numbers in future versions.
+<br><br>
+The library is released under the LGPL (see license.txt and the preamble on each header file).  This
+is version 0.1 and is an alpha release and probably liable to failure.  Any bugfixes,
+requests for new features or code for new features can be emailed to me (twd20@eng.cam.ac.uk).
+
+
+<H3>Why use this library?</H3>
+1) because it supports statically sized vectors and matrices very efficiently
+(without introducing metadata)*
+<br>
+2) because it provides type safety for statically sized vectors and matrices
+(you can't attempt to multiply a 3x4 matrix and a 2-vector).
+<br>
+3) because it supports transposition and subscripting of matrices (to obtain a vector)
+very efficiently
+<br>
+4) because it exploits LAPACK and BLAS (for which optimised versions exist on many platforms).
+<br>
+<br>
+(*) This is not always true (see <A HREF="implementation.html">Implementation</A>)
+
+
+<H3>Using the library</H3>
+
+<LI> <A HREF="howtouse.html">HowToUse</A>
+<LI> <A HREF="vectors.html">Vectors</A>
+<LI> <A HREF="matrices.html">Matrices</A>
+<LI> <A HREF="decompositions.html">Matrix Decompositions</A>
+<LI> <A HREF="implementation.html">Implementation</A>
+<LI> <A HREF="rvopt.html">Return Value Optimisation vs Lazy Evalutation</A>
+<LI> <A HREF="todo.html">Still To Do</A>
+<LI> <A HREF="TooN.tar.gz">Download</A>
+
+<br>
+<br>
+
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>

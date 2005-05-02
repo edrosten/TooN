@@ -1,0 +1,57 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+
+<H3>How to use</H3>
+<br>
+
+1) Make sure you have a suitable compiler (g++ version < 3 is no good)
+<br>
+<br>
+2) Make sure all these files are in your include path.
+<br>
+<br>
+3) Then
+<br>
+<br>
+<tt> #include &lt;numerics.h&gt</tt>
+<br>
+<br> and
+<br>
+<br>
+<tt> #include &lt;numhelpers.h&gt; // (if you want a few extras)
+<br> #include &lt;SVD.h&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp // (if you want singular value decompositions)
+<br> #include &lt;LU.h&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp // (if you want lu triangular decompositions)
+<br> #include &lt;SymEigen.h&gt;&nbsp;&nbsp // (if you want Eigen decomposition of symmetric matrices)
+</tt>
+<br>
+<br>
+4) Finally you need to link with <tt> -llapack -lblas  </tt>
+<br> (and <tt> -lg2c </tt> for g++.  I'm not sure about other compilers)
+<br>This means you will also need liblapack.{a,so} and libblas.{a,so}
+<br>
+<br>That's it.
+<br>
+<br>
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>

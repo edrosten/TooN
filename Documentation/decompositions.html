@@ -1,0 +1,151 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+
+<H2>Matrix Decompositions</H2>
+
+The library provides classes (that are wrappers for functionality provided by LAPACK)
+for computing and storing decompositions of matrices.  These decompositions
+are useful for solving equations like
+<br>
+<br> M*x = y &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (1)
+<br>
+<br> (where M and y are known) without explicitly
+computing the inverse of M.  They can also be used to obtain an inverse.
+
+<H3>Triangular (LU) decomposition</H3>
+
+<tt> #include &lt;LU.h&gt; </tt>
+<br>
+<br> This is the fastest way of computing the solution to (1) but it becomes unstable
+if M is (nearly) singular.  This libarary only supports LU decompositions of square matrices.
+It can be used as follows:
+<br>
+<br> <tt> <b> // construct M </b>
+<br> double d1[] = {1,2,3,4,5,6,7,8,10};
+<br> Matrix<3> M(d1);
+<br>
+<br> <b> // construct v </b>
+<br> double d2[] = {2,3,4};
+<br> Vector<3> V(d2);
+<br>
+<br> <b> // create the LU decomposition of M </b>
+<br> LU<3> luM(M);
+<br> 
+<br> <b> // compute M^-1 * v </b>
+<br> Vector<3> v2 = luM.backsub(v1);
+<br>
+<br> <b> // compute M^-1</b>
+<br> Matrix<3> Minv = luM.get_inverse(); </tt>
+<br>
+<br> Again the convention LU&lt;&gt; (=LU&lt;-1&gt;) is used to create an
+LU decomposition whose size is determined at runtime.
+<br>
+<br>
+
+<H3> Singular value decomposition (SVD) </H3>
+
+<tt> #include &lt;SVD.h&gt; </tt>
+<br>
+<br> Singular value decompositions are more robust than LU decompositions in the face of
+singular or nearly singular matrices.  They decompose a matrix (of any shape) M into:
+<br>
+<br> M = U * D * V<sup>T</sup> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (2)
+<br>
+<br> where D is a diagonal matrix of positive numbers whose dimension is the minimum
+of the dimensions of M.  If M is tall and thin (more rows than columns) then U has the
+same shape as M and V is square
+(v.v. if M is short and fat).  The columns of U and the rows of V are orthogonal and of
+unit norm (so one of them lies in SO(N)).  The inverse of M (or pseudo inverse if M is not square)
+is then given by:
+<br>
+<br> M<sup>-1</sup> = V * D<sup>-1</sup> * U<sup>T</sup> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (3)
+<br>
+<br> If M is nearly singular then the diagonal matrix D has some small values (relative to
+its largest value) and these terms dominate D<sup>-1</sup>.  To deal with this problem, the
+inverse is conditioned by setting a maximum ratio between the largest and smallest values in D.
+Any values which are too small are set to zero in the inverse (rather than a large number).
+This decomposition is used as:
+<br>
+<br><tt> <b> // construct M </b>
+<br> double d1[] = {1,2,3,4,5,6};
+<br> Matrix<2,3> M(d1);
+<br>
+<br> <b> // construct v </b>
+<br> double d2[] = {2,3};
+<br> Vector<2> V(d2);
+<br>
+<br> <b> // create the SVD of M </b>
+<br> SVD<2,3> svdM(M);
+<br> 
+<br> <b> // compute pseudo-inverse of M * v </b>
+<br> Vector<3> v2 = svdM.backsub(v1);
+<br>
+<br> <b> // compute pseudo inverse of M</b>
+<br> Matrix<3,2> Mpinv = svdM.get_pinv(); </tt>
+<br>
+<br> The backsub() and get_pinv() member functions take optional arguments (second argument
+in the case of backsub()) which specifies the maximum condition number to use in computing
+D<sup>-1</sup>.  The default value for this is 10<sup>9</sup>.  Again SVD&lt;&gt; can be used.
+The decomposition class also allows the user to extract the matrices U and V<sup>T</sup> and
+the diagonal of D as a vector using the member functions get_U(), get_VT() and get_diagonal().
+<br>
+<br>
+
+<H3> Eigen decomposition of symmetric matrices </H3>
+
+<tt> #include &lt;SymEigen.h&gt; </tt>
+<br>
+<br> Real symmetric (hence square) matrices can be decomposed as:
+<br>
+<br> M = U * D * U<sup>T</sup>
+<br>
+<br> where U is an orthogonal matrix (hence U<sup>T</sup> = U<sup>-1</sup>) whose columns are
+the Eigen vectors of M and D is a diagonal matrix whose entries are the Eigen values of M.
+These quantities are often of use directly and can be obtained as follows:
+<br>
+<br> <tt> <b> // construct M </b>
+<br> double d1[3][3] = {{1,2,3},{2,4,5},{3,5,6}};
+<br> Matrix<3> M(d1);
+<br>
+<br> <b> // create the Eigen decomposition of M </b>
+<br> SymEigen<3> EigM(M);
+<br>
+<br> <b> // print the largest Eigen value </b>
+<br> cout << EigM.get_evalues()[0] << endl;
+<br>
+<br> <b> // print the associated Eigen vector </b>
+<br> cout << EigM.get_evectors()[0] << endl; </tt>
+<br>
+<br> Note that get_evectors() returns U<sup>T</sup> so the rows of U are the
+Eigen vectors and the subscript operator [] returns the vectors.  This decomposition is
+very similar to SVD and can be used to backsubstitute and obtain inverses using backsub()
+and get_pinv() with the same rules regarding condition numbers as SVD.  SymEigen&lt;&gt;
+also exists.
+<br>
+<br>
+<br>-------
+<br>
+<br>
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>

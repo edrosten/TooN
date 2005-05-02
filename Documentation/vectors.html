@@ -1,0 +1,167 @@
+<HTML>
+<!-- T.W. Drummond -->
+
+<HEAD>
+<TITLE> CUED home page - Dr T.W. Drummond </TITLE>
+<!-- Changed by: T.W. Drummond, 16-Aug-1999 -->
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000" LINK="#0000A3" VLINK="#760076" ALINK="#FF0000">
+
+<A HREF="http://www.cam.ac.uk">
+   <IMG align=left BORDER=0 ALT="[Univ of Cambridge]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/uniban-s.gif"></A>
+<A HREF="http://www.eng.cam.ac.uk">
+   <IMG align=
+right BORDER=0 ALT="[Dept of Engineering]"
+    SRC="http://www.eng.cam.ac.uk/images/house_style/engban-s.gif"></A>
+<Br>
+<Br>
+<Br>
+<HR>
+
+<H2>Vectors</H2>
+
+The library provides classes for statically and dynamically sized vectors.  If
+you know what dimension of vector you're going to use (e.g. 3 to represent a point
+in 3D space), it's more efficient to statically sized vectors.
+
+<H3>Statically sized vectors</H3>
+
+To create a 3-dimensional vector, use:
+<br>
+<br><tt> Vector&lt;3&gt v;</tt>
+<br>
+<br> and to create a vector of some other dimensionality just replace 3 with the positive
+integer of your choice, or some expression which the compiler can evaluate to an integer
+at compile time. Vectors can also be constructed from pointers or static arrays of doubles:
+<br>
+<br><tt> void foo(double* dptr) {
+<br>
+<br> &nbsp;&nbsp;Vector&lt;4&gt v1 (dptr);
+<br>
+<br> &nbsp;&nbsp;double dvals[4]={1,2,3,4};
+<br> &nbsp;&nbsp;Vector&lt;4&gt v2 (dvals);
+<br>
+<br> &nbsp;&nbsp;// ...
+<br>}</tt>
+<br>
+<br> g++ allows the construction of v2 in the example above to be contracted to:
+<br>
+<br><tt> &nbsp;&nbsp;Vector&lt;4&gt v2((double[]){1,2,3,4});</tt>
+
+<H3>Dynamically sized vectors</H3>
+
+To create a dynamically sized vector, use:
+<br>
+<br><tt>  Vector<> v(size); </tt>
+<br>
+<br> where size is an integer which will be evaluated at run time.  Dynamic sized vectors
+can be constructed from pointers in a similar manner to static sized vectors:
+<br>
+<br><tt> void bar(int size, double* dptr) {
+<br> &nbsp;&nbsp;Vector&lt;&gt v1 (size,dptr);
+<br> &nbsp;&nbsp;// ...
+<br>}</tt>
+<br>
+<br> Vector&lt;&gt is actually a synonym for Vector&lt;-1&gt being a template
+specialisation of Vector&lt;N&gt with a special implementation.
+
+<H3>Vector operations</H3>
+
+<li>Elements in a vector (of either sort) can be accessed using the familiar [] notation
+with the index starting at 0:
+<br>
+<br><tt> double d=v[2];
+<br> v[0]=1.2; </tt>
+<br>
+<br>
+<li> Vectors can be added or subtracted:
+<br>
+<br><tt> v3=v1+v2;
+<br> v4=v1-v2;
+<br> v4+=v1;
+<br> v5-=v1; </tt>
+<br>
+<br> v1 and v2 can be both static, both dyanamic, or one of each and they must have the same size.
+If they're both static
+and have different sizes, the compiler will generate an error.  If at least one of them
+is dynamic then differing sizes results in a run time error (currently an assertion failure).
+<br>
+<br>
+<li> Vectors can be printed or loaded from streams
+<br>
+<br> <tt> cout << v1;
+<br>
+<br> ifstream infile("foo.txt");
+<br> infile >> v2; </tt>
+<br>
+<br>
+<li> Vectors can be multiplied (on either side) or divided by a scalar on the right:
+<br>
+<br><tt> v2 = v1*0.7;
+<br> v3 = 1.2*v1;
+<br> v4 = v1/10;</tt>
+<br>
+<br>
+<li> The vector dot product can be computed:
+<br>
+<br><tt> double d = v1*v2; </tt>
+<br>
+<br> Again v1 and v2 must have the same size with the same rules as for addition and subtraction.
+<br>
+<br>
+<li> Subvectors can be extracted using the templated slice member function:
+<br>
+<br><tt> <b> // create v1 </b>
+<br> double d1[6] = {1,2,3,4,5,6};
+<br> Vector<6> v1(d1);
+<br>
+<br> <b> // create v2 </b>
+<br> double d2[3] = {10,11,12};
+<br> Vector<3> v2(d2);
+<br>
+<br> <b> // copy the values from v2 into elements 2, 3 and 4 in v1 </b>
+<br> v1.slice<2,3>() = v2;
+<br> cout << "[ " << v1 << " ]" << endl;
+<br>
+<br> &gt [ 1  2  10  11  12  6 ] </tt>  
+<br>
+<br>
+<li> The cross product can be computed for statically sized 3-vectors:
+<br>
+<br><tt> Vector<3> v3 = v1^v2; </tt>
+
+<H3> Row vectors and Column vectors </H3>
+
+This libarary makes no distinction between row vectors and column vectors.  Vectors
+that appear on the left of a multiplication are treated as row vectors while those
+that appear on the right are treated as column vectors (thus v1*v2 means the dot product).
+This means that sometimes you have to be careful to include prarentheses since
+it is possible to write obscure stuff like:
+<br>
+<br> <tt> Vector<4> v4 = v1 * v2 * v3; </tt>
+<br>
+<br> Which in the absence of any extra parentheses means "compute the dot product
+between v1 and v2 and then multiply v3 by this scalar and assign to v4.
+<br>
+<br> If the row-column distinction is important, then vectors can be turned into matrices
+with one row or column by using as_row() or as_col():
+<br>
+<br> <tt> double d[3] = {1,2,3};
+<br> Vector<3> v(d);
+<br> Matrix<3,3> M = v.as_col() * v.as_row();
+<b> // creates a symmetric rank 1 matrix from v </b></tt>
+<br>
+<br> (see the section on <A HREF="matrices.html">Matrices</A>)
+<br>
+<br>
+<br>
+<br>
+<br>-------
+<br>
+<br>
+<!-- Change the next line to Updated: {date when updated} -->
+Updated: Tue 19 Aug 2002 
+<ADDRESS>T.W. Drummond - <A HREF="mailto:twd20@eng.cam.ac.uk">twd20@eng.cam.ac.uk</A></ADDRESS>
+</BODY>
+</HTML>
