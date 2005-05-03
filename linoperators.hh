@@ -18,6 +18,8 @@
 #ifndef __LINOPERATORS_HH
 #define __LINOPERATORS_HH
 
+#include <assert.h>
+
 
 inline RefMatrix<RowMajor> DynamicVAccessor::as_row(){
   return RefMatrix<RowMajor>(1,my_size,my_values);

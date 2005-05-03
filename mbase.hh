@@ -17,6 +17,7 @@
 
 #ifndef __MBASE_HH
 #define __MBASE_HH
+#include <assert.h>
 
 
 template <class Accessor>
