@@ -622,19 +622,56 @@ struct DynamicMdMult : public MSizer {
 };
 
 
-template <int Rows, int Cols, class Accessor>
+template <class Accessor>
 inline Matrix<> operator*(const DynamicMatrix<Accessor>& lhs, double rhs){
   return Matrix<>(lhs,rhs, Operator<DynamicMdMult<Accessor> >());
 }
 
-template <int Rows, int Cols, class Accessor>
+template <class Accessor>
 inline Matrix<> operator*(double lhs, const DynamicMatrix<Accessor>& rhs){
   return Matrix<>(rhs,lhs, Operator<DynamicMdMult<Accessor> >());
 }
 
 
+//////////////////////
+// operator *=      //
+// Matrix *= double //
+//////////////////////
 
 
+template <class Accessor>
+inline void operator*=(const MatrixBase<Accessor>& lhs, double rhs){
+  for(int r=0; r<lhs.num_rows(); r++){
+    for(int c=0; c<lhs.num_cols(); c++){
+      lhs[r][c]*=rhs;
+    }
+  }
+}
+/////////////////////
+// operator /      //
+// Matrix / double //
+/////////////////////
+
+template <int Rows, int Cols, class Accessor>
+inline Matrix<Rows,Cols> operator/(const FixedMatrix<Rows,Cols,Accessor>& lhs, double rhs){
+  return lhs * (1.0/rhs);
+}
+
+template <class Accessor>
+inline Matrix<> operator/(const DynamicMatrix<Accessor>& lhs, double rhs){
+  return lhs * (1.0/rhs);
+}
+
+
+//////////////////////
+// operator /=      //
+// Matrix /= double //
+//////////////////////
+
+template <class Accessor>
+inline void operator/=(const MatrixBase<Accessor>& lhs, double rhs){
+  lhs*=(1.0/rhs);
+}
 
 
 
