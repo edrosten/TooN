@@ -53,13 +53,13 @@ class HV_SVD <Rows,Cols,Vertical> {
     int info;
     double size;
     // find out FORTRAN space requirements
-    dgesvd_("S","O",&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,&size,&lwork,&info);
+    dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,&size,&lwork,&info);
     lwork = int(size);
     double * WORK = new double[lwork];
-    dgesvd_("S","O",&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,WORK,&lwork,&info);
+    dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,WORK,&lwork,&info);
     delete [] WORK;
     if(info!=0){
-      std::cerr << "error - info was " << info << endl;
+      std::cerr << "error - info was " << info << std::endl;
     }
   }
 
