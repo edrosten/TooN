@@ -642,13 +642,14 @@ inline Matrix<> operator*(double lhs, const DynamicMatrix<Accessor>& rhs){
 
 
 template <class Accessor>
-inline void operator*=(const MatrixBase<Accessor>& lhs, double rhs){
+inline void operator*=(MatrixBase<Accessor>& lhs, double rhs){
   for(int r=0; r<lhs.num_rows(); r++){
     for(int c=0; c<lhs.num_cols(); c++){
       lhs[r][c]*=rhs;
     }
   }
 }
+
 /////////////////////
 // operator /      //
 // Matrix / double //
@@ -671,11 +672,9 @@ inline Matrix<> operator/(const DynamicMatrix<Accessor>& lhs, double rhs){
 //////////////////////
 
 template <class Accessor>
-inline void operator/=(const MatrixBase<Accessor>& lhs, double rhs){
+inline void operator/=(MatrixBase<Accessor>& lhs, double rhs){
   lhs*=(1.0/rhs);
 }
-
-
 
 
 /////////////////////
