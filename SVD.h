@@ -96,10 +96,10 @@ public:
     int info;
     double size;
     // find out FORTRAN space requirements
-    dgesvd_("O","S",&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,&size,&lwork,&info);
+    dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,&size,&lwork,&info);
     lwork = int(size);
     double * WORK = new double[lwork];
-    dgesvd_("O","S",&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,WORK,&lwork,&info);
+    dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,WORK,&lwork,&info);
     delete [] WORK;
     if(info!=0){
       std::cerr << "error - info was " << info << endl;
@@ -202,9 +202,9 @@ public:
     lwork = int(size);
     double * WORK = new double[lwork];
     if(is_vertical()){
-      dgesvd_("S","O",&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,WORK,&lwork,&info);
+      dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,WORK,&lwork,&info);
     } else {
-      dgesvd_("O","S",&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,WORK,&lwork,&info);
+      dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,WORK,&lwork,&info);
     }
     delete [] WORK;
     if(info!=0){
