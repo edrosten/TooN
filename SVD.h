@@ -195,9 +195,9 @@ public:
 
     // compute the storage requirements
     if(is_vertical()){
-      dgesvd_("S","O",&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,&size,&lwork,&info);
+      dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,&size,&lwork,&info);
     } else {
-      dgesvd_("O","S",&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,&size,&lwork,&info);
+      dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,&size,&lwork,&info);
     }
     lwork = int(size);
     double * WORK = new double[lwork];
