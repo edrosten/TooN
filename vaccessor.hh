@@ -147,7 +147,7 @@ class DynamicVAccessor {
   }
 
   template<int Start, int Length>
-  const inline FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() const 
+  inline const FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() const 
   {
     return reinterpret_cast<const FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >&> (my_values[Start]);
   }
