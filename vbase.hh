@@ -19,6 +19,7 @@
 #define __VBASE_HH
 
 // VectorBase //
+#include <assert.h>
 
 template <class Accessor>
 struct VectorBase : public Accessor {
