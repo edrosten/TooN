@@ -66,7 +66,7 @@ namespace VectorMagic {
       return VectorFiller<Index+1,Limit,Vec,InsertionStyle>(v);
     }
     template <int N> inline VectorFiller<Index+N,Limit,Vec,InsertionStyle> operator<<(const ComponentPlaceHolder<N>& ph) {
-      return (VectorFiller<Index+1,Limit,Vec,InsertionStyle>(v), ComponentPlaceHolder<N-1>());
+      return (VectorFiller<Index+1,Limit,Vec,InsertionStyle>(v) << ComponentPlaceHolder<N-1>());
     }
     inline VectorFiller<Index+1,Limit,Vec,InsertionStyle> operator<<(const ComponentPlaceHolder<1>& ph) {
       return VectorFiller<Index+1,Limit,Vec,InsertionStyle>(v);
@@ -115,6 +115,7 @@ namespace VectorMagic {
 
 VectorMagic::BaseVectorCreator make_Vector;
 template <int N> VectorMagic::ComponentPlaceHolder<N> no_change() { return VectorMagic::ComponentPlaceHolder<N>(); }
+inline VectorMagic::ComponentPlaceHolder<1> no_change() { return VectorMagic::ComponentPlaceHolder<1>(); }
   
 
 template <int Size>

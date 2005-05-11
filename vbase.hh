@@ -82,9 +82,6 @@ struct VectorCopy<DynamicVAccessor,DynamicVAccessor>{
 //                                                    //
 ////////////////////////////////////////////////////////
 
-
-
-
 template <int Size, class Accessor>
 struct FixedVector : public VectorBase<Accessor> {
   // assignment from correct sized FixedVector
