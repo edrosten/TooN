@@ -113,7 +113,8 @@ namespace VectorMagic {
   };
 }
 
-VectorMagic::BaseVectorCreator make_Vector;
+inline VectorMagic::BaseVectorCreator make_Vector() { return VectorMagic::BaseVectorCreator(); }
+
 template <int N> VectorMagic::ComponentPlaceHolder<N> no_change() { return VectorMagic::ComponentPlaceHolder<N>(); }
 inline VectorMagic::ComponentPlaceHolder<1> no_change() { return VectorMagic::ComponentPlaceHolder<1>(); }
   
