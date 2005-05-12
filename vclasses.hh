@@ -150,6 +150,11 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     assert(from.size() == Size);
     FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<Size>::get_zone> >::operator=(from);
   }
+  
+  inline Vector<Size>& operator=(const Vector<-1>& dv) {
+    *this = Vector<Size>(dv);
+    return *this;
+  }
 
   template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle> operator=(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle>(*this);
