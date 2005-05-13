@@ -156,7 +156,12 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<Size>::get_zone> >::operator=(from);
   }
   
-  inline Vector<Size>& operator=(const Vector<-1>& dv) {
+  template <class Accessor> inline Vector<Size>& operator=(const FixedVector<Size,Accessor>& fv) {
+    *this = Vector<Size>(fv);
+    return *this;
+  }
+
+  template <class Accessor> inline Vector<Size>& operator=(const DynamicVector<Accessor>& dv) {
     *this = Vector<Size>(dv);
     return *this;
   }
