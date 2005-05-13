@@ -22,6 +22,10 @@
 
 // LAPACK and BLAS routines
 
+#ifndef TOON_NO_NAMESPACE
+namespace TooN {
+#endif 
+
 extern "C" {
   // LU decomoposition of a general matrix
   void dgetrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO);
@@ -44,7 +48,9 @@ extern "C" {
 }
 
 
-
+#ifndef TOON_NO_NAMESPACE
+}
+#endif 
 
 
 

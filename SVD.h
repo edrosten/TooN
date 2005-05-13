@@ -22,9 +22,13 @@
 
 #include <iostream>
 
-#include <numerics.h>
 #include <lapack.h>
 
+#include <TooN/toon.h>
+
+#ifndef TOON_NO_NAMESPACE
+namespace TooN {
+#endif 
 
 enum{Horizontal,Vertical};
 
@@ -280,6 +284,9 @@ private:
 
 
 
+#ifndef TOON_NO_NAMESPACE
+}
+#endif 
 
 
 

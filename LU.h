@@ -22,9 +22,13 @@
 
 #include <iostream>
 
-#include <numerics.h>
 #include <lapack.h>
 
+#include <TooN/toon.h>
+
+#ifndef TOON_NO_NAMESPACE
+namespace TooN {
+#endif 
 
 template <int Size=-1>
 class LU {
@@ -311,6 +315,9 @@ class LU<> {
 
 
 
+#ifndef TOON_NO_NAMESPACE
+}
+#endif 
 
 
 

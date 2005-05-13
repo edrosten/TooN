@@ -21,8 +21,13 @@
 #define __SYMEIGEN_H
 
 #include <iostream>
-#include <numerics.h>
 #include <lapack.h>
+
+#include <TooN/toon.h>
+
+#ifndef TOON_NO_NAMESPACE
+namespace TooN {
+#endif 
 
 static const double symeigen_condition_no=1e9;
 
@@ -227,6 +232,9 @@ private:
 };
 
 
+#ifndef TOON_NO_NAMESPACE
+}
+#endif 
 
 
 

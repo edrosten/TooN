@@ -1,7 +1,6 @@
 #ifndef __ACCESSOREXCEPTIONS_HH
 #define __ACCESSOREXCEPTIONS_HH
 
-
 namespace TooNError
 {
 	class BadRowIndex{};
