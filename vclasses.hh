@@ -167,6 +167,11 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     return *this;
   }
 
+  inline Vector<Size>& operator=(const Vector<-1>& v) {
+    *this = Vector<Size>(v);
+    return *this;
+  }
+
   template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle> operator=(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle>(*this);
   }
