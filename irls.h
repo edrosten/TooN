@@ -1,4 +1,3 @@
-
 /*                       
 	 Copyright (C) 2005 The Authors
 
@@ -27,32 +26,49 @@
 namespace TooN {
 #endif
 
-  // a couple of useful reweighting classes
+/// Robust reweighting (type I) for IRLS.
+/// A reweighting class with \f$w(x)=\frac{1}{\sigma + |x|}\f$.
+/// This structure can be passed as the second template argument in IRLS.
+/// @ingroup gEquations
 struct RobustI {
-  double sd_inlier;
-  inline double reweight(double d) {return 1/(sd_inlier+fabs(d));}  // w(x)
-  inline double true_scale(double d) {return reweight(d) - fabs(d)*reweight(d)*reweight(d);}  // w(x) + x w'(x)
-  inline double objective(double d) {return fabs(d) + sd_inlier*log(sd_inlier*reweight(d));}  // integral (x w(x) )
+  double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
+  inline double reweight(double x) {return 1/(sd_inlier+fabs(x));}  ///< Returns \f$w(x)\f$.
+  inline double true_scale(double x) {return reweight(x) - fabs(x)*reweight(x)*reweight(x);}  ///< Returns \f$w(x) + xw'(x)\f$.
+  inline double objective(double x) {return fabs(x) + sd_inlier*log(sd_inlier*reweight(x));}  ///< Returns \f$\int xw(x)dx\f$.
 };
 
+/// Robust reweighting (type II) for IRLS.
+/// A reweighting class with \f$w(x)=\frac{1}{\sigma + x^2}\f$.
+/// This structure can be passed as the second template argument in IRLS.
+/// @ingroup gEquations
 struct RobustII {
-  double sd_inlier;
-  inline double reweight(double d){return 1/(sd_inlier+d*d);}
-  inline double true_scale(double d){return d - 2*d*reweight(d);}
-  inline double objective(double d){return 0.5 * log(1 + d*d/sd_inlier);}
+  double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
+  inline double reweight(double d){return 1/(sd_inlier+d*d);} ///< Returns \f$w(x)\f$.
+  inline double true_scale(double d){return d - 2*d*reweight(d);} ///< Returns \f$w(x) + xw'(x)\f$.
+  inline double objective(double d){return 0.5 * log(1 + d*d/sd_inlier);} ///< Returns \f$\int xw(x)dx\f$.
 };
 
+/// A reweighting class representing no reweighting in IRLS.
+/// \f$w(x)=1\f$
+/// This structure can be passed as the second template argument in IRLS.
+/// @ingroup gEquations
 struct ILinear {
-  inline double reweight(double d){return 1;}
-  inline double true_scale(double d){return 1;}
-  inline double objective(double d){return d*d;}
+  inline double reweight(double d){return 1;} ///< Returns \f$w(x)\f$.
+  inline double true_scale(double d){return 1;} ///< Returns \f$w(x) + xw'(x)\f$.
+  inline double objective(double d){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
 };
 
 
+/// Performs iterative reweighted least squares.
+/// @param Size the size
+/// @param Reweight The reweighting functor. This structure must provide reweight(), 
+/// true-scale() and objective() methods. Existing examples are  Robust I, Robust II and ILinear.
+/// @ingroup gEquations
 template <int Size, class Reweight>
 class IRLS
   : public Reweight,
-    public WLS<Size>{
+    public WLS<Size>
+{
 public:
   IRLS(){Identity(my_true_C_inv,0);my_residual=0;}
 
@@ -70,16 +86,16 @@ public:
     }
   }
 
-  inline void operator += (const IRLS& meas){
+  void operator += (const IRLS& meas){
     WLS<Size>::operator+=(meas);
     my_true_C_inv += meas.my_true_C_inv;
   }
 
 
-  inline Matrix<Size,Size,RowMajor>& get_true_C_inv() {return my_true_C_inv;}
-  inline const Matrix<Size,Size,RowMajor>& get_true_C_inv()const {return my_true_C_inv;}
+  Matrix<Size,Size,RowMajor>& get_true_C_inv() {return my_true_C_inv;}
+  const Matrix<Size,Size,RowMajor>& get_true_C_inv()const {return my_true_C_inv;}
 
-  inline double get_residual() {return my_residual;}
+  double get_residual() {return my_residual;}
 
 private:
 

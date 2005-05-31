@@ -24,7 +24,7 @@
 #define __WLS_CHOLESKY_H
 
 #include <TooN/toon.h>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 namespace TooN {
