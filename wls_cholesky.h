@@ -33,7 +33,7 @@ namespace TooN {
 /// Much faster (but less robust) than the standard WLS.
 /// Also stores the sum squares error and can compute the residual.
 /// @param The number of parameters in the system
-/// @ingroup gMaths
+/// @ingroup gEquations
 template <int Size>
 class WLSCholesky {
 public:
