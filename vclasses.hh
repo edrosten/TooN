@@ -175,6 +175,13 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
   template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle> operator=(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle>(*this);
   }
+	
+  template<class A, int I, class B> Vector<Size>& operator=(const VectorMagic::VectorCreator<A,I,B>& v)
+  {
+	*this = (Vector<Size>)v;
+	return *this;
+  }
+
 
   template <class T> VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle> operator=(const T& t) {
     (*this)[0] = t;
