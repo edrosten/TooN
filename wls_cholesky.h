@@ -1,5 +1,5 @@
 /*                       
-	Copyright (C) 2005 The Authors
+	Copyright (C) 2005 Tom Drummond
 
 	This library is free software; you can redistribute it and/or
 	modify it under the terms of the GNU Lesser General Public
