@@ -202,6 +202,15 @@ struct RefSkipVector : public DynamicVector<DynamicSkipAccessor> {
     my_skip=skip;
     my_values=ptr;
   }
+
+
+  // assignment from any VectorBase
+  template<class Accessor>
+  RefSkipVector& operator=(const VectorBase<Accessor>& from){
+    assert(my_size == from.size());
+    DynamicVector<DynamicSkipAccessor>::operator=(from);
+    return *this;
+  }
 };
 
 #endif
