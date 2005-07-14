@@ -35,8 +35,21 @@ namespace VectorMagic {
   struct InsertionStyle {};
   struct CommaStyle {};
 
+
+  template<bool Good> struct sentinel
+  {
+	typedef int too_many_elements_inserted;
+  };
+
+  template<> struct sentinel<false>
+  {
+  };
+
   template <int Index, int Limit, class Vec, class Style> struct VectorFiller;
   template <int Index, int Limit, class Vec> struct VectorFiller<Index,Limit,Vec,CommaStyle> {
+
+	typedef typename sentinel<(Limit >= Index)>::too_many_elements_inserted dummy; 
+  
     Vec& v;
     bool final_initializer_but_Vector_not_filled;
     inline VectorFiller(Vec& vec) : v(vec), final_initializer_but_Vector_not_filled(true) {}
@@ -60,8 +73,15 @@ namespace VectorMagic {
   };
   
   template <int Index, int Limit, class Vec> struct VectorFiller<Index,Limit,Vec,InsertionStyle> {
+	typedef typename sentinel<(Limit >= Index)>::too_many_elements_inserted dummy; 
     Vec& v;
     inline VectorFiller(Vec& vec) : v(vec){}
+
+    template <int T> inline VectorFiller<Index+T,Limit,Vec,InsertionStyle> operator<<(const Vector<T>& t) {
+      v.template slice<Index,T>() = t;
+      return VectorFiller<Index+T,Limit,Vec,InsertionStyle>(v);
+    }
+
     template <class T> inline VectorFiller<Index+1,Limit,Vec,InsertionStyle> operator<<(const T& t) {
       v[Index] = t;
       return VectorFiller<Index+1,Limit,Vec,InsertionStyle>(v);
@@ -74,7 +94,7 @@ namespace VectorMagic {
     }
     inline operator Vec () const { return v; }
   };
-
+/*
   template <int Index, class Vec> struct VectorFiller<Index, Index, Vec, CommaStyle> {
     Vec& v;
     inline VectorFiller(Vec& vec) : v(vec) {}
@@ -88,7 +108,7 @@ namespace VectorMagic {
     template <class T> inline void operator,(const T& t) const { too_many_elements_given(); }
     inline operator Vec () const { return v; }
   };
-
+*/
   template <class Left, int Size, class Val> struct VectorCreator
   {
     const Left& left;
@@ -197,6 +217,11 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     return VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::InsertionStyle>(*this);
   }
   
+  template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>, VectorMagic::InsertionStyle> operator<<(const Vector<N>& t) {
+    (*this).template slice<0,N>() = t;
+    return VectorMagic::VectorFiller<N,Size, Vector<Size>, VectorMagic::InsertionStyle>(*this);
+  }
+
 };
 
 
