@@ -107,7 +107,7 @@ struct FixedVProject {
   }
 };
 
-template <int Size, class Accessor>
+  template <int Size, class Accessor> inline 
 Vector<Size-1> project(const FixedVector<Size,Accessor>& v){
   return Vector<Size-1>(v,Operator<FixedVProject<Size,Accessor> >());
 }

@@ -62,7 +62,9 @@ public:
 	   WORK,&lwork,&info);
     delete [] WORK;
     if(info!=0){
-      std::cerr << "info was not zero in SymEigen - it was " << info << std::endl;
+      std::cerr << "In SymEigen<"<<Size<<">: " << info 
+		<< " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
+		<< "M = " << m << std::endl;
     }
   }
   
