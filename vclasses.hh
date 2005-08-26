@@ -203,6 +203,11 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
   }
 
 
+  template <class T> VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle> operator=(const T& t) {
+    (*this)[0] = t;
+    return VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle>(*this);
+  }
+
   template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>, VectorMagic::InsertionStyle> operator<<(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, Vector<Size>, VectorMagic::InsertionStyle>(*this);
   }
@@ -223,6 +228,19 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
 template <>
 class Vector<> : public DynamicVector<DynamicVAccessor> {
  public:
+  Vector(){
+  	this->my_size = 0;
+	this->my_values = NULL;
+  }
+
+  template<class A> inline Vector& operator=(const VectorBase<A>& from)
+  {
+	delete[] this->my_values;
+	this->my_size = from.size();
+	this->my_values = new double[this->my_size];
+    VectorCopy<DynamicVAccessor,A>::eval(*this,from);
+  }
+ 
   Vector(int Size) {
     this->my_size=Size; this->my_values = new double[Size];
   }

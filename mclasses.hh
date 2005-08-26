@@ -60,6 +60,12 @@ template <class Layout>
 class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<Layout> > {
   friend class MSizer;
  public:
+  inline Matrix(){
+    this->my_num_rows = 0;
+    this->my_num_cols = 0;
+    this->my_values = NULL;
+  }
+
   inline Matrix(int num_rows, int num_cols){
     this->my_num_rows = num_rows;
     this->my_num_cols = num_cols;
@@ -85,6 +91,16 @@ class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<L
     this->my_num_cols = from.num_cols();
     this->my_values = new double [this->my_num_rows*this->my_num_cols];
     DynamicMatrix<DynamicMAccessor<Layout> >::operator=(from);
+  }
+
+  // copy construction
+  template<class Accessor> inline Matrix& operator=(const Matrix<General,General,Layout>& from){
+    delete[] this->my_values;
+    this->my_num_rows = from.my_num_rows;
+    this->my_num_cols = from.my_num_cols;
+    this->my_values = new double[this->my_num_rows*this->my_num_cols];
+	 MatrixCopy<DynamicMAccessor<Layout>,Accessor>::eval(*this,from);
+
   }
 
   // copy construction
