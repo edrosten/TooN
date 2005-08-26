@@ -235,9 +235,12 @@ class Vector<> : public DynamicVector<DynamicVAccessor> {
 
   template<class A> inline Vector& operator=(const VectorBase<A>& from)
   {
-	delete[] this->my_values;
-	this->my_size = from.size();
-	this->my_values = new double[this->my_size];
+  	if(size() != from.size())
+	{
+		delete[] this->my_values;
+		this->my_size = from.size();
+		this->my_values = new double[this->my_size];
+	}
     VectorCopy<DynamicVAccessor,A>::eval(*this,from);
   }
  

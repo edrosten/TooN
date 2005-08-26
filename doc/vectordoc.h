@@ -153,11 +153,13 @@ public:
 	/// @name Constructors
 	//@{
 	
-	/// Default constructor for fixed-size vectors. Does nothing, i.e. does not 
-	/// guarantee to initialise the vector to any particular values
+	/// Default constructor for vectors. 
+	/// For fixed-sized vectors, this oes nothing, i.e. does not 
+	/// guarantee to initialise the vector to any particular values.
+	/// For dynamically sized vectors, this sets the vector to have a length of 0.
 	Vector();
 	
-	/// Default constructor for dynamically-size vectors. Does nothing, i.e. does not 
+	/// Constructor for dynamically-size vectors. Does nothing, i.e. does not 
 	/// guarantee to initialise the vector to any particular values
 	Vector(int size);
 	
@@ -186,7 +188,7 @@ public:
 	/// @name Reading and writing elements, and defining vectors
 	//@{
 	
-	/// Assignment operator.
+	/// Assignment operator. This will cause a resize on dynamically sized vectors if the sizes are not matched.
 	Vector<Size>& operator=(const Vector<Size>& from);
 	
 	/// Create a (fixed-size) vector from a list of doubles. 

@@ -104,7 +104,9 @@ public:
 	/// @name Constructors
 	//@{
 	
-	/// Default constructor. Does nothing, i.e. does not guarantee to initialise the vector to any particular values
+	/// Default constructor. 
+	/// For fixed sized matrices, this does nothing, i.e. does not guarantee to initialise the vector to any particular values.
+	/// For dynamically sized matrices, this sets up a 0x0 matrix.
 	Matrix();
 	
 	/// Construct a (fixed-size) matrix from a 1D array of doubles. By default the layout ordering is
@@ -137,6 +139,7 @@ public:
 	//@{
 	
 	/// Assignment operator.
+	/// For dynamically sized matrices, this will cause a resize, if the sizes are mismatched.
 	Matrix<Rows, Cols>& operator=(const Matrix<Rows, Cols>& from);
 	
 	/// Access an element from the matrix. 
