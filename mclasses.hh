@@ -93,16 +93,15 @@ class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<L
     DynamicMatrix<DynamicMAccessor<Layout> >::operator=(from);
   }
 
-  template<class Accessor> inline Matrix& operator=(const Matrix<General,General,Layout>& from){
-  	if(size() != from.size())
+  inline void resize(int rows, int cols)
+  {
+  	if(rows != this->my_num_rows || cols != this->my_num_cols)
 	{
 		delete[] this->my_values;
-		this->my_num_rows = from.my_num_rows;
-		this->my_num_cols = from.my_num_cols;
+		this->my_num_rows = rows;
+		this->my_num_cols = cols;
 		this->my_values = new double[this->my_num_rows*this->my_num_cols];
 	}
-	 MatrixCopy<DynamicMAccessor<Layout>,Accessor>::eval(*this,from);
-
   }
 
   // copy construction
