@@ -194,5 +194,9 @@ class SizeTraits : public ZoneHandler<Size,(Size > NUMERICS::MaxStackSize ? 1 : 
 }
 #endif
 
+#ifdef TOON_USING_NAMESPACE
+	using namespace TooN;
+#endif
+
 #endif
 
