@@ -139,8 +139,11 @@ public:
 	//@{
 	
 	/// Assignment operator.
-	/// For dynamically sized matrices, this will cause a resize, if the sizes are mismatched.
+	/// For dynamically sized matrices this will not cause a resize if the sizes are mismatched.
 	Matrix<Rows, Cols>& operator=(const Matrix<Rows, Cols>& from);
+
+	/// Resize a dynamically sized matrix.
+	resize(int rows, int cols);
 	
 	/// Access an element from the matrix. 
 	/// The index starts at zero, i.e. the top-left element is m(0, 0).

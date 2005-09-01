@@ -188,8 +188,12 @@ public:
 	/// @name Reading and writing elements, and defining vectors
 	//@{
 	
-	/// Assignment operator. This will cause a resize on dynamically sized vectors if the sizes are not matched.
+	/// Assignment operator. This will not cause a resize on dynamically sized vectors if the sizes are not matched.
 	Vector<Size>& operator=(const Vector<Size>& from);
+
+
+	/// Resize a dynamically sized vector.
+	resize(int size);
 	
 	/// Create a (fixed-size) vector from a list of doubles. 
 	/// This operator should be followed by a comma-separated list of doubles, and the whole enclosed in 
