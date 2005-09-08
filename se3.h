@@ -20,7 +20,7 @@
 #ifndef __SE3_H
 #define __SE3_H
 
-#include <so3.h>
+#include <TooN/so3.h>
 
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
