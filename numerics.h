@@ -17,7 +17,7 @@
      Foundation, Inc.
      51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 #ifndef TOON_NO_NAMESPACE
 using namespace TooN;
 #endif

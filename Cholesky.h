@@ -24,7 +24,7 @@
 
 #include <lapack.h>
 
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 #include <limits>
 
 #ifndef TOON_NO_NAMESPACE

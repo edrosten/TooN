@@ -20,7 +20,7 @@
 #ifndef __WLS_H
 #define __WLS_H
 
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 #include <TooN/SVD.h>
 #include <TooN/helpers.h>
 

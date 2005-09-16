@@ -20,7 +20,7 @@
 #ifndef __SO3_H
 #define __SO3_H
 
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 #include <TooN/helpers.h>
 
 #ifndef TOON_NO_NAMESPACE

@@ -20,7 +20,7 @@
 #ifndef __NUMHELPERS_H
 #define __NUMHELPERS_H
 
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
