@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include <lapack.h>
+#include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
 
