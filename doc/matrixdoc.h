@@ -165,10 +165,12 @@ public:
 	/// @endcode
 	double& operator() (int r, int c);
 	
-	/// Access a row (or column) from the matrix. By default the layout ordering is
-	/// row major, in which case this will extract a row; if <code>ColMajor</code> is specified, columns
-	/// be extracted instead. To extract a column from a normal row-major matrix, use the 
-	/// transpose of the matrix (see example).
+	/// Access a row from the matrix.  
+	/// This can be used either as an r-value or an l-value.
+	/// The index starts at zero, i.e. the first row is m[0].
+	/// To extract a column from a matrix, apply [] 
+	/// to the transpose of the matrix (see example).
+	/// This can be used either as an r-value or an l-value
 	/// The index starts at zero, i.e. the first row (or column) is m[0].
 	/// @code
 	/// double d[2][3] = {{1, 2, 3}, {4, 5, 6}};
@@ -178,10 +180,11 @@ public:
 	/// @endcode
 	const Vector& operator[] (int r) const;
 	
-	/// Access a row (or column) from the matrix. By default the layout ordering is
-	/// row major, in which case this will extract a row; if <code>ColMajor</code> is specified, columns
-	/// be extracted instead. To extract a column from a normal row-major matrix, use the 
-	/// transpose of the matrix (see example).
+	/// Access a row from the matrix.  
+	/// This can be used either as an r-value or an l-value.
+	/// The index starts at zero, i.e. the first row is m[0].
+	/// To extract a column from a matrix, apply [] 
+	/// to the transpose of the matrix (see example).
 	/// This can be used either as an r-value or an l-value
 	/// The index starts at zero, i.e. the first row (or column) is m[0].
 	/// @code
@@ -194,10 +197,10 @@ public:
 	/// @endcode
 	Vector& operator[] (int r);
 	
-	/// How many rows does this matrix?
+	/// How many rows does this matrix have?
 	int num_rows() const;
 	
-	/// How many columns does this matrix?
+	/// How many columns does this matrix have?
 	int num_cols() const;
 	
 	/// What is the memory layout of this matrix?
