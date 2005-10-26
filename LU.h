@@ -55,11 +55,11 @@ class LU {
   template <int NRHS, class Accessor>
   Matrix<Size,NRHS,RowMajor> backsub(const FixedMatrix<Size,NRHS,Accessor>& rhs){
     Matrix<Size,NRHS,RowMajor> result(rhs);
-    M=NRHS;
-    N=Size;
-    alpha=1;
-    lda=Size;
-    ldb=NRHS;
+    int M=NRHS;
+    int N=Size;
+    double alpha=1;
+    int lda=Size;
+    int ldb=NRHS;
     dtrsm_("R","U","N","N",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
     dtrsm_("R","L","N","U",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
 
@@ -79,11 +79,11 @@ class LU {
   Matrix<-1,-1,RowMajor> backsub(const DynamicMatrix<Accessor>& rhs){
     Matrix<-1,-1,RowMajor> result(rhs);
     assert(result.num_rows == my_lu.num_rows());
-    M=result.num_cols();
-    N=result.num_rows();
-    alpha=1;
-    lda=result.num_rows();
-    ldb=result.num_cols();
+    int M=result.num_cols();
+    int N=result.num_rows();
+    double alpha=1;
+    int lda=result.num_rows();
+    int ldb=result.num_cols();
     dtrsm_("R","U","N","N",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
     dtrsm_("R","L","N","U",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
 
@@ -203,11 +203,11 @@ class LU<> {
   Matrix<Rows,Cols,RowMajor> backsub(const FixedMatrix<Rows,Cols,Accessor>& rhs){
     assert(my_lu.num_rows() == rhs.num_rows());
     Matrix<Rows,Cols,RowMajor> result(rhs);
-    M=result.num_cols();
-    N=result.num_rows();
-    alpha=1;
-    lda=my_lu.num_rows();
-    ldb=result.num_cols();
+    int M=result.num_cols();
+    int N=result.num_rows();
+    double alpha=1;
+    int lda=my_lu.num_rows();
+    int ldb=result.num_cols();
     dtrsm_("R","U","N","N",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
     dtrsm_("R","L","N","U",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
 
@@ -228,11 +228,11 @@ class LU<> {
   Matrix<-1,-1,RowMajor> backsub(const DynamicMatrix<Accessor>& rhs){
     assert(my_lu.num_rows() == rhs.num_rows());
     Matrix<-1,-1,RowMajor> result(rhs);
-    M=result.num_cols();
-    N=result.num_rows();
-    alpha=1;
-    lda=my_lu.num_rows();
-    ldb=result.num_cols();
+    int M=result.num_cols();
+    int N=result.num_rows();
+    double alpha=1;
+    int lda=my_lu.num_rows();
+    int ldb=result.num_cols();
     dtrsm_("R","U","N","N",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
     dtrsm_("R","L","N","U",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
 
