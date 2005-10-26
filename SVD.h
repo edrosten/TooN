@@ -106,7 +106,7 @@ public:
     dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,WORK,&lwork,&info);
     delete [] WORK;
     if(info!=0){
-      std::cerr << "error - info was " << info << endl;
+      std::cerr << "error - info was " << info << std::endl;
     }
   }
 
@@ -180,8 +180,6 @@ class SVD : public HV_SVD< Rows, Cols, (Rows<Cols?Horizontal:Vertical) > {
 
 };
 
-//double SVD<3,3>::condition_no=1e9;
-
 
 template<>
 class SVD<-1> {
@@ -215,8 +213,6 @@ public:
       std::cerr << "error - info was " << info << std::endl;
     }
   }
-
-  static const double condition_no=1e9;
 
   bool is_vertical(){return (my_orig.num_rows() >= my_orig.num_cols());}
 
