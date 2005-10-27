@@ -143,52 +143,6 @@ private:
 };
 
 
-template<> class WLS<-1>
-{
-	public:
-		WLS(int s)
-		:Size(s), my_C_inv(Size, Size), my_vector(Size)
-		{
-			clear();
-		}
-
-
-		/// Clear all the measurements and apply a constant regularisation term. 
-		/// Equates to a prior that says all the parameters are zero with \f$\sigma^2 = \frac{1}{\text{val}}\f$.
-		/// @param prior The strength of the prior
-		void clear(double prior=0)
-		{
-			Identity(my_C_inv,prior);
-
-			for(int i=0; i<Size; i++)
-				my_vector[i]=0;
-
-			my_err=0;
-			my_extra=0;
-		}
-
-	
-		/// Applies a constant regularisation term. 
-		/// Equates to a prior that says all the parameters are zero with \f$\sigma^2 = \frac{1}{\text{val}}\f$.
-		/// @param val The strength of the prior
-		void add_prior(double val)
-		{
-			for(int i=0; i<Size; i++)
-			  my_C_inv(i,i)+=val;
-		}
-	
-
-
-
-
-	private:
-		int Size;
-		Matrix<> my_C_inv;
-		Vector<> my_vector;
-		
-
-};
-
 
 
 
