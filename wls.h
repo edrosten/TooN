@@ -117,7 +117,6 @@ public:
   void operator += (const WLS& meas){
     my_vector+=meas.my_vector;
     my_C_inv += meas.my_C_inv;
-    my_true_C_inv += meas.my_true_C_inv;
   }
 
   /// Returns the inverse covariance matrix
@@ -198,17 +197,18 @@ public:
   /// Applies a regularisation term with a different strength for each parameter value. 
   /// Equates to a prior that says all the parameters are zero with \f$\sigma_i^2 = \frac{1}{\text{v}_i}\f$.
   /// @param v The vector of priors
-  template<class Accessor>
-  void add_prior(const FixedVector<Size,Accessor>& v){
-    for(int i=0; i<Size; i++){
+  template<int VSize, class Accessor>
+  void add_prior(const FixedVector<VSize,Accessor>& v){
+    assert(VSize==Size);
+    for(int i=0; i<VSize; i++){
       my_C_inv(i,i)+=v[i];
     }
   }
   /// Applies a whole-matrix regularisation term. 
   /// This is the same as adding the \f$m\f$ to the inverse covariance matrix.
   /// @param m The inverse covariance matrix to add
-  template<class Accessor>
-  void add_prior(const FixedMatrix<Size,Size,Accessor>& m){
+  template<int MSize, class Accessor>
+  void add_prior(const FixedMatrix<MSize,MSize,Accessor>& m){
     my_C_inv+=m;
   }
 
@@ -216,11 +216,12 @@ public:
   /// @param m The value of the measurement
   /// @param J The Jacobian for the measurement \f$\frac{\partial\text{m}}{\partial\text{param}_i}\f$
   /// @param weight The inverse variance of the measurement (default = 1)
-  template<class Accessor>
-  inline void add_df(double m, const FixedVector<Size,Accessor>& J, double weight = 1) {
-    Vector<Size> Jw = J*weight;
-    for(int i=0; i<Size; i++){
-      for(int j=0; j<Size; j++){
+  template<int VSize, class Accessor>
+  inline void add_df(double m, const FixedVector<VSize,Accessor>& J, double weight = 1) {
+    assert(VSize==Size);
+    Vector<VSize> Jw = J*weight;
+    for(int i=0; i<VSize; i++){
+      for(int j=0; j<VSize; j++){
 	my_C_inv[i][j]+=J[i]*Jw[j];
       }
       my_vector[i]+=Jw[i]*m;
