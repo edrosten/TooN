@@ -137,6 +137,12 @@ struct RefVector : public DynamicVector<DynamicVAccessor>{
     my_size=size;
     my_values=ptr;
   }
+
+  template<class Accessor2>
+  RefVector& operator=(const VectorBase<Accessor2>& from){
+    DynamicVector<DynamicVAccessor>::operator=(from);
+    return *this;
+  }
 };
 
 class DynamicSkipAccessor{
