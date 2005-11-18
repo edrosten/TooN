@@ -55,6 +55,9 @@ template <int Size, class Accessor> void Symmetrize(FixedMatrix<Size,Size,Access
 // transpose a matrix
 template <int Size, class Accessor> void Transpose(FixedMatrix<Size,Size,Accessor>& m);
 
+// set a matrix to Zero
+template <int Rows, int Cols, class Accessor> void Zero(FixedMatrix<Rows,Cols,Accessor>&m);
+
 // set a vector to zero
 template <class Accessor> inline void Zero(VectorBase<Accessor>& v);
 
@@ -202,6 +205,15 @@ void Transpose(FixedMatrix<Size,Size,Accessor>& m){
       double temp = m(r,c);
       m(r,c) = m(c,r);
       m(c,r) = temp;
+    }
+  }
+}
+
+// set a Matrix to zero
+template <int Rows, int Cols, class Accessor> void Zero(FixedMatrix<Rows,Cols,Accessor>&m){
+  for(int r=0; r<Rows; r++){
+    for(int c=0; c<Cols; c++){
+      m(r,c) = 0;
     }
   }
 }
