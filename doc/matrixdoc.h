@@ -243,7 +243,7 @@ public:
 	/// double d[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 	/// Matrix<3> m(d);
 	/// Extract the top-left 2x2 matrix
-	/// Matrix<2> b = a.slice<0,0,2,2>();  // b = [1 2]
+	/// Matrix<2> b = m.slice<0,0,2,2>();  // b = [1 2]
 	///                                    //     [4 5]
 	/// @endcode
 	template<Rstart, Cstart, Rsize, Csize>
@@ -254,12 +254,32 @@ public:
 	/// @code
 	/// double d[2][3] = {{1, 2, 3}, {4, 5, 6}};
 	/// Matrix<2,3> m(d);
-	/// Zero(a.slice<0,2,2,1>());  // b = [1 2 0]
+	/// Zero(m.slice<0,2,2,1>());  // b = [1 2 0]
 	///                            //     [4 5 0]
 	/// @endcode
 	template<Rstart, Cstart, Rsize, Csize>
 	Matrix<Rsize, Csize>& slice();
-	//@}
+
+  	/// Extract a sub-matrix with runtime location and size. 
+        /// The matrix extracted will be begin at element (rstart, cstart) and will 
+	/// contain the next rsize by csize elements.
+	/// @code
+        /// Matrix<> m(3,3);
+	/// Extract the top-left 2x2 matrix
+	/// Matrix<2> b = m.slice(0,0,2,2);
+	/// @endcode
+	const Matrix<>& slice(int rstart, int cstart, int rsize, int csize) const;
+
+  	/// Extract a sub-matrix with runtime location and size, which can be used as an l-value. 
+        /// The matrix extracted will be begin at element (rstart, cstart) and will
+	/// contain the next rsize by csize elements.
+	/// @code
+        /// Matrix<> m(3,3);
+	/// Zero(m.slice(0,0,2,2));
+	/// @endcode
+	Matrix<>& slice(int rstart, int cstart, int rsize, int csize);
+  
+  //@}
 };
 
 /// @name Input/output

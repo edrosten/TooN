@@ -132,7 +132,10 @@ struct DynamicVector : public VectorBase<Accessor>{
 
 // Special kinds of DynamicVector only constructed internally
 // e.g. from DynamicMAccessor<>::operator[]
-struct RefVector : public DynamicVector<DynamicVAccessor>{
+
+template <class V> struct NonConstVector : public V { operator V&() { return *this; } operator const V&() const { return *this; } };
+
+struct RefVector : public NonConstVector<DynamicVector<DynamicVAccessor> > {
   RefVector(int size, double* ptr){
     my_size=size;
     my_values=ptr;
@@ -142,6 +145,13 @@ struct RefVector : public DynamicVector<DynamicVAccessor>{
   RefVector& operator=(const VectorBase<Accessor2>& from){
     DynamicVector<DynamicVAccessor>::operator=(from);
     return *this;
+  }
+};
+
+struct ConstRefVector : public DynamicVector<DynamicVAccessor> {
+  ConstRefVector(int size, double* ptr){
+    my_size=size;
+    my_values=ptr;
   }
 };
 
@@ -202,7 +212,7 @@ class DynamicSkipAccessor{
 };
 
 // e.g. from SkipMAccessor<>::operator[]
-struct RefSkipVector : public DynamicVector<DynamicSkipAccessor> {
+struct RefSkipVector : public NonConstVector<DynamicVector<DynamicSkipAccessor> > {
   RefSkipVector(int size, int skip, double* ptr){
     my_size=size;
     my_skip=skip;
@@ -216,6 +226,14 @@ struct RefSkipVector : public DynamicVector<DynamicSkipAccessor> {
     assert(my_size == from.size());
     DynamicVector<DynamicSkipAccessor>::operator=(from);
     return *this;
+  }
+};
+
+struct ConstRefSkipVector : public DynamicVector<DynamicSkipAccessor> {
+  ConstRefSkipVector(int size, int skip, double* ptr){
+    my_size=size;
+    my_skip=skip;
+    my_values=ptr;
   }
 };
 

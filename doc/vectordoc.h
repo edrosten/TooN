@@ -304,7 +304,28 @@ public:
 	/// @endcode
 	template<Start, Length>
 	Vector<Length>& slice();
-	
+
+	/// Extract a sub-vector with runtime parameters.
+        /// The vector extracted will be begin at element start and will 
+	/// contain the next length elements.
+	/// @code
+	/// Vector<5> a = (makeVector, 1,2,3,4,5);
+	/// Extract the three elements starting from element 2
+	/// Vector<3> b = a.slice(2,3);  /// b = [3 4 5]
+	/// @endcode
+	template<Start, Length>
+	const Vector<Length>& slice() const;
+  
+	/// Extract a sub-vector with runtime parameters, which can be used as an l-value.
+        /// The vector extracted will be begin at element start and will
+	/// contain the next length elements.
+	/// @code
+	/// Vector<5> a = (makeVector, 1,2,3,4,5);
+	/// Extract the three elements starting from element 2
+	/// a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
+	/// @endcode
+	template<Start, Length>
+	const Vector<Length>& slice() const;
 	//@}
 };
 

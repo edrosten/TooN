@@ -52,6 +52,12 @@ class FixedVAccessor : public AllocZone {
     return reinterpret_cast<FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (parent::my_values[Start]);
   }
 
+  inline RefVector& slice(int start, int size) 
+  {
+    assert(0 <= start && start < Size && size >=0 && start+size <= Size);
+    return RefVector(size, parent::my_values + start);
+  }
+
   
   template<int Start, int Length>
   inline const FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice() const 
@@ -114,6 +120,16 @@ class SkipAccessor : public Stack<Size*Skip>{
     return reinterpret_cast<const FixedVector<Size, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
   }
 
+  template<class D> RefSkipVector slice(int start, D size) 
+  {
+    assert(0 <= start && start < Size && size >=0 && start+size <= Size);
+    return RefSkipVector(size, Skip, parent::my_values + start*Skip);
+  }
+  template <class D> ConstRefSkipVector slice(int start, D size) const 
+  {
+    assert(0 <= start && start < Size && size >=0 && start+size <= Size);
+    return ConstRefSkipVector(size, Skip, parent::my_values + start*Skip);
+  }
   // convert to Matrices
   inline FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >& as_col() 
   {
@@ -155,6 +171,17 @@ class DynamicVAccessor {
     return reinterpret_cast<const FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >&> (my_values[Start]);
   }
 
+  template <class D> inline RefVector slice(int start, D size) 
+  {
+    assert(0 <= start && start < this->my_size && size >=0 && start+size <= this->my_size);
+    return RefVector(size, this->my_values + start);
+  }
+
+  template <class D> inline ConstRefVector slice(int start, D size) const 
+  {
+    assert(0 <= start && start < this->my_size && size >=0 && start+size <= this->my_size);
+    return ConstRefVector(size, this->my_values + start);
+  }
   inline const double& operator[] (int i)const 
   {
     return my_values[i];

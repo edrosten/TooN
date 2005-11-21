@@ -134,9 +134,28 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
 
 // special kinds of DynamicMatrix only constructed internally
 // e.g. from Vector<>::as_row()
+
+template <class M> struct NonConstMatrix : public M { operator M&() { return *this; } operator const M&()const { return *this; }};
+
 template <class Layout>
-struct RefMatrix : public DynamicMatrix<DynamicMAccessor<Layout> > {
+struct RefMatrix : public NonConstMatrix<DynamicMatrix<DynamicMAccessor<Layout> > > {
   RefMatrix(int rows, int cols, double* dptr){
+    this->my_num_rows=rows;
+    this->my_num_cols=cols;
+    this->my_values=dptr;
+  }
+  // assignment from any MatrixBase
+  template<class Accessor>
+  RefMatrix<Layout>& operator=(const MatrixBase<Accessor>& from){
+    assert(this->num_rows() == from.num_rows() && this->num_cols() == from.num_cols());
+    DynamicMatrix<DynamicMAccessor<Layout> >::operator=(from);
+    return *this;
+  }
+};
+
+template <class Layout>
+struct ConstRefMatrix : public DynamicMatrix<DynamicMAccessor<Layout> > {
+  ConstRefMatrix(int rows, int cols, double* dptr){
     this->my_num_rows=rows;
     this->my_num_cols=cols;
     this->my_values=dptr;
@@ -145,15 +164,31 @@ struct RefMatrix : public DynamicMatrix<DynamicMAccessor<Layout> > {
 
 // e.g. from SkipVector::as_row()
 template<class Layout>
-struct RefSkipMatrix : public DynamicMatrix<RefSkipMAccessor<Layout> > {
+struct RefSkipMatrix : public NonConstMatrix<DynamicMatrix<RefSkipMAccessor<Layout> > > {
   RefSkipMatrix(int rows, int cols, int skip, double* dptr){
     this->my_num_rows=rows;
     this->my_num_cols=cols;
     this->my_skip=skip;
     this->my_values=dptr;
   }
+  // assignment from any MatrixBase
+  template<class Accessor>
+  RefSkipMatrix<Layout>& operator=(const MatrixBase<Accessor>& from){
+    assert(this->num_rows() == from.num_rows() && this->num_cols() == from.num_cols());
+    DynamicMatrix<RefSkipMAccessor<Layout> >::operator=(from);
+    return *this;
+  }
 };
 
+template<class Layout>
+struct ConstRefSkipMatrix : public DynamicMatrix<RefSkipMAccessor<Layout> > {
+  ConstRefSkipMatrix(int rows, int cols, int skip, double* dptr){
+    this->my_num_rows=rows;
+    this->my_num_cols=cols;
+    this->my_skip=skip;
+    this->my_values=dptr;
+  }
+};
 
 
 #endif

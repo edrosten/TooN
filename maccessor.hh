@@ -81,6 +81,15 @@ class FixedMAccessor<Rows,Cols,RowMajor,AllocZone> : public AllocZone {
     return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
       (this->my_values[Rstart*Cols+Cstart]);
   }
+
+  template <class D> inline RefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<ColMajor>(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
+  }
+
 };
 
 
@@ -137,6 +146,15 @@ class FixedMAccessor<Rows,Cols,ColMajor,AllocZone> : public AllocZone {
     return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >&>
       (this->my_values[Cstart*Rows+Rstart]);
   }
+
+  template <class D> inline RefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<ColMajor>(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<ColMajor>(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
+  }
+
 };
 
 
@@ -195,6 +213,15 @@ public:
     return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >&>
       (this->my_values[Rstart*Skip+Cstart]);
   }
+
+  template <class D> inline RefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, Skip, this->my_values + Rstart*Skip + Cstart);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, Skip, this->my_values + Rstart*Skip + Cstart);
+  }
+
 
  protected:
   double my_values[Rows*Skip];
@@ -256,6 +283,14 @@ public:
       (this->my_values[Cstart*Skip+Rstart]);
   }
 
+  template <class D> inline RefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<ColMajor>(Rsize, Csize, Skip, this->my_values + Rstart + Cstart*Skip);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<ColMajor>(Rsize, Csize, Skip, this->my_values + Rstart + Cstart*Skip);
+  }
+
  protected:
   double my_values[Cols*Skip];
 };
@@ -312,13 +347,23 @@ class DynamicMAccessor<RowMajor> {
 
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline FixedMatrix<Rsize,Csize,FixedMAccessor<Rsize,Csize,RowMajor,Stack<Rsize*Csize> > > slice(){
-    FixedMatrix<Rsize,Csize,FixedMAccessor<Rsize,Csize,RowMajor,Stack<Rsize*Csize> > > S;
-    for (int i=0; i<Rsize; i++)
-      for (int j=0; j<Csize; j++)
-	S(i,j) = this->my_values[(Rstart+i)*my_num_cols + (Cstart+j)];
-    return S;
+  inline RefSkipMatrix<RowMajor> slice(){
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
   }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline ConstRefSkipMatrix<RowMajor> slice() const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
+  }
+
+  template <class D> inline RefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
+  }
+
  protected:
   int my_num_rows;
   int my_num_cols;
@@ -367,12 +412,21 @@ class DynamicMAccessor<ColMajor> {
 
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline FixedMatrix<Rsize,Csize,FixedMAccessor<Rsize,Csize,RowMajor,Stack<Rsize*Csize> > > slice(){
-    FixedMatrix<Rsize,Csize,FixedMAccessor<Rsize,Csize,RowMajor,Stack<Rsize*Csize> > > M;
-    for (int i=0; i<Rsize; i++)
-      for (int j=0; j<Csize; j++)
-	M(i,j) = this->my_values[(Rstart+i) + (Cstart+j)*my_num_rows];
-    return M;
+  inline RefSkipMatrix<ColMajor> slice(){
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
+  }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline ConstRefSkipMatrix<ColMajor> slice() const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
+  }
+
+  template <class D> inline RefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
   }
 
  protected:
@@ -424,6 +478,24 @@ class RefSkipMAccessor<RowMajor> {
     return reinterpret_cast<const DynamicMatrix<RefSkipMAccessor<ColMajor> >&>(*this);
   }
 
+  // slice
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline RefSkipMatrix<RowMajor> slice(){
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
+  }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline ConstRefSkipMatrix<RowMajor> slice() const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
+  }
+
+  template <class D> inline RefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<RowMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<RowMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<RowMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
+  }
 
  protected:
   int my_num_rows;
@@ -475,6 +547,26 @@ class RefSkipMAccessor<ColMajor> {
   inline const DynamicMatrix<RefSkipMAccessor<RowMajor> >& T() const {
     return reinterpret_cast<const DynamicMatrix<RefSkipMAccessor<RowMajor> >&>(*this);
   }
+
+  // slice
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline RefSkipMatrix<ColMajor> slice(){
+    return RefSkipMatrix<ColMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
+  }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline ConstRefSkipMatrix<ColMajor> slice() const {
+    return ConstRefSkipMatrix<ColMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
+  }
+
+  template <class D> inline RefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) {
+    return RefSkipMatrix<ColMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
+  }
+
+  template <class D> inline ConstRefSkipMatrix<ColMajor> slice(int Rstart, int Cstart, int Rsize, D Csize) const {
+    return ConstRefSkipMatrix<ColMajor>(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
+  }
+
 
 
  protected:

@@ -24,6 +24,7 @@
 #include <string.h>  // for memcpy
 #include <cmath>    // for sqrt
 #include <iomanip>
+#include <cassert>
 #include <iostream> // for input and output of vectors and matrices
 
 #ifndef TOON_NO_NAMESPACE
@@ -102,7 +103,9 @@ template <class Accessor>
 class DynamicVector;
 
 class RefVector;
+class ConstRefVector;
 class RefSkipVector;
+class ConstRefSkipVector;
 
 template <int Size=General>
 class Vector;
@@ -133,9 +136,13 @@ struct DynamicMatrix;
 
 template<class Layout>
 class RefMatrix;
+template<class Layout>
+class ConstRefMatrix;
 
 template<class Layout>
 class RefSkipMatrix;
+template<class Layout>
+class ConstRefSkipMatrix;
 
 template <int Rows=General,
           int Cols=Rows,

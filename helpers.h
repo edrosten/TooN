@@ -47,7 +47,7 @@ template<int Size> inline FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >& 
 template<int Size> inline const FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >&  as_vector(const double* data);
 
 // set a matrix to (a multiple of) the Identity
-template <int Size, class Accessor> void  Identity(FixedMatrix<Size,Size,Accessor>&m, const double factor=1);
+template <class Accessor> void  Identity(MatrixBase<Accessor>& M, const double factor=1);
 
 // symmetrize a matrix
 template <int Size, class Accessor> void Symmetrize(FixedMatrix<Size,Size,Accessor>& m);
@@ -176,13 +176,14 @@ inline const FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >&  as_vector(co
 
 
 // set a matrix to (a multiple of) the Identity
-template <int Size, class Accessor>
-void Identity(FixedMatrix<Size,Size,Accessor>&m, const double factor){
-  for(int i=0; i<Size; i++){
-    for(int j=0; j<Size; j++){
-      m(i,j)=0;
+template <class Accessor>
+  void Identity(MatrixBase<Accessor>& M, const double factor){
+  assert(M.num_rows() == M.num_cols());
+  for(int i=0; i<M.num_rows(); i++){
+    for(int j=0; j<M.num_cols(); j++){
+      M(i,j)=0;
     }
-    m(i,i)=factor;
+    M(i,i)=factor;
   }
 };
 
