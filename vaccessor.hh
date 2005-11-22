@@ -35,8 +35,7 @@ class DynamicVAccessor {
   friend class VSizer;
 public:
   typedef NonConst<DynamicVector<DynamicVAccessor> > RefVector;
-  typedef Const<DynamicVector<DynamicVAccessor> > ConstRefVector;
-
+    
   template<int Start, int Length>
   inline FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() 
   {
@@ -57,10 +56,10 @@ public:
     return ret;
   }
 
-  inline ConstRefVector slice(int start, int size) const 
+  inline const RefVector slice(int start, int size) const 
   {
     assert(0 <= start && start < this->my_size && size >=0 && start+size <= this->my_size);
-    ConstRefVector ret;
+    RefVector ret;
     ret.set(size,this->my_values + start);
     return ret;
   }
@@ -82,21 +81,18 @@ public:
   inline NonConst<DynamicMatrix<DynamicMAccessor<RowMajor> > > as_row(); // implemented in linoperators.hh
   inline NonConst<DynamicMatrix<DynamicMAccessor<ColMajor> > > as_col(); //
   inline void set(int size, double* values) { my_size = size;  my_values = values; }
-
- protected:
+  
+ protected:  
   int my_size;
   double* my_values;
 };
 
 typedef DynamicVAccessor::RefVector RefVector;
-typedef DynamicVAccessor::ConstRefVector ConstRefVector;
 inline RefVector makeRefVector(int size, double* values) { RefVector ret; ret.set(size,values); return ret; }
-inline ConstRefVector makeConstRefVector(int size, double* values) { ConstRefVector ret; ret.set(size,values); return ret; }
 
 class DynamicSkipAccessor{
 public:
   typedef NonConst<DynamicVector<DynamicSkipAccessor> > RefSkipVector;
-  typedef Const<DynamicVector<DynamicSkipAccessor> > ConstRefSkipVector;
   
   //CHECK THIS
   template<int Start, int Length>
@@ -134,10 +130,10 @@ public:
     return ret;
   }
 
-  inline ConstRefSkipVector slice(int start, int size) const 
+  inline const RefSkipVector slice(int start, int size) const 
   {
     assert(0 <= start && start < this->my_size && size >=0 && start+size <= this->my_size);
-    ConstRefSkipVector ret;
+    RefSkipVector ret;
     ret.set(size,my_skip,this->my_values + start*my_skip);
     return ret;
   }
@@ -169,10 +165,8 @@ public:
 };
 
 typedef DynamicSkipAccessor::RefSkipVector RefSkipVector;
-typedef DynamicSkipAccessor::ConstRefSkipVector ConstRefSkipVector;
 
 inline RefSkipVector makeRefSkipVector(int size, int skip, double* values) { RefSkipVector ret; ret.set(size,skip,values); return ret; }
-inline ConstRefSkipVector makeConstRefSkipVector(int size, int skip, double* values) { ConstRefSkipVector ret; ret.set(size,skip,values); return ret; }
 
 
 /////////////  FIXED SIZED ACCESSORS ////////////////
@@ -207,10 +201,10 @@ class FixedVAccessor : public AllocZone {
     return makeRefVector(size, parent::my_values + start);
   }
 
-  inline ConstRefVector slice(int start, int size) const
+  inline const RefVector slice(int start, int size) const
   {
     assert(0 <= start && start < Size && size >=0 && start+size <= Size);
-    return makeConstRefVector(size, parent::my_values + start);
+    return makeRefVector(size, parent::my_values + start);
   }
   
   template<int Start, int Length>
@@ -280,10 +274,10 @@ class SkipAccessor : public Stack<Size*Skip>{
     assert(0 <= start && start < Size && size >=0 && start+size <= Size);
     return makeRefSkipVector(size, Skip, parent::my_values + start*Skip);
   }
-  ConstRefSkipVector slice(int start, int size) const 
+  const RefSkipVector slice(int start, int size) const 
   {
     assert(0 <= start && start < Size && size >=0 && start+size <= Size);
-    return makeConstRefSkipVector(size, Skip, parent::my_values + start*Skip);
+    return makeRefSkipVector(size, Skip, parent::my_values + start*Skip);
   }
   // convert to Matrices
   inline FixedMatrix<Size,1,SkipMAccessor<Size,1,Skip,RowMajor> >& as_col() 

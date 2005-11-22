@@ -42,12 +42,11 @@ template <>
 class RefSkipMAccessor<RowMajor> {
  public:
   typedef NonConst<DynamicMatrix<RefSkipMAccessor<RowMajor> > > RefSkipMatrixRM;
-  typedef Const<DynamicMatrix<RefSkipMAccessor<RowMajor> > > ConstRefSkipMatrixRM;
   RefSkipMAccessor(){};
   
-  ConstRefVector operator[](int r) const TOON_THROW{
+  const RefVector operator[](int r) const TOON_THROW{
   	TOON_CHECK_ROW;
-    return makeConstRefVector(my_num_cols,this->my_values+r*my_skip);
+    return makeRefVector(my_num_cols,this->my_values+r*my_skip);
   }
 
   RefVector operator[](int r) TOON_THROW{
@@ -89,20 +88,20 @@ class RefSkipMAccessor<RowMajor> {
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline ConstRefSkipMatrixRM slice() const {
-    ConstRefSkipMatrixRM ret;
-    ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
-    return ret;
-  }
-
-  template <class D> inline RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, D Csize) {
+  inline const RefSkipMatrixRM slice() const {
     RefSkipMatrixRM ret;
     ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
     return ret;
   }
 
-  template <class D> inline ConstRefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, D Csize) const {
-    ConstRefSkipMatrixRM ret;
+  inline RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) {
+    RefSkipMatrixRM ret;
+    ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
+    return ret;
+  }
+
+  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    RefSkipMatrixRM ret;
     ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart*this->my_skip + Cstart);
     return ret;
   }
@@ -118,13 +117,12 @@ template <>
 class RefSkipMAccessor<ColMajor> {
  public:
   typedef NonConst<DynamicMatrix<RefSkipMAccessor<ColMajor> > > RefSkipMatrixCM;
-  typedef Const<DynamicMatrix<RefSkipMAccessor<ColMajor> > > ConstRefSkipMatrixCM;
 
   RefSkipMAccessor(){};
   
-  ConstRefSkipVector operator[](int r) const TOON_THROW{
+  const RefSkipVector operator[](int r) const TOON_THROW{
   	TOON_CHECK_ROW;
-    return makeConstRefSkipVector(my_num_cols,my_skip,this->my_values+r);
+    return makeRefSkipVector(my_num_cols,my_skip,this->my_values+r);
   }
 
   RefSkipVector operator[](int r) TOON_THROW{
@@ -169,8 +167,8 @@ class RefSkipMAccessor<ColMajor> {
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline ConstRefSkipMatrixCM slice() const {
-    ConstRefSkipMatrixCM ret;
+  inline const RefSkipMatrixCM slice() const {
+    RefSkipMatrixCM ret;
     ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
     return ret;
   }
@@ -181,8 +179,8 @@ class RefSkipMAccessor<ColMajor> {
     return ret;
   }
 
-  inline ConstRefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    ConstRefSkipMatrixCM ret;
+  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    RefSkipMatrixCM ret;
     ret.set(Rsize, Csize, this->my_skip, this->my_values + Rstart + Cstart*this->my_skip);
     return ret;
   }
@@ -196,20 +194,16 @@ class RefSkipMAccessor<ColMajor> {
 };
 
 typedef RefSkipMAccessor<RowMajor>::RefSkipMatrixRM RefSkipMatrixRM;
-typedef RefSkipMAccessor<RowMajor>::ConstRefSkipMatrixRM ConstRefSkipMatrixRM;
 typedef RefSkipMAccessor<ColMajor>::RefSkipMatrixCM RefSkipMatrixCM;
-typedef RefSkipMAccessor<ColMajor>::ConstRefSkipMatrixCM ConstRefSkipMatrixCM;
 inline RefSkipMatrixRM makeRefSkipMatrixRM(int nr, int nc, int sk, double* v) { RefSkipMatrixRM ret; ret.set(nr,nc,sk,v); return ret; }
-inline ConstRefSkipMatrixRM makeConstRefSkipMatrixRM(int nr, int nc, int sk, double* v) { ConstRefSkipMatrixRM ret; ret.set(nr,nc,sk,v); return ret; }
 inline RefSkipMatrixCM makeRefSkipMatrixCM(int nr, int nc, int sk, double* v) { RefSkipMatrixCM ret; ret.set(nr,nc,sk,v); return ret; }
-inline ConstRefSkipMatrixCM makeConstRefSkipMatrixCM(int nr, int nc, int sk, double* v) { ConstRefSkipMatrixCM ret; ret.set(nr,nc,sk,v); return ret; }
 
 template <>
 class DynamicMAccessor<RowMajor> {
  public:
-  ConstRefVector operator[](int r) const TOON_THROW{
+  const RefVector operator[](int r) const TOON_THROW{
   	TOON_CHECK_ROW;
-    return makeConstRefVector(my_num_cols,this->my_values+r*my_num_cols);
+    return makeRefVector(my_num_cols,this->my_values+r*my_num_cols);
   }
 
   RefVector operator[](int r) TOON_THROW{
@@ -250,16 +244,16 @@ class DynamicMAccessor<RowMajor> {
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline ConstRefSkipMatrixRM slice() const {
-    return makeConstRefSkipMatrixRM(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
+  inline const RefSkipMatrixRM slice() const {
+    return makeRefSkipMatrixRM(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
   }
 
   inline RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) {
     return makeRefSkipMatrixRM(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
   }
 
-  inline ConstRefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixRM(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
+  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixRM(Rsize, Csize, this->my_num_cols, this->my_values + Rstart*this->my_num_cols + Cstart);
   }
   inline void set(int nr, int nc, double* v) { my_num_rows = nr; my_num_cols = nc; my_values = v; }
  protected:
@@ -271,9 +265,9 @@ class DynamicMAccessor<RowMajor> {
 template <>
 class DynamicMAccessor<ColMajor> {
  public:  
-  ConstRefSkipVector operator[](int r) const TOON_THROW{ 
+  const RefSkipVector operator[](int r) const TOON_THROW{ 
   	TOON_CHECK_ROW;
-    return makeConstRefSkipVector(my_num_cols,my_num_rows,this->my_values+r);
+    return makeRefSkipVector(my_num_cols,my_num_rows,this->my_values+r);
   }
 
   RefSkipVector operator[](int r) TOON_THROW
@@ -315,16 +309,16 @@ class DynamicMAccessor<ColMajor> {
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline ConstRefSkipMatrixCM slice() const {
-    return makeConstRefSkipMatrixCM(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
+  inline const RefSkipMatrixCM slice() const {
+    return makeRefSkipMatrixCM(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
   }
 
   inline RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) {
     return makeRefSkipMatrixCM(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
   }
 
-  inline ConstRefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixCM(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
+  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixCM(Rsize, Csize, this->my_num_rows, this->my_values + Rstart + Cstart*this->my_num_rows);
   }
 
   inline void set(int nr, int nc, double* v) { my_num_rows = nr; my_num_cols = nc; my_values = v; }
@@ -335,13 +329,9 @@ class DynamicMAccessor<ColMajor> {
 };
 
 typedef NonConst<DynamicMatrix<DynamicMAccessor<RowMajor> > > RefMatrixRM;
-typedef Const<DynamicMatrix<DynamicMAccessor<RowMajor> > > ConstRefMatrixRM;
 typedef NonConst<DynamicMatrix<DynamicMAccessor<ColMajor> > > RefMatrixCM;
-typedef Const<DynamicMatrix<DynamicMAccessor<ColMajor> > > ConstRefMatrixCM;
 inline RefMatrixRM makeRefMatrixRM(int nr, int nc, double* v) { RefMatrixRM ret; ret.set(nr,nc,v); return ret; }
-inline ConstRefMatrixRM makeConstRefMatrixRM(int nr, int nc, double* v) { ConstRefMatrixRM ret; ret.set(nr,nc,v); return ret; }
 inline RefMatrixCM makeRefMatrixCM(int nr, int nc, double* v) { RefMatrixCM ret; ret.set(nr,nc,v); return ret; }
-inline ConstRefMatrixCM makeConstRefMatrixCM(int nr, int nc, double* v) { ConstRefMatrixCM ret; ret.set(nr,nc,v); return ret; }
 
 #undef TOON_CHECK_ROW
 #undef TOON_CHECK_COL
@@ -404,8 +394,8 @@ class FixedMAccessor<Rows,Cols,RowMajor,AllocZone> : public AllocZone {
     return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
   }
 
-  inline ConstRefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
+  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
   }
 
 };
@@ -469,8 +459,8 @@ class FixedMAccessor<Rows,Cols,ColMajor,AllocZone> : public AllocZone {
     return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
   }
 
-  inline ConstRefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
+  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
   }
 
 };
@@ -536,8 +526,8 @@ public:
     return makeRefSkipMatrixRM(Rsize, Csize, Skip, this->my_values + Rstart*Skip + Cstart);
   }
 
-  inline ConstRefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixRM(Rsize, Csize, Skip, this->my_values + Rstart*Skip + Cstart);
+  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixRM(Rsize, Csize, Skip, this->my_values + Rstart*Skip + Cstart);
   }
 
 
@@ -605,8 +595,8 @@ public:
     return makeRefSkipMatrixCM(Rsize, Csize, Skip, this->my_values + Rstart + Cstart*Skip);
   }
 
-  inline ConstRefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeConstRefSkipMatrixCM(Rsize, Csize, Skip, this->my_values + Rstart + Cstart*Skip);
+  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixCM(Rsize, Csize, Skip, this->my_values + Rstart + Cstart*Skip);
   }
 
  protected:

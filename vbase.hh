@@ -105,7 +105,6 @@ struct DynamicVector : public VectorBase<Accessor>{
 // Special kinds of DynamicVector only constructed internally
 // e.g. from DynamicMAccessor<>::operator[]
 
-template <class V> struct Const : public V { inline operator const V&() const { return *this; } };
 template <class V> struct NonConst : public V { 
   inline operator const V&() const { return *this; }  
   inline operator V&() { return *this; } 
