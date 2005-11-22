@@ -50,13 +50,13 @@ template<int Size> inline const FixedVector<Size,FixedVAccessor<Size,Stack<Size>
 template <class Accessor> void  Identity(MatrixBase<Accessor>& M, const double factor=1);
 
 // symmetrize a matrix
-template <int Size, class Accessor> void Symmetrize(FixedMatrix<Size,Size,Accessor>& m);
+template <class Accessor> void Symmetrize(MatrixBase<Accessor>& m);
 
 // transpose a matrix
-template <int Size, class Accessor> void Transpose(FixedMatrix<Size,Size,Accessor>& m);
+template <class Accessor> void Transpose(MatrixBase<Accessor>& m);
 
 // set a matrix to Zero
-template <int Rows, int Cols, class Accessor> void Zero(FixedMatrix<Rows,Cols,Accessor>&m);
+template <class Accessor> void Zero(MatrixBase<Accessor>&m);
 
 // set a vector to zero
 template <class Accessor> inline void Zero(VectorBase<Accessor>& v);
@@ -189,20 +189,22 @@ template <class Accessor>
 
 
 // symmetrize a matrix
-template <int Size, class Accessor>
-void Symmetrize(FixedMatrix<Size,Size,Accessor>& m){
-  for(int r=0; r<Size-1; r++){
-    for(int c=r; c<Size; c++){
+template <class Accessor>
+void Symmetrize(MatrixBase<Accessor>& m){
+  assert(m.num_rows()==m.num_cols());
+  for(int r=0; r<m.num_rows()-1; r++){
+    for(int c=r; c<m.num_rows(); c++){
       m(c,r) = m(r,c) = 0.5*(m(r,c)+m(c,r));
     }
   }
 }
 
 // Transpose a matrix
-template<int Size, class Accessor>
-void Transpose(FixedMatrix<Size,Size,Accessor>& m){
-  for(int r=0; r<Size-1; r++){
-    for(int c=r; c<Size; c++){
+template<class Accessor>
+void Transpose(MatrixBase<Accessor>& m){
+  assert(m.num_rows() == m.num_cols());
+  for(int r=0; r<m.num_rows()-1; r++){
+    for(int c=r; c<m.num_rows(); c++){
       double temp = m(r,c);
       m(r,c) = m(c,r);
       m(c,r) = temp;
@@ -211,9 +213,9 @@ void Transpose(FixedMatrix<Size,Size,Accessor>& m){
 }
 
 // set a Matrix to zero
-template <int Rows, int Cols, class Accessor> void Zero(FixedMatrix<Rows,Cols,Accessor>&m){
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
+template <class Accessor> void Zero(MatrixBase<Accessor>&m){
+  for(int r=0; r<m.num_rows(); r++){
+    for(int c=0; c<m.num_cols(); c++){
       m(r,c) = 0;
     }
   }

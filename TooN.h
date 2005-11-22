@@ -102,10 +102,10 @@ class FixedVector;
 template <class Accessor>
 class DynamicVector;
 
-class RefVector;
-class ConstRefVector;
-class RefSkipVector;
-class ConstRefSkipVector;
+//class RefVector;
+//class ConstRefVector;
+//class RefSkipVector;
+//class ConstRefSkipVector;
 
 template <int Size=General>
 class Vector;
@@ -188,10 +188,10 @@ class SizeTraits : public ZoneHandler<Size,(Size > NUMERICS::MaxStackSize ? 1 : 
 
 
 #include <TooN/membase.hh>
-#include <TooN/vaccessor.hh>
 #include <TooN/vbase.hh>
-#include <TooN/maccessor.hh>
+#include <TooN/vaccessor.hh>
 #include <TooN/mbase.hh>
+#include <TooN/maccessor.hh>
 #include <TooN/vclasses.hh>
 #include <TooN/mclasses.hh>
 #include <TooN/blasoperators.hh>

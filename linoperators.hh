@@ -23,20 +23,20 @@
 #include <assert.h>
 
 
-inline RefMatrix<RowMajor> DynamicVAccessor::as_row(){
-  return RefMatrix<RowMajor>(1,my_size,my_values);
+inline RefMatrixRM DynamicVAccessor::as_row(){
+  return makeRefMatrixRM(1,my_size,my_values);
 }
 
-inline RefMatrix<ColMajor> DynamicVAccessor::as_col(){
-  return RefMatrix<ColMajor>(my_size,1,my_values);
+inline RefMatrixCM DynamicVAccessor::as_col(){
+  return makeRefMatrixCM(my_size,1,my_values);
 }
 
-inline RefSkipMatrix<ColMajor> DynamicSkipAccessor::as_row(){
-  return RefSkipMatrix<ColMajor>(1,my_size,my_skip,my_values);
+inline RefSkipMatrixCM DynamicSkipAccessor::as_row(){
+  return makeRefSkipMatrixCM(1,my_size,my_skip,my_values);
 }
 
-inline RefSkipMatrix<RowMajor> DynamicSkipAccessor::as_col(){
-  return RefSkipMatrix<RowMajor>(my_size,1,my_skip,my_values);
+inline RefSkipMatrixRM DynamicSkipAccessor::as_col(){
+  return makeRefSkipMatrixRM(my_size,1,my_skip,my_values);
 }
 
 //////////////////////
@@ -840,7 +840,7 @@ FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor
 template <int Rows, int Cols, class MAccessor1, class MAccessor2>
 FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
 						 const DynamicMatrix<MAccessor2>& rhs){
-  assert(rhs.num_rows == Rows && rhs.num_cols() == Cols);
+  assert(rhs.num_rows() == Rows && rhs.num_cols() == Cols);
   for(int r=0; r<Rows; r++){
     for(int c=0; c<Cols; c++){
       lhs(r,c)+=rhs(r,c);
@@ -874,31 +874,6 @@ DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
   return lhs;
 }
 
-#if 0
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
-NonConstMatrix<MAccessor1> operator += ( NonConstMatrix<MAccessor1> lhs,
-					 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)+=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-template <class MAccessor1, class MAccessor2>
-NonConstMatrix<MAccessor1> operator += ( NonConstMatrix<MAccessor1> lhs,
-					 const DynamicMatrix<MAccessor2>& rhs){
-  assert(lhs.num_rows() == rhs.num_cols() && lhs.num_cols() == rhs.num_cols());
-  for(int r=0; r<lhs.num_rows; r++){
-    for(int c=0; c<lhs.num_cols(); c++){
-      lhs(r,c)+=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-#endif 
 /////////////////////
 // operator -      //
 // Matrix - Matrix //

@@ -48,33 +48,7 @@ std::istream& operator >> (std::istream& is, VectorBase<Accessor>& v){
   return is;
 }
 
-// Data copying //
-
-template <class Accessor1, class Accessor2>
-struct VectorCopy {
-  inline static void eval(VectorBase<Accessor1>& to, const VectorBase<Accessor2>& from){
-    for(int i=0; i<from.size(); i++){
-      to[i]=from[i];
-    }
-  }
-};
-
-template <int Size, class Zone1, class Zone2>
-struct VectorCopy<FixedVAccessor<Size,Zone1>,FixedVAccessor<Size,Zone2> > {
-  inline static void eval(VectorBase<FixedVAccessor<Size,Zone1> >& to,
-			  const VectorBase<FixedVAccessor<Size,Zone2> >& from){
-    memcpy(to.get_data_ptr(),from.get_data_ptr(),Size*sizeof(double));
-  }
-};
-
-template<>
-struct VectorCopy<DynamicVAccessor,DynamicVAccessor>{
-  inline static void eval(VectorBase<DynamicVAccessor>& to,
-			  const VectorBase<DynamicVAccessor>& from){
-    memcpy(to.get_data_ptr(),from.get_data_ptr(),from.size()*sizeof(double));
-  }
-};
-
+template <class Accessor1, class Accessor2> struct VectorCopy;
 
 ////////////////////////////////////////////////////////
 //                                                    //
@@ -125,116 +99,48 @@ struct DynamicVector : public VectorBase<Accessor>{
     VectorCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
-
-
 };
 
 
 // Special kinds of DynamicVector only constructed internally
 // e.g. from DynamicMAccessor<>::operator[]
 
-template <class V> struct NonConstVector : public V { operator V&() { return *this; } operator const V&() const { return *this; } };
+template <class V> struct Const : public V { inline operator const V&() const { return *this; } };
+template <class V> struct NonConst : public V { 
+  inline operator const V&() const { return *this; }  
+  inline operator V&() { return *this; } 
+  template <class T> inline NonConst& operator=(const T& t) { V::operator=(t);  return *this; }
+};
 
-struct RefVector : public NonConstVector<DynamicVector<DynamicVAccessor> > {
-  RefVector(int size, double* ptr){
-    my_size=size;
-    my_values=ptr;
-  }
+#include <TooN/vaccessor.hh>
 
-  template<class Accessor2>
-  RefVector& operator=(const VectorBase<Accessor2>& from){
-    DynamicVector<DynamicVAccessor>::operator=(from);
-    return *this;
+
+// Data copying //
+
+template <class Accessor1, class Accessor2>
+struct VectorCopy {
+  inline static void eval(VectorBase<Accessor1>& to, const VectorBase<Accessor2>& from){
+    for(int i=0; i<from.size(); i++){
+      to[i]=from[i];
+    }
   }
 };
 
-struct ConstRefVector : public DynamicVector<DynamicVAccessor> {
-  ConstRefVector(int size, double* ptr){
-    my_size=size;
-    my_values=ptr;
+template <int Size, class Zone1, class Zone2>
+struct VectorCopy<FixedVAccessor<Size,Zone1>,FixedVAccessor<Size,Zone2> > {
+  inline static void eval(VectorBase<FixedVAccessor<Size,Zone1> >& to,
+			  const VectorBase<FixedVAccessor<Size,Zone2> >& from){
+    memcpy(to.get_data_ptr(),from.get_data_ptr(),Size*sizeof(double));
   }
 };
 
-class DynamicSkipAccessor{
- public:
-
-  //CHECK THIS
-  template<int Start, int Length>
-  inline DynamicVector<DynamicSkipAccessor> slice() 
-  {
-    //DynamicSkipAccessors do not own memory, so destruction of one will not free it 
-	
-	DynamicVector<DynamicSkipAccessor> r;
-
-	r.my_size = Length;
-	r.my_skip = my_skip;
-	r.my_values = my_values + my_skip * Start;
-	
-	return r;
-  }
-
-  template<int Start, int Length>
-  inline const DynamicVector<DynamicSkipAccessor> slice() const 
-  {
-    //DynamicSkipAccessors do not own memory, so destruction of one will not free it 
-	
-	DynamicVector<DynamicSkipAccessor> r;
-	r.my_size = Length;
-	r.my_skip = my_skip;
-	r.my_values = my_values + my_skip * Start;
-	
-	return r;
-  }
-
-  inline const double& operator[] (int i)const 
-  {
-    return my_values[i*my_skip];
-  }
-
-  inline double& operator[] (int i) 
-  {
-    return my_values[i*my_skip];	
-  }
-  
-  inline int size() const 
-  {
-    return my_size;
-  }
-
-  inline RefSkipMatrix<ColMajor> as_row(); // implemented in linoperators.hh
-  inline RefSkipMatrix<RowMajor> as_col(); //
-
-
- protected:
-  int my_size;
-  int my_skip;
-  double* my_values;
-};
-
-// e.g. from SkipMAccessor<>::operator[]
-struct RefSkipVector : public NonConstVector<DynamicVector<DynamicSkipAccessor> > {
-  RefSkipVector(int size, int skip, double* ptr){
-    my_size=size;
-    my_skip=skip;
-    my_values=ptr;
-  }
-
-
-  // assignment from any VectorBase
-  template<class Accessor>
-  RefSkipVector& operator=(const VectorBase<Accessor>& from){
-    assert(my_size == from.size());
-    DynamicVector<DynamicSkipAccessor>::operator=(from);
-    return *this;
+template<>
+struct VectorCopy<DynamicVAccessor,DynamicVAccessor>{
+  inline static void eval(VectorBase<DynamicVAccessor>& to,
+			  const VectorBase<DynamicVAccessor>& from){
+    memcpy(to.get_data_ptr(),from.get_data_ptr(),from.size()*sizeof(double));
   }
 };
 
-struct ConstRefSkipVector : public DynamicVector<DynamicSkipAccessor> {
-  ConstRefSkipVector(int size, int skip, double* ptr){
-    my_size=size;
-    my_skip=skip;
-    my_values=ptr;
-  }
-};
 
 #endif

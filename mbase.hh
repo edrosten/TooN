@@ -102,7 +102,7 @@ struct FixedMatrix : public MatrixBase<Accessor> {
     MatrixCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
-
+  
   // assignment from any DynamicMatrix
   template<class Accessor2>
     inline FixedMatrix& operator=(const DynamicMatrix<Accessor2>& from){
@@ -121,6 +121,8 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
     MatrixCopy<Accessor,Accessor2>::eval(*this,from);
     return *this;
   }
+  inline operator MatrixBase<Accessor>& () { return *this; }
+
 
   // repeated for explicit copy assignment
   DynamicMatrix& operator=(const DynamicMatrix& from){
@@ -129,65 +131,6 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
     return *this;
   }
 
-};
-
-
-// special kinds of DynamicMatrix only constructed internally
-// e.g. from Vector<>::as_row()
-
-template <class M> struct NonConstMatrix : public M { operator M&() { return *this; } operator const M&()const { return *this; }};
-
-template <class Layout>
-struct RefMatrix : public NonConstMatrix<DynamicMatrix<DynamicMAccessor<Layout> > > {
-  RefMatrix(int rows, int cols, double* dptr){
-    this->my_num_rows=rows;
-    this->my_num_cols=cols;
-    this->my_values=dptr;
-  }
-  // assignment from any MatrixBase
-  template<class Accessor>
-  RefMatrix<Layout>& operator=(const MatrixBase<Accessor>& from){
-    assert(this->num_rows() == from.num_rows() && this->num_cols() == from.num_cols());
-    DynamicMatrix<DynamicMAccessor<Layout> >::operator=(from);
-    return *this;
-  }
-};
-
-template <class Layout>
-struct ConstRefMatrix : public DynamicMatrix<DynamicMAccessor<Layout> > {
-  ConstRefMatrix(int rows, int cols, double* dptr){
-    this->my_num_rows=rows;
-    this->my_num_cols=cols;
-    this->my_values=dptr;
-  }
-};
-
-// e.g. from SkipVector::as_row()
-template<class Layout>
-struct RefSkipMatrix : public NonConstMatrix<DynamicMatrix<RefSkipMAccessor<Layout> > > {
-  RefSkipMatrix(int rows, int cols, int skip, double* dptr){
-    this->my_num_rows=rows;
-    this->my_num_cols=cols;
-    this->my_skip=skip;
-    this->my_values=dptr;
-  }
-  // assignment from any MatrixBase
-  template<class Accessor>
-  RefSkipMatrix<Layout>& operator=(const MatrixBase<Accessor>& from){
-    assert(this->num_rows() == from.num_rows() && this->num_cols() == from.num_cols());
-    DynamicMatrix<RefSkipMAccessor<Layout> >::operator=(from);
-    return *this;
-  }
-};
-
-template<class Layout>
-struct ConstRefSkipMatrix : public DynamicMatrix<RefSkipMAccessor<Layout> > {
-  ConstRefSkipMatrix(int rows, int cols, int skip, double* dptr){
-    this->my_num_rows=rows;
-    this->my_num_cols=cols;
-    this->my_skip=skip;
-    this->my_values=dptr;
-  }
 };
 
 
