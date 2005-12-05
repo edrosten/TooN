@@ -1,5 +1,5 @@
 
-/*                       
+/*
 	 Copyright (C) 2005 Tom Drummond
 
      This library is free software; you can redistribute it and/or
@@ -32,6 +32,7 @@ public:
   friend std::istream& operator>>(std::istream& is, SO3& rhs);
   friend std::istream& operator>>(std::istream& is, class SE3& rhs);
   inline SO3();
+  inline SO3(const Matrix<3>& rhs);
 
   inline SO3& operator=(const SO3& rhs);
   inline SO3& operator=(const Matrix<3>& rhs);
@@ -80,12 +81,12 @@ inline std::istream& operator>>(std::istream& is, SO3& rhs){
 
 
 
-template<class Accessor> inline 
+template<class Accessor> inline
 Vector<3> operator*(const SO3& lhs, const FixedVector<3,Accessor>& rhs){
   return lhs.get_matrix() * rhs;
 }
 
-template<class Accessor> inline 
+template<class Accessor> inline
 Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
   //FIXME: check size
   return lhs.get_matrix() * rhs;
@@ -94,23 +95,23 @@ Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
 
 
 
-template<class Accessor> inline 
+template<class Accessor> inline
 Vector<3> operator*(const DynamicVector<Accessor>& lhs, const SO3& rhs){
   //FIXME: check size
   return lhs * rhs.get_matrix();
 }
 
-template<class Accessor> inline 
+template<class Accessor> inline
 Vector<3> operator*(const FixedVector<3,Accessor>& lhs, const SO3& rhs){
   return lhs * rhs.get_matrix();
 }
 
-template <int RHS, class Accessor> inline 
+template <int RHS, class Accessor> inline
 Matrix<3,RHS> operator*(const SO3& lhs, const FixedMatrix<3,RHS,Accessor>& rhs){
   return lhs.get_matrix() * rhs;
 }
 
-template <int LHS, class Accessor> inline 
+template <int LHS, class Accessor> inline
 Matrix<LHS,3> operator*(const FixedMatrix<LHS,3,Accessor>& lhs, const SO3& rhs){
   return lhs * rhs.get_matrix();
 }
@@ -123,6 +124,10 @@ namespace SO3static
 inline SO3::SO3() :
   my_matrix(SO3static::identity)
 {}
+
+inline SO3::SO3(const Matrix<3>& rhs){
+    *this = rhs;
+}
 
 inline SO3& SO3::operator=(const SO3& rhs){
   my_matrix = rhs.my_matrix;
@@ -155,7 +160,7 @@ inline SO3 SO3::exp(const double* vect){
   }
 
   double theta = sqrt(vect[0]*vect[0] + vect[1]*vect[1] + vect[2]*vect[2]);
-  
+
   double stot = 1;
   double shtot = 0.5;
 
@@ -211,8 +216,8 @@ inline Vector<3> SO3::ln() const{
 
     tost = angle / sin_angle_abs;
   }
-  
-  
+
+
   result *=tost;
 
   return result;
