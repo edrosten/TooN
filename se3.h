@@ -161,8 +161,7 @@ Vector<4> operator*(const SE3& lhs, const DynamicVector<Accessor>& rhs){
 
 template <class Accessor> inline
 Vector<3> operator*(const SE3& lhs, const FixedVector<3,Accessor>& rhs){
-  Vector<3> v = lhs.get_rotation()*rhs;
-  return v + lhs.get_translation();
+  return lhs.get_rotation()*rhs + lhs.get_translation();
 }
 
 

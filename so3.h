@@ -88,7 +88,7 @@ Vector<3> operator*(const SO3& lhs, const FixedVector<3,Accessor>& rhs){
 
 template<class Accessor> inline
 Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
-  //FIXME: check size
+  assert(rhs.size() == 3);
   return lhs.get_matrix() * rhs;
 }
 
@@ -97,7 +97,7 @@ Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
 
 template<class Accessor> inline
 Vector<3> operator*(const DynamicVector<Accessor>& lhs, const SO3& rhs){
-  //FIXME: check size
+  assert(rhs.size() == 3);
   return lhs * rhs.get_matrix();
 }
 
@@ -131,7 +131,6 @@ inline SO3::SO3(const Matrix<3>& rhs){
 
 inline SO3& SO3::operator=(const SO3& rhs){
   my_matrix = rhs.my_matrix;
-  coerce();
   return *this;
 }
 
@@ -225,15 +224,7 @@ inline Vector<3> SO3::ln() const{
 
 inline SO3 SO3::inverse() const{
   SO3 result;
-  result.my_matrix[0][0] = my_matrix[0][0];
-  result.my_matrix[0][1] = my_matrix[1][0];
-  result.my_matrix[0][2] = my_matrix[2][0];
-  result.my_matrix[1][0] = my_matrix[0][1];
-  result.my_matrix[1][1] = my_matrix[1][1];
-  result.my_matrix[1][2] = my_matrix[2][1];
-  result.my_matrix[2][0] = my_matrix[0][2];
-  result.my_matrix[2][1] = my_matrix[1][2];
-  result.my_matrix[2][2] = my_matrix[2][2];
+  result.my_matrix = my_matrix.T();
   return result;
 }
 

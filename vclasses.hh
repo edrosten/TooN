@@ -243,6 +243,10 @@ class Vector<> : public DynamicVector<DynamicVAccessor> {
 	}
   }
  
+    template <class Accessor> inline void assign(const VectorBase<Accessor>& v) {
+	resize(v.size());
+	DynamicVector<DynamicVAccessor>::operator=(v);	
+    }
   Vector(int Size) {
     this->my_size=Size; this->my_values = new double[Size];
   }

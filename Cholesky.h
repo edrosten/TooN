@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include <lapack.h>
+#include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
 #include <limits>
@@ -51,9 +51,11 @@ namespace TooN {
 	if (a < std::numeric_limits<double>::epsilon()) {
 	  --rank;
 	  L[i][i] = 0;
-	} else
+	  invdiag[i] = 0;
+	} else {
 	  L[i][i]=sqrt(a);
-	invdiag[i] = 1.0/L[i][i];
+	  invdiag[i] = 1.0/L[i][i];
+	}
 	for(int j=i+1;j<Size;j++) {
 	  L[i][j] = 0;
 	  a=m[i][j];

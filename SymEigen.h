@@ -21,7 +21,7 @@
 #define __SYMEIGEN_H
 
 #include <iostream>
-#include <lapack.h>
+#include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
 
