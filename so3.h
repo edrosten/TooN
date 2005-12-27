@@ -97,7 +97,7 @@ Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
 
 template<class Accessor> inline
 Vector<3> operator*(const DynamicVector<Accessor>& lhs, const SO3& rhs){
-  assert(rhs.size() == 3);
+  assert(lhs.size() == 3);
   return lhs * rhs.get_matrix();
 }
 
