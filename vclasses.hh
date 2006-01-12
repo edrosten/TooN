@@ -48,7 +48,9 @@ namespace VectorMagic {
   template <int Index, int Limit, class Vec, class Style> struct VectorFiller;
   template <int Index, int Limit, class Vec> struct VectorFiller<Index,Limit,Vec,CommaStyle> {
 
-	typedef typename sentinel<(Limit >= Index)>::too_many_elements_inserted dummy; 
+
+    // a static assertion
+    typedef typename sentinel<(Limit >= Index)>::too_many_elements_inserted dummy; 
   
     Vec& v;
     bool final_initializer_but_Vector_not_filled;
@@ -203,7 +205,7 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
   }
 
 
-  template <class T> VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle> operator=(const T& t) {
+  VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle> operator=(double t) {
     (*this)[0] = t;
     return VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle>(*this);
   }
@@ -212,7 +214,7 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     return VectorMagic::VectorFiller<N,Size, Vector<Size>, VectorMagic::InsertionStyle>(*this);
   }
 
-  template <class T> VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::InsertionStyle> operator<<(const T& t) {
+  VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::InsertionStyle> operator<<(double t) {
     (*this)[0] = t;
     return VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::InsertionStyle>(*this);
   }
