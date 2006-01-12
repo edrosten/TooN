@@ -52,7 +52,7 @@ namespace VectorMagic {
   
     Vec& v;
     bool final_initializer_but_Vector_not_filled;
-    inline VectorFiller(Vec& vec) : v(vec), final_initializer_but_Vector_not_filled(true) {}
+    inline VectorFiller(Vec& vec) : v(vec), final_initializer_but_Vector_not_filled(Index!=Limit) {}
     template <class T> inline VectorFiller<Index+1,Limit,Vec,CommaStyle> operator,(const T& t) {
       v[Index] = t;
       final_initializer_but_Vector_not_filled = false;
