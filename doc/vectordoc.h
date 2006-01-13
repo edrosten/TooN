@@ -93,7 +93,8 @@ An alternative means of assigning values to vectors is to use the overloaded <co
 with a comma-separated list of doubles (or anything that can be cast to a double):
 @code
 // Create a vector initialised to [1 2 3];
-Vector<3> v = 1, 2, 3;
+Vector<3> v;
+v = 1, 2, 3;
 @endcode
 This is more concise than the %make_Vector syntax, but can only be used for assigning values to 
 existing vectors, and only generates a compile-time error if the list is too long, not too 
