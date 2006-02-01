@@ -214,6 +214,16 @@ inline Vector<3> SO3::ln() const{
     }
 
     tost = angle / sin_angle_abs;
+  } else {
+    if(trace < 1){
+      if(my_matrix[0][0] > 0){
+        result[0] = M_PI;
+      } else if(my_matrix[1][1] > 0){
+        result[1] = M_PI;
+      } else if(my_matrix[2][2] > 0){
+        result[2] = M_PI;
+      }
+    }
   }
 
 
