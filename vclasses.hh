@@ -132,7 +132,7 @@ namespace VectorMagic {
     template <class T> inline VectorCreator<BaseVectorCreator, 1, T> operator,(const T& t) const {
       return VectorCreator<BaseVectorCreator, 1, T>(*this, t);
     }
-    template <class V> inline void assign(V& v) const {}
+    template <class V> inline void assign(V& ) const {}
   };
 }
 
