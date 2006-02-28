@@ -31,7 +31,6 @@ class SE3 {
   friend std::istream& operator>> (std::istream& is, SE3& rhs);
 public:
   inline SE3();
-  inline SE3(const Matrix<3> &R, const Vector<3> &T);
 
   inline SO3& get_rotation(){return my_rotation;}
   inline const SO3& get_rotation() const {return my_rotation;}
@@ -66,11 +65,6 @@ private:
   Vector<3> my_translation;
 };
 
-inline SE3::SE3(const Matrix<3> &R, const Vector<3> &T)
-{
-  my_rotation = R;
-  my_translation = T;
-}
 
 // left multiply an SE3 by an SO3 
 inline SE3 operator*(const SO3& lhs, const SE3& rhs);
@@ -161,7 +155,8 @@ Vector<4> operator*(const SE3& lhs, const DynamicVector<Accessor>& rhs){
 
 template <class Accessor> inline
 Vector<3> operator*(const SE3& lhs, const FixedVector<3,Accessor>& rhs){
-  return lhs.get_rotation()*rhs + lhs.get_translation();
+  Vector<3> v = lhs.get_rotation()*rhs;
+  return v + lhs.get_translation();
 }
 
 
