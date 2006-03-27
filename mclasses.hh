@@ -103,7 +103,12 @@ class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<L
 		this->my_values = new double[this->my_num_rows*this->my_num_cols];
 	}
   }
-
+    
+    template <class Accessor> inline void assign(const MatrixBase<Accessor>& m) {
+	resize(m.num_rows(),m.num_cols());
+	DynamicMatrix<DynamicMAccessor<Layout> >::operator=(m);	
+    }
+    
   // copy construction
   inline Matrix(const Matrix<General,General,Layout>& from){
     this->my_num_rows = from.my_num_rows;

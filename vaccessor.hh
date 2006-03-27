@@ -258,15 +258,15 @@ class SkipAccessor : public Stack<Size*Skip>{
   }
 
   template<int Start, int Length>
-  inline FixedVector<Size, SkipAccessor<Size, Skip> >& slice() 
+  inline FixedVector<Length, SkipAccessor<Size, Skip> >& slice() 
   {
-	return reinterpret_cast<FixedVector<Size, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
+	return reinterpret_cast<FixedVector<Length, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
   }
 
   template<int Start, int Length>
-  inline const FixedVector<Size, SkipAccessor<Size, Skip> >& slice() const 
+  inline const FixedVector<Length, SkipAccessor<Size, Skip> >& slice() const 
   {
-    return reinterpret_cast<const FixedVector<Size, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
+    return reinterpret_cast<const FixedVector<Length, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
   }
 
   RefSkipVector slice(int start, int size) 

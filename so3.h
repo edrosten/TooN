@@ -36,12 +36,12 @@ public:
 
   inline SO3& operator=(const SO3& rhs);
   inline SO3& operator=(const Matrix<3>& rhs);
-  inline void coerce();
+  template <class Accessor> static inline void coerce(FixedMatrix<3,3,Accessor>& M);
 
   static inline SO3 exp(const double* vect);
 
-  template<class Accessor>
-  inline static SO3 exp(const FixedVector<3,Accessor>& vect) {return exp(vect.get_data_ptr());}
+  template<class Accessor> inline static SO3 exp(const FixedVector<3,Accessor>& vect);
+  template <class Accessor> inline static double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second);
 
   inline Vector<3> ln() const;
 
@@ -54,8 +54,8 @@ public:
     return *this;
   }
 
-  inline SO3 operator *(const SO3& rhs) const{
-    return SO3(*this)*=rhs;
+  inline SO3 operator *(const SO3& rhs) const {
+      return SO3(*this)*=rhs;
   }
 
   inline const Matrix<3>& get_matrix()const {return my_matrix;}
@@ -136,50 +136,39 @@ inline SO3& SO3::operator=(const SO3& rhs){
 
 inline SO3& SO3::operator=(const Matrix<3>& rhs){
   my_matrix = rhs;
-  coerce();
+  coerce(my_matrix);
   return *this;
 }
 
-inline void SO3::coerce(){
-  normalize(my_matrix[0]);
-  my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
-  normalize(my_matrix[1]);
-  my_matrix[2] -= my_matrix[0] * (my_matrix[0]*my_matrix[2]);
-  my_matrix[2] -= my_matrix[1] * (my_matrix[1]*my_matrix[2]);
-  normalize(my_matrix[2]);
+ template <class Accessor> inline void SO3::coerce(FixedMatrix<3,3, Accessor>& M){
+     normalize(M[0]);
+     M[1] -= M[0] * (M[0]*M[1]);
+     normalize(M[1]);
+     M[2] -= M[0] * (M[0]*M[2]);
+     M[2] -= M[1] * (M[1]*M[2]);
+     normalize(M[2]);
 }
 
 
-inline SO3 SO3::exp(const double* vect){
+template <class Accessor> inline SO3 SO3::exp(const FixedVector<3,Accessor>& vect){
   SO3 result;
-  for(int i=0; i<3; i++){
-    for(int j=0; j<3; j++){
-      result.my_matrix[i][j] = 0;
-    }
-  }
-
-  double theta = sqrt(vect[0]*vect[0] + vect[1]*vect[1] + vect[2]*vect[2]);
-
+  
+  double theta = sqrt(vect*vect);
+  
   double stot = 1;
   double shtot = 0.5;
 
   double ct=cos(theta);
 
   if(theta > 0.001) {
-    stot = sin(theta)/theta;
-    shtot = sin(theta/2)/theta;
+      stot = sin(theta)/theta;
+      shtot = sin(theta*0.5)/theta;
   }
 
-  result.my_matrix[0][1] -= stot*vect[2];
-  result.my_matrix[0][2] += stot*vect[1];
-  result.my_matrix[1][0] += stot*vect[2];
-  result.my_matrix[1][2] -= stot*vect[0];
-  result.my_matrix[2][0] -= stot*vect[1];
-  result.my_matrix[2][1] += stot*vect[0];
-
-  result.my_matrix[0][0] += ct;
-  result.my_matrix[1][1] += ct;
-  result.my_matrix[2][2] += ct;
+  result.my_matrix[0][0] = result.my_matrix[1][1] = result.my_matrix[2][2] = ct;
+  result.my_matrix[0][1] = -(result.my_matrix[1][0] = stot*vect[2]);
+  result.my_matrix[2][0] = -(result.my_matrix[0][2] = stot*vect[1]);
+  result.my_matrix[1][2] = -(result.my_matrix[2][1] = stot*vect[0]);
 
   for(int i=0; i<3; i++){
     for(int j=0; j<3; j++){
@@ -189,6 +178,50 @@ inline SO3 SO3::exp(const double* vect){
   return result;
 }
 
+ template <class Accessor> inline double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second){
+     double theta = sqrt(vect*vect);
+
+     double stot = 1;
+     double shtot = 0.5;
+     double sqtoth = 0.5;
+
+     double cth = cos(theta*0.5);
+     double ct = 2 * cth*cth - 1;
+     
+     if(theta > 0.001) {	 
+	 double sth = sin(theta*0.5);
+	 double st = 2*cth*sth;
+	 double thetaInv = 1.0/theta;
+
+	 stot = st*thetaInv;
+	 shtot = sth*thetaInv;
+	 if (theta > 0.0005)
+	     sqtoth = 2*sin(theta*0.25)*thetaInv;
+     }
+     
+     first.my_matrix[0][0] = first.my_matrix[1][1] = first.my_matrix[2][2] = ct;
+     first.my_matrix[0][1] = -(first.my_matrix[1][0] = stot*vect[2]);
+     first.my_matrix[2][0] = -(first.my_matrix[0][2] = stot*vect[1]);
+     first.my_matrix[1][2] = -(first.my_matrix[2][1] = stot*vect[0]);
+
+     second.my_matrix[0][0] = second.my_matrix[1][1] = second.my_matrix[2][2] = cth;
+     second.my_matrix[0][1] = -(second.my_matrix[1][0] = shtot*vect[2]);
+     second.my_matrix[2][0] = -(second.my_matrix[0][2] = shtot*vect[1]);
+     second.my_matrix[1][2] = -(second.my_matrix[2][1] = shtot*vect[0]);
+     
+     for(int i=0; i<3; i++){
+	 for(int j=0; j<3; j++){
+	     first.my_matrix[i][j] += 2*shtot*shtot*vect[i]*vect[j];
+	 }
+     }
+     
+     for(int i=0; i<3; i++){
+	 for(int j=0; j<3; j++){
+	     second.my_matrix[i][j] += 0.5*sqtoth*sqtoth*vect[i]*vect[j];
+	 }
+     }
+     return theta;
+}
 
 inline Vector<3> SO3::ln() const{
   Vector<3> result;

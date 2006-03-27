@@ -75,9 +75,9 @@ inline SE3 operator*(const SO3& lhs, const SE3& rhs);
 // so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
 template<class Accessor>
 inline void SE3::adjoint(FixedVector<6,Accessor>& vect)const{
-  vect.template slice<3,3>() = my_rotation * vect.template slice<3,3>();
-  vect.template slice<0,3>() = my_rotation * vect.template slice<0,3>();
-  vect.template slice<0,3>() += my_translation ^ vect.template slice<3,3>();
+    vect.template slice<3,3>() = my_rotation * vect.template slice<3,3>();
+    vect.template slice<0,3>() = my_rotation * vect.template slice<0,3>();
+    vect.template slice<0,3>() += my_translation ^ vect.template slice<3,3>();
 }
 
 // tansfers covectors between frames
@@ -239,24 +239,18 @@ inline SE3::SE3() :
 
 inline SE3 SE3::exp(const Vector<6>& vect){
   SE3 result;
-  
-  result.my_rotation = SO3::exp(vect.slice<3,3>());  
+  SO3 halfrotator;
+  Vector<3> trans(vect.slice<0,3>());
+  Vector<3> rot(vect.slice<3,3>());
 
-  double theta = sqrt(vect[3]*vect[3] + vect[4]*vect[4] + vect[5]*vect[5]);
+  double theta = SO3::exp_with_half(rot, result.my_rotation, halfrotator);
   
   double shtot = 0.5;
 
   if(theta > 0.00001) {  // accurate up to 10^-10
     shtot = sin(theta/2)/theta;
   }
-
-
-  // now do the rotation
-  SO3 halfrotator = SO3::exp(vect.slice<3,3>()/2);
-
-  Vector<3> trans(vect.slice<0,3>());
-  Vector<3> rot(vect.slice<3,3>());
-
+  
   result.my_translation = halfrotator * trans * (2*shtot);
 
   if(theta > 0.001){

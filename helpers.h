@@ -48,6 +48,11 @@ template<int Size> inline const FixedVector<Size,FixedVAccessor<Size,Stack<Size>
 
 // set a matrix to (a multiple of) the Identity
 template <class Accessor> void  Identity(MatrixBase<Accessor>& M, const double factor=1);
+ template <int N> Matrix<N> Identity(const double factor=1) {
+     Matrix<N> M;
+     Identity(M,factor);
+     return M;
+ }
 
 // symmetrize a matrix
 template <class Accessor> void Symmetrize(MatrixBase<Accessor>& m);

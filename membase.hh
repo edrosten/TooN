@@ -26,7 +26,7 @@ template<int Size>
 class Stack {
 protected:
   double my_values[Size];
-};
+} __attribute__ ((aligned(16)));
 
 // the class allocates and deallocates the data on the heap
 template<int Size>
