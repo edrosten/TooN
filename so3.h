@@ -41,7 +41,7 @@ public:
   static inline SO3 exp(const double* vect);
 
   template<class Accessor> inline static SO3 exp(const FixedVector<3,Accessor>& vect);
-  template <class Accessor> inline static double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second);
+  template <class Accessor> inline static double exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second);
 
   inline Vector<3> ln() const;
 
