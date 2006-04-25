@@ -121,7 +121,6 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
     MatrixCopy<Accessor,Accessor2>::eval(*this,from);
     return *this;
   }
-  inline operator MatrixBase<Accessor>& () { return *this; }
 
 
   // repeated for explicit copy assignment
