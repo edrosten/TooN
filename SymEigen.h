@@ -120,6 +120,22 @@ public:
   inline const Matrix<Size,Size,RowMajor>& get_evectors() const {return my_evectors;}
   inline Vector<Size>& get_evalues() {return my_evalues;}
   inline const Vector<Size>& get_evalues() const {return my_evalues;}
+  
+  bool is_posdef() const {
+      for (int i = 0; i < Size; ++i) {
+          if (my_evalues[i] <= 0.0)
+              return false;
+      }
+      return true;
+  }
+  
+  bool is_negdef() const {
+      for (int i = 0; i < Size; ++i) {
+          if (my_evalues[i] >= 0.0)
+              return false;
+      }
+      return true;
+  }
 
 private:
   // eigen vectors laid out row-wise so evectors[i] is the ith evector
