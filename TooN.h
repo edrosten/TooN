@@ -27,6 +27,7 @@
 #include <cassert>
 #include <iostream> // for input and output of vectors and matrices
 
+#include <TooN/util.h>
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
 #endif
@@ -196,6 +197,10 @@ class SizeTraits : public ZoneHandler<Size,(Size > NUMERICS::MaxStackSize ? 1 : 
 #include <TooN/mclasses.hh>
 #include <TooN/blasoperators.hh>
 #include <TooN/linoperators.hh>
+
+ namespace util {
+#include <TooN/generated.h>
+ }
 
 #ifndef TOON_NO_NAMESPACE
 }
