@@ -32,28 +32,51 @@
 namespace TooN {
 #endif 
     namespace util {
-	template <int N> struct ForwardSub {
-	    template <class V1, class M, class FV> static inline void forwardSub(const V1& v, const M& L, const FV& invdiag, FV& t) {
-		ForwardSub<N-1>::forwardSub(v,L,invdiag,t);
-		t[N] = invdiag[N] * (v[N] - Dot<0,N-1>::eval(L[N],t));
+	template <int Size, class A1, class A2, class A3, class A4> inline
+	void cholesky_backsub(const FixedMatrix<Size,Size,A1>& L, const FixedVector<Size,A2>& invdiag, const FixedVector<Size,A3>& v, FixedVector<Size,A4>& x) 
+	{
+	    Vector<Size> t;
+	    // forward substitution
+	    for (int i=0; i<Size; i++) {
+		double b = v[i];
+		for (int j=0; j<i;j++)
+		    b -= L[i][j]*t[j];
+		t[i] = b*invdiag[i];
 	    }
-	};
-	template <> struct ForwardSub<0> {
-	    template <class V1, class M, class FV> static inline void forwardSub(const V1& v, const M& L, const FV& invdiag, FV& t) {
-		t[0] = invdiag[0] * v[0];
+	    // back substitution
+	    for (int i=Size-1; i >=0; i--) {
+		double b = t[i];
+		for (int j=i+1; j<Size;j++)
+		    b -= L[j][i]*x[j];
+		x[i] = b*invdiag[i];
 	    }
-	};
-	template <int Max, int N=0> struct BackwardSub {
-	    template <class V1, class M, class FV> static inline void backwardSub(const V1& v, const M& L, const FV& invdiag, FV& t) {
-		BackwardSub<Max,N+1>::backwardSub(v,L,invdiag,t);
-		t[N] = invdiag[N] * (v[N] - Dot<N+1,Max>::eval(L.T()[N],t));
+	}
+	
+	template <int Size, class A1, class A2, class A3> inline int cholesky_compute(const FixedMatrix<Size,Size,A1>& M, FixedMatrix<Size,Size,A2>& L, FixedVector<Size,A3>& invdiag) 
+	{
+	    int rank = Size;
+	    const double eps = std::numeric_limits<double>::min();
+	    for(int i=0;i<Size;i++) {
+		double a=M[i][i];
+		for(int k=0;k<i;k++) 
+		    a-=L[i][k]*L[i][k];
+		if (a < eps) {
+		    --rank;
+		    L[i][i] = invdiag[i] = 0;
+		} else {
+		    L[i][i]=sqrt(a);
+		    invdiag[i] = 1.0/L[i][i];
+		}
+		for(int j=i+1;j<Size;j++) {
+		    L[i][j] = 0;
+		    a=M[i][j];
+		    for(int k=0;k<i;k++) 
+			a-=L[i][k]*L[j][k];
+		    L[j][i]=a*invdiag[i];
+		}
 	    }
-	};
-	template <int Max> struct BackwardSub<Max,Max> {
-	    template <class V1, class M, class FV> static inline void backwardSub(const V1& v, const M& L, const FV& invdiag, FV& t) {
-		t[Max] = invdiag[Max] * v[Max];
-	    }
-	};
+	    return rank;
+	}
     }
 
     template <int Size=-1>
@@ -67,27 +90,7 @@ namespace TooN {
     
 	template<class Accessor>
 	void compute(const FixedMatrix<Size,Size,Accessor>& m){
-	    rank = Size;
-	    for(int i=0;i<Size;i++) {
-		double a=m[i][i];
-		for(int k=0;k<i;k++) 
-		    a-=L[i][k]*L[i][k];
-		if (a < std::numeric_limits<double>::epsilon()) {
-		    --rank;
-		    L[i][i] = 0;
-		    invdiag[i] = 0;
-		} else {
-		    L[i][i]=sqrt(a);
-		    invdiag[i] = 1.0/L[i][i];
-		}
-		for(int j=i+1;j<Size;j++) {
-		    L[i][j] = 0;
-		    a=m[i][j];
-		    for(int k=0;k<i;k++) 
-			a-=L[i][k]*L[j][k];
-		    L[j][i]=a*invdiag[i];
-		}
-	    }
+	    rank = util::cholesky_compute(m,L,invdiag);
 	}
 	int get_rank() const { return rank; }
 
@@ -105,12 +108,8 @@ namespace TooN {
 	template <class Accessor> inline 
 	Vector<Size> backsub(const FixedVector<Size,Accessor>& v) const
 	{
-	    Vector<Size> t;
-	    // forward substitution
-	    util::ForwardSub<Size-1>::forwardSub(v,L,invdiag,t);
-	    // back substitution
 	    Vector<Size> x;
-	    util::BackwardSub<Size-1>::backwardSub(t,L,invdiag,x);
+	    util::cholesky_backsub(L, invdiag, v, x);
 	    return x;
 	}
       
@@ -122,15 +121,18 @@ namespace TooN {
 	    return result.T();
 	}
 
-	Matrix<Size,Size> get_inverse() const {
-	    Matrix<Size,Size> M;
-	    Vector<Size> id_row;
-	    zero(id_row);
+	template <class A> void get_inverse(FixedMatrix<Size,Size,A>& M) const {
+	    Vector<Size> id_row=zeros<Size>();
 	    for (int r=0; r<Size; r++) {
 		id_row[r] = 1.0;
-		M.T()[r] = backsub(id_row);
+		util::cholesky_backsub(L, invdiag, id_row, M[r]);
 		id_row[r] = 0.0;
 	    }
+	}
+
+	Matrix<Size,Size> get_inverse() const {
+	    Matrix<Size,Size> M;
+	    get_inverse(M);
 	    return M;
 	}
 

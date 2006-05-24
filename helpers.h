@@ -66,21 +66,27 @@ template <class Accessor> void Zero(MatrixBase<Accessor>&m);
 // set a vector to zero
 template <class Accessor> inline void Zero(VectorBase<Accessor>& v);
 
-//////////////////////////////////////////////
+ template <class T, int N> struct ZeroBlock {
+     static const T data[N];
+ };
+
+ template <class T, int N> const T ZeroBlock<T,N>::data[N] = {0};
+ 
+ template <int M, int N> inline const Matrix<M,N>& zeros() { return *reinterpret_cast<const Matrix<M,N>*>(ZeroBlock<double,M*N>::data); }
+ template <int N> inline const Vector<N>& zeros() { return *reinterpret_cast<const Vector<N>*>(ZeroBlock<double,N>::data); }
+ //////////////////////////////////////////////
 
 
 
 // normalizations (note US spelling)
 template <class Accessor>
 inline void normalize(VectorBase<Accessor>& v){
-  double sumsq=0;
-  for(int i=0; i<v.size(); i++){
-    sumsq += v[i] * v[i];
-  }
-  const double scalefac = 1/sqrt(sumsq);
-  for(int i=0; i<v.size(); i++){
-    v[i]*=scalefac;
-  }
+    double sumSq = v[0]*v[0];
+    for (int i=1; i<v.size(); i++)
+	sumSq += v[i]*v[i];
+    double factor = 1.0/sqrt(sumSq);
+    for (int i=0; i<v.size(); i++)
+	v[i] *= factor;
 }
 
 template <class Accessor>

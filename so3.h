@@ -27,14 +27,16 @@
 namespace TooN {
 #endif
 
+    class SE3;
+
 class SO3 {
 public:
   friend std::istream& operator>>(std::istream& is, SO3& rhs);
   friend std::istream& operator>>(std::istream& is, class SE3& rhs);
+  friend class SE3;
   inline SO3();
   inline SO3(const Matrix<3>& rhs);
 
-  inline SO3& operator=(const SO3& rhs);
   inline SO3& operator=(const Matrix<3>& rhs);
   template <class Accessor> static inline void coerce(FixedMatrix<3,3,Accessor>& M);
 
@@ -127,11 +129,6 @@ inline SO3::SO3() :
 
 inline SO3::SO3(const Matrix<3>& rhs){
     *this = rhs;
-}
-
-inline SO3& SO3::operator=(const SO3& rhs){
-  my_matrix = rhs.my_matrix;
-  return *this;
 }
 
 inline SO3& SO3::operator=(const Matrix<3>& rhs){

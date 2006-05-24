@@ -29,8 +29,18 @@ namespace TooN {
 class SE3 {
   friend SE3 operator*(const SO3& lhs, const SE3& rhs);
   friend std::istream& operator>> (std::istream& is, SE3& rhs);
-public:
+  
+  struct Product {
+      Product(const SE3& l, const SE3& r) : left(l), right(r) {}
+      const SE3& left;
+      const SE3& right;
+  };
+
+ public:
   inline SE3();
+  inline SE3(const SE3::Product& p) { *this = p;  }
+  template <class A> inline SE3(const SO3& R, const FixedVector<3,A>& T) : my_rotation(R), my_translation(T) {}
+      
 
   inline SO3& get_rotation(){return my_rotation;}
   inline const SO3& get_rotation() const {return my_rotation;}
@@ -38,12 +48,21 @@ public:
   inline const Vector<3>& get_translation() const {return my_translation;}
 
   static inline SE3 exp(const Vector<6>& vect);
-  inline Vector<6> ln() const;
+  static inline Vector<6> ln(const SE3& se3);
+  inline Vector<6> ln() const { return SE3::ln(*this); }
 
   inline SE3 inverse() const;
 
+  inline SE3& operator=(const Product& p) {
+      Matrix<3> tmp;
+      util::matrix_multiply<3,3,3>(p.left.my_rotation.my_matrix, p.right.my_rotation.my_matrix, tmp);
+      my_rotation.my_matrix = tmp;
+      my_translation = p.left.my_translation + p.left.my_rotation*p.right.my_translation;
+      return *this;
+  }
   inline SE3& operator *=(const SE3& rhs);
-  inline SE3 operator *(const SE3& rhs) const;
+  inline Product operator *(const SE3& rhs) const { return Product(*this,rhs); }
+  inline SE3& left_multiply_by(const SE3& left);
 
   static inline Vector<4> generator_field(int i, Vector<4> pos);
 
@@ -264,33 +283,33 @@ inline SE3 SE3::exp(const Vector<6>& vect){
   return result;
 }
 
-inline Vector<6> SE3::ln() const{
-  Vector<3> rot = my_rotation.ln();
-  double theta = sqrt(rot*rot);
-  double shtot = 0.5;
-
-  if(theta > 0.00001) {
-    shtot = sin(theta/2)/theta;
-  }
-
-  // now do the rotation
-  Vector<3> halfrot = rot * -0.5;
-  SO3 halfrotator = SO3::exp(halfrot);
-
-  Vector<3> rottrans = halfrotator * my_translation;
-  
-  if(theta > 0.001){
-    rottrans -= rot * ((my_translation * rot) * (1-2*shtot) / (rot*rot));
-  } else {
-    rottrans -= rot * ((my_translation * rot)/24);
-  }
-
-  rottrans /= (2 * shtot);
-
-  Vector<6> result;
-  result.slice<0,3>()=rottrans;
-  result.slice<3,3>()=rot;
-  return result;
+ inline Vector<6> SE3::ln(const SE3& se3) {
+    Vector<3> rot = se3.my_rotation.ln();
+    double theta = sqrt(rot*rot);
+    double shtot = 0.5;
+    
+    if(theta > 0.00001) {
+	shtot = sin(theta/2)/theta;
+    }
+    
+    // now do the rotation
+    Vector<3> halfrot = rot * -0.5;
+    SO3 halfrotator = SO3::exp(halfrot);
+    
+    Vector<3> rottrans = halfrotator * se3.my_translation;
+    
+    if(theta > 0.001){
+	rottrans -= rot * ((se3.my_translation * rot) * (1-2*shtot) / (rot*rot));
+    } else {
+	rottrans -= rot * ((se3.my_translation * rot)/24);
+    }
+    
+    rottrans /= (2 * shtot);
+    
+    Vector<6> result;
+    result.slice<0,3>()=rottrans;
+    result.slice<3,3>()=rot;
+    return result;
 }
 
 inline SE3 SE3::inverse() const {
@@ -302,13 +321,11 @@ inline SE3 SE3::inverse() const {
   return result;
 }
 
-inline SE3 SE3::operator*(const SE3& rhs) const {
-  SE3 result;
-  result.my_rotation = my_rotation * rhs.my_rotation;
-  result.my_translation = my_translation + (my_rotation * rhs.my_translation);
-  return result;
+inline SE3& SE3::left_multiply_by(const SE3& left) {
+    my_translation = left.my_translation + left.get_rotation() * my_translation;
+    my_rotation = left.my_rotation * my_rotation;
+    return *this;
 }
-
 
 inline Vector<4> SE3::generator_field(int i, Vector<4> pos){
   double result_d[]={0,0,0,0};

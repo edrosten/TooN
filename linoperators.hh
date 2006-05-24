@@ -53,7 +53,7 @@ struct FixedVectorNeg{
   }
 };
 
-template<int Size, class Accessor>
+template<int Size, class Accessor> inline 
 Vector<Size> operator-(const FixedVector<Size,Accessor>& arg){
   return Vector<Size>(arg,Operator<FixedVectorNeg<Size,Accessor> >());
 }
@@ -153,29 +153,23 @@ inline Vector<> operator+(const DynamicVector<Accessor1>& lhs, const FixedVector
 template <int Size, class LHAccessor, class RHAccessor>
 inline FixedVector<Size,LHAccessor>& operator+= (FixedVector<Size,LHAccessor>& lhs,
 						 const FixedVector<Size,RHAccessor>& rhs){
-  for(int i=0; i<Size; i++){
-    lhs[i]+=rhs[i];
-  }
-  return lhs;
+    util::AddV<0,Size-1>::eval(lhs,rhs);
+    return lhs;
 }
 
 template <int Size, class LHAccessor, class RHAccessor>
 inline FixedVector<Size,LHAccessor>& operator+= (FixedVector<Size,LHAccessor>& lhs,
 						 const DynamicVector<RHAccessor>& rhs){
-  assert(rhs.size() == Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]+=rhs[i];
-  }
-  return lhs;
+    assert(rhs.size() == Size);
+    util::AddV<0,Size-1>::eval(lhs,rhs);
+    return lhs;
 }
 
 template <int Size, class LHAccessor, class RHAccessor>
 inline DynamicVector<LHAccessor>& operator+= (DynamicVector<LHAccessor>& lhs,
 					      const FixedVector<Size,RHAccessor>& rhs){
   assert(lhs.size()==Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]+=rhs[i];
-  }
+  util::AddV<0,Size-1>::eval(lhs,rhs);
   return lhs;
 }
 
@@ -324,26 +318,6 @@ inline DynamicVector<LHAccessor>& operator-= (DynamicVector<LHAccessor>& lhs,
   return lhs;
 }
 
-#if 0
-template <int Size, class LH, class RHAccessor>
-inline NonConstVector<LH> operator-= (NonConstVector<LH> lhs, const FixedVector<Size,RHAccessor>& rhs){
-  assert(lhs.size()==Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]-=rhs[i];
-  }
-  return lhs;
-}
-
-template <class LH, class RHAccessor>
-inline NonConstVector<LH> operator-= (NonConstVector<LH> lhs, const DynamicVector<RHAccessor>& rhs){
-  assert(lhs.size()==rhs.size());
-  for(int i=0; i<lhs.size(); i++){
-    lhs[i]-=rhs[i];
-  }
-  return lhs;
-}
-
-#endif
 
 /////////////////////
 // operator *      //
@@ -475,11 +449,7 @@ inline NonConstVector<LH> operator/= (NonConstVector<LH> lhs, const double& rhs)
 
 template <int Size, class Accessor1, class Accessor2>
 inline double operator*(const FixedVector<Size,Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs) {
-  double dot=0;
-  for(int i=0; i<Size; i++){
-    dot += lhs[i]*rhs[i];
-  }
-  return dot;
+    return util::Dot<0,Size-1>::eval(lhs,rhs);
 }
 
 template <class Accessor1,class Accessor2>
@@ -487,7 +457,7 @@ inline double operator*(const DynamicVector<Accessor1>& lhs, const DynamicVector
   assert(lhs.size() == rhs.size());
   double dot=0;
   for(int i=0; i<lhs.size(); i++){
-    dot += lhs[i]*rhs[i];
+      dot += lhs[i]*rhs[i];
   }
   return dot;
 }
@@ -495,21 +465,13 @@ inline double operator*(const DynamicVector<Accessor1>& lhs, const DynamicVector
 template <int Size, class Accessor1,class Accessor2>
 inline double operator*(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
   assert(lhs.size() == rhs.size());
-  double dot=0;
-  for(int i=0; i<lhs.size(); i++){
-    dot += lhs[i]*rhs[i];
-  }
-  return dot;
+  return util::Dot<0,Size-1>::eval(lhs,rhs);
 }
 
 template <class Accessor1,int Size,class Accessor2>
 inline double operator*(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
   assert(lhs.size() == rhs.size());
-  double dot=0;
-  for(int i=0; i<lhs.size(); i++){
-    dot += lhs[i]*rhs[i];
-  }
-  return dot;
+  return util::Dot<0,Size-1>::eval(lhs,rhs);
 }
 
 ///////////////////////////
@@ -543,10 +505,7 @@ template <int Rows, int Cols, class LHS, class RHS>
 struct FixedMVMult {
   inline static void eval(Vector<Rows>& ret, const LHS& lhs, const RHS& rhs){
     for(int r=0; r<Rows; r++){
-      ret[r]=0;
-      for(int c=0; c<Cols; c++){
-	ret[r]+=lhs[r][c]*rhs[c];
-      }
+	ret[r]=lhs[r]*rhs;
     }
   }
 };
@@ -613,7 +572,7 @@ inline Vector<> operator*(const DynamicMatrix<MAccessor>& lhs,
 /////////////////////
 
 template <int Rows, int Cols, class MAccessor, class VAccessor>
-inline Vector<Rows> operator*(const FixedVector<Cols, VAccessor>& lhs,
+inline Vector<Cols> operator*(const FixedVector<Rows, VAccessor>& lhs,
 			      const FixedMatrix<Rows, Cols, MAccessor>& rhs){
   return (rhs.T() * lhs);
 }
@@ -826,50 +785,42 @@ Matrix<> operator+(const DynamicMatrix<LHAccessor>& lhs,
 // Matrix += Matrix //
 //////////////////////
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline 
 FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
 						 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)+=rhs(r,c);
+    for(int r=0; r<Rows; r++){
+	lhs[r] += rhs[r];
     }
-  }
-  return lhs;
+    return lhs;
 }
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
 FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
 						 const DynamicMatrix<MAccessor2>& rhs){
   assert(rhs.num_rows() == Rows && rhs.num_cols() == Cols);
   for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)+=rhs(r,c);
-    }
+      lhs[r] += rhs[r];
   }
   return lhs;
 }
 
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
 DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
 					 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
   assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
   for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)+=rhs(r,c);
-    }
+      lhs[r] += rhs[r];
   }
   return lhs;
 }
 
-template <class MAccessor1, class MAccessor2>
+template <class MAccessor1, class MAccessor2> inline
 DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
 					 const DynamicMatrix<MAccessor2>& rhs){
   assert(lhs.num_rows() == rhs.num_cols() && lhs.num_cols() == rhs.num_cols());
   for(int r=0; r<lhs.num_rows(); r++){
-    for(int c=0; c<lhs.num_cols(); c++){
-      lhs(r,c)+=rhs(r,c);
-    }
+      lhs[r] += rhs[r];
   }
   return lhs;
 }
@@ -892,7 +843,7 @@ struct FixedMMSub {
   }
 };
 
-template <int Rows, int Cols, class LHAccessor, class RHAccessor>
+template <int Rows, int Cols, class LHAccessor, class RHAccessor> inline
 Matrix<Rows,Cols> operator-(const FixedMatrix<Rows,Cols,LHAccessor>& lhs,
 			    const FixedMatrix<Rows,Cols,RHAccessor>& rhs){
   return Matrix<Rows,Cols>(lhs,rhs, Operator<FixedMMSub<Rows,Cols,LHAccessor,RHAccessor> >());
@@ -1050,16 +1001,18 @@ struct FixedMMMult;
 template <int Rows, int Inter, int Cols, class LHS, class RHS>
 struct FixedMMMult<Rows,Inter,Cols,LHS,RHS,NUMERICS::BlasMult> {
   inline static void eval(Matrix<Rows,Cols>& ret, const LHS& lhs, const RHS& rhs){
+      
     //blasmmmult(ret,lhs,rhs);
-	cppmmmult(ret, lhs, rhs);
-
+      //cppmmmult(ret, lhs, rhs);
+      util::matrix_multiply<Rows,Inter,Cols>(lhs, rhs, ret);
   }
 };
 
 template <int Rows, int Inter, int Cols, class LHS, class RHS>
 struct FixedMMMult<Rows,Inter,Cols,LHS,RHS,NUMERICS::CPPMult> {
   inline static void eval(Matrix<Rows,Cols>& ret, const LHS& lhs, const RHS& rhs){
-    cppmmmult(ret,lhs,rhs);
+      //cppmmmult(ret,lhs,rhs);
+      util::matrix_multiply<Rows,Inter,Cols>(lhs, rhs, ret);
   }
 };
 
