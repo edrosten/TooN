@@ -34,6 +34,8 @@ class SE3 {
       Product(const SE3& l, const SE3& r) : left(l), right(r) {}
       const SE3& left;
       const SE3& right;
+      Product operator *(const SE3 & rhs) const { SE3 lhs = *this; return lhs * rhs; }
+      Product operator *(const Product & rhs) const { SE3 lhs = *this; return lhs * rhs; }
   };
 
  public:
@@ -62,6 +64,7 @@ class SE3 {
   }
   inline SE3& operator *=(const SE3& rhs);
   inline Product operator *(const SE3& rhs) const { return Product(*this,rhs); }
+  inline Product operator *(const Product & rhs) const { SE3 temp = rhs; return Product(*this, temp); }
   inline SE3& left_multiply_by(const SE3& left);
 
   static inline Vector<4> generator_field(int i, Vector<4> pos);
