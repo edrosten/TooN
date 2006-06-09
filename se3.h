@@ -30,17 +30,8 @@ class SE3 {
   friend SE3 operator*(const SO3& lhs, const SE3& rhs);
   friend std::istream& operator>> (std::istream& is, SE3& rhs);
   
-  struct Product {
-      Product(const SE3& l, const SE3& r) : left(l), right(r) {}
-      const SE3& left;
-      const SE3& right;
-      Product operator *(const SE3 & rhs) const { SE3 lhs = *this; return lhs * rhs; }
-      Product operator *(const Product & rhs) const { SE3 lhs = *this; return lhs * rhs; }
-  };
-
  public:
   inline SE3();
-  inline SE3(const SE3::Product& p) { *this = p;  }
   template <class A> inline SE3(const SO3& R, const FixedVector<3,A>& T) : my_rotation(R), my_translation(T) {}
       
 
@@ -55,16 +46,8 @@ class SE3 {
 
   inline SE3 inverse() const;
 
-  inline SE3& operator=(const Product& p) {
-      Matrix<3> tmp;
-      util::matrix_multiply<3,3,3>(p.left.my_rotation.my_matrix, p.right.my_rotation.my_matrix, tmp);
-      my_rotation.my_matrix = tmp;
-      my_translation = p.left.my_translation + p.left.my_rotation*p.right.my_translation;
-      return *this;
-  }
   inline SE3& operator *=(const SE3& rhs);
-  inline Product operator *(const SE3& rhs) const { return Product(*this,rhs); }
-  inline Product operator *(const Product & rhs) const { SE3 temp = rhs; return Product(*this, temp); }
+  inline SE3 operator *(const SE3& rhs) const { return SE3(my_rotation*rhs.my_rotation, my_translation + my_rotation*rhs.my_translation); }
   inline SE3& left_multiply_by(const SE3& left);
 
   static inline Vector<4> generator_field(int i, Vector<4> pos);
