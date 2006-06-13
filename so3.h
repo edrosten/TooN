@@ -21,6 +21,7 @@
 #define __SO3_H
 
 #include <TooN/TooN.h>
+#include <TooN/LU.h>
 #include <TooN/helpers.h>
 
 #ifndef TOON_NO_NAMESPACE
@@ -224,42 +225,58 @@ inline Vector<3> SO3::ln() const{
   Vector<3> result;
 
   double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
+ 
+  // 2 * cos(theta) - 1 == trace
 
   result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
   result[1] = (my_matrix[0][2]-my_matrix[2][0])/2;
   result[2] = (my_matrix[1][0]-my_matrix[0][1])/2;
 
-  double sin_angle_abs = sqrt(result*result);
-
-  // FIX PAS 10/5/02 added the min since was occasionally giving a fraction over 1.0
-  if(sin_angle_abs > 1.0)
-     sin_angle_abs = 1.0;
-  // END FIX
-
-  double tost=1;
-  if (sin_angle_abs > 0.00001){
-    double angle = asin(sin_angle_abs);
-    if(trace < 1) {
-      angle = M_PI - angle;
-    }
-
-    tost = angle / sin_angle_abs;
-  } else {
-    if(trace < 1){
-      if(my_matrix[0][0] > 0){
-        result[0] = M_PI;
-      } else if(my_matrix[1][1] > 0){
-        result[1] = M_PI;
-      } else if(my_matrix[2][2] > 0){
-        result[2] = M_PI;
+  if (trace > -0.95) {
+      double sin_angle_abs = sqrt(result*result);
+      if (sin_angle_abs > 0.00001) {
+	  double tost=1;
+	  double angle;
+	  if(sin_angle_abs > 1.0) {
+	      sin_angle_abs = 1.0;
+	      angle = M_PI_2;
+	  } else {
+	      angle = asin(sin_angle_abs);
+	      if (trace < 1)
+		  angle = M_PI - angle;
+	  }
+	  result *= angle / sin_angle_abs;
       }
-    }
+      return result;
+  } else {
+      TooN::Matrix<3> A = my_matrix;
+      A[0][0] -= 1.0;
+      A[1][1] -= 1.0;
+      A[2][2] -= 1.0;
+      TooN::LU<3> lu(A);     
+      const TooN::Matrix<3,3,TooN::ColMajor>& u = lu.get_lu().T();
+      const double u0 = fabs(u[0][0]);
+      const double u1 = fabs(u[1][1]);
+      const double u2 = fabs(u[2][2]);
+      int row;      
+      if (u0 < u1)
+	  row = u0 < u2 ? 0 : 2;
+      else
+	  row = u1 < u2 ? 1 : 2;      
+      //std::cerr << u << std::endl;
+      //std::cerr << "row = " << row << std::endl;
+      TooN::Vector<3> r;
+      const double factor = acos(0.5*(trace-1));
+      switch (row) {
+      case 0: r[0] = factor; r[1] = 0; r[2] = 0; break;
+      case 1: r[0] = u[0][1]*u[2][2]; r[1] = -u[0][0]*u[2][2]; r[2] = 0; r *= factor/sqrt(r*r); break;
+      case 2: r[0] = u[0][1]*u[1][2] - u[0][2]*u[1][1]; r[1] = -u[0][0]*u[1][2]; r[2] = u[0][0]*u[1][1];  r *= factor/sqrt(r*r); break;
+      }
+      if (result * r < 0)
+	  return -r;
+      else
+	  return r;
   }
-
-
-  result *=tost;
-
-  return result;
 }
 
 inline SO3 SO3::inverse() const{
