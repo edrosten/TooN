@@ -28,8 +28,8 @@ class Matrix : public FixedMatrix<Rows, Cols, FixedMAccessor<Rows, Cols, Layout,
   inline Matrix(){}
 
   // construction from 1 and 2 dimensional c-style arrays
-  inline Matrix(double d[Rows*Cols]){*this = (reinterpret_cast<FixedMatrix<Rows,Cols,FixedMAccessor<Rows,Cols,RowMajor,Stack<Rows*Cols> > >&>(*d));}
-  inline Matrix(double d[Rows][Cols]){*this = (reinterpret_cast<FixedMatrix<Rows,Cols,FixedMAccessor<Rows,Cols,RowMajor,Stack<Rows*Cols> > >&>(*d));}
+  inline Matrix(const double d[Rows*Cols]){*this = (reinterpret_cast<const FixedMatrix<Rows,Cols,FixedMAccessor<Rows,Cols,RowMajor,Stack<Rows*Cols> > >&>(*d));}
+  inline Matrix(const double d[Rows][Cols]){*this = (reinterpret_cast<const FixedMatrix<Rows,Cols,FixedMAccessor<Rows,Cols,RowMajor,Stack<Rows*Cols> > >&>(*d));}
 
   // construction from a fixed Matrix
   template <class Accessor>
@@ -76,7 +76,7 @@ class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<L
     delete[] this->my_values;}
 
   // construction from a double*
-  inline Matrix(int num_rows, int num_cols, double* data){
+  inline Matrix(int num_rows, int num_cols, const double* data){
     this->my_num_rows=num_rows;
     this->my_num_cols = num_cols;
     this->my_values = new double[num_rows*num_cols];

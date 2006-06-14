@@ -235,7 +235,6 @@ inline Vector<3> SO3::ln() const{
   if (trace > -0.95) {
       double sin_angle_abs = sqrt(result*result);
       if (sin_angle_abs > 0.00001) {
-	  double tost=1;
 	  double angle;
 	  if(sin_angle_abs > 1.0) {
 	      sin_angle_abs = 1.0;

@@ -239,31 +239,38 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
   }
 }
 
-template <int R, int N, class Accessor1, class Accessor2> Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
-{
-    Matrix<R> M;
-    for (int i=0; i<R; i++) {
-	double sum = 0;
-	for (int k=0; k<N; k++) {
-	    double psum = 0;
-	    for (int l=k+1; l<N;l++)
-		psum += A[i][l] * B[k][l];
-	    sum += (psum * 2 + A[i][k]*B[k][k]) * A[i][k];
-	}
-	M[i][i] = sum;
-	for (int j=i+1; j<R;j++) {
-	    double sum = 0;
-	    for (int k=0; k<N; k++) {
-		sum += A[i][k]*A[j][k]*B[k][k];
-		for (int l=k+1; l<N;l++)
-		    sum += (A[i][l]*A[j][k] + A[i][k]*A[j][l]) * B[k][l];
-	    }
-	    M[i][j] = M[j][i] = sum;
-	}
-    }
-    return M;
-}
+ namespace util {
+     template <int R, int N, class Accessor1, class Accessor2> Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+     {
+	 Matrix<R> M;
+	 for (int i=0; i<R; i++) {
+	     double sum = 0;
+	     for (int k=0; k<N; k++) {
+		 double psum = 0;
+		 for (int l=k+1; l<N;l++)
+		     psum += A[i][l] * B[k][l];
+		 sum += (psum * 2 + A[i][k]*B[k][k]) * A[i][k];
+	     }
+	     M[i][i] = sum;
+	     for (int j=i+1; j<R;j++) {
+		 double sum = 0;
+		 for (int k=0; k<N; k++) {
+		     sum += A[i][k]*A[j][k]*B[k][k];
+		     for (int l=k+1; l<N;l++)
+			 sum += (A[i][l]*A[j][k] + A[i][k]*A[j][l]) * B[k][l];
+		 }
+		 M[i][j] = M[j][i] = sum;
+	     }
+	 }
+	 return M;
+     }
+ }
 
+ template <int R, int N, class Accessor1, class Accessor2> inline Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+ {
+     return util::transformCovariance(A,B);
+ }
+ 
 #ifndef TOON_NO_NAMESPACE
 }
 #endif 
