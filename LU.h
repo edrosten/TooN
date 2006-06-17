@@ -191,7 +191,7 @@ class LU<> {
     int M = lda;
     int N = lda;
     dgetrf_(&M,&N,my_lu.get_data_ptr(),&lda,my_IPIV,&my_info);
-    if(info < 0){
+    if(my_info < 0){
       std::cerr << "error in LU, INFO was " << my_info << std::endl;
     }
   }
