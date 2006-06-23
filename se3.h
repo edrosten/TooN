@@ -299,12 +299,8 @@ inline SE3 SE3::exp(const Vector<6>& vect){
 }
 
 inline SE3 SE3::inverse() const {
-  SE3 result;
-  result.my_rotation = my_rotation.inverse();
-  result.my_translation = result.my_rotation * my_translation;
-  result.my_translation *= -1;
-
-  return result;
+    const SO3& rinv = my_rotation.inverse();
+    return SE3(rinv, -(rinv*my_translation));
 }
 
 inline SE3& SE3::left_multiply_by(const SE3& left) {

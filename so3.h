@@ -58,7 +58,7 @@ public:
   }
 
   inline SO3 operator *(const SO3& rhs) const {
-      return SO3(*this)*=rhs;
+      return SO3(*this,rhs);
   }
 
   inline const Matrix<3>& get_matrix()const {return my_matrix;}
@@ -70,6 +70,10 @@ public:
   inline Vector<3> adjoint(Vector<3> vect) const ;
 
  private:
+  struct Invert {};
+  inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
+  inline SO3(const SO3& a, const SO3& b) : my_matrix(a.my_matrix*b.my_matrix) {}
+      
   Matrix<3> my_matrix;
 };
 
@@ -279,9 +283,7 @@ inline Vector<3> SO3::ln() const{
 }
 
 inline SO3 SO3::inverse() const{
-  SO3 result;
-  result.my_matrix = my_matrix.T();
-  return result;
+    return SO3(*this, Invert());
 }
 
 
