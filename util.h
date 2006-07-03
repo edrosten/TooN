@@ -5,6 +5,10 @@
 namespace TooN {
 #endif 
     namespace util {
+
+	template <bool Cond> struct Assert;
+	template <> struct Assert<true> {};
+
 	template <int B, int E> struct Dot {
 	    template <class V1, class V2> static inline double eval(const V1& v1, const V2& v2) { return v1[B]* v2[B] + Dot<B+1,E>::eval(v1,v2); }
 	};

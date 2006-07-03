@@ -77,6 +77,30 @@ namespace TooN {
 	    }
 	    return rank;
 	}
+
+	template <int S, class A1, class A2, class A3> inline void cholesky_inverse(const FixedMatrix<S,S,A1>& L, const FixedVector<S,A2>& invdiag, FixedMatrix<S,S,A3>& I)
+	{
+	    for (int col = 0; col<S; col++) {
+		Vector<S> t,x;
+		for (int i=col; i<S; i++) {
+		    double psum = v[i];
+		    for (int j=col; j<i; j++)
+			psum -= L[i][j]*t[j];		    
+		    t[i] = invdiag[i] * psum;
+		}
+		for (int i=S-1; i>col; i--) {
+		    double psum = t[i];
+		    for (int j=i+1; j<S; j++)
+			psum -= L[j][i]*x[j];
+		    I[i][col] = I[col][i] = x[i] = invdiag[i] * psum;
+		}
+		double psum = t[col];
+		for (int j=col+1; j<S; j++)
+		    psum -= L[j][col]*x[j];		
+		I[col][col] = invdiag[col]*psum;
+	    }
+	}
+	
     }
 
     template <int Size=-1>
@@ -122,12 +146,7 @@ namespace TooN {
 	}
 
 	template <class A> void get_inverse(FixedMatrix<Size,Size,A>& M) const {
-	    Vector<Size> id_row=zeros<Size>();
-	    for (int r=0; r<Size; r++) {
-		id_row[r] = 1.0;
-		util::cholesky_backsub(L, invdiag, id_row, M[r]);
-		id_row[r] = 0.0;
-	    }
+	    util::cholesky_inverse(L, invdiag, M);
 	}
 
 	Matrix<Size,Size> get_inverse() const {

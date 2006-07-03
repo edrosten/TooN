@@ -170,7 +170,6 @@ inline RefSkipVector makeRefSkipVector(int size, int skip, double* values) { Ref
 
 
 /////////////  FIXED SIZED ACCESSORS ////////////////
-
 template <int Size, class AllocZone>
 class FixedVAccessor : public AllocZone {
  public:
@@ -189,9 +188,10 @@ class FixedVAccessor : public AllocZone {
   inline static int size() {return Size;}
 
   template<int Start, int Length>
-  inline FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice() 
+  inline FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice()
   {
-    return reinterpret_cast<FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (parent::my_values[Start]);
+      util::Assert<(Start+Length <= Size)>();
+      return reinterpret_cast<FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (parent::my_values[Start]);
   }
 
   typedef FixedVAccessor<Size,AllocZone> this_type;
@@ -210,6 +210,7 @@ class FixedVAccessor : public AllocZone {
   template<int Start, int Length>
   inline const FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice() const 
   {
+      util::Assert<(Start+Length <= Size)>();
     return reinterpret_cast<const FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (parent::my_values[Start]);
   }
 
@@ -260,12 +261,14 @@ class SkipAccessor : public Stack<Size*Skip>{
   template<int Start, int Length>
   inline FixedVector<Length, SkipAccessor<Size, Skip> >& slice() 
   {
-	return reinterpret_cast<FixedVector<Length, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
+      util::Assert<(Start+Length <= Size)>();
+      return reinterpret_cast<FixedVector<Length, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
   }
 
   template<int Start, int Length>
   inline const FixedVector<Length, SkipAccessor<Size, Skip> >& slice() const 
   {
+      util::Assert<(Start+Length <= Size)>();
     return reinterpret_cast<const FixedVector<Length, SkipAccessor<Size, Skip> >&>(parent::my_values[Start*Skip]);
   }
 

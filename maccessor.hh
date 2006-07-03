@@ -380,12 +380,16 @@ class FixedMAccessor<Rows,Cols,RowMajor,AllocZone> : public AllocZone {
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
   inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice(){
+      util::Assert<(Rstart+Rsize <= Rows)>();
+      util::Assert<(Cstart+Csize <= Cols)>();
     return reinterpret_cast<FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
       (this->my_values[Rstart*Cols+Cstart]);
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
   inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice() const {
+      util::Assert<(Rstart+Rsize <= Rows)>();
+      util::Assert<(Cstart+Csize <= Cols)>();
     return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
       (this->my_values[Rstart*Cols+Cstart]);
   }

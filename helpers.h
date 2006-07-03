@@ -254,11 +254,8 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
 	     M[i][i] = sum;
 	     for (int j=i+1; j<R;j++) {
 		 double sum = 0;
-		 for (int k=0; k<N; k++) {
-		     sum += A[i][k]*A[j][k]*B[k][k];
-		     for (int l=k+1; l<N;l++)
-			 sum += (A[i][l]*A[j][k] + A[i][k]*A[j][l]) * B[k][l];
-		 }
+		 for (int k=0; k<N; k++)
+		     sum += A[i][k] * (B[k]*A[j]);
 		 M[i][j] = M[j][i] = sum;
 	     }
 	 }
