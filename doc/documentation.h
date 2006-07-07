@@ -41,7 +41,11 @@ Why use this library?
 
 (*) This is not always true (see Implementation, below)
  
+\section sGetting How to get
 
+The library can be obtained from savannah using anonymous cvs with the command:
+
+cvs -d:pserver:anonymous@cvs.savannah.nongnu.org:/cvsroot/toon co TooN
 
 \section sUsage How to use
 
