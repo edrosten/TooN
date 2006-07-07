@@ -62,18 +62,21 @@ The library can be obtained from savannah using anonymous cvs with the command:
 Create two vectors and work out their inner (dot), outer and cross products
 @code
 // Initialise the vectors
-Vector<3> a = 3,5,0;
-Vector<3> b  = 4,1,3;
+Vector<3> a;
+a = 3,5,0;
+Vector<3> b;
+b = 4,1,3;
 // Now work out the products
 double dot = a*b;                            // Dot product
-Matrix<3,3> outer = a.as_row() * b.as_col(); // Outer product
+Matrix<3,3> outer = a.as_col() * b.as_row(); // Outer product
 Vector<3> cross = a ^ b;                     // Cross product
 @endcode
 
 Create a vector and a matrix and multiply the two together
 @code
 // Initialise a vector
-Vector<3> v = 1,2,3;
+Vector<3> v;
+v = 1,2,3;
 // Initialise a matrix
 double d[2][3] = {{2,4,5},{6,8,9}};
 Matrix<2,3> M(d);
