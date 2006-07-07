@@ -70,6 +70,11 @@ b = 4,1,3;
 double dot = a*b;                            // Dot product
 Matrix<3,3> outer = a.as_col() * b.as_row(); // Outer product
 Vector<3> cross = a ^ b;                     // Cross product
+
+cout << "a:" << endl << a << endl;
+cout << "b:" << endl << b << endl;
+cout << "Outer:" << endl << outer << endl;
+cout << "Cross:" << endl << cross << endl;
 @endcode
 
 Create a vector and a matrix and multiply the two together
