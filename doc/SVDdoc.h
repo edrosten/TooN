@@ -52,7 +52,8 @@ It can be used as follows to solve the \f$M\underline{x} = \underline{c}\f$ prob
 double d1[][] = {{1,2,3},{4,5,6},{7,8,10}};
 Matrix<3> M(d1);
 // construct c
-Vector<3> c = 2,3,4;
+ Vector<3> c;
+c = 2,3,4;
 // create the SVD decomposition of M
 SVD<3> svdM(M);
 // compute x = M^-1 * c
