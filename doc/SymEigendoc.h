@@ -41,7 +41,7 @@ double d1[][] = {{1,2,3},{2,5,6},{3,6,7}};
 Matrix<3> M(d1);
 // create the eigen decomposition of M
 SymEigen<3> eigM(M);
-// print the largest eigenvalue
+// print the smallest eigenvalue
 cout << eigM.get_evalues()[0] << endl;
 // print the associated eigenvector
 cout << eigM.get_evectors()[0] << endl;
