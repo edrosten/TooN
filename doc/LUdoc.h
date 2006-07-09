@@ -75,6 +75,10 @@ public:
 	/// multiply it by a matrix or a vector, use one of the backsub() functions, which will be faster.
 	Matrix<Size,Size> get_inverse();
   
+	/// Calculate the determinant of the matrix
+	double determinant() const;
+
+
 	/// Returns the L and U matrices. The permutation matrix is not returned.
 	/// Since L is lower-triangular (with unit diagonal)
 	/// and U is upper-triangular, these are returned conflated into one matrix, where the 
