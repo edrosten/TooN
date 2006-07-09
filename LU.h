@@ -45,9 +45,10 @@ class LU {
     int lda = Size;
     int M = Size;
     int N = Size;
-    dgetrf_(&M,&N,my_lu.get_data_ptr(),&lda,my_IPIV,&my_info);
-    if(my_info < 0){
-      std::cerr << "error in LU, INFO was " << my_info << std::endl;
+    int info;
+    dgetrf_(&M,&N,my_lu.get_data_ptr(),&lda,my_IPIV,&info);
+    if(info != 0){
+      std::cerr << "error in LU, INFO was " << info << std::endl;
     }
   }
 
@@ -145,10 +146,11 @@ class LU {
     int lda=Size;
     int lwork=-1;
     double size;
-    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, &size, &lwork, &my_info);
+    int info;
+    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, &size, &lwork, &info);
     lwork=int(size);
     double* WORK = new double[lwork];
-    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, WORK, &lwork, &my_info);
+    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, WORK, &lwork, &info);
     delete [] WORK;
     return Inverse;
   }
@@ -156,10 +158,26 @@ class LU {
   Matrix<Size,Size,RowMajor>& get_lu(){return my_lu;}
   const Matrix<Size,Size,RowMajor>& get_lu()const {return my_lu;}
 
-  int get_info() const { return my_info; }
+  inline int get_sign() const {
+    int result=1;
+    for(int i=0; i<Size-1; i++){
+      if(my_IPIV[i] > i+1){
+	result=-result;
+      }
+    }
+    return result;
+  }
+
+  inline double determinant() const {
+    double result = get_sign();
+    for (int i=0; i<Size; i++){
+      result*=my_lu(i,i);
+    }
+    return result;
+  }
+
  private:
   Matrix<Size,Size,RowMajor> my_lu;
-  int my_info;
   int my_IPIV[Size];
 };
   
@@ -190,9 +208,10 @@ class LU<> {
     int lda = my_lu.num_cols();
     int M = lda;
     int N = lda;
-    dgetrf_(&M,&N,my_lu.get_data_ptr(),&lda,my_IPIV,&my_info);
-    if(my_info < 0){
-      std::cerr << "error in LU, INFO was " << my_info << std::endl;
+    int info;
+    dgetrf_(&M,&N,my_lu.get_data_ptr(),&lda,my_IPIV,&info);
+    if(info != 0){
+      std::cerr << "error in LU, INFO was " << info << std::endl;
     }
   }
 
@@ -293,10 +312,11 @@ class LU<> {
     int lda=my_lu.num_rows();;
     int lwork=-1;
     double size;
-    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, &size, &lwork, &my_info);
+    int info;
+    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, &size, &lwork, &info);
     lwork=int(size);
     double* WORK = new double[lwork];
-    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, WORK, &lwork, &my_info);
+    dgetri_(&N, Inverse.get_data_ptr(), &lda, my_IPIV, WORK, &lwork, &info);
     delete [] WORK;
     return Inverse;
   }
@@ -304,12 +324,9 @@ class LU<> {
   Matrix<-1,-1,RowMajor>& get_lu(){return my_lu;}
   const Matrix<-1,-1,RowMajor>& get_lu()const {return my_lu;}
 
-  int get_info() const { return my_info; }
-
 
  private:
   Matrix<-1,-1,RowMajor> my_lu;
-  int my_info;
   int* my_IPIV;
 };
 
