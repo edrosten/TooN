@@ -53,7 +53,7 @@ The library can be obtained from savannah using anonymous cvs with the command:
 
 	- Make sure you have a suitable compiler (g++ version < 3 is no good)
 	- Make sure the directory containing TooN/ is somewhere on your search path
-	- Add <code>#include <TooN/toon.h></code>, and any other header files you might need e.g. <code>TooN/helpers.h</code> (for some more matrix and vector functions) or <code>TooN/SVD.h</code> (for the singular value decomposition) to your source code. 
+	- Add <code>#include <TooN/TooN.h></code>, and any other header files you might need e.g. <code>TooN/helpers.h</code> (for some more matrix and vector functions) or <code>TooN/SVD.h</code> (for the singular value decomposition) to your source code. 
 	- Add <code>using namespace %TooN</code> to your code (or prefix class declarations with <code>%TooN::</code>).
 	- You will need to link with <code>-llapack -lblas</code> (and <code>-lg2c</code> for g++. I'm not sure about other compilers). This means you will also need liblapack.{a,so} and libblas.{a,so} 
 
@@ -86,9 +86,9 @@ v = 1,2,3;
 double d[2][3] = {{2,4,5},{6,8,9}};
 Matrix<2,3> M(d);
 // Now perform calculations
-Vector<2> = M*v;  // OK - answer is a static 2D vector
-Vector<> = M*v;   // OK - vector is determined to be 2D at runtime
-Vector<> = v*M;   // Compile error - dimensions of matrix and vector incompatible
+Vector<2> v2 = M*v;  // OK - answer is a static 2D vector
+Vector<> v3 = M*v;   // OK - vector is determined to be 2D at runtime
+Vector<> v4 = v*M;   // Compile error - dimensions of matrix and vector incompatible
 @endcode
 
 See the detailed documentation for @link TooN::Vector Vector@endlink, @link TooN::Matrix Matrix@endlink and
