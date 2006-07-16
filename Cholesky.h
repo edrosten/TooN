@@ -82,8 +82,9 @@ namespace TooN {
 	{
 	    for (int col = 0; col<S; col++) {
 		Vector<S> t,x;
-		for (int i=col; i<S; i++) {
-		    double psum = 1;
+		t[col] = invdiag[i];
+		for (int i=col+1; i<S; i++) {
+		    double psum = 0;
 		    for (int j=col; j<i; j++)
 			psum -= L[i][j]*t[j];		    
 		    t[i] = invdiag[i] * psum;
