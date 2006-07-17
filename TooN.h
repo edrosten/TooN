@@ -187,6 +187,7 @@ class SizeTraits : public ZoneHandler<Size,(Size > NUMERICS::MaxStackSize ? 1 : 
   #define TOON_THROW throw()
 #endif
 
+#include <TooN/vmagic.hh>
 
 #include <TooN/membase.hh>
 #include <TooN/vbase.hh>

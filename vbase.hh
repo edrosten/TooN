@@ -80,6 +80,33 @@ struct FixedVector : public VectorBase<Accessor> {
     VectorCopy<Accessor, Accessor2>::eval(*this, from);
     return *this;
   }
+
+  // assignment from a double - uses vector magic
+  VectorMagic::VectorFiller<1,Size, FixedVector<Size, Accessor>, VectorMagic::CommaStyle> operator=(double t) {
+    (*this)[0] = t;
+    return VectorMagic::VectorFiller<1,Size, FixedVector<Size, Accessor>, VectorMagic::CommaStyle>(*this);
+  }
+
+  // insertion operators - uses vector magic
+  VectorMagic::VectorFiller<1,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle> operator<<(double t) {
+    (*this)[0] = t;
+    return VectorMagic::VectorFiller<1,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
+  }
+
+  template <int N> VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle> operator<<(const VectorMagic::ComponentPlaceHolder<N>& t) {
+    return VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
+  }
+  
+  template <int N> VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle> operator<<(const Vector<N>& t) {
+    (*this).template slice<0,N>() = t;
+    return VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
+  }
+
+
+
+
+
+
 };
 
 template <class Accessor>

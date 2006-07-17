@@ -74,6 +74,9 @@ public:
 	/// performs the decomposition immediately.
   	SVD(const Matrix<Rows,Cols>& M);
 
+	/// Compute the %SVD decomposition of M, typically used after the default constructor
+	void compute(const Matrix<Rows,Cols>& M);
+
 	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix. 
 	/// For a matrix \f$A\f$, this calculates \f$M^{\dagger}A\f$ by back substitution 
 	/// (i.e. without explictly calculating the (pseudo-)inverse). 
