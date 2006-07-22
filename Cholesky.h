@@ -101,6 +101,36 @@ namespace TooN {
 		I[col][col] = invdiag[col]*psum;
 	    }
 	}
+
+	template <class A1, class A2, class A3> inline void cholesky_inverse(const DynamicMatrix<A1>& L, const DynamicVector<A2>& invdiag, DynamicMatrix<A3>& I)
+	{
+	    assert(L.num_rows() == L.num_cols() && 
+		   L.num_rows() == invdiag.size() && 
+		   L.num_rows() == I.num_rows() && 
+		   I.num_rows() == I.num_cols());
+	    int S = L.num_rows();
+	    for (int col = 0; col<S; col++) {
+		Vector<> t(S),x(S);
+		t[col] = invdiag[col];
+		for (int i=col+1; i<S; i++) {
+		    double psum = 0;
+		    for (int j=col; j<i; j++)
+			psum -= L[i][j]*t[j];		    
+		    t[i] = invdiag[i] * psum;
+		}
+		for (int i=S-1; i>col; i--) {
+		    double psum = t[i];
+		    for (int j=i+1; j<S; j++)
+			psum -= L[j][i]*x[j];
+		    I[i][col] = I[col][i] = x[i] = invdiag[i] * psum;
+		}
+		double psum = t[col];
+		for (int j=col+1; j<S; j++)
+		    psum -= L[j][col]*x[j];		
+		I[col][col] = invdiag[col]*psum;
+	    }
+	}
+
 	
     }
 
@@ -220,32 +250,14 @@ namespace TooN {
 	    return det*det;
 	}
 
+	template <class Mat> void get_inverse(Mat& M) const {
+	    assert(M.num_rows() == M.num_cols() && M.num_rows() == L.num_rows());
+	    util::cholesky_inverse(L, invdiag, M);
+	}
+
 	Matrix<> get_inverse() const {
-	    int Size = L.num_rows();
-	    Matrix<> M(Size, Size);
-	    // compute inverse(L)
-	    for (int r=0; r<Size; r++) {
-		M[r][r] = invdiag[r];
-		for (int i=r+1; i<Size; i++) {
-		    double b = -L[i][r]*M[r][r];
-		    for (int j=r+1; j<i;j++)
-			b -= L[i][j]*M[r][j];
-		    M[r][i] = b*invdiag[i];
-		}      
-	    }
-	    // multiply (inverse(L))^T * inverse(L)
-	    for (int i=0;i<Size; i++) {
-		double s = 0;
-		for (int k=i; k<Size; k++)
-		    s += M[i][k]*M[i][k];
-		M[i][i] = s;
-		for (int j=i+1; j<Size; j++) {
-		    double s = 0;
-		    for (int k=j; k<Size; k++)
-			s += M[j][k]*M[i][k];
-		    M[i][j] = M[j][i] = s;
-		}
-	    }
+	    Matrix<> M(L.num_rows(), L.num_rows());
+	    get_inverse(M);
 	    return M;
 	}
 

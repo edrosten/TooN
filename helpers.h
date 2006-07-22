@@ -240,9 +240,14 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
 }
 
  namespace util {
-     template <int R, int N, class Accessor1, class Accessor2> Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+     template <class MatA, class MatB, class MatM> void transformCovariance(const MatA& A, const MatB& B, MatM& M)
      {
-	 Matrix<R> M;
+	 assert(M.num_rows() == M.num_cols() && 
+		M.num_rows() == A.num_rows() && 
+		A.num_cols() == B.num_rows() && 
+		B.num_rows() == B.num_cols());
+	 const int R = A.num_rows();
+	 const int N = A.num_cols();
 	 for (int i=0; i<R; i++) {
 	     double sum = 0;
 	     for (int k=0; k<N; k++) {
@@ -259,13 +264,33 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
 		 M[i][j] = M[j][i] = sum;
 	     }
 	 }
+     }
+
+     template <int R, int N, class Accessor1, class Accessor2> Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+     {
+	 Matrix<R> M;
+	 transformCovariance(A,B,M);
 	 return M;
      }
  }
-
- template <int R, int N, class Accessor1, class Accessor2> inline Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+ 
+ template <class A1, class A2> Matrix<> transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B)
  {
-     return util::transformCovariance(A,B);
+     Matrix<> M(A.num_rows(), A.num_rows());
+     util::transformCovariance(A,B,M);
+     return M;
+ }
+
+ template <int R, int N, class Accessor1, class Accessor2> inline Matrix<R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+ {
+     Matrix<R> M;
+     util::transformCovariance(A,B,M);
+     return M;
+ }
+
+ template <class MatA, class MatB, class MatM> void transformCovariance(const MatA& A, const MatB& B, MatM& M)
+ {
+     util::transformCovariance(A,B,M);
  }
  
 #ifndef TOON_NO_NAMESPACE
