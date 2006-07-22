@@ -240,41 +240,34 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
 }
 
  namespace util {
-     template <class MatA, class MatB, class MatM> void transformCovariance(const MatA& A, const MatB& B, MatM& M)
+     template <int R, int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<R,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<R,R,A3>& M)
      {
-	 assert(M.num_rows() == M.num_cols() && 
-		M.num_rows() == A.num_rows() && 
-		A.num_cols() == B.num_rows() && 
-		B.num_rows() == B.num_cols());
-	 const int R = A.num_rows();
-	 const int N = A.num_cols();
-	 for (int i=0; i<R; i++) {
-	     double sum = 0;
-	     for (int k=0; k<N; k++) {
-		 double psum = 0;
-		 for (int l=k+1; l<N;l++)
-		     psum += A[i][l] * B[k][l];
-		 sum += (psum * 2 + A[i][k]*B[k][k]) * A[i][k];
-	     }
-	     M[i][i] = sum;
-	     for (int j=i+1; j<R;j++) {
-		 double sum = 0;
-		 for (int k=0; k<N; k++)
-		     sum += A[i][k] * (B[k]*A[j]);
-		 M[i][j] = M[j][i] = sum;
-	     }
+	 for (int i=0; i<R; ++i) {
+	     const Vector<N> ABi = B * A[i];
+	     M[i][i] = ABi * A[i];
+	     for (int j=i+1; j<R; ++j)
+		 M[i][j] = M[j][i] = ABi * A[j];
 	 }
      }
 
-     template <int R, int N, class Accessor1, class Accessor2> Matrix<R,R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
+     template <class A1, class A2, class MatM> inline void transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B, MatM& M)
      {
-	 Matrix<R> M;
-	 transformCovariance(A,B,M);
-	 return M;
+	 const int R = A.num_rows();
+	 const int N = A.num_cols();	 
+	 assert(M.num_rows() == R && 
+		M.num_cols() == R && 
+		B.num_rows() == N && 
+		B.num_cols() == N);
+	 for (int i=0; i<R; ++i) {
+	     const Vector<> ABi = B * A[i];
+	     M[i][i] = ABi * A[i];
+	     for (int j=i+1; j<R; ++j)
+		 M[j][i] = M[i][j] = ABi * A[j];
+	 }
      }
  }
  
- template <class A1, class A2> Matrix<> transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B)
+ template <class A1, class A2> Matrix<> inline transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B)
  {
      Matrix<> M(A.num_rows(), A.num_rows());
      util::transformCovariance(A,B,M);
@@ -288,7 +281,7 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
      return M;
  }
 
- template <class MatA, class MatB, class MatM> void transformCovariance(const MatA& A, const MatB& B, MatM& M)
+ template <class MatA, class MatB, class MatM> inline void transformCovariance(const MatA& A, const MatB& B, MatM& M)
  {
      util::transformCovariance(A,B,M);
  }

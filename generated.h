@@ -1,124 +1,3 @@
-// Generated for J*C*J^T, C symmetric
-template <class Accessor1, class Accessor2> inline Matrix<2> transformCovariance(const FixedMatrix<2,2,Accessor1>& A, const FixedMatrix<2,2,Accessor2>& B)
-{
-	Matrix<2> M;
-	M[0][0] = A[0][0]*(2*Dot<1,1>::eval(A[0], B[0]) + A[0][0]*B[0][0])
-		+ A[0][1]*A[0][1]*B[1][1];
-	M[0][1] = M[1][0] = A[0][0]*(B[0]*A[1])
-		+ A[0][1]*(B[1]*A[1]);
-	M[1][1] = A[1][0]*(2*Dot<1,1>::eval(A[1], B[0]) + A[1][0]*B[0][0])
-		+ A[1][1]*A[1][1]*B[1][1];
-	return M;
-}
-
-// Generated for J*C*J^T, C symmetric
-template <class Accessor1, class Accessor2> inline Matrix<2> transformCovariance(const FixedMatrix<2,3,Accessor1>& A, const FixedMatrix<3,3,Accessor2>& B)
-{
-	Matrix<2> M;
-	M[0][0] = A[0][0]*(2*Dot<1,2>::eval(A[0], B[0]) + A[0][0]*B[0][0])
-		+ A[0][1]*(2*Dot<2,2>::eval(A[0], B[1]) + A[0][1]*B[1][1])
-		+ A[0][2]*A[0][2]*B[2][2];
-	M[0][1] = M[1][0] = A[0][0]*(B[0]*A[1])
-		+ A[0][1]*(B[1]*A[1])
-		+ A[0][2]*(B[2]*A[1]);
-	M[1][1] = A[1][0]*(2*Dot<1,2>::eval(A[1], B[0]) + A[1][0]*B[0][0])
-		+ A[1][1]*(2*Dot<2,2>::eval(A[1], B[1]) + A[1][1]*B[1][1])
-		+ A[1][2]*A[1][2]*B[2][2];
-	return M;
-}
-
-// Generated for J*C*J^T, C symmetric
-template <class Accessor1, class Accessor2> inline Matrix<3> transformCovariance(const FixedMatrix<3,2,Accessor1>& A, const FixedMatrix<2,2,Accessor2>& B)
-{
-	Matrix<3> M;
-	M[0][0] = A[0][0]*(2*Dot<1,1>::eval(A[0], B[0]) + A[0][0]*B[0][0])
-		+ A[0][1]*A[0][1]*B[1][1];
-	M[0][1] = M[1][0] = A[0][0]*(B[0]*A[1])
-		+ A[0][1]*(B[1]*A[1]);
-	M[0][2] = M[2][0] = A[0][0]*(B[0]*A[2])
-		+ A[0][1]*(B[1]*A[2]);
-	M[1][1] = A[1][0]*(2*Dot<1,1>::eval(A[1], B[0]) + A[1][0]*B[0][0])
-		+ A[1][1]*A[1][1]*B[1][1];
-	M[1][2] = M[2][1] = A[1][0]*(B[0]*A[2])
-		+ A[1][1]*(B[1]*A[2]);
-	M[2][2] = A[2][0]*(2*Dot<1,1>::eval(A[2], B[0]) + A[2][0]*B[0][0])
-		+ A[2][1]*A[2][1]*B[1][1];
-	return M;
-}
-
-// Generated for J*C*J^T, C symmetric
-template <class Accessor1, class Accessor2> inline Matrix<2> transformCovariance(const FixedMatrix<2,6,Accessor1>& A, const FixedMatrix<6,6,Accessor2>& B)
-{
-	Matrix<2> M;
-	M[0][0] = A[0][0]*(2*Dot<1,5>::eval(A[0], B[0]) + A[0][0]*B[0][0])
-		+ A[0][1]*(2*Dot<2,5>::eval(A[0], B[1]) + A[0][1]*B[1][1])
-		+ A[0][2]*(2*Dot<3,5>::eval(A[0], B[2]) + A[0][2]*B[2][2])
-		+ A[0][3]*(2*Dot<4,5>::eval(A[0], B[3]) + A[0][3]*B[3][3])
-		+ A[0][4]*(2*Dot<5,5>::eval(A[0], B[4]) + A[0][4]*B[4][4])
-		+ A[0][5]*A[0][5]*B[5][5];
-	M[0][1] = M[1][0] = A[0][0]*(B[0]*A[1])
-		+ A[0][1]*(B[1]*A[1])
-		+ A[0][2]*(B[2]*A[1])
-		+ A[0][3]*(B[3]*A[1])
-		+ A[0][4]*(B[4]*A[1])
-		+ A[0][5]*(B[5]*A[1]);
-	M[1][1] = A[1][0]*(2*Dot<1,5>::eval(A[1], B[0]) + A[1][0]*B[0][0])
-		+ A[1][1]*(2*Dot<2,5>::eval(A[1], B[1]) + A[1][1]*B[1][1])
-		+ A[1][2]*(2*Dot<3,5>::eval(A[1], B[2]) + A[1][2]*B[2][2])
-		+ A[1][3]*(2*Dot<4,5>::eval(A[1], B[3]) + A[1][3]*B[3][3])
-		+ A[1][4]*(2*Dot<5,5>::eval(A[1], B[4]) + A[1][4]*B[4][4])
-		+ A[1][5]*A[1][5]*B[5][5];
-	return M;
-}
-
-// Generated for J*C*J^T, C symmetric
-template <class Accessor1, class Accessor2> inline Matrix<6> transformCovariance(const FixedMatrix<6,2,Accessor1>& A, const FixedMatrix<2,2,Accessor2>& B)
-{
-	Matrix<6> M;
-	M[0][0] = A[0][0]*(2*Dot<1,1>::eval(A[0], B[0]) + A[0][0]*B[0][0])
-		+ A[0][1]*A[0][1]*B[1][1];
-	M[0][1] = M[1][0] = A[0][0]*(B[0]*A[1])
-		+ A[0][1]*(B[1]*A[1]);
-	M[0][2] = M[2][0] = A[0][0]*(B[0]*A[2])
-		+ A[0][1]*(B[1]*A[2]);
-	M[0][3] = M[3][0] = A[0][0]*(B[0]*A[3])
-		+ A[0][1]*(B[1]*A[3]);
-	M[0][4] = M[4][0] = A[0][0]*(B[0]*A[4])
-		+ A[0][1]*(B[1]*A[4]);
-	M[0][5] = M[5][0] = A[0][0]*(B[0]*A[5])
-		+ A[0][1]*(B[1]*A[5]);
-	M[1][1] = A[1][0]*(2*Dot<1,1>::eval(A[1], B[0]) + A[1][0]*B[0][0])
-		+ A[1][1]*A[1][1]*B[1][1];
-	M[1][2] = M[2][1] = A[1][0]*(B[0]*A[2])
-		+ A[1][1]*(B[1]*A[2]);
-	M[1][3] = M[3][1] = A[1][0]*(B[0]*A[3])
-		+ A[1][1]*(B[1]*A[3]);
-	M[1][4] = M[4][1] = A[1][0]*(B[0]*A[4])
-		+ A[1][1]*(B[1]*A[4]);
-	M[1][5] = M[5][1] = A[1][0]*(B[0]*A[5])
-		+ A[1][1]*(B[1]*A[5]);
-	M[2][2] = A[2][0]*(2*Dot<1,1>::eval(A[2], B[0]) + A[2][0]*B[0][0])
-		+ A[2][1]*A[2][1]*B[1][1];
-	M[2][3] = M[3][2] = A[2][0]*(B[0]*A[3])
-		+ A[2][1]*(B[1]*A[3]);
-	M[2][4] = M[4][2] = A[2][0]*(B[0]*A[4])
-		+ A[2][1]*(B[1]*A[4]);
-	M[2][5] = M[5][2] = A[2][0]*(B[0]*A[5])
-		+ A[2][1]*(B[1]*A[5]);
-	M[3][3] = A[3][0]*(2*Dot<1,1>::eval(A[3], B[0]) + A[3][0]*B[0][0])
-		+ A[3][1]*A[3][1]*B[1][1];
-	M[3][4] = M[4][3] = A[3][0]*(B[0]*A[4])
-		+ A[3][1]*(B[1]*A[4]);
-	M[3][5] = M[5][3] = A[3][0]*(B[0]*A[5])
-		+ A[3][1]*(B[1]*A[5]);
-	M[4][4] = A[4][0]*(2*Dot<1,1>::eval(A[4], B[0]) + A[4][0]*B[0][0])
-		+ A[4][1]*A[4][1]*B[1][1];
-	M[4][5] = M[5][4] = A[4][0]*(B[0]*A[5])
-		+ A[4][1]*(B[1]*A[5]);
-	M[5][5] = A[5][0]*(2*Dot<1,1>::eval(A[5], B[0]) + A[5][0]*B[0][0])
-		+ A[5][1]*A[5][1]*B[1][1];
-	return M;
-}
 
 // Generated for lower triangular L, inverse diagonal invdiag
 template <class A1, class A2, class A3, class A4> inline void cholesky_backsub(const FixedMatrix<6,6,A1>& L, const FixedVector<6,A2>& invdiag, const FixedVector<6,A3>& v, FixedVector<6,A4>& x)
@@ -324,4 +203,73 @@ template <class A1, class A2, class A3> inline void cholesky_inverse(const Fixed
 		const double x5 = invdiag[5]*(t5);
 		I[5][5] = x5;
 	}
+}
+
+
+// Generated for J*C*J^T, C symmetric
+template <class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<2,2,A1>& A, const FixedMatrix<2,2,A2>& B, FixedMatrix<2,2,A3>& M)
+{
+    M = A*B*A.T();
+}
+
+// Generated for J*C*J^T, C symmetric
+template <int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<2,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<2,2,A3>& M)
+{
+	{	const Vector<N> ABi = B * A[0];
+		M[0][0] = ABi * A[0];
+		M[0][1] = M[1][0] = ABi * A[1];
+	}
+	M[1][1] = (B * A[1]) * A[1];
+}
+
+// Generated for J*C*J^T, C symmetric
+template <int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<3,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<3,3,A3>& M)
+{
+	{	const Vector<N> ABi = B * A[0];
+		M[0][0] = ABi * A[0];
+		M[0][1] = M[1][0] = ABi * A[1];
+		M[0][2] = M[2][0] = ABi * A[2];
+	}
+	{	const Vector<N> ABi = B * A[1];
+		M[1][1] = ABi * A[1];
+		M[1][2] = M[2][1] = ABi * A[2];
+	}
+	M[2][2] = (B * A[2]) * A[2];
+}
+
+
+// Generated for J*C*J^T, C symmetric
+template <int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<6,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<6,6,A3>& M)
+{
+	{	const Vector<N> ABi = B * A[0];
+		M[0][0] = ABi * A[0];
+		M[0][1] = M[1][0] = ABi * A[1];
+		M[0][2] = M[2][0] = ABi * A[2];
+		M[0][3] = M[3][0] = ABi * A[3];
+		M[0][4] = M[4][0] = ABi * A[4];
+		M[0][5] = M[5][0] = ABi * A[5];
+	}
+	{	const Vector<N> ABi = B * A[1];
+		M[1][1] = ABi * A[1];
+		M[1][2] = M[2][1] = ABi * A[2];
+		M[1][3] = M[3][1] = ABi * A[3];
+		M[1][4] = M[4][1] = ABi * A[4];
+		M[1][5] = M[5][1] = ABi * A[5];
+	}
+	{	const Vector<N> ABi = B * A[2];
+		M[2][2] = ABi * A[2];
+		M[2][3] = M[3][2] = ABi * A[3];
+		M[2][4] = M[4][2] = ABi * A[4];
+		M[2][5] = M[5][2] = ABi * A[5];
+	}
+	{	const Vector<N> ABi = B * A[3];
+		M[3][3] = ABi * A[3];
+		M[3][4] = M[4][3] = ABi * A[4];
+		M[3][5] = M[5][3] = ABi * A[5];
+	}
+	{	const Vector<N> ABi = B * A[4];
+		M[4][4] = ABi * A[4];
+		M[4][5] = M[5][4] = ABi * A[5];
+	}
+	M[5][5] = (B * A[5]) * A[5];
 }
