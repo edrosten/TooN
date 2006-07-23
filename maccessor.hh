@@ -41,7 +41,7 @@
 template <>
 class RefSkipMAccessor<RowMajor> {
  public:
-  typedef NonConst<DynamicMatrix<RefSkipMAccessor<RowMajor> > > RefSkipMatrixRM;
+  typedef DynamicMatrix<RefSkipMAccessor<RowMajor> > RefSkipMatrixRM;
   RefSkipMAccessor(){};
   
   const RefVector operator[](int r) const TOON_THROW{
@@ -116,7 +116,7 @@ class RefSkipMAccessor<RowMajor> {
 template <>
 class RefSkipMAccessor<ColMajor> {
  public:
-  typedef NonConst<DynamicMatrix<RefSkipMAccessor<ColMajor> > > RefSkipMatrixCM;
+  typedef DynamicMatrix<RefSkipMAccessor<ColMajor> > RefSkipMatrixCM;
 
   RefSkipMAccessor(){};
   
@@ -328,8 +328,8 @@ class DynamicMAccessor<ColMajor> {
   double* my_values;
 };
 
-typedef NonConst<DynamicMatrix<DynamicMAccessor<RowMajor> > > RefMatrixRM;
-typedef NonConst<DynamicMatrix<DynamicMAccessor<ColMajor> > > RefMatrixCM;
+typedef DynamicMatrix<DynamicMAccessor<RowMajor> > RefMatrixRM;
+typedef DynamicMatrix<DynamicMAccessor<ColMajor> > RefMatrixCM;
 inline RefMatrixRM makeRefMatrixRM(int nr, int nc, double* v) { RefMatrixRM ret; ret.set(nr,nc,v); return ret; }
 inline RefMatrixCM makeRefMatrixCM(int nr, int nc, double* v) { RefMatrixCM ret; ret.set(nr,nc,v); return ret; }
 

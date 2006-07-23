@@ -183,26 +183,6 @@ inline DynamicVector<LHAccessor>& operator+= (DynamicVector<LHAccessor>& lhs,
   return lhs;
 }
 
-#if 0
-template <int Size, class LH, class RHAccessor>
-inline NonConstVector<LH> operator+= (NonConstVector<LH> lhs, const FixedVector<Size,RHAccessor>& rhs){
-  assert(lhs.size()==Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]+=rhs[i];
-  }
-  return lhs;
-}
-
-template <class LH, class RHAccessor>
-inline NonConstVector<LH> operator+= (NonConstVector<LH> lhs, const DynamicVector<RHAccessor>& rhs){
-  assert(lhs.size()==rhs.size());
-  for(int i=0; i<lhs.size(); i++){
-    lhs[i]+=rhs[i];
-  }
-  return lhs;
-}
-#endif
-
 
 ////////////////
 //            //
@@ -388,16 +368,6 @@ inline DynamicVector<Accessor>& operator*=(DynamicVector<Accessor>& lhs, const d
   return lhs;
 }
 
-#if 0
-template <class LH>
-inline NonConstVector<LH> operator*= (NonConstVector<LH> lhs, const double& rhs){
-  assert(lhs.size()==Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]*=rhs;
-  }
-  return lhs;
-}
-#endif
 /////////////////////
 // operator /      //
 // Vector / double //
@@ -430,17 +400,6 @@ template <class Accessor>
 inline DynamicVector<Accessor>& operator/=(DynamicVector<Accessor>& lhs, const double& rhs){
   return lhs*=(1/rhs);
 }
-
-#if 0
-template <class LH>
-inline NonConstVector<LH> operator/= (NonConstVector<LH> lhs, const double& rhs){
-  assert(lhs.size()==Size);
-  for(int i=0; i<Size; i++){
-    lhs[i]/=rhs;
-  }
-  return lhs;
-}
-#endif
 
 ///////////////////
 //  operator *   //
@@ -668,17 +627,6 @@ inline void operator*=(MatrixBase<Accessor>& lhs, double rhs){
   }
 }
 
-#if 0
-template <class Accessor>
-inline void operator*=(NonConstMatrix<Accessor> lhs, double rhs){
-  for(int r=0; r<lhs.num_rows(); r++){
-    for(int c=0; c<lhs.num_cols(); c++){
-      lhs[r][c]*=rhs;
-    }
-  }
-}
-#endif
-
 /////////////////////
 // operator /      //
 // Matrix / double //
@@ -704,13 +652,6 @@ template <class Accessor>
 inline void operator/=(MatrixBase<Accessor>& lhs, double rhs){
   lhs*=(1.0/rhs);
 }
-
-#if 0
-template <class Accessor>
-inline void operator/=(NonConstMatrix<Accessor> lhs, double rhs){
-  lhs*=(1.0/rhs);
-}
-#endif
 
 /////////////////////
 // operator +      //
@@ -945,33 +886,6 @@ DynamicMatrix<MAccessor1>& operator -= ( DynamicMatrix<MAccessor1>& lhs,
   }
   return lhs;
 }
-
-#if 0
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
-NonConstMatrix<MAccessor1> operator -= ( NonConstMatrix<MAccessor1> lhs,
-					 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-template <class MAccessor1, class MAccessor2>
-NonConstMatrix<MAccessor1> operator -= ( NonConstMatrix<MAccessor1> lhs,
-					 const DynamicMatrix<MAccessor2>& rhs){
-  assert(lhs.num_rows() == rhs.num_cols() && lhs.num_cols() == rhs.num_cols());
-  for(int r=0; r<lhs.num_rows; r++){
-    for(int c=0; c<lhs.num_cols(); c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-#endif
 
 /////////////////////
 // operator *      //

@@ -34,7 +34,7 @@ template <int Size, class AllocZone> class FixedVAccessor;
 class DynamicVAccessor {
   friend class VSizer;
 public:
-  typedef NonConst<DynamicVector<DynamicVAccessor> > RefVector;
+  typedef DynamicVector<DynamicVAccessor> RefVector;
     
   template<int Start, int Length>
   inline FixedVector<Length, FixedVAccessor<Length, Stack<Length> > >& slice() 
@@ -78,8 +78,8 @@ public:
     return my_size;
   }
 
-  inline NonConst<DynamicMatrix<DynamicMAccessor<RowMajor> > > as_row(); // implemented in linoperators.hh
-  inline NonConst<DynamicMatrix<DynamicMAccessor<ColMajor> > > as_col(); //
+  inline DynamicMatrix<DynamicMAccessor<RowMajor> > as_row(); // implemented in linoperators.hh
+  inline DynamicMatrix<DynamicMAccessor<ColMajor> > as_col(); //
   inline void set(int size, double* values) { my_size = size;  my_values = values; }
   
  protected:  
@@ -92,7 +92,7 @@ inline RefVector makeRefVector(int size, double* values) { RefVector ret; ret.se
 
 class DynamicSkipAccessor{
 public:
-  typedef NonConst<DynamicVector<DynamicSkipAccessor> > RefSkipVector;
+  typedef DynamicVector<DynamicSkipAccessor> RefSkipVector;
   
   //CHECK THIS
   template<int Start, int Length>
@@ -153,8 +153,8 @@ public:
     return my_size;
   }
 
-  inline NonConst<DynamicMatrix<RefSkipMAccessor<ColMajor> > > as_row(); // implemented in linoperators.hh
-  inline NonConst<DynamicMatrix<RefSkipMAccessor<RowMajor> > > as_col(); //
+  inline DynamicMatrix<RefSkipMAccessor<ColMajor> > as_row(); // implemented in linoperators.hh
+  inline DynamicMatrix<RefSkipMAccessor<RowMajor> > as_col(); //
 
   inline void set(int size, int skip, double* values) { my_size = size; my_skip = skip; my_values = values; }
 

@@ -51,6 +51,36 @@ namespace TooN {
 		x[i] = b*invdiag[i];
 	    }
 	}
+
+	inline double dynamic_dot(const double* a, const double* b, int size)
+	{
+	    double sum = 0;
+	    const double* const end = a+size;
+	    for (;a != end; ++a, ++b)
+		sum += *a * *b; 
+	    return sum;
+	}
+
+
+	template <class A1, class A2, class V, class A4>
+	void cholesky_backsub(const DynamicMatrix<A1>& L, const DynamicVector<A2>& invdiag, const V& v, DynamicVector<A4>& x) 
+	{
+	    const int Size = L.num_rows();
+	    Vector<> t(Size);
+	    // forward substitution
+	    for (int i=0; i<Size; i++) {
+		const double* Li = &L(i,0);
+		t[i] = invdiag[i] * (v[i] - dynamic_dot(Li, t.get_data_ptr(), i));
+	    }
+	    // back substitution
+	    for (int i=Size-1; i >=0; i--) {
+		double b = t[i];
+		const double* Lji = &L(i+1,i);
+		for (int j=i+1; j<Size;j++, Lji += Size)
+		    b -= *Lji * x[j];
+		x[i] = b*invdiag[i];
+	    }
+	}
 	
 	template <int Size, class A1, class A2, class A3> inline int cholesky_compute(const FixedMatrix<Size,Size,A1>& M, FixedMatrix<Size,Size,A2>& L, FixedVector<Size,A3>& invdiag) 
 	{
@@ -78,6 +108,32 @@ namespace TooN {
 	    return rank;
 	}
 
+	template <class A1, class A2, class A3> inline int cholesky_compute(const DynamicMatrix<A1>& M, DynamicMatrix<A2>& L, DynamicVector<A3>& invdiag) 
+	{
+	    const int Size = M.num_rows();
+	    int rank = Size;
+	    const double eps = std::numeric_limits<double>::min();
+	    for(int i=0;i<Size;i++) {
+		double* const Li = &L(i,0);
+		double a = M(i,i);
+		for (int j=0; j<i; ++j) {
+		    double sum = invdiag[j] * (M(j,i) - dynamic_dot(Li, &L(j,0), j));
+		    Li[j] = sum;
+		    a -= sum*sum;
+		}
+		if (eps < a) {
+		    const double s = sqrt(a);
+		    Li[i]= s;
+		    invdiag[i] = 1.0/s;
+		} else {
+		    --rank;
+		    Li[i] = invdiag[i] = 0;
+		}
+	    }
+	    return rank;
+	}
+
+
 	template <int S, class A1, class A2, class A3> inline void cholesky_inverse(const FixedMatrix<S,S,A1>& L, const FixedVector<S,A2>& invdiag, FixedMatrix<S,S,A3>& I)
 	{
 	    for (int col = 0; col<S; col++) {
@@ -104,30 +160,29 @@ namespace TooN {
 
 	template <class A1, class A2, class A3> inline void cholesky_inverse(const DynamicMatrix<A1>& L, const DynamicVector<A2>& invdiag, DynamicMatrix<A3>& I)
 	{
-	    assert(L.num_rows() == L.num_cols() && 
-		   L.num_rows() == invdiag.size() && 
-		   L.num_rows() == I.num_rows() && 
-		   I.num_rows() == I.num_cols());
 	    int S = L.num_rows();
 	    for (int col = 0; col<S; col++) {
 		Vector<> t(S),x(S);
 		t[col] = invdiag[col];
 		for (int i=col+1; i<S; i++) {
+		    const double* Li = &L(i,0);
 		    double psum = 0;
 		    for (int j=col; j<i; j++)
-			psum -= L[i][j]*t[j];		    
+			psum -= Li[j]*t[j];
 		    t[i] = invdiag[i] * psum;
 		}
 		for (int i=S-1; i>col; i--) {
+		    const double* Lji = &L(i+1,i);
 		    double psum = t[i];
-		    for (int j=i+1; j<S; j++)
-			psum -= L[j][i]*x[j];
-		    I[i][col] = I[col][i] = x[i] = invdiag[i] * psum;
+		    for (int j=i+1; j<S; j++, Lji += S)
+			psum -= *Lji * x[j];
+		    I(i,col) = I(col,i) = x[i] = invdiag[i] * psum;
 		}
 		double psum = t[col];
-		for (int j=col+1; j<S; j++)
-		    psum -= L[j][col]*x[j];		
-		I[col][col] = invdiag[col]*psum;
+		const double* Ljc = &L(col+1,col);
+		for (int j=col+1; j<S; j++, Ljc += S)
+		    psum -= *Ljc * x[j];		
+		I(col,col) = invdiag[col]*psum;
 	    }
 	}
 
@@ -204,41 +259,19 @@ namespace TooN {
 
 	template<class Accessor>
 	void compute(const DynamicMatrix<Accessor>& m){
-	    int Size = m.num_rows();
-	    rank = Size;
-	    for(int i=0;i<Size;i++) {
-		double a=m[i][i];
-		for(int k=0;k<i;k++) 
-		    a-=L[i][k]*L[i][k];
-		if (a < std::numeric_limits<double>::epsilon()) {
-		    --rank;
-		    L[i][i] = 0;
-		} else
-		    L[i][i]=sqrt(a);
-		invdiag[i] = 1.0/L[i][i];
-		for(int j=i+1;j<Size;j++) {
-		    a=m[i][j];
-		    for(int k=0;k<i;k++) 
-			a-=L[i][k]*L[j][k];
-		    L[j][i]=a*invdiag[i];
-		}
-	    }
+	    rank = util::cholesky_compute(m,L,invdiag);
 	}
 	int get_rank() const { return rank; }
-	template <class Accessor> inline 
-	Vector<> backsub(const DynamicVector<Accessor>& v) const
+
+	template <class V>
+	Vector<> backsub(const V& v) const
 	{
 	    assert(v.size() == L.num_rows());
-	    return backsub(v.get_data_ptr());
+	    Vector<> x(L.num_rows());
+	    util::cholesky_backsub(L, invdiag, v, x);
+	    return x;
 	}
 
-	template <int N, class Accessor> inline
-	Vector<> backsub(const FixedVector<N, Accessor>& v) const
-	{
-	    assert(N == L.num_rows());
-	    return backsub(v.get_data_ptr());
-	}
-    
 	const Matrix<>& get_L() const {
 	    return L;
 	}
@@ -262,27 +295,6 @@ namespace TooN {
 	}
 
     private:
-	Vector<> backsub(const double* v) const
-	{
-	    int Size = L.num_rows();
-	    Vector<> t(Size);
-	    // forward substitution
-	    for (int i=0; i<Size; i++) {
-		double b = v[i];
-		for (int j=0; j<i;j++)
-		    b -= L[i][j]*t[j];
-		t[i] = b*invdiag[i];
-	    }
-	    // back substitution
-	    Vector<> x(Size);
-	    for (int i=Size-1; i >=0; i--) {
-		double b = t[i];
-		for (int j=i+1; j<Size;j++)
-		    b -= L[j][i]*x[j];
-		x[i] = b*invdiag[i];
-	    }
-	    return x;
-	}
 	Matrix<> L;
 	Vector<> invdiag;
 	int rank;
