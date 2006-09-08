@@ -1,5 +1,5 @@
 
-/*                       
+/*
 	 Copyright (C) 2005 Tom Drummond
 
      This library is free software; you can redistribute it and/or
@@ -96,16 +96,17 @@ struct FixedVector : public VectorBase<Accessor> {
   template <int N> VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle> operator<<(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
   }
-  
+
   template <int N> VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle> operator<<(const Vector<N>& t) {
     (*this).template slice<0,N>() = t;
     return VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
   }
 
-
-
-
-
+  template<class A, int I> FixedVector<Size, Accessor>& operator=(const VectorMagic::VectorCreator<A,I>& v)
+  {
+    v.assign(*this);
+    return *this;
+  }
 
 };
 
@@ -126,15 +127,22 @@ struct DynamicVector : public VectorBase<Accessor>{
     VectorCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
+
+  template<class A, int I> DynamicVector<Accessor> & operator=(const VectorMagic::VectorCreator<A,I>& v)
+  {
+    v.assign(*this);
+    return *this;
+  }
+
 };
 
 
 // Special kinds of DynamicVector only constructed internally
 // e.g. from DynamicMAccessor<>::operator[]
 
-template <class V> struct NonConst : public V { 
-  inline operator const V&() const { return *this; }  
-  inline operator V&() { return *this; } 
+template <class V> struct NonConst : public V {
+  inline operator const V&() const { return *this; }
+  inline operator V&() { return *this; }
   template <class T> inline NonConst& operator=(const T& t) { V::operator=(t);  return *this; }
 };
 

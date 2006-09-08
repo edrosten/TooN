@@ -1,5 +1,5 @@
 
-/*                       
+/*
 	 Copyright (C) 2005 Tom Drummond
 
      This library is free software; you can redistribute it and/or
@@ -58,7 +58,7 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     assert(from.size() == Size);
     FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<Size>::get_zone> >::operator=(from);
   }
-  
+
   template <class Accessor> inline Vector<Size>& operator=(const FixedVector<Size,Accessor>& fv) {
     *this = Vector<Size>(fv);
     return *this;
@@ -84,12 +84,6 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
   template <int N> VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle> operator=(const VectorMagic::ComponentPlaceHolder<N>& t) {
     return VectorMagic::VectorFiller<N,Size, Vector<Size>,VectorMagic::CommaStyle>(*this);
   }
-	
-  template<class A, int I> Vector<Size>& operator=(const VectorMagic::VectorCreator<A,I>& v)
-  {
-    *this = (Vector<Size>)v;
-    return *this;
-  }
 
 };
 
@@ -114,10 +108,10 @@ class Vector<> : public DynamicVector<DynamicVAccessor> {
 		this->my_values = new double[this->my_size];
 	}
   }
- 
+
     template <class Accessor> inline void assign(const VectorBase<Accessor>& v) {
 	resize(v.size());
-	DynamicVector<DynamicVAccessor>::operator=(v);	
+	DynamicVector<DynamicVAccessor>::operator=(v);
     }
   Vector(int Size) {
     this->my_size=Size; this->my_values = new double[Size];
@@ -128,7 +122,7 @@ class Vector<> : public DynamicVector<DynamicVAccessor> {
     this->my_values = new double[Size];
     memcpy(this->my_values,from,Size*sizeof(double));
   }
-  
+
   inline ~Vector(){
     delete[] this->my_values;
   }
@@ -152,7 +146,7 @@ class Vector<> : public DynamicVector<DynamicVAccessor> {
     this->my_values = new double[this->my_size];
     DynamicVector<DynamicVAccessor>::operator=(from);
   }
-  
+
   // trap copy constructor here
   Vector(const Vector& from){
     this->my_size = from.my_size;
