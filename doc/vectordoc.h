@@ -151,183 +151,218 @@ template<int Size>
 class Vector
 {
 public:
-	/// @name Constructors
-	//@{
-	
-	/// Default constructor for vectors. 
-	/// For fixed-sized vectors, this oes nothing, i.e. does not 
-	/// guarantee to initialise the vector to any particular values.
-	/// For dynamically sized vectors, this sets the vector to have a length of 0.
-	Vector();
-	
-	/// Constructor for dynamically-size vectors. Does nothing, i.e. does not 
-	/// guarantee to initialise the vector to any particular values
-	Vector(int size);
-	
-	/// Construct a fixed-size vector from an array of doubles. No errors are generated if the array
-	/// is the wrong length.
-	/// @code
-	/// double d[4] = {1, 2, 3, 4};
-	/// Vector<4> a(d);  // now a = [1 2 3 4]
-	/// @endcode
-	Vector(double darray[]);
-	
-	/// Construct a dynamically-sized vector from an array of doubles. No errors are generated if the array
-	/// is the wrong length.
-	/// @code
-	/// double d[4] = {1, 2, 3, 4};
-	/// Vector<> a(4, d);  // now a = [1 2 3 4]
-	/// @endcode
-	Vector(int size, double* dptr);
-	
-	/// Copy constructor.
-	Vector(const Vector<Size>& from);
-	
-	//@}
-	
-	
-	/// @name Reading and writing elements, and defining vectors
-	//@{
-	
-	/// Assignment operator. This will not cause a resize on dynamically sized vectors if the sizes are not matched.
-	Vector<Size>& operator=(const Vector<Size>& from);
-
-
-	/// Resize a dynamically sized vector.
-	resize(int size);
-	
-	/// Create a (fixed-size) vector from a list of doubles. 
-	/// This operator should be followed by a comma-separated list of doubles, and the whole enclosed in 
-	/// brackets (see the example).
-	/// The list of doubles most be of the correct length: if the wrong number of 
-	/// element are provided, a compile error is generated.
-	/// @code
-	/// Vector<4> a;
-	/// a = (make_Vector, 1, 2, 3, 4);    //  v = [ 1 2 3 4 ]
-    /// a = make_Vector, 1, 2, 3, 4;      // compile error
-    /// a = (make_Vector, 1, 2, 3, 4, 5); // compile error
-    /// a = (make_Vector, 1, 2, 3);       // compile error;
-	/// @endcode
-	/// The <code>(make_Vector, 1, 2, 3, 4)</code> syntax generates a real vector object
-	/// which can be used in other operations, not just for assigning to a Vector.
-	const Vector<Size>&  operator=(const make_Vector mv);
-	
-	/// Set the elements of a (fixed-size) vector from a list of doubles. This operator should be used
-	/// together with the comma operator to provide a list of doubles of the correct length.
-	/// Providing too many numbers will generate a compile-time error, but if too few are provided, 
-	/// only a run-time error is generated. The operator=(make_Vector) syntax (see above) can check for both
-	/// at compile time.
-	/// @code
-	/// Vector<4> a;
-	/// a = 5,6,7,8;    // now a = [5 6 7 8]
-   	/// a = 5,6,7;      // run-time error (underfilling)
-   	/// a = 5,6,7,8,9;  // compile error (overfilling)
-	/// @endcode
-	template <typename T>
-	void operator=(const T& t);
-	
-	/// Set the elements of a (fixed-size) vector by sequential insertion. 
-	/// This operator replaces the elements of a vector starting from the beginning of the vector (see example). 
-	/// A compile error is generated if too many elements are provided. Single or multiple elements may
-	/// be skipped and left unmodified by using the no_change() command;
-	/// @code
-	/// Vector<4> a;
-	/// a << 9 << 10 << 11 << 12;       // now a = [9 10 11 12]
-    /// a << 9 << 10 << 11 << 12 << 12; //compile error
-    /// a << 13 << 14 << 15;            // now a = [13 14 15 12]
-    /// a << 3 << no_change<2>() << 3;  // now a = [3 14 15 3];
-    /// a << no_change() << 17 << no_change() << 17;  // now a = [3 17 15 17], no_change() is no_change<1>()
-	/// @endcode
-	template <typename T>
-	void operator<<(const T& t);
-	
-	/// Access an element from the vector in the usual way. 
-	/// The index starts at zero, i.e. the first element is vect[0].
-	/// @code
-	/// Vector<3> a = 1,2,3;
-	/// double d = a[1];     // now d = 2.0;
-	/// @endcode
-	const double& operator[] (int i) const;
-	
-	/// Access an element from the vector in the usual way. 
-	/// This can be used as either an r-value or an l-value.
-	/// The index starts at zero, i.e. the first element is vect[0]. 
-	/// @code
-	/// Vector<3> a = 1,2,3;
-	/// double d = a[0]; // now d = 1.0;
-	/// a[1] = 0;        // now a = [1 0 3];
-	/// @endcode
-	double& operator[] (int i);
-	
-	/// Get the raw double array.
-	const double* get_data_ptr() const;
-	
-	/// Get the raw double array.
-	double* get_data_ptr();
-	
-	/// What is the size of this vector?
-	int size() const;
-	//@}
-	
-	/// @name Reshaping, sub-vectors and matrices
-	//@{
-	/// Convert this vector into a 1-by-Size matrix, i.e. a matrix which has this matrix as its only row.
-	/// @code
-	/// Vector<3> a = 1,2,3;
-	/// Matrix<1,3> m = a.as_row();  // now m = [1 2 3]
-	/// @endcode
-	Matrix<1, Size> as_row(); 
-	
-	/// Convert this vector into a Size-by-1 matrix, i.e. a matrix which has this matrix as its only column.
-	/// @code
-	/// Vector<3> a = 1,2,3;
-	/// Matrix<3,1> m = a.as_col();   // now m = [1 2 3]'
-	/// @endcode
-	Matrix<Size, 1> as_col();
-	
-	/// Extract a sub-vector. The vector extracted will be begin at element Start and will 
-	/// contain the next Length elements.
-	/// @code
-	/// Vector<5> a = 1,2,3,4,5;
-	/// Extract the three elements starting from element 2
-	/// Vector<3> b = a.slice<2,3>();  /// b = [3 4 5]
-	/// @endcode
-	template<Start, Length>
-	const Vector<Length>& slice() const;
-	
-	/// Extract a sub-vector. The vector extracted will be begin at element Start and will 
-	/// contain the next Length elements. This version can be used as an l-value as well as an r-value
-	/// @code
-	/// Vector<5> a = 1,2,3,4,5;
-	/// Vector<2> b = 8,9;
-	/// // replace the two elements starting from element 1 with b
-	/// a.slice<1, 2>() = b;       /// now a = [1 8 9 4 5]
-	/// @endcode
-	template<Start, Length>
-	Vector<Length>& slice();
-
-	/// Extract a sub-vector with runtime parameters.
-        /// The vector extracted will be begin at element start and will 
-	/// contain the next length elements.
-	/// @code
-	/// Vector<5> a = (makeVector, 1,2,3,4,5);
-	/// Extract the three elements starting from element 2
-	/// Vector<3> b = a.slice(2,3);  /// b = [3 4 5]
-	/// @endcode
-	template<Start, Length>
-	const Vector<Length>& slice() const;
+  /// @name Constructors
+  //@{
   
-	/// Extract a sub-vector with runtime parameters, which can be used as an l-value.
-        /// The vector extracted will be begin at element start and will
-	/// contain the next length elements.
-	/// @code
-	/// Vector<5> a = (makeVector, 1,2,3,4,5);
-	/// Extract the three elements starting from element 2
-	/// a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
-	/// @endcode
-	template<Start, Length>
-	const Vector<Length>& slice() const;
-	//@}
+  /// Default constructor for vectors.
+  /// For fixed-sized vectors, this oes nothing, i.e. does not
+  /// guarantee to initialise the vector to any particular values.
+  /// For dynamically sized vectors, this sets the vector to have a length of 0.
+  Vector();
+  
+  /// Constructor for dynamically-size vectors. Does nothing, i.e. does not
+  /// guarantee to initialise the vector to any particular values
+  Vector(int size);
+  
+  /**
+  Construct a fixed-size vector from an array of doubles. No errors are
+  generated if the array is the wrong length.
+  @code
+  double d[4] = {1, 2, 3, 4};
+  Vector<4> a(d);  // now a = [1 2 3 4]
+  @endcode
+  */
+  Vector(double darray[]);
+  
+  /**
+  Construct a dynamically-sized vector from an array of doubles. No errors
+  are generated if the array is the wrong length.
+  @code
+  double d[4] = {1, 2, 3, 4};
+  Vector<> a(4, d);  // now a = [1 2 3 4]
+  @endcode
+  */
+  Vector(int size, double* dptr);
+  
+  /// Copy constructor.
+  Vector(const Vector<Size>& from);
+  
+  //@}
+  
+  
+  /// @name Reading and writing elements, and defining vectors
+  //@{
+  
+  /// Assignment operator. This will not cause a resize on dynamically sized
+  vectors if the sizes are not matched.
+  Vector<Size>& operator=(const Vector<Size>& from);
+  
+  
+  /// Resize a dynamically sized vector.
+  resize(int size);
+  
+  /**
+  Create a (fixed-size) vector from a list of doubles.
+  This operator should be followed by a comma-separated list of doubles, and the
+  whole enclosed in brackets (see the example). The list of doubles most be of
+  the correct length: if the wrong number of elements are provided, a compile
+  error is generated.
+  @code
+  Vector<4> a;
+  a = (make_Vector, 1, 2, 3, 4);    //  v = [ 1 2 3 4 ]
+  a = make_Vector, 1, 2, 3, 4;      // compile error
+  a = (make_Vector, 1, 2, 3, 4, 5); // compile error
+  a = (make_Vector, 1, 2, 3);       // compile error;
+  @endcode
+  The <code>(make_Vector, 1, 2, 3, 4)</code> syntax generates a real vector
+  object which can be used in other operations, not just for assigning to a
+  Vector.
+  */
+  const Vector<Size>&  operator=(const make_Vector mv);
+  
+  /**
+  Set the elements of a (fixed-size) vector from a list of doubles.
+  This operator should be used together with the comma operator to provide a
+  list of  doubles of the correct length. Providing too many numbers will
+  generate a compile-time error, but if too few are provided, only a run-time
+  error is generated. The operator=(make_Vector) syntax (see above) can check
+  for both at compile time.
+  @code
+  Vector<4> a;
+  a = 5,6,7,8;    // now a = [5 6 7 8]
+  a = 5,6,7;      // run-time error (underfilling)
+  a = 5,6,7,8,9;  // compile error (overfilling)
+  @endcode
+  */
+  template <typename T>
+  void operator=(const T& t);
+  
+  /**
+  Set the elements of a (fixed-size) vector by sequential insertion.
+  This operator replaces the elements of a vector starting from the beginning of
+  the vector (see example). A compile error is generated if too many elements
+  are provided. Single or multiple elements may be skipped and left unmodified
+  by using the no_change() command.
+  @code
+  Vector<4> a;
+  a << 9 << 10 << 11 << 12;       // now a = [9 10 11 12]
+  a << 9 << 10 << 11 << 12 << 12; //compile error
+  a << 13 << 14 << 15;            // now a = [13 14 15 12]
+  a << 3 << no_change<2>() << 3;  // now a = [3 14 15 3];
+  a << no_change() << 17 << no_change() << 17;
+    // now a = [3 17 15 17], no_change() is no_change<1>()
+  @endcode
+  */
+  template <typename T>
+  void operator<<(const T& t);
+  
+  /**
+  Access an element from the vector in the usual way.
+  The index starts at zero, i.e. the first element is vect[0].
+  @code
+  Vector<3> a = 1,2,3;
+  double d = a[1];     // now d = 2.0;
+  @endcode
+  */
+  const double& operator[] (int i) const;
+  
+  /**
+  Access an element from the vector in the usual way.
+  This can be used as either an r-value or an l-value.
+  The index starts at zero, i.e. the first element is vect[0].
+  @code
+  Vector<3> a = 1,2,3;
+  double d = a[0]; // now d = 1.0;
+  a[1] = 0;        // now a = [1 0 3];
+  @endcode
+  */
+  double& operator[] (int i);
+  
+  /// Get the raw double array.
+  const double* get_data_ptr() const;
+  
+  /// Get the raw double array.
+  double* get_data_ptr();
+  
+  /// What is the size of this vector?
+  int size() const;
+  //@}
+  
+  /// @name Reshaping, sub-vectors and matrices
+  //@{
+  /**
+  Convert this vector into a 1-by-Size matrix, i.e. a matrix which has this
+  matrix as its only row.
+  @code
+  Vector<3> a = 1,2,3;
+  Matrix<1,3> m = a.as_row();  // now m = [1 2 3]
+  @endcode
+  */
+  Matrix<1, Size> as_row();
+  
+  /**
+  Convert this vector into a Size-by-1 matrix, i.e. a matrix which has this
+  matrix as its only column.
+  @code
+  Vector<3> a = 1,2,3;
+  Matrix<3,1> m = a.as_col();   // now m = [1 2 3]'
+  @endcode
+  */
+  Matrix<Size, 1> as_col();
+  
+  /**
+  Extract a sub-vector. The vector extracted will be begin at element Start
+  and will contain the next Length elements.
+  @code
+  Vector<5> a = 1,2,3,4,5;
+  Extract the three elements starting from element 2
+  Vector<3> b = a.slice<2,3>();  /// b = [3 4 5]
+  @endcode
+  */
+  template<Start, Length>
+  const Vector<Length>& slice() const;
+  
+  /**
+  Extract a sub-vector. The vector extracted will be begin at element Start
+  and will contain the next Length elements. This version can be used as an
+  l-value as well as an r-value
+  @code
+  Vector<5> a = 1,2,3,4,5;
+  Vector<2> b = 8,9;
+  // replace the two elements starting from element 1 with b
+  a.slice<1, 2>() = b;       /// now a = [1 8 9 4 5]
+  @endcode
+  */
+  template<Start, Length>
+  Vector<Length>& slice();
+  
+  /**
+  Extract a sub-vector with runtime parameters.
+  The vector extracted will be begin at element start and will contain the next
+  length elements.
+  @code
+  Vector<5> a = (makeVector, 1,2,3,4,5);
+  Extract the three elements starting from element 2
+  Vector<3> b = a.slice(2,3);  /// b = [3 4 5]
+  @endcode
+  */
+  template<Start, Length>
+  const Vector<Length>& slice() const;
+  
+  /**
+  Extract a sub-vector with runtime parameters, which can be used as an
+  l-value.
+  The vector extracted will be begin at element start and will contain the next
+  length elements.
+  @code
+  Vector<5> a = (makeVector, 1,2,3,4,5);
+  Extract the three elements starting from element 2
+  a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
+  @endcode
+  */
+  template<Start, Length>
+  const Vector<Length>& slice() const;
+  //@}
 };
 
 /// @name Input/output
