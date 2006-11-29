@@ -44,7 +44,7 @@ public:
   static inline SO3 exp(const double* vect);
 
   template<class Accessor> inline static SO3 exp(const FixedVector<3,Accessor>& vect);
-  template <class Accessor> inline static double exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second);
+  template <class Accessor> inline static double exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second, double& shtot);
 
   inline Vector<3> ln() const;
 
@@ -62,7 +62,6 @@ public:
   }
 
   inline const Matrix<3>& get_matrix()const {return my_matrix;}
-
   // returns i-th generator times pos
   inline static Vector<3> generator_field(int i, Vector<3> pos);
 
@@ -180,47 +179,74 @@ template <class Accessor> inline SO3 SO3::exp(const FixedVector<3,Accessor>& vec
   return result;
 }
 
- template <class Accessor> inline double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second){
-     double theta = sqrt(vect*vect);
-
-     double stot = 1;
-     double shtot = 0.5;
-     double sqtoth = 0.5;
-
-     double cth = cos(theta*0.5);
-     double ct = 2 * cth*cth - 1;
-     
-     if(theta > 0.001) {	 
-	 double sth = sin(theta*0.5);
-	 double st = 2*cth*sth;
-	 double thetaInv = 1.0/theta;
-
-	 stot = st*thetaInv;
-	 shtot = sth*thetaInv;
-	 if (theta > 0.0005)
-	     sqtoth = 2*sin(theta*0.25)*thetaInv;
+template <class Accessor> inline double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second, double& shtot){
+     const double thetasq = vect*vect;
+     const double theta = sqrt(thetasq);
+     double stot, sqtoth, cth, ct;
+     if (thetasq < 1e-6) {
+	 const double sixth_thetasq = thetasq/6.0;
+	 stot = 1 - sixth_thetasq;
+	 shtot = 0.5 - sixth_thetasq*0.125;
+	 sqtoth = 0.5 - sixth_thetasq*0.03125;
+	 cth = 1.0 - thetasq*0.125;
+	 ct = 1.0 - thetasq*0.5;
+     } else {
+	 const double thetainv = 1.0/theta;
+	 const double ht = theta*0.5;
+	 const double sth = sin(ht);
+	 cth = cos(ht);
+	 ct = 2*cth*cth - 1;
+	 shtot = sth*thetainv;
+	 stot = 2*cth*shtot;
+	 sqtoth = 2*sqrt(0.5*(1 - cth))*thetainv;
      }
-     
-     first.my_matrix[0][0] = first.my_matrix[1][1] = first.my_matrix[2][2] = ct;
-     first.my_matrix[0][1] = -(first.my_matrix[1][0] = stot*vect[2]);
-     first.my_matrix[2][0] = -(first.my_matrix[0][2] = stot*vect[1]);
-     first.my_matrix[1][2] = -(first.my_matrix[2][1] = stot*vect[0]);
 
-     second.my_matrix[0][0] = second.my_matrix[1][1] = second.my_matrix[2][2] = cth;
-     second.my_matrix[0][1] = -(second.my_matrix[1][0] = shtot*vect[2]);
-     second.my_matrix[2][0] = -(second.my_matrix[0][2] = shtot*vect[1]);
-     second.my_matrix[1][2] = -(second.my_matrix[2][1] = shtot*vect[0]);
-     
-     for(int i=0; i<3; i++){
-	 for(int j=0; j<3; j++){
-	     first.my_matrix[i][j] += 2*shtot*shtot*vect[i]*vect[j];
-	 }
+     {
+	 const double a = shtot*vect[0];
+	 const double b = shtot*vect[1];
+	 const double c = shtot*vect[2];
+	 first.my_matrix[0][0] = ct + 2*a*a;
+	 first.my_matrix[1][1] = ct + 2*b*b;
+	 first.my_matrix[2][2] = ct + 2*c*c;
+
+	 const double f = stot*vect[2];
+	 const double cr1 = 2*a*b;
+	 first.my_matrix[1][0] = f + cr1;
+	 first.my_matrix[0][1] = cr1 - f;
+	 
+	 const double e = stot*vect[1];
+	 const double cr2 = 2*a*c;
+	 first.my_matrix[0][2] = e + cr2;
+	 first.my_matrix[2][0] = cr2 - e;
+	 	 
+	 const double d = stot*vect[0];
+	 const double cr3 = 2*b*c;
+	 first.my_matrix[2][1] = d + cr3;
+	 first.my_matrix[1][2] = cr3 - d;
      }
-     
-     for(int i=0; i<3; i++){
-	 for(int j=0; j<3; j++){
-	     second.my_matrix[i][j] += 0.5*sqtoth*sqtoth*vect[i]*vect[j];
-	 }
+
+     {
+	 const double a = sqtoth*vect[0];
+	 const double b = sqtoth*vect[1];
+	 const double c = sqtoth*vect[2];
+	 second.my_matrix[0][0] = cth + 0.5*a*a;
+	 second.my_matrix[1][1] = cth + 0.5*b*b;
+	 second.my_matrix[2][2] = cth + 0.5*c*c;
+
+	 const double f = shtot*vect[2];
+	 const double cr1 = 0.5*a*b;
+	 second.my_matrix[1][0] = f + cr1;
+	 second.my_matrix[0][1] = cr1 - f;
+	 
+	 const double e = shtot*vect[1];
+	 const double cr2 = 0.5*a*c;
+	 second.my_matrix[0][2] = e + cr2;
+	 second.my_matrix[2][0] = cr2 - e;
+	 	 
+	 const double d = shtot*vect[0];
+	 const double cr3 = 0.5*b*c;
+	 second.my_matrix[2][1] = d + cr3;
+	 second.my_matrix[1][2] = cr3 - d;
      }
      return theta;
 }

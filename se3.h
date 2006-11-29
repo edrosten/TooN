@@ -248,13 +248,8 @@ inline SE3 SE3::exp(const Vector<6>& vect){
   Vector<3> trans(vect.slice<0,3>());
   Vector<3> rot(vect.slice<3,3>());
 
-  double theta = SO3::exp_with_half(rot, result.my_rotation, halfrotator);
-  
-  double shtot = 0.5;
-
-  if(theta > 0.00001) {  // accurate up to 10^-10
-    shtot = sin(theta/2)/theta;
-  }
+  double shtot;
+  double theta = SO3::exp_with_half(rot, result.my_rotation, halfrotator, shtot);
   
   result.my_translation = halfrotator * trans * (2*shtot);
 
