@@ -81,6 +81,28 @@ public:
   inline DynamicMatrix<DynamicMAccessor<RowMajor> > as_row(); // implemented in linoperators.hh
   inline DynamicMatrix<DynamicMAccessor<ColMajor> > as_col(); //
   inline void set(int size, double* values) { my_size = size;  my_values = values; }
+
+  typedef double* iterator;
+  typedef const double* const_iterator;
+
+  iterator begin()
+  {
+  	return my_values;
+  }
+
+  iterator end()
+  {
+	return my_values + my_size;
+  }
+
+  const_iterator begin() const
+  {
+	return my_values;
+  }	
+  const_iterator end() const
+  {
+	return my_values + my_size;
+  }
   
  protected:  
   int my_size;
@@ -157,6 +179,56 @@ public:
   inline DynamicMatrix<RefSkipMAccessor<RowMajor> > as_col(); //
 
   inline void set(int size, int skip, double* values) { my_size = size; my_skip = skip; my_values = values; }
+
+  private:
+	  template<class T> class It: public std::iterator<std::random_access_iterator_tag, double>
+	  {
+		private:
+		  T* d;
+		  int skip;
+		public:
+		  bool operator!=(const It&i){return d != i.d;}
+		  bool operator==(const It&i){return d == i.d;}
+		  bool operator<=(const It&i){return d <= i.d;}
+		  bool operator>=(const It&i){return d >= i.d;}
+		  bool operator<(const It&i){return d < i.d;}
+		  bool operator>(const It&i){return d > i.d;}
+		  It& operator+=(ptrdiff_t i) {d += i*skip;return *this;}
+		  It& operator-=(ptrdiff_t i) {d -= i*skip;return *this;}
+		  It& operator++() {d += skip;return *this;}
+		  It& operator--() {d -= skip;return *this;}
+		  It operator++(int) {T* t=d;d += skip;return iterator(t,skip);}
+		  It operator--(int) {T* t=d;d -= skip;return iterator(t,skip);}
+		  It operator+(ptrdiff_t i) {return It(d + i*skip,skip);}
+		  It operator-(ptrdiff_t i) {return It(d - i*skip,skip);}
+		  ptrdiff_t operator-(const It& i) {return (d - i.d)/skip;};
+		  T& operator*(){return *d;}
+		  It(T*a, int s):d(a),skip(s){}
+	  };
+
+  public:
+
+  typedef It<double> iterator;
+  typedef It<const double> const_iterator;
+
+  iterator begin()
+  {
+  	return iterator(my_values, my_skip);
+  }
+
+  iterator end()
+  {
+  	return iterator(my_values, my_skip) + my_size;
+  }
+
+  const_iterator begin() const
+  {
+  	return const_iterator(my_values, my_skip);
+  }	
+  const_iterator end() const
+  {
+  	return const_iterator(my_values, my_skip) + my_size;
+  }
 
  protected:
   int my_size;
@@ -235,6 +307,28 @@ class FixedVAccessor : public AllocZone {
     return reinterpret_cast<const FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >&> (*parent::my_values);
   }
   
+  typedef double* iterator;
+  typedef const double* const_iterator;
+
+  iterator begin()
+  {
+  	return parent::my_values;
+  }
+
+  iterator end()
+  {
+	return parent::my_values + Size;
+  }
+
+  const_iterator begin() const
+  {
+	return parent::my_values;
+  }	
+  const_iterator end() const
+  {
+	return parent::my_values + Size;
+  }
+
 };
 
 
@@ -301,6 +395,55 @@ class SkipAccessor : public Stack<Size*Skip>{
   inline const FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >& as_row() const 
   {
     return reinterpret_cast<const FixedMatrix<1,Size,SkipMAccessor<1,Size,Skip,ColMajor> >&>(*parent::my_values);
+  }
+
+  private:
+	  template<class T> class It: public std::iterator<std::random_access_iterator_tag, double>
+	  {
+		private:
+		  T* d;
+		public:
+		  bool operator!=(const It&i){return d != i.d;}
+		  bool operator==(const It&i){return d == i.d;}
+		  bool operator<=(const It&i){return d <= i.d;}
+		  bool operator>=(const It&i){return d >= i.d;}
+		  bool operator<(const It&i){return d < i.d;}
+		  bool operator>(const It&i){return d > i.d;}
+		  It& operator+=(ptrdiff_t i) {d += i*Skip;return *this;}
+		  It& operator-=(ptrdiff_t i) {d -= i*Skip;return *this;}
+		  It& operator++() {d += Skip;return *this;}
+		  It& operator--() {d -= Skip;return *this;}
+		  It operator++(int) {T* t=d;d += Skip;return iterator(t);}
+		  It operator--(int) {T* t=d;d -= Skip;return iterator(t);}
+		  It operator+(ptrdiff_t i) {return It(d + i*Skip);}
+		  It operator-(ptrdiff_t i) {return It(d - i*Skip);}
+		  ptrdiff_t operator-(const It& i) {return (d - i.d)/Skip;};
+		  T& operator*(){return *d;}
+		  It(T*a):d(a){}
+	  };
+
+  public:
+
+  typedef It<double> iterator;
+  typedef It<const double> const_iterator;
+
+  iterator begin()
+  {
+  	return iterator(parent::my_values);
+  }
+
+  iterator end()
+  {
+	return iterator(parent::my_values) + Size;
+  }
+
+  const_iterator begin() const
+  {
+	return iterator(parent::my_values);
+  }	
+  const_iterator end() const
+  {
+	return iterator(parent::my_values) + Size;
   }
 
 };
