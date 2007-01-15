@@ -205,7 +205,7 @@ void Symmetrize(MatrixBase<Accessor>& m){
   assert(m.num_rows()==m.num_cols());
   for(int r=0; r<m.num_rows()-1; r++){
     for(int c=r; c<m.num_rows(); c++){
-      m(c,r) = m(r,c) = 0.5*(m(r,c)+m(c,r));
+	m(c,r) = m(r,c);// = 0.5*(m(r,c)+m(c,r));
     }
   }
 }
@@ -240,13 +240,25 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
 }
 
  namespace util {
-     template <int R, int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<R,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<R,R,A3>& M)
+     template <class F, int R, int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<R,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<R,R,A3>& M)
      {
 	 for (int i=0; i<R; ++i) {
 	     const Vector<N> ABi = B * A[i];
-	     M[i][i] = ABi * A[i];
-	     for (int j=i+1; j<R; ++j)
-		 M[i][j] = M[j][i] = ABi * A[j];
+	     F::eval(M[i][i],ABi * A[i]);
+	     for (int j=i+1; j<R; ++j) {
+		 const double v = ABi * A[j];
+		 F::eval(M[i][j], v);
+		 F::eval(M[j][i], v);
+	     }
+	 }
+     }
+
+     template <class F, int R, int N, class A1, class A2, class A3> inline void transformCovarianceUpper(const FixedMatrix<R,N,A1>& A, const FixedMatrix<N,N,A2>& B, FixedMatrix<R,R,A3>& M)
+     {
+	 for (int i=0; i<R; ++i) {
+	     const Vector<N> ABi = B * A[i];
+	     for (int j=i; j<R; ++j)
+		 F::eval(M[i][j], ABi * A[j]);
 	 }
      }
 
@@ -277,15 +289,49 @@ template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
  template <int R, int N, class Accessor1, class Accessor2> inline Matrix<R> transformCovariance(const FixedMatrix<R,N,Accessor1>& A, const FixedMatrix<N,N,Accessor2>& B)
  {
      Matrix<R> M;
-     util::transformCovariance(A,B,M);
+     util::transformCovariance<util::Assign>(A,B,M);
      return M;
  }
 
  template <class MatA, class MatB, class MatM> inline void transformCovariance(const MatA& A, const MatB& B, MatM& M)
  {
-     util::transformCovariance(A,B,M);
+     util::transformCovariance<util::Assign>(A,B,M);
+ }
+
+ template <class F, class MatA, class MatB, class MatM> void transformCovariance(const MatA& A, const MatB& B, MatM& M)
+ {
+     util::transformCovariance<F>(A,B,M);
+ }
+
+ template <int M, int N, int C, class A, class B, class Mat> inline void add_product(const FixedMatrix<M,N,A>& Ma, const FixedMatrix<N,C,B>& Mb, Mat& Mc)
+ {
+     util::matrix_multiply<util::PlusEquals,M,N,C>(Ma,Mb,Mc);
+ }
+
+ template <int M, int N, class A, class B, class Vec> inline void add_product(const FixedMatrix<M,N,A>& m, const FixedVector<N,B>& v, Vec& r)
+ {
+     util::matrix_multiply<util::PlusEquals,M,N,1>(m,v.as_col(),r.as_col());
  }
  
+ template <class A, class B, class C> inline void add_product(const DynamicMatrix<A>& Ma, const DynamicMatrix<B>& Mb, DynamicMatrix<C>& r)
+ {
+     const int M=Ma.num_rows();
+     const int N=Ma.num_cols();
+     const int R=Mb.num_cols();
+     for (int i=0; i<M; ++i)
+	 for (int j=0; j<R; ++j) {
+	     double sum = 0;
+	     for (int k=0; k<N; ++k)
+		 sum += Ma(i,k)*Mb(k,j);
+	     r(i,j) += sum;
+	 }
+ }
+
+ template <int M, int N, int C, class A1, class A2, class Mat> void matrix_multiply(const FixedMatrix<M,N,A1>& A, const FixedMatrix<N,C,A2>& B, Mat& R)
+ {
+     util::matrix_multiply<M,N,C>(A,B,R);
+ }
+
 #ifndef TOON_NO_NAMESPACE
 }
 #endif 
