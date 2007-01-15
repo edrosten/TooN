@@ -9,11 +9,15 @@ namespace TooN {
 	template <bool Cond> struct Assert;
 	template <> struct Assert<true> {};
 
-	template <int B, int E> struct Dot {
+	template <int B, int E, bool Valid=(B<=E)> struct Dot { 
+	    template <class V1, class V2> static inline double eval(const V1& v1, const V2& v2) { return 0; }
+	};
+
+	template <int B, int E> struct Dot<B,E,true> {
 	    template <class V1, class V2> static inline double eval(const V1& v1, const V2& v2) { return v1[B]* v2[B] + Dot<B+1,E>::eval(v1,v2); }
 	};
 	
-	template <int N> struct Dot<N,N> {
+	template <int N> struct Dot<N,N,true> {
 	    template <class V1, class V2> static inline double eval(const V1& v1, const V2& v2) { return v1[N]*v2[N];  }
 	};	
 
@@ -59,21 +63,28 @@ namespace TooN {
 #endif
 
 	template <int B, int Col=0> struct MatrixProductRow {
-	    template <class M1, class M2, class V> static inline void eval(const M1& a, const M2& b, V& v, int row) { 		
-		v[Col] = a[row] * b[Col];
-		MatrixProductRow<B,Col+1>::eval(a,b,v, row);
+	    template <class F, class M1, class M2, class V> static inline void eval(const M1& a, const M2& b, V& v, int row) { 		
+		F::eval(v[Col], a[row] * b[Col]);
+		MatrixProductRow<B,Col+1>::template eval<F>(a,b,v, row);
 	    }
 	};
 
 	template <int B> struct MatrixProductRow<B,B> {
-	    template <class M1, class M2, class V> static inline void eval(const M1& a, const M2& b, V& v, int row) {
-		v[B] = a[row] * b[B];
+	    template <class F, class M1, class M2, class V> static inline void eval(const M1& a, const M2& b, V& v, int row) {
+		F::template eval(v[B], a[row] * b[B]);
 	    }
 	};
+	struct Assign { template <class LHS, class RHS> static inline void eval(LHS& lhs, const RHS& rhs) { lhs = rhs; } };
+	struct PlusEquals { template <class LHS, class RHS> static inline void eval(LHS& lhs, const RHS& rhs) { lhs += rhs; } };
+	struct MinusEquals { template <class LHS, class RHS> static inline void eval(LHS& lhs, const RHS& rhs) { lhs -= rhs; } };
 
-	template <int A, int N, int B, class M1, class M2, class M3> inline void matrix_multiply(const M1& a, const M2& b, M3& m) {
+	template <class F, int A, int N, int B, class M1, class M2, class M3> inline void matrix_multiply(const M1& a, const M2& b, M3& m) {
 	    for (int i=0; i<m.num_rows(); i++)
-		MatrixProductRow<B-1>::eval(a,b.T(),m[i],i);
+		MatrixProductRow<B-1>::template eval<F>(a,b.T(),m[i],i);
+	}
+	    	
+	template <int A, int N, int B, class M1, class M2, class M3> inline void matrix_multiply(const M1& a, const M2& b, M3& m) {
+	    matrix_multiply<Assign,A,N,B,M1,M2,M3>(a,b,m);
 	}
 
     }
