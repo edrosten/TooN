@@ -110,6 +110,7 @@ struct FixedMatrix : public MatrixBase<Accessor> {
     MatrixCopy<Accessor,Accessor2>::eval(*this,from);
     return *this;
   }
+    static void dummy() {}
 };
 
 template<class Accessor>
@@ -129,6 +130,9 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
     MatrixCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
+
+    operator DynamicMatrix& () { return *this; }
+    operator const DynamicMatrix& () const { return *this; }
 
 };
 

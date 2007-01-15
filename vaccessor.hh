@@ -263,6 +263,7 @@ class FixedVAccessor : public AllocZone {
   inline FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >& slice()
   {
       util::Assert<(Start+Length <= Size)>();
+      FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >::dummy();
       return reinterpret_cast<FixedVector<Length,FixedVAccessor<Length,Stack<Length> > >&> (parent::my_values[Start]);
   }
 
@@ -276,7 +277,7 @@ class FixedVAccessor : public AllocZone {
   inline const RefVector slice(int start, int size) const
   {
     assert(0 <= start && start < Size && size >=0 && start+size <= Size);
-    return makeRefVector(size, parent::my_values + start);
+    return makeRefVector(size, const_cast<double*>( parent::my_values + start));
   }
   
   template<int Start, int Length>
@@ -289,21 +290,25 @@ class FixedVAccessor : public AllocZone {
   // convert to Matrices
   inline FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >& as_col() 
   {
+      FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >::dummy();
     return reinterpret_cast<FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >&>(*parent::my_values);
   }
 
   inline const FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >& as_col() const 
   {
+      FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >::dummy();
     return reinterpret_cast<const FixedMatrix<Size,1,FixedMAccessor<Size,1,ColMajor,Stack<Size> > >&> (*parent::my_values);
   }
 
   inline FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >& as_row() 
   {
+      FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >::dummy();
     return reinterpret_cast<FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >&> (*parent::my_values);
   }
   
   inline const FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >& as_row() const 
   {
+      FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >::dummy();
     return reinterpret_cast<const FixedMatrix<1,Size,FixedMAccessor<1,Size,RowMajor,Stack<Size> > >&> (*parent::my_values);
   }
   

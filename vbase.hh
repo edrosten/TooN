@@ -102,6 +102,8 @@ struct FixedVector : public VectorBase<Accessor> {
     return VectorMagic::VectorFiller<N,Size, FixedVector<Size,Accessor>, VectorMagic::InsertionStyle>(*this);
   }
 
+    static void dummy() {}
+
   template<class A, int I> FixedVector<Size, Accessor>& operator=(const VectorMagic::VectorCreator<A,I>& v)
   {
     v.assign(*this);
@@ -127,6 +129,8 @@ struct DynamicVector : public VectorBase<Accessor>{
     VectorCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
+    operator DynamicVector& () { return *this; }
+    operator const DynamicVector& () const { return *this; }
 
   template<class A, int I> DynamicVector<Accessor> & operator=(const VectorMagic::VectorCreator<A,I>& v)
   {

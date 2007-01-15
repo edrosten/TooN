@@ -339,138 +339,6 @@ inline RefMatrixCM makeRefMatrixCM(int nr, int nc, double* v) { RefMatrixCM ret;
 #define TOON_CHECK_COL TOON_ASSERT(c < Cols && c >= 0, TooNError::BadColIndex)
 
 
-template <int Rows,int Cols, class AllocZone>
-class FixedMAccessor<Rows,Cols,RowMajor,AllocZone> : public AllocZone {
- public:
-  inline FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >& operator[](int r) TOON_THROW {
-  	TOON_CHECK_ROW;
-    return reinterpret_cast<FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >&>(this->my_values[r*Cols]);
-  }
-  inline const FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >& operator[](int r) const TOON_THROW {
-  	TOON_CHECK_ROW;
-    return reinterpret_cast<const FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >&>(this->my_values[r*Cols]);
-  }
-
-  inline double& operator()(int r, int c) TOON_THROW {
-  	TOON_CHECK_ROW;
-	TOON_CHECK_COL;
-  	return this->my_values[r*Cols+c];
-  }
-
-  inline const double& operator()(int r, int c) const TOON_THROW
-  {
-  	TOON_CHECK_ROW;
-	TOON_CHECK_COL;
-  	return this->my_values[r*Cols+c];
-  }
-
-  static inline int num_rows() throw() {return Rows;}
-  static inline int num_cols() throw() {return Cols;}
-  static inline int num_skip() throw() {return Cols;}
-  typedef RowMajor layout;
-
-  // Transpose operations
-  inline FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >& T() {
-    return reinterpret_cast<FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >&>(*this->my_values);
-  }
-  inline const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >& T() const {
-    return reinterpret_cast<const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >&>(*this->my_values);
-  }
-
-  // slice
-  template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice(){
-      util::Assert<(Rstart+Rsize <= Rows)>();
-      util::Assert<(Cstart+Csize <= Cols)>();
-    return reinterpret_cast<FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
-      (this->my_values[Rstart*Cols+Cstart]);
-  }
-
-  template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice() const {
-      util::Assert<(Rstart+Rsize <= Rows)>();
-      util::Assert<(Cstart+Csize <= Cols)>();
-    return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
-      (this->my_values[Rstart*Cols+Cstart]);
-  }
-
-  inline RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) {
-    return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
-  }
-
-  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
-  }
-
-};
-
-
-
-template <int Rows,int Cols, class AllocZone>
-class FixedMAccessor<Rows,Cols,ColMajor,AllocZone> : public AllocZone {
- public:
-  FixedVector<Cols, SkipAccessor<Cols, Rows> >& operator[](int r) TOON_THROW{
-  	TOON_CHECK_ROW;
-    return reinterpret_cast<FixedVector<Cols, SkipAccessor<Cols, Rows> >&>(this->my_values[r]);
-  }
-
-  const FixedVector<Cols, SkipAccessor<Cols, Rows> >& operator[](int r) const TOON_THROW{
-  	TOON_CHECK_ROW;
-    return reinterpret_cast<const FixedVector<Cols, SkipAccessor<Cols, Rows> >&>(this->my_values[r]);
-  }
-
-  inline double& operator()(int r, int c) TOON_THROW
-  {
-  	TOON_CHECK_ROW;
-	TOON_CHECK_COL;
-  	return this->my_values[c*Rows+r];
-  }
-
-  inline const double& operator()(int r, int c)const TOON_THROW
-  {
-  	TOON_CHECK_ROW;
-	TOON_CHECK_COL;
-  	return this->my_values[c*Rows+r];
-  }
-
-  static inline int num_rows() throw() {return Rows;}
-  static inline int num_cols() throw() {return Cols;}
-  static inline int num_skip() throw() {return Rows;}
-  typedef ColMajor layout;
-
-  // Transpose operations
-  inline FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >& T() {
-    return reinterpret_cast<FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >&>(*this->my_values);
-  }
-  inline const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >& T() const {
-    return reinterpret_cast<const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >&>(*this->my_values);
-  }
-
-  // slice()
-  template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >& slice(){
-    return reinterpret_cast<FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >&>
-      (this->my_values[Cstart*Rows+Rstart]);
-  }
-
-  template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >& slice()const{
-    return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >&>
-      (this->my_values[Cstart*Rows+Rstart]);
-  }
-
-  inline RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) {
-    return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
-  }
-
-  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
-    return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
-  }
-
-};
-
-
-
 
 
 template<int Rows, int Cols, int Skip>
@@ -510,18 +378,24 @@ public:
   }
 
   inline const FixedMatrix<Cols,Rows,SkipMAccessor<Cols,Rows,Skip,ColMajor> >& T() const {
-    return reinterpret_cast<const FixedMatrix<Cols,Rows,SkipMAccessor<Cols,Rows,Skip,ColMajor> >&>(*this);
+     return reinterpret_cast<const FixedMatrix<Cols,Rows,SkipMAccessor<Cols,Rows,Skip,ColMajor> >&>(*this);
   }
 
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
-  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >& slice(){
+  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >& slice() {
+      FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >::dummy();
+     util::Assert<(Rstart+Rsize <= Rows)>();
+     util::Assert<(Cstart+Csize <= Cols)>();
     return reinterpret_cast<FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >&>
       (this->my_values[Rstart*Skip+Cstart]);
   }
 
   template<int Rstart, int Cstart, int Rsize, int Csize>
   inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >& slice() const {
+     FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >::dummy();
+     util::Assert<(Rstart+Rsize <= Rows)>();
+     util::Assert<(Cstart+Csize <= Cols)>();
     return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Skip,RowMajor> >&>
       (this->my_values[Rstart*Skip+Cstart]);
   }
@@ -606,6 +480,146 @@ public:
  protected:
   double my_values[Cols*Skip];
 };
+
+
+template <int Rows,int Cols, class AllocZone>
+class FixedMAccessor<Rows,Cols,RowMajor,AllocZone> : public AllocZone {
+ public:
+  inline FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >& operator[](int r) TOON_THROW {
+  	TOON_CHECK_ROW;
+    return reinterpret_cast<FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >&>(this->my_values[r*Cols]);
+  }
+  inline const FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >& operator[](int r) const TOON_THROW {
+  	TOON_CHECK_ROW;
+    return reinterpret_cast<const FixedVector<Cols,FixedVAccessor<Cols,Stack<Cols> > >&>(this->my_values[r*Cols]);
+  }
+
+  inline double& operator()(int r, int c) TOON_THROW {
+  	TOON_CHECK_ROW;
+	TOON_CHECK_COL;
+  	return this->my_values[r*Cols+c];
+  }
+
+  inline const double& operator()(int r, int c) const TOON_THROW
+  {
+  	TOON_CHECK_ROW;
+	TOON_CHECK_COL;
+  	return this->my_values[r*Cols+c];
+  }
+
+  static inline int num_rows() throw() {return Rows;}
+  static inline int num_cols() throw() {return Cols;}
+  static inline int num_skip() throw() {return Cols;}
+  typedef RowMajor layout;
+
+  // Transpose operations
+  inline FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >& T() {
+      FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >::dummy();
+    return reinterpret_cast<FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >&>(*this->my_values);
+  }
+  inline const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >& T() const {
+      FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >::dummy();
+      return reinterpret_cast<const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,ColMajor,Stack<Rows*Cols> > >&>(*this->my_values);
+  }
+
+  // slice
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice(){
+      typedef FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> > ST;
+      util::Assert<(Rstart+Rsize <= Rows)>();
+      util::Assert<(Cstart+Csize <= Cols)>();
+      ST::dummy();
+      return reinterpret_cast<ST&>(this->my_values[Rstart*Cols+Cstart]);
+  }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >& slice() const {
+      util::Assert<(Rstart+Rsize <= Rows)>();
+      util::Assert<(Cstart+Csize <= Cols)>();
+    return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Cols,RowMajor> >&>
+      (this->my_values[Rstart*Cols+Cstart]);
+  }
+
+  inline RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) {
+    return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
+  }
+
+  inline const RefSkipMatrixRM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixRM(Rsize, Csize, Cols, this->my_values + Rstart*Cols + Cstart);
+  }
+
+};
+
+
+
+template <int Rows,int Cols, class AllocZone>
+class FixedMAccessor<Rows,Cols,ColMajor,AllocZone> : public AllocZone {
+ public:
+  FixedVector<Cols, SkipAccessor<Cols, Rows> >& operator[](int r) TOON_THROW{
+  	TOON_CHECK_ROW;
+	FixedVector<Cols, SkipAccessor<Cols, Rows> >::dummy();
+	return reinterpret_cast<FixedVector<Cols, SkipAccessor<Cols, Rows> >&>(this->my_values[r]);
+  }
+
+  const FixedVector<Cols, SkipAccessor<Cols, Rows> >& operator[](int r) const TOON_THROW{
+  	TOON_CHECK_ROW;
+    return reinterpret_cast<const FixedVector<Cols, SkipAccessor<Cols, Rows> >&>(this->my_values[r]);
+  }
+
+  inline double& operator()(int r, int c) TOON_THROW
+  {
+  	TOON_CHECK_ROW;
+	TOON_CHECK_COL;
+  	return this->my_values[c*Rows+r];
+  }
+
+  inline const double& operator()(int r, int c)const TOON_THROW
+  {
+  	TOON_CHECK_ROW;
+	TOON_CHECK_COL;
+  	return this->my_values[c*Rows+r];
+  }
+
+  static inline int num_rows() throw() {return Rows;}
+  static inline int num_cols() throw() {return Cols;}
+  static inline int num_skip() throw() {return Rows;}
+  typedef ColMajor layout;
+
+  // Transpose operations
+  inline FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >& T() {
+      FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >::dummy();
+      return reinterpret_cast<FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >&>(*this->my_values);
+  }
+  inline const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >& T() const {
+      FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >::dummy();
+      return reinterpret_cast<const FixedMatrix<Cols,Rows,FixedMAccessor<Cols,Rows,RowMajor,Stack<Rows*Cols> > >&>(*this->my_values);
+  }
+
+  // slice()
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >& slice(){
+      FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >::dummy();
+    return reinterpret_cast<FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >&>
+      (this->my_values[Cstart*Rows+Rstart]);
+  }
+
+  template<int Rstart, int Cstart, int Rsize, int Csize>
+  inline const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >& slice()const{
+      FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >::dummy();
+    return reinterpret_cast<const FixedMatrix<Rsize,Csize,SkipMAccessor<Rsize,Csize,Rows,ColMajor> >&>
+      (this->my_values[Cstart*Rows+Rstart]);
+  }
+
+  inline RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) {
+    return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
+  }
+
+  inline const RefSkipMatrixCM slice(int Rstart, int Cstart, int Rsize, int Csize) const {
+    return makeRefSkipMatrixCM(Rsize, Csize, Rows, this->my_values + Rstart + Cstart*Rows);
+  }
+
+};
+
 
 
 #undef TOON_CHECK_ROW

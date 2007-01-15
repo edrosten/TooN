@@ -69,12 +69,6 @@ class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<
     return *this;
   }
 
-  inline Vector<Size>& operator=(const Vector<-1>& v) {
-    *this = Vector<Size>(v);
-    return *this;
-  }
-
-
   // vector magic assignment operators (uses comma style) - insertion style defined in vbase.hh
   VectorMagic::VectorFiller<1,Size, Vector<Size>, VectorMagic::CommaStyle> operator=(double t) {
     (*this)[0] = t;
