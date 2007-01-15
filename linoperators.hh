@@ -760,9 +760,9 @@ template <class MAccessor1, class MAccessor2> inline
 DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
 					 const DynamicMatrix<MAccessor2>& rhs){
   assert(lhs.num_rows() == rhs.num_cols() && lhs.num_cols() == rhs.num_cols());
-  for(int r=0; r<lhs.num_rows(); r++)
-      for (int c=0; c<lhs.num_cols(); ++c)
-	  lhs(r,c) += rhs(r,c);
+  for(int r=0; r<lhs.num_rows(); r++){
+      lhs[r] += rhs[r];
+  }
   return lhs;
 }
 
