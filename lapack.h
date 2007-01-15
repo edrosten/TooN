@@ -45,6 +45,14 @@ extern "C" {
   void dsyev_(char* JOBZ, char* UPLO, int* N, double* A, int* lda, double* W,
 	      double* WORK, int* LWORK, int* INFO);
 
+    // Cholesky decomposition
+    void dpotrf_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
+
+    // Cholesky solve AX=B given decomposition
+    void dpotrs_(const char* UPLO, const int* N, const int* NRHS, const double* A, const int* LDA, double* B, const int* LDB, int* INFO);
+
+    // Cholesky inverse given decomposition
+    void dpotri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
 }
 
 
