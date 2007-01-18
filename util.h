@@ -71,7 +71,7 @@ namespace TooN {
 
 	template <int B> struct MatrixProductRow<B,B> {
 	    template <class F, class M1, class M2, class V> static inline void eval(const M1& a, const M2& b, V& v, int row) {
-		F::template eval(v[B], a[row] * b[B]);
+		F::eval(v[B], a[row] * b[B]);
 	    }
 	};
 	struct Assign { template <class LHS, class RHS> static inline void eval(LHS& lhs, const RHS& rhs) { lhs = rhs; } };
