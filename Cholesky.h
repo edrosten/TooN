@@ -65,7 +65,7 @@ namespace TooN {
 	template <int N, int I=N> struct Backsub_LT {
 	    template <class A1, class A2, class A3, class A4> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, 
 										      const FixedVector<N,A3>& invdiag, FixedVector<N,A4>& x) {
-		x[I] = v[I]*invdiag[I] - Dot<I+1,N-1>::eval(L.T()[I], x);
+		x[I-1] = v[I-1]*invdiag[I-1] - Dot<I,N-1>::eval(L.T()[I-1], x);
 		Backsub_LT<N,I-1>::eval(L, v, invdiag, x);
 	    }
 	};
@@ -73,14 +73,12 @@ namespace TooN {
 	    template <class A1, class A2, class A3, class A4> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, 
 										      const FixedVector<N,A3>& invdiag, FixedVector<N,A4>& x) {
 		x[N-1] = v[N-1]*invdiag[N-1];
-		Backsub_LT<N,N-2>::eval(L, v, invdiag, x);
+		Backsub_LT<N,N-1>::eval(L, v, invdiag, x);
 	    }
 	};
 	template <int N> struct Backsub_LT<N,0> {
 	    template <class A1, class A2, class A3, class A4> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, 
-										      const FixedVector<N,A3>& invdiag, FixedVector<N,A4>& x) {
-		x[0] = v[0]*invdiag[0] - Dot<1,N-1>::eval(L.T()[0], x);
-	    }
+										      const FixedVector<N,A3>& invdiag, FixedVector<N,A4>& x) {}
 	};
 
 	template <int N, class A1, class A2, class A3, class A4>
