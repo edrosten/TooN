@@ -66,11 +66,17 @@ template <class Accessor> void Zero(MatrixBase<Accessor>&m);
 // set a vector to zero
 template <class Accessor> inline void Zero(VectorBase<Accessor>& v);
 
+// Fill a matrix with a certain value
+template <class Accessor> void Fill(MatrixBase<Accessor>&m, double value);
+
+// Fill a vector with a certain value
+template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value);
+
  template <class T, int N> struct ZeroBlock {
      static const T data[N];
  };
 
- template <class T, int N> const T ZeroBlock<T,N>::data[N] = {0};
+ template <class T, int N> const T ZeroBlock<T,N>::data[N] = {0}; 
  
  template <int M, int N> inline const Matrix<M,N>& zeros() { return *reinterpret_cast<const Matrix<M,N>*>(ZeroBlock<double,M*N>::data); }
  template <int N> inline const Vector<N>& zeros() { return *reinterpret_cast<const Vector<N>*>(ZeroBlock<double,N>::data); }
@@ -236,6 +242,22 @@ template <class Accessor> void Zero(MatrixBase<Accessor>&m){
 template <class Accessor> inline void Zero(VectorBase<Accessor>& v){
   for(int i=0; i<v.size(); i++){
     v[i]=0;
+  }
+}
+
+// Fill a matrix with a certain value
+template <class Accessor> void Fill(MatrixBase<Accessor>&m, double value){
+  for(int r=0; r<m.num_rows(); r++){
+    for(int c=0; c<m.num_cols(); c++){
+      m(r,c) = value;
+    }
+  }
+}
+
+// Fill a vector with a certain value
+template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value){
+  for(int i=0; i<v.size(); i++){
+    v[i]=value;
   }
 }
 
