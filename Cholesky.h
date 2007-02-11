@@ -415,7 +415,10 @@ namespace TooN {
 	}
 	int get_rank() const { return rank; }
 
-	template <class V>
+	template <class V> inline
+	Vector<> inverse_times(const V& v) const { return backsub(v); }
+
+	template <class V> inline
 	Vector<> backsub(const V& v) const
 	{
 	    assert(v.size() == L.num_rows());
@@ -426,6 +429,10 @@ namespace TooN {
 	    dpotrs_("L", &N, &NRHS, L.get_data_ptr(), &N, x.get_data_ptr(), &N, &info);	    
 	    assert(info==0);
 	    return x;
+	}
+
+	template <class V> double mahalanobis(const V& v) const {
+	    return v * backsub(v);
 	}
 
 	const Matrix<>& get_L() const {
