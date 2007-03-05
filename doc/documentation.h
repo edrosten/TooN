@@ -45,7 +45,7 @@ Why use this library?
 
 The library can be obtained from savannah using anonymous cvs with the command:
 
-<code> cvs -d:pserver:%anonymous@cvs.savannah.nongnu.org:/cvsroot/toon co %TooN </code>
+<code> cvs -z3 -d:pserver:anonymous@cvs.savannah.nongnu.org:/sources/toon co TooN </code>
 
 \section sUsage How to use
 
