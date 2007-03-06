@@ -12,9 +12,9 @@
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 */
-// A proxy version of the LU class,
+// A proxy version of the Cholesky class,
 // cleaned up to present a comprehensible
-// version of the LU interface
+// version of the Cholesky interface
 
 #ifdef DOXYGEN_INCLUDE_ONLY_FOR_DOCS
 
@@ -27,38 +27,42 @@
 #include <TooN/helpers.h>
 #include <limits>
 
-namespace TooN {
-/// @class Cholesky Choleskydoc.h TooN/Cholesky.h
-/// Decomposes a positive-semidefinite symmetric matrix A (such as a covariance) into L*D*L^T, where L is lower-triangular and D is diagonal.
-/// Also can compute A = S*S^T, with S lower triangular.  The LDL^T form is faster to compute than the class Cholesky decomposition.
-/// The decomposition can be used to compute A^-1*x, A^-1*M, M*A^-1*M^T, and A^-1 itself, though the latter rarely needs to be explicitly represented.
-/// Also efficiently computes det(A) and rank(A).
-/// It can be used as follows:
-/// @code
-/// // Declare some matrices.
-/// Matrix<3> A = ...; // we'll pretend it is pos-def
-/// Matrix<2,3> M;
-/// Matrix<2> B;
-/// Vector<3> y = (make_Vector, 2,3,4);
-/// // create the Cholesky decomposition of A
-/// Cholesky<3> chol(A);
-/// // compute x = A^-1 * y
-/// Vector<3> x = cholA.inverse_times(y);
-/// Identical to above
-/// x = cholA.backsub(y);
-/// // compute B = M*A^-1*M^T
-/// B = cholA.transform_inverse(M);
-/// //compute A^-1
-/// Matrix<3> Ainv = cholA.get_inverse();
-/// Matrix<3> C = ... // again, C is pos-def
-/// //compute the 'square-root' of C
-/// Matrix<3> L = Cholesky<3>::sqrt(C);
-/// @endcode
-/// @ingroup gDecomps
+/// All classes and functions are within this namespace
+namespace TooN
+{
+/**
+@class Cholesky Choleskydoc.h TooN/Cholesky.h
+Decomposes a positive-semidefinite symmetric matrix A (such as a covariance) into L*D*L^T, where L is lower-triangular and D is diagonal.
+Also can compute A = S*S^T, with S lower triangular.  The LDL^T form is faster to compute than the class Cholesky decomposition.
+The decomposition can be used to compute A^-1*x, A^-1*M, M*A^-1*M^T, and A^-1 itself, though the latter rarely needs to be explicitly represented.
+Also efficiently computes det(A) and rank(A).
+It can be used as follows:
+@code
+// Declare some matrices.
+Matrix<3> A = ...; // we'll pretend it is pos-def
+Matrix<2,3> M;
+Matrix<2> B;
+Vector<3> y = (make_Vector, 2,3,4);
+// create the Cholesky decomposition of A
+Cholesky<3> chol(A);
+// compute x = A^-1 * y
+Vector<3> x = cholA.inverse_times(y);
+// Identical to above
+x = cholA.backsub(y);
+// compute B = M*A^-1*M^T
+B = cholA.transform_inverse(M);
+//compute A^-1
+Matrix<3> Ainv = cholA.get_inverse();
+Matrix<3> C = ... // again, C is pos-def
+//compute the 'square-root' of C
+Matrix<3> L = Cholesky<3>::sqrt(C);
+@endcode
+@ingroup gDecomps
+**/
+
 template <int N>
 class Cholesky {
 public:
-
     /// Construct the Cholesky-ish decomposition of a matrix. This initialises the class, and
     /// performs the decomposition immediately.
     /// Run time is O(N^3)
@@ -163,6 +167,8 @@ public:
     /// Run time is O(N^2), but for small N, it's faster to compute A' and recompute the decomposition
     /// Not yet present in Cholesky<-1>
     template <class A>  void update(const FixedVector<N,A>& v);
+};
+
 };
 
 #endif
