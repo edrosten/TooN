@@ -167,7 +167,7 @@ are  mismatched.
   @code
   double d[2][3] = {{1, 2, 3}, {4, 5, 6}};
   Matrix<2,3> m(d);
-  double e = m(1,2);     // now e = 5.0;
+  double e = m(1,2);     // now e = 6.0;
   @endcode
   */
   const double& operator() (int r, int c) const;
@@ -180,7 +180,7 @@ are  mismatched.
   double d[2][3] = {{1, 2, 3}, {4, 5, 6}};
   Matrix<2,3> m(d);
   m(1,2) = 8;     // now d = [1 2 3]
-                  //         [4 8 6]
+                  //         [4 5 8]
   @endcode
   */
   double& operator() (int r, int c);

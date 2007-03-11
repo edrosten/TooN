@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <lapack.h>
-#include <TooN/toon.h>
+#include <TooN/TooN.h>
 
 /// All classes and functions are within this namespace
 namespace TooN
