@@ -155,7 +155,7 @@ public:
   //@{
   
   /// Default constructor for vectors.
-  /// For fixed-sized vectors, this oes nothing, i.e. does not
+  /// For fixed-sized vectors, this does nothing, i.e. does not
   /// guarantee to initialise the vector to any particular values.
   /// For dynamically sized vectors, this sets the vector to have a length of 0.
   Vector();
@@ -292,7 +292,7 @@ public:
   //@{
   /**
   Convert this vector into a 1-by-Size matrix, i.e. a matrix which has this
-  matrix as its only row.
+  vector as its only row.
   @code
   Vector<3> a = 1,2,3;
   Matrix<1,3> m = a.as_row();  // now m = [1 2 3]
@@ -302,7 +302,7 @@ public:
   
   /**
   Convert this vector into a Size-by-1 matrix, i.e. a matrix which has this
-  matrix as its only column.
+  vector as its only column.
   @code
   Vector<3> a = 1,2,3;
   Matrix<3,1> m = a.as_col();   // now m = [1 2 3]'
