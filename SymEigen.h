@@ -137,6 +137,14 @@ public:
       return true;
   }
 
+  double get_determinant () const {
+	  double det = 1.0;
+	  for (int i = 0; i < Size; ++i) {
+		  det *= my_evalues[i];
+	  }
+	  return det;
+  }
+
 private:
   // eigen vectors laid out row-wise so evectors[i] is the ith evector
   Matrix<Size,Size,RowMajor> my_evectors;
