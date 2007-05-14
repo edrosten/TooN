@@ -284,27 +284,45 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
 	 }
      }
 
-     template <class A1, class A2, class MatM> inline void transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B, MatM& M)
+     template <class F, class A1, class M2, class M3> inline void transformCovarianceUpper(const DynamicMatrix<A1>& A, const M2 & B, M3 & M)
      {
-	 const int R = A.num_rows();
-	 const int N = A.num_cols();	 
-	 assert(M.num_rows() == R && 
-		M.num_cols() == R && 
-		B.num_rows() == N && 
-		B.num_cols() == N);
+	const int R = A.num_rows();
+	const int N = A.num_cols();
+	assert(M.num_rows() == R &&
+               M.num_cols() == R &&
+               B.num_rows() == N &&
+               B.num_cols() == N);
 	 for (int i=0; i<R; ++i) {
 	     const Vector<> ABi = B * A[i];
-	     M[i][i] = ABi * A[i];
-	     for (int j=i+1; j<R; ++j)
-		 M[j][i] = M[i][j] = ABi * A[j];
+	     for (int j=i; j<R; ++j)
+		 F::eval(M[i][j], ABi * A[j]);
+	 }
+     }
+
+     template <class F, class A1, class M2, class MatM> inline void transformCovariance(const DynamicMatrix<A1> & A, const M2 & B, MatM& M)
+     {
+	const int R = A.num_rows();
+	const int N = A.num_cols();
+	assert(M.num_rows() == R &&
+	       M.num_cols() == R &&
+	       B.num_rows() == N &&
+	       B.num_cols() == N);
+	for (int i=0; i<R; ++i) {
+	     const Vector<> ABi = B * A[i];
+	     F::eval(M[i][i], ABi * A[i]);
+	     for (int j=i+1; j<R; ++j){
+		const double v = ABi * A[j];
+		F::eval(M[j][i], v);
+		F::eval(M[i][j], v);
+	     }
 	 }
      }
  }
  
- template <class A1, class A2> Matrix<> inline transformCovariance(const DynamicMatrix<A1>& A, const DynamicMatrix<A2>& B)
+ template <class A1, class A2> Matrix<> inline transformCovariance(const DynamicMatrix<A1> & A, const A2 & B)
  {
      Matrix<> M(A.num_rows(), A.num_rows());
-     util::transformCovariance(A,B,M);
+     util::transformCovariance<util::Assign>(A,B,M);
      return M;
  }
 
@@ -347,6 +365,19 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
 		 sum += Ma(i,k)*Mb(k,j);
 	     r(i,j) += sum;
 	 }
+ }
+
+ template <class A, class B, class Vec> inline void add_product(const DynamicMatrix<A>& Ma, const DynamicVector<B>& Mb, Vec & r)
+ {
+     const int M=Ma.num_rows();
+     const int N=Ma.num_cols();
+     assert(N == Mb.size());
+     for (int i=0; i<M; ++i) {
+	double sum = 0;
+	for (int k=0; k<N; ++k)
+	    sum += Ma(i,k)*Mb[k];
+	r[i] += sum;
+     }
  }
 
  template <int M, int N, int C, class A1, class A2, class Mat> void matrix_multiply(const FixedMatrix<M,N,A1>& A, const FixedMatrix<N,C,A2>& B, Mat& R)

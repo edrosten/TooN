@@ -48,15 +48,25 @@ namespace TooN {
 		x[I] = v[I] - Dot<0,I-1>::eval(L[I], x);
 		Forwardsub_L<N,I+1>::eval(L, v, x);
 	    }
+	    template <class A1, class A2, class Vec> static inline void eval(const FixedMatrix<N,N,A1>& L, const DynamicVector<A2>& v, Vec & x) {
+		x[I] = v[I] - Dot<0,I-1>::eval(L[I], x);
+		Forwardsub_L<N,I+1>::eval(L, v, x);
+	    }
 	};
 	template <int N> struct Forwardsub_L<N,0> {
 	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, FixedVector<N,A3>& x) {
 		x[0] = v[0];
 		Forwardsub_L<N,1>::eval(L, v, x);
 	    }
+	    template <class A1, class A2, class Vec> static inline void eval(const FixedMatrix<N,N,A1>& L, const DynamicVector<A2>& v, Vec & x) {
+		assert(v.size() == N && x.size() == N);
+		x[0] = v[0];
+		Forwardsub_L<N,1>::eval(L, v, x);
+	    }
 	};
 	template <int N> struct Forwardsub_L<N,N> {
 	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, FixedVector<N,A3>& x) {}
+	    template <class A1, class A2, class Vec> static inline void eval(const FixedMatrix<N,N,A1>& L, const DynamicVector<A2>& v, Vec & x) {}
 	};
 	
 	//
@@ -225,6 +235,8 @@ namespace TooN {
     class Cholesky {
     public:
 
+	Cholesky() {}
+
 	template<class Accessor>
 	Cholesky(const FixedMatrix<N,N,Accessor>& m){
 	    compute(m);
@@ -329,11 +341,39 @@ namespace TooN {
 		}
 	    }
 	}
+
+	template <class F, class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
+	    const int M = J.num_rows();
+	    assert( T.num_rows() == M && T.num_cols() == M);
+	    Matrix<> L_inv_JT(M,N);
+	    for (int i=0; i<M; ++i)
+		util::Forwardsub_L<N>::eval(L, J[i], L_inv_JT[i]);
+	    for (int i=0; i<M; ++i) {
+		F::eval(T[i][i],util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[i], invdiag));
+		for (int j=i+1; j<M; ++j) {
+		    const double x = util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[j], invdiag);
+		    F::eval(T[i][j],x);
+		    F::eval(T[j][i],x);
+		}
+	    }
+	}
+
 	template <int M, class A1, class A2> void transform_inverse(const FixedMatrix<M,N,A1>& J, FixedMatrix<M,M,A2>& T) const {
 	    transform_inverse<util::Assign>(J,T);
 	}
+
+	template <class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
+	    transform_inverse<util::Assign>(J,T);
+	}
+
 	template <int M, class A> Matrix<M> transform_inverse(const FixedMatrix<M,N,A>& J) const {
 	    Matrix<M> T;
+	    transform_inverse(J,T);
+	    return T;
+	}
+
+	template <class A> Matrix<> transform_inverse(const DynamicMatrix<A>& J) const {
+	    Matrix<> T(J.num_rows(), J.num_rows());
 	    transform_inverse(J,T);
 	    return T;
 	}
@@ -396,6 +436,8 @@ namespace TooN {
     template <>
     class Cholesky<-1> {
     public:
+
+    Cholesky(){}
 
 	template<class Accessor>
 	Cholesky(const DynamicMatrix<Accessor>& m) {
