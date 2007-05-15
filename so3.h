@@ -152,7 +152,7 @@ inline SO3& SO3::operator=(const Matrix<3>& rhs){
 
 inline SO3 SO3::exp(const double* vect)
 {
-  return SO3::exp(Vector<3>(vect));
+  return SO3::exp(*reinterpret_cast<const Vector<3>*>(vect));
 }
 
 template <class Accessor> inline SO3 SO3::exp(const FixedVector<3,Accessor>& vect){
