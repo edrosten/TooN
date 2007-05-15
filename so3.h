@@ -150,6 +150,10 @@ inline SO3& SO3::operator=(const Matrix<3>& rhs){
      normalize(M[2]);
 }
 
+inline SO3 SO3::exp(const double* vect)
+{
+  return SO3::exp(Vector<3>(vect));
+}
 
 template <class Accessor> inline SO3 SO3::exp(const FixedVector<3,Accessor>& vect){
   SO3 result;
