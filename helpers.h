@@ -317,11 +317,52 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
 	     }
 	 }
      }
+
+     template <class F, int R, int N, class A1, class A2, class MatM> inline void transformCovariance(const FixedMatrix<R,N,A1> & A, const DynamicMatrix<A2> & B, MatM& M)
+     {
+	assert(M.num_rows() == R &&
+	       M.num_cols() == R &&
+	       B.num_rows() == N &&
+	       B.num_cols() == N);
+	for (int i=0; i<R; ++i) {
+	     const Vector<N> ABi = B * A[i];
+	     F::eval(M[i][i], ABi * A[i]);
+	     for (int j=i+1; j<R; ++j){
+		const double v = ABi * A[j];
+		F::eval(M[j][i], v);
+		F::eval(M[i][j], v);
+	     }
+	 }
+     }
+
+     template <class F, int R, int N, class A1, class A2, class A3> inline void transformCovariance(const FixedMatrix<R,N,A1> & A, const FixedMatrix<N,N,A2> & B, DynamicMatrix<A3> & M)
+     {
+	assert(M.num_rows() == R &&
+	       M.num_cols() == R );
+	for (int i=0; i<R; ++i) {
+	     const Vector<N> ABi = B * A[i];
+	     F::eval(M[i][i], ABi * A[i]);
+	     for (int j=i+1; j<R; ++j){
+		const double v = ABi * A[j];
+		F::eval(M[j][i], v);
+		F::eval(M[i][j], v);
+	     }
+	 }
+     }
+
  }
  
- template <class A1, class A2> Matrix<> inline transformCovariance(const DynamicMatrix<A1> & A, const A2 & B)
+ template <class A1, class A2> inline Matrix<> transformCovariance(const DynamicMatrix<A1> & A, const A2 & B)
  {
      Matrix<> M(A.num_rows(), A.num_rows());
+     util::transformCovariance<util::Assign>(A,B,M);
+     return M;
+ }
+
+template <int R, int N, class A1, class A2> inline Matrix<R> transformCovariance(const FixedMatrix<R, N, A1> & A, const DynamicMatrix<A2> & B)
+ {
+     assert(B.num_cols() == N && B.num_rows() == N);
+     Matrix<R> M;
      util::transformCovariance<util::Assign>(A,B,M);
      return M;
  }
