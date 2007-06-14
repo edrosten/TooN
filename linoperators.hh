@@ -77,6 +77,89 @@ Vector<> operator-(const DynamicVector<Accessor>& arg){
 
 /////////////////////
 //                 //
+//   operator ==   //
+//   operator !=   //
+// Vector == Vector//
+/////////////////////
+
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator==(const FixedVector<Size, Accessor1>& lhs, const FixedVector<Size, Accessor2>& rhs){
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] != rhs[i])
+		return 0;
+  return 1;
+}
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator==(const FixedVector<Size, Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(rhs.size() == Size);
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] != rhs[i])
+		return 0;
+  return 1;
+}
+
+template<class Accessor1, class Accessor2>
+inline bool operator==(const DynamicVector<Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(rhs.size() == lhs.size());
+  for(int i=0; i < rhs.size(); i++)
+  	if(lhs[i] != rhs[i])
+		return 0;
+  return 1;
+}
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator==(const DynamicVector<Accessor1>& lhs, const FixedVector<Size, Accessor2>& rhs){
+  assert(Size == lhs.size());
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] != rhs[i])
+		return 0;
+  return 1;
+}
+
+
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator!=(const FixedVector<Size, Accessor1>& lhs, const FixedVector<Size, Accessor2>& rhs){
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] == rhs[i])
+		return 0;
+  return 1;
+}
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator!=(const FixedVector<Size, Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(rhs.size() == Size);
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] == rhs[i])
+		return 0;
+  return 1;
+}
+
+template<class Accessor1, class Accessor2>
+inline bool operator!=(const DynamicVector<Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(rhs.size() == lhs.size());
+  for(int i=0; i < rhs.size(); i++)
+  	if(lhs[i] == rhs[i])
+		return 0;
+  return 1;
+}
+
+template<int Size, class Accessor1, class Accessor2>
+inline bool operator!=(const DynamicVector<Accessor1>& lhs, const FixedVector<Size, Accessor2>& rhs){
+  assert(Size == lhs.size());
+  for(int i=0; i < Size; i++)
+  	if(lhs[i] == rhs[i])
+		return 0;
+  return 1;
+}
+
+
+
+
+/////////////////////
+//                 //
 //   operator +    //
 // Vector + Vector //
 /////////////////////
