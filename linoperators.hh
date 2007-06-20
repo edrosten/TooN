@@ -576,11 +576,11 @@ struct DynamicMVMult : public VSizer {
 };
 
 template <int Rows, int Cols, class MAccessor, class VAccessor>
-inline Vector<> operator*(const FixedMatrix<Rows,Cols,MAccessor>& lhs,
+inline Vector<Rows> operator*(const FixedMatrix<Rows,Cols,MAccessor>& lhs,
 			  const DynamicVector<VAccessor>& rhs){
   assert(rhs.size() == Cols);
-  return Vector<>(lhs,rhs,
-		  Operator<DynamicMVMult<
+  return Vector<Rows>(lhs,rhs,
+		  Operator<FixedMVMult<Rows, Cols,
 		  FixedMatrix<Rows,Cols,MAccessor>,
 		  DynamicVector<VAccessor> > >());
 		  
