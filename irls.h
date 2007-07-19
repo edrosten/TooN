@@ -74,9 +74,9 @@ public:
   IRLS(){Identity(my_true_C_inv,0);my_residual=0;}
 
   inline void add_df(double d, const Vector<Size>& f) {
-    double scale = reweight(d);
-    double ts = true_scale(d);
-    my_residual += objective(d);
+    double scale = Reweight::reweight(d);
+    double ts = Reweight::true_scale(d);
+    my_residual += Reweight::objective(d);
 
     WLS<Size>::add_df(d,f,scale);
 
