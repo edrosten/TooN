@@ -65,6 +65,81 @@ class SE3 {
   template <class Accessor>
   inline void trinvadjoint(FixedMatrix<6,6,Accessor>& M)const;
 
+
+    template <class A1, class A2, class A3> 
+    Vector<2> project_transformed_point(const FixedVector<3,A1>& in_frame, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,6,A3>& J_pose) const 
+    {
+	const double z_inv = 1.0/in_frame[2];
+	const double x_z_inv = in_frame[0]*z_inv;
+	const double y_z_inv = in_frame[1]*z_inv;
+	const double cross = x_z_inv * y_z_inv;
+	J_pose[0][0] = J_pose[1][1] = z_inv;
+	J_pose[0][1] = J_pose[1][0] = 0;
+	J_pose[0][2] = -x_z_inv * z_inv;
+	J_pose[1][2] = -y_z_inv * z_inv;
+	J_pose[0][3] = -cross;
+	J_pose[0][4] = 1 + x_z_inv*x_z_inv; 
+	J_pose[0][5] = -y_z_inv;  
+	J_pose[1][3] = -1 - y_z_inv*y_z_inv;
+	J_pose[1][4] =  cross;
+	J_pose[1][5] =  x_z_inv;    
+	
+	const TooN::Matrix<3>& R = get_rotation().get_matrix();
+	J_x[0][0] = z_inv*(R[0][0] - x_z_inv * R[2][0]);
+	J_x[0][1] = z_inv*(R[0][1] - x_z_inv * R[2][1]);
+	J_x[0][2] = z_inv*(R[0][2] - x_z_inv * R[2][2]);
+	J_x[1][0] = z_inv*(R[1][0] - y_z_inv * R[2][0]);
+	J_x[1][1] = z_inv*(R[1][1] - y_z_inv * R[2][1]);
+	J_x[1][2] = z_inv*(R[1][2] - y_z_inv * R[2][2]);
+	
+	Vector<2> uv;
+	uv[0] = x_z_inv;
+	uv[1] = y_z_inv;
+	return uv;
+    }
+
+    template <class A> Vector<3> 
+    transform(const FixedVector<3,A>& x) const { return my_rotation * x + my_translation; }
+    
+    template <class A1, class A2, class A3> 
+    Vector<3> transform(const FixedVector<3,A1>& x, FixedMatrix<3,3,A2>& J_x, FixedMatrix<3,6,A3>& J_pose) const {	
+	const Vector<3> se3_x = *this * x;
+	J_x = my_rotation.get_matrix();
+	Identity(J_pose.template slice<0,0,3,3>());
+	J_pose[0][3] = J_pose[1][4] = J_pose[2][5] = 0;
+	J_pose[0][4] =  se3_x[2]; J_pose[0][5] = -se3_x[1];
+	J_pose[1][3] = -se3_x[2]; J_pose[1][5] =  se3_x[0];
+	J_pose[2][3] =  se3_x[1]; J_pose[2][4] = -se3_x[0];
+	return se3_x;
+    }
+
+
+    template <class A> 
+    Vector<3> transform_uvq(const FixedVector<3,A>& uvq) const {
+	const Matrix<3>& R = my_rotation.get_matrix();	
+	const Vector<3> DqT = R.template slice<0,0,3,2>() * uvq.template slice<0,2>() + R.T()[2] + uvq[2] * my_translation;
+	const double inv_z = 1.0/ DqT[2];
+	const double vals[3] = {DqT[0] * inv_z, DqT[1]*inv_z, uvq[2]*inv_z};
+	return Vector<3>(vals);
+    }
+
+    
+    template <class A1, class A2, class A3> 
+    Vector<2> transform_and_project(const FixedVector<3,A1>& x, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,6,A3>& J_pose) const 
+    {
+	return project_transformed_point(*this * x, J_x, J_pose);
+    }
+    
+    template <class A1, class A2, class A3> 
+    Vector<2> transform_and_project_uvq(const FixedVector<3,A1>& uvq, FixedMatrix<2,3,A2>& J_uvq, FixedMatrix<2,6,A3>& J_pose) const
+    {
+	const Vector<3> DqT = get_rotation() * TooN::unproject(uvq.template slice<0,2>()) + uvq[2] * get_translation();
+	const Vector<2> uv = project_transformed_point(DqT, J_uvq, J_pose);
+	J_uvq.T()[2] = J_pose.template slice<0,0,2,3>() * get_translation();
+	J_pose.template slice<0,0,2,3>() *= uvq[2];
+	return uv;
+    }
+
 private:
   SO3 my_rotation;
   Vector<3> my_translation;
@@ -160,8 +235,7 @@ Vector<4> operator*(const SE3& lhs, const DynamicVector<Accessor>& rhs){
 
 template <class Accessor> inline
 Vector<3> operator*(const SE3& lhs, const FixedVector<3,Accessor>& rhs){
-  Vector<3> v = lhs.get_rotation()*rhs;
-  return v + lhs.get_translation();
+    return lhs.transform(rhs);
 }
 
 
@@ -242,27 +316,40 @@ inline SE3::SE3() :
 {}
 
 
-inline SE3 SE3::exp(const Vector<6>& vect){
-  SE3 result;
-  SO3 halfrotator;
-  Vector<3> trans(vect.slice<0,3>());
-  Vector<3> rot(vect.slice<3,3>());
+inline SE3 SE3::exp(const Vector<6>& mu){
+    static const double one_6th = 1.0/6.0;
+    static const double one_20th = 1.0/20.0;
 
-  double shtot;
-  double theta = SO3::exp_with_half(rot, result.my_rotation, halfrotator, shtot);
-  
-  result.my_translation = halfrotator * trans * (2*shtot);
+    SE3 result;
 
-  if(theta > 0.001){
-    result.my_translation += rot * ((trans * rot) * (1- 2*shtot) / (rot * rot));
-  } else {
-    // small angle approximation that considers first two terms in expansion of sin(theta/2)
-    // accurate up to 10^-15
-    result.my_translation += rot * ((trans * rot)/24);
-  }
-
-  return result;
+    const Vector<3> w = mu.slice<3,3>();
+    const double theta_sq = w*w;
+    const double theta = sqrt(theta_sq);
+    double A, B;
+    
+    const Vector<3> cross = w ^ mu.slice<0,3>();
+    if (theta_sq < 1e-8) {
+	A = 1.0 - one_6th * theta_sq;
+	B = 0.5;
+	result.get_translation() = mu.slice<0,3>() + 0.5 * cross;
+    } else {
+	double C;
+	if (theta_sq < 1e-6) {
+	    C = one_6th*(1.0 - one_20th * theta_sq);
+	    A = 1.0 - theta_sq * C;
+	    B = 0.5 - 0.25 * one_6th * theta_sq;
+	} else {
+	    const double inv_theta = 1.0/theta;
+	    A = sin(theta) * inv_theta;
+	    B = (1 - cos(theta)) * (inv_theta * inv_theta);
+	    C = (1 - A) * (inv_theta * inv_theta);
+	}
+	result.get_translation() = mu.slice<0,3>() + B * cross + C * (w ^ cross);
+    }
+    rodrigues_so3_exp(w, A, B, result.my_rotation.my_matrix);
+    return result;
 }
+
 
  inline Vector<6> SE3::ln(const SE3& se3) {
     Vector<3> rot = se3.my_rotation.ln();

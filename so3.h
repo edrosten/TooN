@@ -148,105 +148,64 @@ inline SO3& SO3::operator=(const Matrix<3>& rhs){
      normalize(M[2]);
 }
 
-
-template <class Accessor> inline SO3 SO3::exp(const FixedVector<3,Accessor>& vect){
-  SO3 result;
-  
-  double theta = sqrt(vect*vect);
-  
-  double stot = 1;
-  double shtot = 0.5;
-
-  double ct=cos(theta);
-
-  if(theta > 0.001) {
-      stot = sin(theta)/theta;
-      shtot = sin(theta*0.5)/theta;
-  }
-
-  result.my_matrix[0][0] = result.my_matrix[1][1] = result.my_matrix[2][2] = ct;
-  result.my_matrix[0][1] = -(result.my_matrix[1][0] = stot*vect[2]);
-  result.my_matrix[2][0] = -(result.my_matrix[0][2] = stot*vect[1]);
-  result.my_matrix[1][2] = -(result.my_matrix[2][1] = stot*vect[0]);
-
-  for(int i=0; i<3; i++){
-    for(int j=0; j<3; j++){
-      result.my_matrix[i][j] += 2*shtot*shtot*vect[i]*vect[j];
+template <class A1, class A2> 
+inline void rodrigues_so3_exp(const TooN::FixedVector<3,A1>& w, const double A, const double B, TooN::FixedMatrix<3,3,A2>& R)
+{
+    {
+	const double wx2 = w[0]*w[0];
+	const double wy2 = w[1]*w[1];
+	const double wz2 = w[2]*w[2];
+	
+	R[0][0] = 1.0 - B*(wy2 + wz2);
+	R[1][1] = 1.0 - B*(wx2 + wz2);
+	R[2][2] = 1.0 - B*(wx2 + wy2);
     }
-  }
-  return result;
+    {
+	const double a = A*w[2];
+	const double b = B*(w[0]*w[1]);
+	R[0][1] = b - a;
+	R[1][0] = b + a;
+    }
+    {
+	const double a = A*w[1];
+	const double b = B*(w[0]*w[2]);
+	R[0][2] = b + a;
+	R[2][0] = b - a;
+    }
+    {
+	const double a = A*w[0];
+	const double b = B*(w[1]*w[2]);
+	R[1][2] = b - a;
+	R[2][1] = b + a;
+    }
 }
 
-template <class Accessor> inline double SO3::exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second, double& shtot){
-     const double thetasq = vect*vect;
-     const double theta = sqrt(thetasq);
-     double stot, sqtoth, cth, ct;
-     if (thetasq < 1e-6) {
-	 const double sixth_thetasq = thetasq/6.0;
-	 stot = 1 - sixth_thetasq;
-	 shtot = 0.5 - sixth_thetasq*0.125;
-	 sqtoth = 0.5 - sixth_thetasq*0.03125;
-	 cth = 1.0 - thetasq*0.125;
-	 ct = 1.0 - thetasq*0.5;
-     } else {
-	 const double thetainv = 1.0/theta;
-	 const double ht = theta*0.5;
-	 const double sth = sin(ht);
-	 cth = cos(ht);
-	 ct = 2*cth*cth - 1;
-	 shtot = sth*thetainv;
-	 stot = 2*cth*shtot;
-	 sqtoth = 2*sqrt(0.5*(1 - cth))*thetainv;
-     }
+template <class Accessor> 
+inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
+    static const double one_6th = 1.0/6.0;
+    static const double one_20th = 1.0/20.0;
 
-     {
-	 const double a = shtot*vect[0];
-	 const double b = shtot*vect[1];
-	 const double c = shtot*vect[2];
-	 first.my_matrix[0][0] = ct + 2*a*a;
-	 first.my_matrix[1][1] = ct + 2*b*b;
-	 first.my_matrix[2][2] = ct + 2*c*c;
+    SO3 result;
 
-	 const double f = stot*vect[2];
-	 const double cr1 = 2*a*b;
-	 first.my_matrix[1][0] = f + cr1;
-	 first.my_matrix[0][1] = cr1 - f;
-	 
-	 const double e = stot*vect[1];
-	 const double cr2 = 2*a*c;
-	 first.my_matrix[0][2] = e + cr2;
-	 first.my_matrix[2][0] = cr2 - e;
-	 	 
-	 const double d = stot*vect[0];
-	 const double cr3 = 2*b*c;
-	 first.my_matrix[2][1] = d + cr3;
-	 first.my_matrix[1][2] = cr3 - d;
-     }
-
-     {
-	 const double a = sqtoth*vect[0];
-	 const double b = sqtoth*vect[1];
-	 const double c = sqtoth*vect[2];
-	 second.my_matrix[0][0] = cth + 0.5*a*a;
-	 second.my_matrix[1][1] = cth + 0.5*b*b;
-	 second.my_matrix[2][2] = cth + 0.5*c*c;
-
-	 const double f = shtot*vect[2];
-	 const double cr1 = 0.5*a*b;
-	 second.my_matrix[1][0] = f + cr1;
-	 second.my_matrix[0][1] = cr1 - f;
-	 
-	 const double e = shtot*vect[1];
-	 const double cr2 = 0.5*a*c;
-	 second.my_matrix[0][2] = e + cr2;
-	 second.my_matrix[2][0] = cr2 - e;
-	 	 
-	 const double d = shtot*vect[0];
-	 const double cr3 = 0.5*b*c;
-	 second.my_matrix[2][1] = d + cr3;
-	 second.my_matrix[1][2] = cr3 - d;
-     }
-     return theta;
+    const double theta_sq = w*w;
+    const double theta = sqrt(theta_sq);
+    double A, B;
+    
+    if (theta_sq < 1e-8) {
+	A = 1.0 - one_6th * theta_sq;
+	B = 0.5;
+    } else {
+	if (theta_sq < 1e-6) {
+	    B = 0.5 - 0.25 * one_6th * theta_sq;
+	    A = 1.0 - theta_sq * one_6th*(1.0 - one_20th * theta_sq);
+	} else {
+	    const double inv_theta = 1.0/theta;
+	    A = sin(theta) * inv_theta;
+	    B = (1 - cos(theta)) * (inv_theta * inv_theta);
+	}
+    }
+    rodrigues_so3_exp(w, A, B, result.my_matrix);
+    return result;
 }
 
 inline Vector<3> SO3::ln() const{
