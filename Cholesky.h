@@ -302,7 +302,7 @@ namespace TooN {
 	    return S;
 	}
 	
-	Matrix<N> get_L() const __attribute__ ((deprecated)) { return get_sqrt(); }
+	Matrix<N> get_L() const { return get_sqrt(); }
 	
 	template <class A> void get_inv_sqrt(FixedMatrix<N,N,A>& M) const {
 	    Vector<N> root;
