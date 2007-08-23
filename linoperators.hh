@@ -1,5 +1,5 @@
 
-/*                       
+/*
 	 Copyright (C) 2005 Tom Drummond
 
      This library is free software; you can redistribute it and/or
@@ -53,7 +53,7 @@ struct FixedVectorNeg{
   }
 };
 
-template<int Size, class Accessor> inline 
+template<int Size, class Accessor> inline
 Vector<Size> operator-(const FixedVector<Size,Accessor>& arg){
   return Vector<Size>(arg,Operator<FixedVectorNeg<Size,Accessor> >());
 }
@@ -211,17 +211,19 @@ inline Vector<> operator+(const DynamicVector<Accessor1>& lhs, const DynamicVect
 }
 
 template <int Size, class Accessor1,class Accessor2>
-inline Vector<> operator+(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
-  return Vector<>(lhs,rhs,
-		  Operator<DynamicVAdd<
+inline Vector<Size> operator+(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+    assert(Size == rhs.size());
+    return Vector<Size>(lhs,rhs,
+		  Operator<FixedVAdd<Size,
 		  FixedVector<Size,Accessor1>,
 		  DynamicVector<Accessor2> > >());
 }
 
 template <class Accessor1, int Size, class Accessor2>
-inline Vector<> operator+(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
-  return Vector<>(lhs,rhs,
-		  Operator<DynamicVAdd<
+inline Vector<Size> operator+(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
+  assert(Size == lhs.size());
+  return Vector<Size>(lhs,rhs,
+		  Operator<FixedVAdd<Size,
 		  DynamicVector<Accessor1>,
 		  FixedVector<Size,Accessor2> > >());
 }
@@ -320,17 +322,19 @@ inline Vector<> operator-(const DynamicVector<Accessor1>& lhs, const DynamicVect
 }
 
 template <int Size, class Accessor1,class Accessor2>
-inline Vector<> operator-(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
-  return Vector<>(lhs,rhs,
-		  Operator<DynamicVSub<
+inline Vector<Size> operator-(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(Size == rhs.size());
+  return Vector<Size>(lhs,rhs,
+		  Operator<FixedVSub<Size,
 		  FixedVector<Size,Accessor1>,
 		  DynamicVector<Accessor2> > >());
 }
 
 template <class Accessor1, int Size, class Accessor2>
-inline Vector<> operator-(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
-  return Vector<>(lhs,rhs,
-		  Operator<DynamicVSub<
+inline Vector<Size> operator-(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
+  assert(Size == lhs.size());
+  return Vector<Size>(lhs,rhs,
+		  Operator<FixedVSub<Size,
 		  DynamicVector<Accessor1>,
 		  FixedVector<Size,Accessor2> > >());
 }
@@ -583,7 +587,7 @@ inline Vector<Rows> operator*(const FixedMatrix<Rows,Cols,MAccessor>& lhs,
 		  Operator<FixedMVMult<Rows, Cols,
 		  FixedMatrix<Rows,Cols,MAccessor>,
 		  DynamicVector<VAccessor> > >());
-		  
+
 }
 
 
@@ -622,9 +626,9 @@ inline Vector<Cols> operator*(const FixedVector<Rows, VAccessor>& lhs,
 
 
 template <int Rows, int Cols, class MAccessor, class VAccessor>
-inline Vector<> operator*(const DynamicVector<VAccessor>& lhs,
+inline Vector<Cols> operator*(const DynamicVector<VAccessor>& lhs,
 			  const FixedMatrix<Rows,Cols,MAccessor>& rhs){
-  return (rhs.T()*lhs);  
+  return (rhs.T()*lhs);
 }
 
 
@@ -809,7 +813,7 @@ Matrix<> operator+(const DynamicMatrix<LHAccessor>& lhs,
 // Matrix += Matrix //
 //////////////////////
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline 
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
 FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
 						 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
     for(int r=0; r<Rows; r++){
@@ -887,22 +891,22 @@ struct DynamicMMSub : public MSizer {
 
 
 template <int Rows, int Cols, class LHAccessor, class RHAccessor>
-Matrix<> operator-(const FixedMatrix<Rows,Cols,LHAccessor>& lhs,
+Matrix<Rows, Cols> operator-(const FixedMatrix<Rows,Cols,LHAccessor>& lhs,
 		   const DynamicMatrix<RHAccessor>& rhs){
   assert(rhs.num_rows()==Rows && rhs.num_cols()==Cols);
-  return Matrix<> (lhs,rhs,
-		   Operator<DynamicMMSub<
+  return Matrix<Rows, Cols> (lhs,rhs,
+		   Operator<FixedMMSub<Rows, Cols,
 		   FixedMatrix<Rows,Cols,LHAccessor>,
 		   DynamicMatrix<RHAccessor> > >());
 }
 
 
 template <int Rows, int Cols, class LHAccessor, class RHAccessor>
-Matrix<> operator-(const DynamicMatrix<LHAccessor>& lhs,
+Matrix<Rows, Cols> operator-(const DynamicMatrix<LHAccessor>& lhs,
 		   const FixedMatrix<Rows,Cols,RHAccessor>& rhs){
   assert(lhs.num_rows()==Rows && lhs.num_cols()==Cols);
-  return Matrix<> (lhs,rhs,
-		   Operator<DynamicMMSub<
+  return Matrix<Rows, Cols> (lhs,rhs,
+		   Operator<FixedMMSub<Rows, Cols,
 		   DynamicMatrix<LHAccessor>,
 		   FixedMatrix<Rows,Cols,RHAccessor> > >());
 }
@@ -998,7 +1002,7 @@ struct FixedMMMult;
 template <int Rows, int Inter, int Cols, class LHS, class RHS>
 struct FixedMMMult<Rows,Inter,Cols,LHS,RHS,NUMERICS::BlasMult> {
   inline static void eval(Matrix<Rows,Cols>& ret, const LHS& lhs, const RHS& rhs){
-      
+
     //blasmmmult(ret,lhs,rhs);
       //cppmmmult(ret, lhs, rhs);
       util::matrix_multiply<Rows,Inter,Cols>(lhs, rhs, ret);
@@ -1113,13 +1117,15 @@ Vector<> diagmult(const DynamicVector<Accessor1>& lhs, const DynamicVector<Acces
 }
 
 template<class Accessor1, class Accessor2, int Size>
-Vector<> diagmult(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
-  return Vector<>(lhs,rhs,Operator<DynamicDiagVVMult<FixedVector<Size,Accessor1>,DynamicVector<Accessor2> > >());
+Vector<Size> diagmult(const FixedVector<Size,Accessor1>& lhs, const DynamicVector<Accessor2>& rhs){
+  assert(lhs.size() == rhs.size());
+  return Vector<Size>(lhs,rhs,Operator<DiagVVMult<FixedVector<Size,Accessor1>,DynamicVector<Accessor2>, Size > >());
 }
 
 template<class Accessor1, class Accessor2, int Size>
-Vector<> diagmult(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
-  return Vector<>(lhs,rhs,Operator<DynamicDiagVVMult<DynamicVector<Accessor1>,FixedVector<Size,Accessor2> > >());
+Vector<Size> diagmult(const DynamicVector<Accessor1>& lhs, const FixedVector<Size,Accessor2>& rhs){
+  assert(lhs.size() == rhs.size());
+  return Vector<Size>(lhs,rhs,Operator<DiagVVMult<DynamicVector<Accessor1>,FixedVector<Size,Accessor2>, Size > >());
 }
 
 /////////////////////////
@@ -1172,8 +1178,9 @@ inline Matrix<> diagmult(const FixedVector<Size,Accessor1>& lhs, const DynamicMa
 }
 
 template<class Accessor1, class Accessor2, int Rows, int Cols>
-inline Matrix<> diagmult(const DynamicVector<Accessor1>& lhs, const FixedMatrix<Rows,Cols,Accessor2>& rhs){
-  return Matrix<>(lhs,rhs,Operator<DynamicDiagVMMult<DynamicVector<Accessor1>,FixedMatrix<Rows,Cols,Accessor2> > >());
+inline Matrix<Rows, Cols> diagmult(const DynamicVector<Accessor1>& lhs, const FixedMatrix<Rows,Cols,Accessor2>& rhs){
+  assert(lhs.size() == Rows);
+  return Matrix<Rows, Cols>(lhs,rhs,Operator<DiagVMMult<DynamicVector<Accessor1>,FixedMatrix<Rows,Cols,Accessor2>,Rows,Cols > >());
 }
 
 /////////////////////////
@@ -1226,8 +1233,9 @@ inline Matrix<> diagmult(const DynamicMatrix<Accessor1>& lhs,  const FixedVector
 }
 
 template<class Accessor1, class Accessor2, int Rows, int Cols>
-inline Matrix<> diagmult(const FixedMatrix<Rows,Cols,Accessor1>& lhs,  const DynamicVector<Accessor2>& rhs){
-  return Matrix<>(lhs,rhs,Operator<DynamicDiagMVMult<FixedMatrix<Rows,Cols,Accessor1>, DynamicVector<Accessor2> > >());
+inline Matrix<Rows, Cols> diagmult(const FixedMatrix<Rows,Cols,Accessor1>& lhs,  const DynamicVector<Accessor2>& rhs){
+  assert(rhs.size() == Cols);
+  return Matrix<Rows, Cols>(lhs,rhs,Operator<DiagMVMult<FixedMatrix<Rows,Cols,Accessor1>, DynamicVector<Accessor2>,Rows,Cols > >());
 }
 
 #endif
