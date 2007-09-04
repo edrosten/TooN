@@ -129,8 +129,6 @@ struct DynamicVector : public VectorBase<Accessor>{
     VectorCopy<Accessor,Accessor>::eval(*this,from);
     return *this;
   }
-    operator DynamicVector& () { return *this; }
-    operator const DynamicVector& () const { return *this; }
 
   template<class A, int I> DynamicVector<Accessor> & operator=(const VectorMagic::VectorCreator<A,I>& v)
   {
