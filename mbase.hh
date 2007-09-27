@@ -131,6 +131,8 @@ struct DynamicMatrix : public MatrixBase<Accessor> {
     return *this;
   }
 
+    operator DynamicMatrix& () { return *this; }
+    operator const DynamicMatrix& () const { return *this; }
 
 };
 
