@@ -37,12 +37,12 @@ extern "C" {
   void dtrsm_(char* SIDE, char* UPLO, char* TRANSA, char* DIAG, int* M, int* N, double* alpha, double* A, int* lda, double* B, int* ldb);
 
   // SVD of a general matrix of doubles
-  void dgesvd_(char* JOBU, char* JOBVT, int* M, int *N, double* A, int* lda,
+  void dgesvd_(const char* JOBU, const char* JOBVT, int* M, int *N, double* A, int* lda,
 	       double* S, double *U, int* ldu, double* VT, int* ldvt,
 	       double* WORK, int* lwork, int* INFO);
 
   // Eigen decomposition of a symmetric matrix of doubles
-  void dsyev_(char* JOBZ, char* UPLO, int* N, double* A, int* lda, double* W,
+  void dsyev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W,
 	      double* WORK, int* LWORK, int* INFO);
 
     // Cholesky decomposition
