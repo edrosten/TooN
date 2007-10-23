@@ -26,7 +26,8 @@
 The %TooN library is a set of C++ header files which provide basic numerics facilities:
 	- @link TooN::Vector Vectors@endlink and @link TooN::Matrix matrices@endlink
 	- @link gDecomps Matrix decompositions@endlink (@link TooN::LU LU@endlink, @link TooN::SVD SVD@endlink, @link TooN::SymEigen symmetric eigen decomposition @endlink)
-	- Some particular types of @link gTransforms transformation matrices@endlink (@link TooN::SO3 SO3@endlink and @link TooN::SE3 SE3@endlink)
+	- @link gOptimize Function optimization@endlink (@link TooN::DownhillSimplex Downhill Simplex@endlink) 
+	- Some particular types of @link gTransforms transformation matrices@endlink (@link TooN::SO3 SO3@endlink and @link TooN::SE3 SE3@endlink) 
 	- Solvers for systems of @link gEquations linear equations@endlink using @link TooN::WLS weighted@endlink or @link TooN::IRLS iteratively-reweighted@endlink least squares.
 	
  It provides classes for statically- (known at compile time) and dynamically- (unknown at compile time) sized vectors and matrices and it delegates advanced functions (like SVD or multiplication of large matrices) to LAPACK and BLAS (this means you will need libblas and liblapack).
@@ -160,3 +161,5 @@ Then take a look at the source code ...
 /// @defgroup gEquations Linear equation solvers
 /// Classes to solve linear equations.
 
+/// @defgroup gOptimize Function optimization
+/// Classes to perform function optimization.
