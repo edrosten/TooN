@@ -202,7 +202,7 @@ template <class Accessor>
     }
     M(i,i)=factor;
   }
-};
+}
 
 
 // symmetrize a matrix
