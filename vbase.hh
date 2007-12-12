@@ -21,10 +21,10 @@
 #define __VBASE_HH
 
 // VectorBase //
-#include <assert.h>
 
 template <class Accessor>
-struct VectorBase : public Accessor {
+class VectorBase : public Accessor {
+public:
   const double* get_data_ptr()const{return Accessor::my_values;}
   double* get_data_ptr(){return Accessor::my_values;}
 
@@ -59,7 +59,8 @@ template <class Accessor1, class Accessor2> struct VectorCopy;
 ////////////////////////////////////////////////////////
 
 template <int Size, class Accessor>
-struct FixedVector : public VectorBase<Accessor> {
+class FixedVector : public VectorBase<Accessor> {
+public:
   // assignment from correct sized FixedVector
   template<class Accessor2>
   inline FixedVector& operator=(const FixedVector<Size,Accessor2>& from){
@@ -113,8 +114,10 @@ struct FixedVector : public VectorBase<Accessor> {
 };
 
 template <class Accessor>
-struct DynamicVector : public VectorBase<Accessor>{
+class DynamicVector : public VectorBase<Accessor>{
   typedef VectorBase<Accessor> parent;
+
+public:
   // assignment from any VectorBase
   template<class Accessor2>
   DynamicVector& operator=(const VectorBase<Accessor2>& from){

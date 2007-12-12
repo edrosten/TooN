@@ -20,6 +20,9 @@
 #ifndef __TOON_H
 #define __TOON_H
 
+#ifdef WIN32 // to get M_PI, etc.
+#define _USE_MATH_DEFINES   
+#endif
 
 #include <string.h>  // for memcpy
 #include <cmath>    // for sqrt
@@ -130,10 +133,10 @@ template <class Accessor>
 class MatrixBase;
 
 template<int Rows, int Cols, class Accessor>
-struct FixedMatrix;
+class FixedMatrix;
 
 template<class Accessor>
-struct DynamicMatrix;
+class DynamicMatrix;
 
 template<class Layout>
 class RefMatrix;

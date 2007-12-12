@@ -32,7 +32,7 @@ template <int Size, class AllocZone> class FixedVAccessor;
 /////////////  DYNAMIC SIZED ACCESSORS ////////////////
 
 class DynamicVAccessor {
-  friend class VSizer;
+  friend struct VSizer;
 public:
   typedef DynamicVector<DynamicVAccessor> RefVector;
     

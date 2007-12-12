@@ -71,13 +71,9 @@ class RefSkipMAccessor<RowMajor> {
   int num_skip()const throw() {return my_skip;}
   typedef RowMajor layout;
 
-  inline DynamicMatrix<RefSkipMAccessor<ColMajor> >& T() {
-    return reinterpret_cast<DynamicMatrix<RefSkipMAccessor<ColMajor> >&>(*this);
-  }
+  inline DynamicMatrix<RefSkipMAccessor<ColMajor> >& T();
 
-  inline const DynamicMatrix<RefSkipMAccessor<ColMajor> >& T() const {
-    return reinterpret_cast<const DynamicMatrix<RefSkipMAccessor<ColMajor> >&>(*this);
-  }
+  inline const DynamicMatrix<RefSkipMAccessor<ColMajor> >& T() const;
 
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
@@ -193,6 +189,14 @@ class RefSkipMAccessor<ColMajor> {
   double* my_values;
 };
 
+inline DynamicMatrix<RefSkipMAccessor<ColMajor> >& RefSkipMAccessor<RowMajor>::T() {
+    return reinterpret_cast<DynamicMatrix<RefSkipMAccessor<ColMajor> >&>(*this);
+}
+
+inline const DynamicMatrix<RefSkipMAccessor<ColMajor> >& RefSkipMAccessor<RowMajor>::T() const {
+    return reinterpret_cast<const DynamicMatrix<RefSkipMAccessor<ColMajor> >&>(*this);
+}
+
 typedef RefSkipMAccessor<RowMajor>::RefSkipMatrixRM RefSkipMatrixRM;
 typedef RefSkipMAccessor<ColMajor>::RefSkipMatrixCM RefSkipMatrixCM;
 inline RefSkipMatrixRM makeRefSkipMatrixRM(int nr, int nc, int sk, double* v) { RefSkipMatrixRM ret; ret.set(nr,nc,sk,v); return ret; }
@@ -230,12 +234,8 @@ class DynamicMAccessor<RowMajor> {
   int num_skip()const throw() {return my_num_cols;}
   typedef RowMajor layout;
 
-  inline DynamicMatrix<DynamicMAccessor<ColMajor> >& T() {
-    return reinterpret_cast<DynamicMatrix<DynamicMAccessor<ColMajor> >&>(*this);
-  }
-  inline const DynamicMatrix<DynamicMAccessor<ColMajor> >& T() const {
-    return reinterpret_cast<const DynamicMatrix<DynamicMAccessor<ColMajor> >&>(*this);
-  }
+  inline DynamicMatrix<DynamicMAccessor<ColMajor> >& T();
+  inline const DynamicMatrix<DynamicMAccessor<ColMajor> >& T() const;
 
   // slice
   template<int Rstart, int Cstart, int Rsize, int Csize>
@@ -327,6 +327,14 @@ class DynamicMAccessor<ColMajor> {
   int my_num_rows;  // so that transpose operation is a simple cast
   double* my_values;
 };
+
+inline DynamicMatrix<DynamicMAccessor<ColMajor> >& DynamicMAccessor<RowMajor>::T() {
+    return reinterpret_cast<DynamicMatrix<DynamicMAccessor<ColMajor> >&>(*this);
+}
+inline const DynamicMatrix<DynamicMAccessor<ColMajor> >& DynamicMAccessor<RowMajor>::T() const {
+    return reinterpret_cast<const DynamicMatrix<DynamicMAccessor<ColMajor> >&>(*this);
+}
+
 
 typedef DynamicMatrix<DynamicMAccessor<RowMajor> > RefMatrixRM;
 typedef DynamicMatrix<DynamicMAccessor<ColMajor> > RefMatrixCM;

@@ -58,7 +58,7 @@ class Matrix : public FixedMatrix<Rows, Cols, FixedMAccessor<Rows, Cols, Layout,
 
 template <class Layout>
 class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<Layout> > {
-  friend class MSizer;
+  friend struct MSizer;
  public:
   inline Matrix(){
     this->my_num_rows = 0;
@@ -135,9 +135,7 @@ class Matrix<General, General, Layout> : public DynamicMatrix<DynamicMAccessor<L
 struct MSizer {
   template<class Layout>
   static inline void set_size(Matrix<General,General,Layout>& ret, int rows, int cols){
-    ret.my_num_rows=rows;
-    ret.my_num_cols=cols;
-    ret.my_values = new double[rows*cols];
+    ret.set(rows, cols, new double[rows*cols]);
   }
 };
 

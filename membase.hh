@@ -26,7 +26,11 @@ template<int Size>
 class Stack {
 protected:
   double my_values[Size];
+#ifndef WIN32
 } __attribute__ ((aligned(16)));
+#else
+};
+#endif
 
 // the class allocates and deallocates the data on the heap
 template<int Size>

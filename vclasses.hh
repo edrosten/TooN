@@ -19,8 +19,6 @@
 #ifndef __VCLASSES_HH
 #define __VCLASSES_HH
 
-#include <assert.h>
-
 ///////////////////////////
 //                       //
 // Actual Vector classes //

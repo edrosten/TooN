@@ -20,9 +20,6 @@
 #ifndef __LINOPERATORS_HH
 #define __LINOPERATORS_HH
 
-#include <assert.h>
-
-
 inline RefMatrixRM DynamicVAccessor::as_row(){
   return makeRefMatrixRM(1,my_size,my_values);
 }

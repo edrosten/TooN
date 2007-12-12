@@ -19,8 +19,6 @@
 */
 #ifndef __MBASE_HH
 #define __MBASE_HH
-#include <assert.h>
-
 
 template <class Accessor>
 class MatrixBase : public Accessor {
@@ -89,7 +87,8 @@ struct MatrixCopy<DynamicMAccessor<Layout>,DynamicMAccessor<Layout> > {
 ////////////////////////////////////////////////////////
 
 template<int Rows, int Cols, class Accessor>
-struct FixedMatrix : public MatrixBase<Accessor> {
+class FixedMatrix : public MatrixBase<Accessor> {
+public:
   // assignment from correct sized FixedMatrix
   template<class Accessor2>
   inline FixedMatrix& operator=(const FixedMatrix<Rows,Cols,Accessor2>& from){
@@ -114,7 +113,8 @@ struct FixedMatrix : public MatrixBase<Accessor> {
 };
 
 template<class Accessor>
-struct DynamicMatrix : public MatrixBase<Accessor> {
+class DynamicMatrix : public MatrixBase<Accessor> {
+public:
   // assignment from any MatrixBase
   template<class Accessor2>
   DynamicMatrix& operator=(const MatrixBase<Accessor2>& from){
