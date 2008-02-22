@@ -21,6 +21,7 @@
 #define __SYMEIGEN_H
 
 #include <iostream>
+#include <cassert>
 #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
@@ -31,6 +32,62 @@ namespace TooN {
 
 static const double symeigen_condition_no=1e9;
 
+    template <int Size> struct ComputeSymEigen {
+	
+	template<class Accessor>
+	static inline void compute(const FixedMatrix<Size,Size,Accessor>& m, Matrix<Size,Size,RowMajor>& evectors, Vector<Size>& evalues) {
+	    evectors = m;
+	    int N = Size;
+	    int lda = Size;
+	    int info;
+	    int lwork=-1;
+	    double size;
+	    
+	    // find out how much space fortran needs
+	    dsyev_((char*)"V",(char*)"U",&N,evectors.get_data_ptr(),&lda,evalues.get_data_ptr(),
+		   &size,&lwork,&info);
+	    lwork = int(size);
+	    double* WORK = new double[lwork];
+	    
+	    // now compute the decomposition
+	    dsyev_((char*)"V",(char*)"U",&N,evectors.get_data_ptr(),&lda,evalues.get_data_ptr(),
+		   WORK,&lwork,&info);
+	    delete [] WORK;
+	    if(info!=0){
+		std::cerr << "In SymEigen<"<<Size<<">: " << info 
+			  << " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
+			  << "M = " << m << std::endl;
+	    }
+	}	
+    };
+
+    template <> struct ComputeSymEigen<2> {
+	
+	template<class Accessor>
+	static inline void compute(const FixedMatrix<2,2,Accessor>& m, Matrix<2,2,RowMajor>& eig, Vector<2>& ev) {
+	    double trace = m[0][0] + m[1][1];
+	    double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+	    double disc = trace*trace - 4 * det;
+	    assert(disc>=0);
+	    double root_disc = sqrt(disc);
+	    ev[0] = 0.5 * (trace - root_disc);
+	    ev[1] = 0.5 * (trace + root_disc);
+	    double a = m[0][0] - ev[0];
+	    double b = m[0][1];
+	    double magsq = a*a + b*b;
+	    if (magsq == 0) {
+		eig[0][0] = 1.0;
+		eig[0][1] = 0;
+	    } else {
+		eig[0][0] = -b;
+		eig[0][1] = a;
+		eig[0] *= 1.0/sqrt(magsq);
+	    }
+	    eig[1][0] = -eig[0][1];
+	    eig[1][1] = eig[0][0];
+	}	
+    };
+    
 template <int Size=-1>
 class SymEigen {
 public:
@@ -44,28 +101,7 @@ public:
 
   template<class Accessor>
   inline void compute(const FixedMatrix<Size,Size,Accessor>& m){
-    my_evectors = m;
-    int N = Size;
-    int lda = Size;
-    int info;
-    int lwork=-1;
-    double size;
-
-    // find out how much space fortran needs
-    dsyev_("V","U",&N,my_evectors.get_data_ptr(),&lda,my_evalues.get_data_ptr(),
-	   &size,&lwork,&info);
-    lwork = int(size);
-    double* WORK = new double[lwork];
-
-    // now compute the decomposition
-    dsyev_("V","U",&N,my_evectors.get_data_ptr(),&lda,my_evalues.get_data_ptr(),
-	   WORK,&lwork,&info);
-    delete [] WORK;
-    if(info!=0){
-      std::cerr << "In SymEigen<"<<Size<<">: " << info 
-		<< " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
-		<< "M = " << m << std::endl;
-    }
+      ComputeSymEigen<Size>::compute(m, my_evectors, my_evalues);
   }
   
   template <class Accessor>
