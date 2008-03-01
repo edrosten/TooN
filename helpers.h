@@ -41,6 +41,10 @@ template  <class Accessor> Vector<>                 project(const DynamicVector<
 template <int Size, class Accessor> Vector<Size+1>  unproject(const FixedVector<Size,Accessor>& v);
 template  <class Accessor> Vector<>                 unproject(const DynamicVector<Accessor>& v);
 
+// Extend - same as unproject, but with 0 instead of 1
+template <int Size, class Accessor> Vector<Size+1>  extend(const FixedVector<Size,Accessor>& v);
+template  <class Accessor> Vector<>                 extend(const DynamicVector<Accessor>& v);
+
 
 // as_vector
 template<int Size> inline FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >&  as_vector(double* data);
@@ -176,6 +180,35 @@ struct DynamicVUnproject : public VSizer{
 template  <class Accessor>
 Vector<> unproject(const DynamicVector<Accessor>& v){
   return Vector<>(v,Operator<DynamicVUnproject<Accessor> >());
+}
+
+// Extend
+template <int Size, class Accessor>
+struct FixedVExtend {
+  inline static void eval(Vector<Size+1>& ret, const FixedVector<Size,Accessor>& v){
+    ret.template slice<0,Size>() = v;
+    ret[Size]=0;
+  }
+};
+
+template <int Size, class Accessor>
+Vector<Size+1> extend(const FixedVector<Size,Accessor>& v){
+  return Vector<Size+1>(v,Operator<FixedVExtend<Size,Accessor> >());
+}
+
+template <class Accessor>
+struct DynamicVExtend : public VSizer{
+  inline static void eval(Vector<>& ret, const DynamicVector<Accessor>& v){
+    const int size = v.size();
+    set_size(ret,size+1);
+    v.copy_into(ret.get_data_ptr());
+    ret[size]=0;
+  }
+};
+
+template  <class Accessor>
+Vector<> extend(const DynamicVector<Accessor>& v){
+  return Vector<>(v,Operator<DynamicVExtend<Accessor> >());
 }
 
 
