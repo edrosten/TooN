@@ -8,7 +8,8 @@
      version 2.1 of the License, or (at your option) any later version.
 
      This library is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     but WITHOUT ANY WARRANTY; without even the implied warranty of}
+
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
      Lesser General Public License for more details.
 
@@ -46,6 +47,10 @@ template <int Size, class Accessor> Vector<Size+1>  extend(const FixedVector<Siz
 template  <class Accessor> Vector<>                 extend(const DynamicVector<Accessor>& v);
 
 
+// unit vector
+template <int N, class A> Vector<N> unit(const FixedVector<N,A>& v) { return v / sqrt(v*v); }
+template <int N, class A> double norm_sq(const FixedVector<N,A>& v) { return v*v; }
+    
 // as_vector
 template<int Size> inline FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >&  as_vector(double* data);
 template<int Size> inline const FixedVector<Size,FixedVAccessor<Size,Stack<Size> > >&  as_vector(const double* data);
@@ -84,6 +89,40 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
  
  template <int M, int N> inline const Matrix<M,N>& zeros() { return *reinterpret_cast<const Matrix<M,N>*>(ZeroBlock<double,M*N>::data); }
  template <int N> inline const Vector<N>& zeros() { return *reinterpret_cast<const Vector<N>*>(ZeroBlock<double,N>::data); }
+ inline const Matrix<> zeros(int m, int n) {
+     Matrix<> z(m,n);
+     Zero(z);
+     return z;
+ }
+
+
+template <class A> inline double determinant(const FixedMatrix<2,2,A>& M) 
+{
+    return M[0][0] * M[1][1] - M[0][1] * M[1][0];
+}
+
+template <class A> inline Matrix<2> inverse(const FixedMatrix<2,2,A>& M)
+{
+    const double det = determinant(M);
+    assert(det != 0);
+    Matrix<2> inv;
+    double rdet = 1.0/det;
+    inv[0][0] = M[1][1] * rdet;
+    inv[0][1] = -M[0][1] * rdet;
+    inv[1][0] = -M[1][0] * rdet;
+    inv[1][1] = M[0][0] * rdet;
+    return inv;
+ }
+
+template <class A> inline double trace(const MatrixBase<A>& M)
+{
+    assert(M.num_rows() == M.num_cols());
+    double tr = 0;
+    for (int i=0; i<M.num_rows(); ++i)
+	tr += M[i][i];
+    return tr;
+}
+
  //////////////////////////////////////////////
 
 
@@ -422,9 +461,19 @@ template <int R, int N, class A1, class A2> inline Matrix<R> transformCovariance
      util::matrix_multiply<util::PlusEquals,M,N,C>(Ma,Mb,Mc);
  }
 
+ template <int M, int N, int C, class A, class B, class Mat> inline void subtract_product(const FixedMatrix<M,N,A>& Ma, const FixedMatrix<N,C,B>& Mb, Mat& Mc)
+ {
+     util::matrix_multiply<util::MinusEquals,M,N,C>(Ma,Mb,Mc);
+ }
+
  template <int M, int N, class A, class B, class Vec> inline void add_product(const FixedMatrix<M,N,A>& m, const FixedVector<N,B>& v, Vec& r)
  {
      util::matrix_multiply<util::PlusEquals,M,N,1>(m,v.as_col(),r.as_col());
+ }
+
+ template <int M, int N, class A, class B, class Vec> inline void subtract_product(const FixedMatrix<M,N,A>& m, const FixedVector<N,B>& v, Vec& r)
+ {
+     util::matrix_multiply<util::MinusEquals,M,N,1>(m,v.as_col(),r.as_col());
  }
  
  template <class A, class B, class C> inline void add_product(const DynamicMatrix<A>& Ma, const DynamicMatrix<B>& Mb, DynamicMatrix<C>& r)
