@@ -54,12 +54,12 @@ namespace TooN {
 
     template <int N, class A1, class A2>
     inline Vector<N> gaussian_elimination(const FixedMatrix<N,N,A1>& A, const FixedVector<N,A2>& b) {
-	return gaussian_elimination<Vector<N> >(Matrix<N>(A), Vector<N>(b));
+	return gaussian_elimination<Vector<N>, N, Vector<N> >(Matrix<N>(A), Vector<N>(b));
     }
 
     template <int N, class A1, class A2, int M>
     inline Matrix<N> gaussian_elimination(const FixedMatrix<N,N,A1>& A, const FixedMatrix<N,M,A2>& b) {
-	return gaussian_elimination<Matrix<N,M> >(Matrix<N>(A), Matrix<N,M>(b));
+	return gaussian_elimination<Matrix<N,M>,N, Matrix<N,M> >(Matrix<N>(A), Matrix<N,M>(b));
     }
 
 }
