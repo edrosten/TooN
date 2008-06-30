@@ -8,8 +8,7 @@
      version 2.1 of the License, or (at your option) any later version.
 
      This library is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of}
-
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
      Lesser General Public License for more details.
 
@@ -28,6 +27,13 @@ namespace TooN {
 #endif 
 
 //////////// CONTENTS OF THIS FILE ///////////
+
+inline Vector<1> makeVector(double x) { double vals[] = {x}; return Vector<1>(vals); }
+inline Vector<2> makeVector(double x0, double x1) { double vals[] = {x0,x1}; return Vector<2>(vals); }
+inline Vector<3> makeVector(double x0, double x1, double x2) { double vals[] = {x0,x1,x2}; return Vector<3>(vals); }
+inline Vector<4> makeVector(double x0, double x1, double x2, double x3) { double vals[] = {x0,x1,x2,x3}; return Vector<4>(vals); }
+inline Vector<5> makeVector(double x0, double x1, double x2, double x3, double x4) { double vals[] = {x0,x1,x2,x3,x4}; return Vector<5>(vals); }
+inline Vector<6> makeVector(double x0, double x1, double x2, double x3, double x4, double x5) { double vals[] = {x0,x1,x2,x3,x4,x5}; return Vector<6>(vals); }
 
 // normalizations (note US spelling)
 template <class Accessor> inline void  normalize(VectorBase<Accessor>& v);
@@ -89,12 +95,12 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
  
  template <int M, int N> inline const Matrix<M,N>& zeros() { return *reinterpret_cast<const Matrix<M,N>*>(ZeroBlock<double,M*N>::data); }
  template <int N> inline const Vector<N>& zeros() { return *reinterpret_cast<const Vector<N>*>(ZeroBlock<double,N>::data); }
+
  inline const Matrix<> zeros(int m, int n) {
      Matrix<> z(m,n);
      Zero(z);
      return z;
  }
-
 
 template <class A> inline double determinant(const FixedMatrix<2,2,A>& M) 
 {
@@ -123,9 +129,13 @@ template <class A> inline double trace(const MatrixBase<A>& M)
     return tr;
 }
 
- //////////////////////////////////////////////
+ ////////////////////////////-//////////////////
 
 
+template <int N, class A> void normalize(FixedVector<N,A>& v)
+{
+    v *= 1.0/sqrt(v*v);
+}
 
 // normalizations (note US spelling)
 template <class Accessor>
