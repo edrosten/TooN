@@ -366,6 +366,16 @@ template <class Accessor> inline void Fill(VectorBase<Accessor>& v, double value
 	 }
      }
 
+     template <class F, int R, int N, class A1, class A2, class A3> inline void transformCovarianceUpper(const FixedMatrix<R,N,A1>& A, const FixedMatrix<N,N,A2>& B, DynamicMatrix<A3> & M)
+     {
+	 assert(M.num_rows() == R && M.num_cols() == R);
+	 for (int i=0; i<R; ++i) {
+	     const Vector<N> ABi = B * A[i];
+	     for (int j=i; j<R; ++j)
+		 F::eval(M[i][j], ABi * A[j]);
+	 }
+     }
+
      template <class F, class A1, class M2, class M3> inline void transformCovarianceUpper(const DynamicMatrix<A1>& A, const M2 & B, M3 & M)
      {
 	const int R = A.num_rows();
