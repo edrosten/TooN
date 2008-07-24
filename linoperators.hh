@@ -806,61 +806,92 @@ Matrix<> operator+(const DynamicMatrix<LHAccessor>& lhs,
 }
 
 //////////////////////
-// operator +=      //
+// operator +=, -=  //
 // Matrix += Matrix //
 //////////////////////
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
-FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
-						 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-    for(int r=0; r<Rows; r++){
-	lhs[r] += rhs[r];
-    }
-    return lhs;
-}
+//fixed fixed
+//fixed dynamic
+//dynamic fixed
+//dynamic dynamic
+//RefCM fixed
+//RefCM dynamic
+//RefRM fixed
+//RefRM dynamic
 
-template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
-FixedMatrix<Rows,Cols,MAccessor1>& operator += ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
-						 const DynamicMatrix<MAccessor2>& rhs){
-  assert(rhs.num_rows() == Rows && rhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-      lhs[r] += rhs[r];
-  }
-  return lhs;
-}
+#define TOON_MAKE_ELEMENT_OPS(OP) \
+ \
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline FixedMatrix<Rows,Cols,MAccessor1>& operator OP ( FixedMatrix<Rows,Cols,MAccessor1>& lhs, const FixedMatrix<Rows,Cols,MAccessor2>& rhs){ \
+    for(int r=0; r<Rows; r++) \
+		lhs[r] OP rhs[r]; \
+    return lhs; \
+} \
+\
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline FixedMatrix<Rows,Cols,MAccessor1>& operator OP ( FixedMatrix<Rows,Cols,MAccessor1>& lhs, const DynamicMatrix<MAccessor2>& rhs){ \
+  assert(rhs.num_rows() == Rows && rhs.num_cols() == Cols); \
+  for(int r=0; r<Rows; r++) \
+      lhs[r] OP rhs[r]; \
+  return lhs; \
+} \
+ \
+template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline DynamicMatrix<MAccessor1>& operator OP ( DynamicMatrix<MAccessor1>& lhs, const FixedMatrix<Rows,Cols,MAccessor2>& rhs){ \
+  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols); \
+  for(int r=0; r<Rows; r++){ \
+      lhs[r] OP rhs[r]; \
+  } \
+  return lhs; \
+} \
+ \
+template <class MAccessor1, class MAccessor2> inline DynamicMatrix<MAccessor1>& operator OP ( DynamicMatrix<MAccessor1>& lhs, const DynamicMatrix<MAccessor2>& rhs){ \
+  assert(lhs.num_rows() == rhs.num_rows() && lhs.num_cols() == rhs.num_cols()); \
+  for(int r=0; r<lhs.num_rows(); r++) \
+    for(int c=0; c <lhs.num_cols(); c++) \
+      lhs[r][c] OP rhs[r][c]; \
+  return lhs; \
+} \
+ \
+template <int Rows, int Cols, class MAccessor> inline RefSkipMatrixRM operator OP (RefSkipMatrixRM lhs, const FixedMatrix<Rows,Cols,MAccessor>& rhs) \
+{ \
+  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols); \
+  for(int r=0; r<Rows; r++) \
+	  for(int c=0; c<Cols; c++) \
+		  lhs[r][c] OP rhs[r][c]; \
+   \
+  return lhs; \
+} \
+ \
+template <class MAccessor> inline RefSkipMatrixRM operator OP (RefSkipMatrixRM lhs, const DynamicMatrix<MAccessor>& rhs) \
+{ \
+  assert(lhs.num_rows() == rhs.num_rows() && lhs.num_cols() == rhs.num_cols()); \
+  for(int r=0; r < lhs.num_rows(); r++) \
+	  for(int c=0; c< lhs.num_cols(); c++) \
+      lhs[r][c] OP rhs[r][c]; \
+   \
+  return lhs; \
+} \
+ \
+ \
+template <int Rows, int Cols, class MAccessor> inline RefSkipMatrixCM operator OP (RefSkipMatrixCM lhs, const FixedMatrix<Rows,Cols,MAccessor>& rhs) { \
+  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols); \
+  for(int r=0; r<Rows; r++) \
+	  for(int c=0; c<Cols; c++) \
+      lhs[r][c] OP rhs[r][c]; \
+   \
+  return lhs; \
+} \
+ \
+template <class MAccessor> inline RefSkipMatrixCM operator OP (RefSkipMatrixCM lhs, const DynamicMatrix<MAccessor>& rhs) \
+{ \
+  assert(lhs.num_rows() == rhs.num_rows() && lhs.num_cols() == rhs.num_cols()); \
+  for(int r=0; r < lhs.num_rows(); r++) \
+	  for(int c=0; c< lhs.num_cols(); c++) \
+      lhs[r][c] OP rhs[r][c]; \
+   \
+  return lhs; \
+} 
 
-
-template <int Rows, int Cols, class MAccessor1, class MAccessor2> inline
-DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
-					 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-      lhs[r] += rhs[r];
-  }
-  return lhs;
-}
-
-template <class MAccessor1, class MAccessor2> inline
-DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
-					 const DynamicMatrix<MAccessor2>& rhs){
-  assert(lhs.num_rows() == rhs.num_rows() && lhs.num_cols() == rhs.num_cols());
-  for(int r=0; r<lhs.num_rows(); r++)
-    for(int c=0; c <lhs.num_cols(); c++)
-      lhs[r][c] += rhs[r][c];
-  return lhs;
-}
-
-template <int Rows, int Cols, class MAccessor> inline
-RefSkipMatrixRM operator += (RefSkipMatrixRM lhs, const FixedMatrix<Rows,Cols,MAccessor>& rhs)
-{
-  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++)
-	  for(int c=0; c<Cols; c++)
-      lhs[r][c] += rhs[r][c];
-  
-  return lhs;
-}
-
+TOON_MAKE_ELEMENT_OPS(+=)
+TOON_MAKE_ELEMENT_OPS(-=)
 
 
 
@@ -932,59 +963,6 @@ Matrix<> operator-(const DynamicMatrix<LHAccessor>& lhs,
 		   Operator<DynamicMMSub<
 		   DynamicMatrix<LHAccessor>,
 		   DynamicMatrix<RHAccessor> > >());
-}
-
-//////////////////////
-// operator -=      //
-// Matrix -= Matrix //
-//////////////////////
-
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
-FixedMatrix<Rows,Cols,MAccessor1>& operator -= ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
-						 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
-FixedMatrix<Rows,Cols,MAccessor1>& operator -= ( FixedMatrix<Rows,Cols,MAccessor1>& lhs,
-						 const DynamicMatrix<MAccessor2>& rhs){
-  assert(rhs.num_rows == Rows && rhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-
-template <int Rows, int Cols, class MAccessor1, class MAccessor2>
-DynamicMatrix<MAccessor1>& operator -= ( DynamicMatrix<MAccessor1>& lhs,
-					 const FixedMatrix<Rows,Cols,MAccessor2>& rhs){
-  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
-  for(int r=0; r<Rows; r++){
-    for(int c=0; c<Cols; c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
-}
-
-template <class MAccessor1, class MAccessor2>
-DynamicMatrix<MAccessor1>& operator -= ( DynamicMatrix<MAccessor1>& lhs,
-					 const DynamicMatrix<MAccessor2>& rhs){
-  assert(lhs.num_rows() == rhs.num_rows() && lhs.num_cols() == rhs.num_cols());
-  for(int r=0; r<lhs.num_rows(); r++){
-    for(int c=0; c<lhs.num_cols(); c++){
-      lhs(r,c)-=rhs(r,c);
-    }
-  }
-  return lhs;
 }
 
 /////////////////////
