@@ -850,6 +850,22 @@ DynamicMatrix<MAccessor1>& operator += ( DynamicMatrix<MAccessor1>& lhs,
   return lhs;
 }
 
+template <int Rows, int Cols, class MAccessor> inline
+RefSkipMatrixRM operator += (RefSkipMatrixRM lhs, const FixedMatrix<Rows,Cols,MAccessor>& rhs)
+{
+  assert(lhs.num_rows() == Rows && lhs.num_cols() == Cols);
+  for(int r=0; r<Rows; r++)
+	  for(int c=0; c<Cols; c++)
+      lhs[r][c] += rhs[r][c];
+  
+  return lhs;
+}
+
+
+
+
+
+
 /////////////////////
 // operator -      //
 // Matrix - Matrix //
