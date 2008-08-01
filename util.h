@@ -10,7 +10,7 @@ namespace TooN {
 	template <> struct Assert<true> {};
 
 	template <int B, int E, bool Valid=(B<=E)> struct Dot { 
-	    template <class V1, class V2> static inline double eval(const V1& v1, const V2& v2) { return 0; }
+	    template <class V1, class V2> static inline double eval(const V1&, const V2&) { return 0; }
 	};
 
 	template <int B, int E> struct Dot<B,E,true> {

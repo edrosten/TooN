@@ -65,8 +65,8 @@ namespace TooN {
 	    }
 	};
 	template <int N> struct Forwardsub_L<N,N> {
-	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, FixedVector<N,A3>& x) {}
-	    template <class A1, class A2, class Vec> static inline void eval(const FixedMatrix<N,N,A1>& L, const DynamicVector<A2>& v, Vec & x) {}
+	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& /*L*/, const FixedVector<N,A2>& /*v*/, FixedVector<N,A3>& /*x*/) {}
+	    template <class A1, class A2, class Vec> static inline void eval(const FixedMatrix<N,N,A1>& /*L*/, const DynamicVector<A2>& /*v*/, Vec & /*x*/) {}
 	};
 	
 	//
@@ -87,8 +87,8 @@ namespace TooN {
 	    }
 	};
 	template <int N> struct Backsub_LT<N,0> {
-	    template <class A1, class A2, class A3, class A4> static inline void eval(const FixedMatrix<N,N,A1>& L, const FixedVector<N,A2>& v, 
-										      const FixedVector<N,A3>& invdiag, FixedVector<N,A4>& x) {}
+	    template <class A1, class A2, class A3, class A4> static inline void eval(const FixedMatrix<N,N,A1>& /*L*/, const FixedVector<N,A2>& /*v*/, 
+										      const FixedVector<N,A3>& /*invdiag*/, FixedVector<N,A4>& /*x*/) {}
 	};
 
 	template <int N, class A1, class A2, class A3, class A4>
@@ -112,7 +112,7 @@ namespace TooN {
 	};
 
 	template <int N, int I> struct CholeskyInner<N,I,N> {
-	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& M, FixedMatrix<N,N,A2>& L, const FixedVector<N,A3>& invdiag) {}
+	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& /*M*/, FixedMatrix<N,N,A2>& /*L*/, const FixedVector<N,A3>& /*invdiag*/) {}
 	};
 	template <int N, int I=0> struct CholeskyOuter {
 	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& M, FixedMatrix<N,N,A2>& L, FixedVector<N,A3>& invdiag, int& rank) {
@@ -130,7 +130,7 @@ namespace TooN {
 	    }
 	};
 	template <int N> struct CholeskyOuter<N,N> {
-	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& M, FixedMatrix<N,N,A2>& L, FixedVector<N,A3>& invdiag, int& rank) {}
+	    template <class A1, class A2, class A3> static inline void eval(const FixedMatrix<N,N,A1>& /*M*/, FixedMatrix<N,N,A2>& /*L*/, FixedVector<N,A3>& /*invdiag*/, int& /*rank*/) {}
 	};
 
 
