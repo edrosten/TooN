@@ -46,8 +46,7 @@ public:
 
   inline Vector<3> ln() const;
 
-  inline double operator[](int i){return my_matrix[i/3][i%3];}
-  inline const double operator[](int i) const {return my_matrix[i/3][i%3];}
+  inline double operator[](int i) const {return my_matrix[i/3][i%3];}
 
   inline SO3 inverse() const;
 
