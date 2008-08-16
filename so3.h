@@ -47,6 +47,7 @@ public:
   inline Vector<3> ln() const;
 
   inline double operator[](int i){return my_matrix[i/3][i%3];}
+  inline const double operator[](int i) const {return my_matrix[i/3][i%3];}
 
   inline SO3 inverse() const;
 
@@ -70,7 +71,7 @@ public:
   struct Invert {};
   inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
   inline SO3(const SO3& a, const SO3& b) : my_matrix(a.my_matrix*b.my_matrix) {}
-      
+
   Matrix<3> my_matrix;
 };
 
@@ -148,14 +149,14 @@ inline SO3& SO3::operator=(const Matrix<3>& rhs){
      normalize(M[2]);
 }
 
-template <class A1, class A2> 
+template <class A1, class A2>
 inline void rodrigues_so3_exp(const TooN::FixedVector<3,A1>& w, const double A, const double B, TooN::FixedMatrix<3,3,A2>& R)
 {
     {
 	const double wx2 = w[0]*w[0];
 	const double wy2 = w[1]*w[1];
 	const double wz2 = w[2]*w[2];
-	
+
 	R[0][0] = 1.0 - B*(wy2 + wz2);
 	R[1][1] = 1.0 - B*(wx2 + wz2);
 	R[2][2] = 1.0 - B*(wx2 + wy2);
@@ -180,7 +181,7 @@ inline void rodrigues_so3_exp(const TooN::FixedVector<3,A1>& w, const double A, 
     }
 }
 
-template <class Accessor> 
+template <class Accessor>
 inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
     static const double one_6th = 1.0/6.0;
     static const double one_20th = 1.0/20.0;
@@ -190,7 +191,7 @@ inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
     const double theta_sq = w*w;
     const double theta = sqrt(theta_sq);
     double A, B;
-    
+
     if (theta_sq < 1e-8) {
 	A = 1.0 - one_6th * theta_sq;
 	B = 0.5;
@@ -212,7 +213,7 @@ inline Vector<3> SO3::ln() const{
   Vector<3> result;
 
   double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
- 
+
   // 2 * cos(theta) - 1 == trace
 
   result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
@@ -239,16 +240,16 @@ inline Vector<3> SO3::ln() const{
       A[0][0] -= 1.0;
       A[1][1] -= 1.0;
       A[2][2] -= 1.0;
-      TooN::LU<3> lu(A);     
+      TooN::LU<3> lu(A);
       const TooN::Matrix<3,3,TooN::ColMajor>& u = lu.get_lu().T();
       const double u0 = fabs(u[0][0]);
       const double u1 = fabs(u[1][1]);
       const double u2 = fabs(u[2][2]);
-      int row;      
+      int row;
       if (u0 < u1)
 	  row = u0 < u2 ? 0 : 2;
       else
-	  row = u1 < u2 ? 1 : 2;      
+	  row = u1 < u2 ? 1 : 2;
       //std::cerr << u << std::endl;
       //std::cerr << "row = " << row << std::endl;
       TooN::Vector<3> r;
