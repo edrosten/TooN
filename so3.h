@@ -293,6 +293,67 @@ inline Vector<3> SO3::adjoint(Vector<3> vect)const {
   return my_matrix * vect;
 }
 
+template <class A> inline
+Vector<3> transform(const SO3& pose, const FixedVector<3,A>& x) { return pose*x; }
+
+template <class A1, class A2> inline
+Vector<3> transform(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<3,3,A2>& J_x)
+{
+    J_x = pose.get_matrix();
+    return pose * x;
+}
+
+template <class A1, class A2, class A3> inline
+Vector<3> transform(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<3,3,A2>& J_x, FixedMatrix<3,3,A3>& J_pose)
+{
+    J_x = pose.get_matrix();
+    const Vector<3> cx = pose * x;
+    J_pose[0][0] = J_pose[1][1] = J_pose[2][2] = 0;
+    J_pose[1][0] = -(J_pose[0][1] = cx[2]);
+    J_pose[0][2] = -(J_pose[2][0] = cx[1]);
+    J_pose[2][1] = -(J_pose[1][2] = cx[0]);
+    return cx;
+}
+
+template <class A1, class A2, class A3> inline
+Vector<2> project_transformed_point(const SO3& pose, const FixedVector<3,A1>& in_frame, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,3,A3>& J_pose)
+{
+    const double z_inv = 1.0/in_frame[2];
+    const double x_z_inv = in_frame[0]*z_inv;
+    const double y_z_inv = in_frame[1]*z_inv;
+    const double cross = x_z_inv * y_z_inv;
+    J_pose[0][0] = -cross;
+    J_pose[0][1] = 1 + x_z_inv*x_z_inv;
+    J_pose[0][2] = -y_z_inv;
+    J_pose[1][0] = -1 - y_z_inv*y_z_inv;
+    J_pose[1][1] =  cross;
+    J_pose[1][2] =  x_z_inv;
+
+    const TooN::Matrix<3>& R = pose.get_matrix();
+    J_x[0][0] = z_inv*(R[0][0] - x_z_inv * R[2][0]);
+    J_x[0][1] = z_inv*(R[0][1] - x_z_inv * R[2][1]);
+    J_x[0][2] = z_inv*(R[0][2] - x_z_inv * R[2][2]);
+    J_x[1][0] = z_inv*(R[1][0] - y_z_inv * R[2][0]);
+    J_x[1][1] = z_inv*(R[1][1] - y_z_inv * R[2][1]);
+    J_x[1][2] = z_inv*(R[1][2] - y_z_inv * R[2][2]);
+
+    return makeVector(x_z_inv, y_z_inv);
+}
+
+
+template <class A1> inline
+Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x)
+{
+    return project(transform(pose,x));
+}
+
+template <class A1, class A2, class A3> inline
+Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,3,A3>& J_pose)
+{
+    return project_transformed_point(pose, transform(pose,x), J_x, J_pose);
+}
+
+
 #ifndef TOON_NO_NAMESPACE
 }
 #endif
