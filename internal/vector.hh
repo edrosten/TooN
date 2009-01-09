@@ -20,9 +20,8 @@ class Operator;
 template <int Size, int Type, typename Precision>
 class VBase;
 
-template <typename Precision>
-class SDVBase;
-
+template<int Stride, typename Precision> 
+class SDVBase; //Sliced Dynamic VBase. No ownership of data, Static stride.
 
 template<int Size, typename Precision>
 class VBase<Size, 0, Precision> {
@@ -40,7 +39,7 @@ public:
   
   // constructor from arbitrary vector
   template<int Size2, class Base2>
-  inline VBase(const Vector<Size2,Base2>& from){}
+  inline VBase(const Vector<Size2, Precision, Base2>& from){}
 
   Precision* data(){return my_data;}
   const Precision* data() const {return my_data;}
@@ -58,13 +57,13 @@ public:
   }
 
   template <int Start, int Length>
-  Vector<Length, Precision, SVBase<Length,1> >
+  Vector<Length, Precision, SVBase<Length,1,Precision> >
   slice(){
     Internal::CheckSlice<Size, Start, Length>::check();
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start]));
   }
 
-  Vector<-1, Precision, SDVBase>
+  Vector<-1, Precision, SDVBase<1, Precision> >
   slice(int start, int length);
 
 private:
@@ -72,7 +71,7 @@ private:
 };
 
 template<int Size, typename Precision>
-class VBase<Size,1>{
+class VBase<Size,1, Precision>{
 public:
 
   // Constructors
@@ -111,7 +110,7 @@ public:
   }
 
   Precision* data(){return my_data;}
-  const Precsion* data() const {return my_data;}
+  const Precision* data() const {return my_data;}
   
   static int size(){return Size;}
   static int stride(){return 1;}
@@ -124,10 +123,13 @@ public:
   }
 
   template <int Start, int Length>
-  Vector<Length, Precision, SVBase<Length,1> >
+  Vector<Length, Precision, SVBase<Length,1, Precision> >
   slice(){
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start]));
   }
+
+  Vector<-1, Precision, SDVBase<1, Precision> >
+  slice(int start, int length);
 
 private:
   Precision* const my_data;
@@ -161,7 +163,7 @@ public:
   }
 
   template <int Start, int Length>
-  Vector<Length, Precision, SVBase<Length,Stride> >
+  Vector<Length, Precision, SVBase<Length,Stride,Precision> >
   slice(){
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start*Stride]));
   }
@@ -204,7 +206,7 @@ public:
 
   // constructor from arbitrary vector
   template<int Size2, class Base2>
-  inline DVBase(const Vector<Size2,Base2>& from):
+  inline DVBase(const Vector<Size2, Precision, Base2>& from):
     my_data(new Precision[from.size()]),
     my_size(from.size()) {
   }
@@ -245,7 +247,7 @@ public:
 
   SDVBase(const SDVBase& from)
     : my_data(from.my_data),
-      my_size(from.my_size),
+      my_size(from.my_size){
   }
 
   Precision* data(){return my_data;}
@@ -276,7 +278,7 @@ public:
     my_stride=stride_in;
   };
 
-  SSDVBase(const SDVBase& from)
+  SSDVBase(const SSDVBase& from)
     : my_data(from.my_data),
       my_size(from.my_size),
       my_stride(from.my_stride){
@@ -291,6 +293,7 @@ public:
   Precision& operator[](int i){
     return my_data[i*my_stride];
   }
+
   const Precision& operator[](int i) const {
     return my_data[i*my_stride];
   }
@@ -364,7 +367,7 @@ public:
   }
 
   // operator = from copy
-  inline Vector<Size,Base >& operator= (const Vector& from){
+  inline Vector& operator= (const Vector& from){
     SizeMismatch<Size,Size>::test(Base::size(), from.size());
     const int s=Base::size();
     for(int i=0; i<s; i++){
@@ -386,4 +389,18 @@ public:
 
 };
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+//
+// Fill in function calls, now everything is visible
+
+template<int Size, typename Precision>
+Vector<-1, Precision, SDVBase<1, Precision> > VBase<Size, 0, Precision>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(Size, start, length);
+  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
+}
+
+template<int Size, typename Precision>
+Vector<-1, Precision, SDVBase<1, Precision> > VBase<Size, 1, Precision>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(Size, start, length);
+  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
+}
