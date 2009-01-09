@@ -239,7 +239,15 @@ public:
     return my_data[i];
   }
 
-  // TODO slice still to go in here
+  template <int Start, int Length>
+  Vector<Length, Precision, SVBase<Length,1,Precision> >
+  slice(){
+    Internal::CheckSlice<>::check(my_size, Start, Length);
+    return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start]));
+  }
+
+  Vector<-1, Precision, SDVBase<1, Precision> >
+  slice(int start, int length);
 
 private:
   Precision* const my_data;
@@ -275,6 +283,18 @@ public:
     Internal::check_index(my_size, i);
     return my_data[i*Stride];
   }
+
+  template <int Start, int Length>
+  Vector<Length, Precision, SVBase<Length,Stride,Precision> >
+  slice(){
+    Internal::CheckSlice<>::check(my_size, Start, Length);
+    return Vector<Length, Precision, SVBase<Length,Stride,Precision> >(&(my_data[Start]));
+  }
+
+  Vector<-1, Precision, SDVBase<Stride, Precision> >
+  slice(int start, int length);
+
+
 private:
   Precision* const my_data;
   int my_size;
@@ -425,3 +445,18 @@ Vector<-1, Precision, SDVBase<Stride, Precision> > SVBase<Size, Stride, Precisio
   Internal::CheckSlice<>::check(Size, start, length);
   return Vector<-1, Precision, SDVBase<Stride, Precision> >(my_data + start, length);
 }
+
+
+template<typename Precision>
+Vector<-1, Precision, SDVBase<1, Precision> > DVBase<Precision>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(my_size, start, length);
+  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
+}
+
+
+template<int Stride, typename Precision>
+Vector<-1, Precision, SDVBase<Stride, Precision> > SDVBase<Stride, Precision>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(my_size, start, length);
+  return Vector<-1, Precision, SDVBase<Stride, Precision> >(my_data + start, length);
+}
+
