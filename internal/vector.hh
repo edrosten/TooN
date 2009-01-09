@@ -116,15 +116,18 @@ public:
   static int stride(){return 1;}
 
   Precision& operator[](int i){
+    Internal::check_index(Size, i);
     return my_data[i];
   }
   const Precision& operator[](int i) const {
+    Internal::check_index(Size, i);
     return my_data[i];
   }
 
   template <int Start, int Length>
   Vector<Length, Precision, SVBase<Length,1, Precision> >
   slice(){
+    Internal::CheckSlice<Size, Start, Length>::check();
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start]));
   }
 
