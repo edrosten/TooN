@@ -170,8 +170,12 @@ public:
   template <int Start, int Length>
   Vector<Length, Precision, SVBase<Length,Stride,Precision> >
   slice(){
+    Internal::CheckSlice<Size, Start, Length>::check();
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start*Stride]));
   }
+
+  Vector<-1, Precision, SDVBase<Stride, Precision> >
+  slice(int start, int length);
 
 private:
   Precision* const my_data;
@@ -414,4 +418,10 @@ template<int Size, typename Precision>
 Vector<-1, Precision, SDVBase<1, Precision> > VBase<Size, 1, Precision>:: slice(int start, int length){
   Internal::CheckSlice<>::check(Size, start, length);
   return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
+}
+
+template<int Size, int Stride, typename Precision>
+Vector<-1, Precision, SDVBase<Stride, Precision> > SVBase<Size, Stride, Precision>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(Size, start, length);
+  return Vector<-1, Precision, SDVBase<Stride, Precision> >(my_data + start, length);
 }
