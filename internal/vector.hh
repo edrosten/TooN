@@ -1,9 +1,4 @@
 //-*- c++ -*-
-#ifndef TOON_VECTOR_H
-#define TOON_VECTOR_H
-
-#include "size_assert.h"
-
 // forward declarations
 template<int Size, typename Base>
 class Vector;
@@ -23,6 +18,8 @@ class Operator;
 // Type=1 means the data is external to the object
 template <int Size, int Type>
 class VBase;
+
+class SDVBase;
 
 
 template<int Size>
@@ -50,18 +47,23 @@ public:
   static int stride(){return 1;}
 
   double& operator[](int i){
+    Internal::check_index(Size, i);
     return my_data[i];
   }
   const double& operator[](int i) const {
+    Internal::check_index(Size, i);
     return my_data[i];
   }
 
   template <int Start, int Length>
   Vector<Length, SVBase<Length,1> >
   slice(){
+    Internal::CheckSlice<Size, Start, Length>::check();
     return Vector<Length, SVBase<Length,1> >(&(my_data[Start]));
   }
 
+  Vector<-1, SDVBase>
+  slice(int start, int length);
 
 private:
   double my_data[Size];
@@ -108,17 +110,23 @@ public:
   static int stride(){return 1;}
 
   double& operator[](int i){
+    Internal::check_index(Size, i);
     return my_data[i];
   }
   const double& operator[](int i) const {
+    Internal::check_index(Size, i);
     return my_data[i];
   }
 
   template <int Start, int Length>
   Vector<Length, SVBase<Length,1> >
   slice(){
+    Internal::CheckSlice<Size, Start, Length>::check();
     return Vector<Length, SVBase<Length,1> >(&(my_data[Start]));
   }
+
+  Vector<-1, SDVBase>
+  slice(int start, int length);
 
 private:
   double* const my_data;
@@ -224,27 +232,24 @@ private:
 // They have an additional stride member
 class SDVBase{
 public:
-  SDVBase(double* data_in, int size_in, int stride_in):
+  SDVBase(double* data_in, int size_in):
     my_data(data_in) {
     my_size=size_in;
-    my_stride=stride_in;
   };
 
   SDVBase(const SDVBase& from)
     : my_data(from.my_data),
-      my_size(from.my_size),
-      my_stride(from.my_stride){
+      my_size(from.my_size){
   }
 
   ~SDVBase(){
-    delete[] my_data;
   }
 
   double* data(){return my_data;}
   const double* data() const {return my_data;}
   
   int size() const {return my_size;}
-  int stride() const {return my_stride;}
+  int stride() const {return 1;}
 
   double& operator[](int i){
     return my_data[i];
@@ -255,7 +260,6 @@ public:
 private:
   double* const my_data;
   int my_size;
-  int my_stride;
 };
 
 // traits classes that help with building the vectors you actually
@@ -288,6 +292,7 @@ public:
   inline Vector(){}
   inline Vector(double* data) : Base (data) {}
   inline Vector(int size_in) : Base(size_in) {}
+  inline Vector(double* data_in, int size_in) : Base(data_in, size_in) {}
   inline Vector(double* data_in, int size_in, int stride_in) : Base(data_in, size_in, stride_in) {}
 
 
@@ -341,4 +346,20 @@ public:
 
 };
 
-#endif
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Fill in function calls, now everything is visible
+
+template<int Size>
+Vector<-1, SDVBase> VBase<Size, 0>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(Size, start, length);
+  return Vector<-1, SDVBase>(my_data + start, length);
+}
+
+template<int Size>
+Vector<-1, SDVBase> VBase<Size, 1>:: slice(int start, int length){
+  Internal::CheckSlice<>::check(Size, start, length);
+  return Vector<-1, SDVBase>(my_data + start, length);
+}

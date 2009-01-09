@@ -1,7 +1,5 @@
 // -*- c++ -*-
 
-#include<iostream>
-
 // class to generate compile time error
 // general case which doesn't exist
 template<int Size1, int Size2>
@@ -18,7 +16,7 @@ struct SizeMismatch<-1,Size>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
       std::cerr << "Toon Size Mismatch" << std::endl;
-      abort();
+      std::abort();
     }
   }
 };
@@ -28,7 +26,7 @@ struct SizeMismatch<Size,-1>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
       std::cerr << "Toon Size Mismatch" << std::endl;
-      abort();
+      std::abort();
     }
   }
 };
@@ -38,8 +36,9 @@ struct SizeMismatch<-1,-1>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
       std::cerr << "Toon Size Mismatch" << std::endl;
-      abort();
+      std::abort();
     }
   }
 };
+
 
