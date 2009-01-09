@@ -159,9 +159,11 @@ public:
   int stride() const {return Stride;}
 
   Precision& operator[](int i){
+    Internal::check_index(Size, i);
     return my_data[i*Stride];
   }
   const Precision& operator[](int i) const {
+    Internal::check_index(Size, i);
     return my_data[i*Stride];
   }
 
@@ -225,9 +227,11 @@ public:
   int stride() const {return 1;}
 
   Precision& operator[](int i){
+    Internal::check_index(my_size, i);
     return my_data[i];
   }
   const Precision& operator[](int i) const {
+    Internal::check_index(my_size, i);
     return my_data[i];
   }
 
@@ -260,9 +264,11 @@ public:
   int stride() const {return Stride;}
 
   Precision& operator[](int i){
+    Internal::check_index(my_size, i);
     return my_data[i*Stride];
   }
   const Precision& operator[](int i) const {
+    Internal::check_index(my_size, i);
     return my_data[i*Stride];
   }
 private:
@@ -294,10 +300,12 @@ public:
   int stride() const {return my_stride;}
 
   Precision& operator[](int i){
+    Internal::check_index(my_size, i);
     return my_data[i*my_stride];
   }
 
   const Precision& operator[](int i) const {
+    Internal::check_index(my_size, i);
     return my_data[i*my_stride];
   }
 private:
