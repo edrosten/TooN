@@ -15,8 +15,12 @@ template<int Size>
 struct SizeMismatch<-1,Size>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
-      std::cerr << "Toon Size Mismatch" << std::endl;
-      std::abort();
+	  #ifdef TOON_TEST_INTERNALS
+	  	throw Internal::SizeMismatch();
+	  #else
+		  std::cerr << "Toon Size Mismatch" << std::endl;
+		  std::abort();
+	  #endif
     }
   }
 };
@@ -25,8 +29,12 @@ template<int Size>
 struct SizeMismatch<Size,-1>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
-      std::cerr << "Toon Size Mismatch" << std::endl;
-      std::abort();
+	  #ifdef TOON_TEST_INTERNALS
+	  	throw Internal::SizeMismatch();
+	  #else
+		  std::cerr << "Toon Size Mismatch" << std::endl;
+		  std::abort();
+	  #endif
     }
   }
 };
@@ -35,10 +43,24 @@ template <>
 struct SizeMismatch<-1,-1>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
-      std::cerr << "Toon Size Mismatch" << std::endl;
-      std::abort();
+	  #ifdef TOON_TEST_INTERNALS
+	  	throw Internal::SizeMismatch();
+	  #else
+		  std::cerr << "Toon Size Mismatch" << std::endl;
+		  std::abort();
+	  #endif
     }
   }
 };
 
 
+#ifdef TOON_TEST_INTERNALS
+  template<int Size1, int Size2>
+  struct SizeMismatch
+  {
+    static inline void test(int, int)
+    {
+      throw Internal::StaticSizeMismatch();
+    }
+  };
+#endif

@@ -24,11 +24,24 @@ namespace Internal
 		{
 			if(start + length >= size)
 			{
-				std::cerr << "Toon slice out of range" << std::endl;
-				std::abort();
+				#ifdef TOON_TEST_INTERNALS
+					throw Internal::SliceError();
+				#else
+					std::cerr << "Toon slice out of range" << std::endl;
+					std::abort();
+				#endif
 			}
 		}
 	};
+
+	#ifdef TOON_TEST_INTERNALS
+		template<int Size, bool StaticBad> 
+		struct BadSlice{
+			static void check(){
+				throw Internal::StaticSliceError();
+			}
+		};
+	#endif
 
 
 

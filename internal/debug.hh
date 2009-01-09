@@ -1,12 +1,19 @@
 namespace Internal
 {
-	static inline void check_index(int i, int s)
+
+	
+
+	static inline void check_index(int s, int i)
 	{
-		#ifdef TOON_CHECK_BOUNDS
+		#if defined  TOON_CHECK_BOUNDS  || defined TOON_TEST_INTERNALS
 			if(i<0 || i >= s)
 			{
-				std::cerr << "Toon index out of range" << std::endl;
-				std::abort();
+				#ifdef TOON_TEST_INTERNALS
+					throw Internal::BadIndex();
+				#else
+					std::cerr << "Toon index out of range" << std::endl;
+					std::abort();
+				#endif
 			}
 		#endif
 	}
