@@ -14,6 +14,9 @@ install:
 	cp *.h *.hh $(hdr)
 	cp -r optimization $(hdr)/
 
+internal/make_vector.hh:  make_make_vector.awk
+	awk -f make_make_vector.awk > $@
+
 clean:
 	rm -rf html
 
