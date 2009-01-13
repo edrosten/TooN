@@ -18,6 +18,9 @@ template<class A> struct no_duplicates<A, A>
 	typedef class IgnoreMe{} type;
 };
 
+namespace TooN{namespace Internal{
+struct NoError{};
+}}
 
 #define TRY lineno = __LINE__; try{
 
@@ -28,10 +31,7 @@ catch(no_duplicates<TooN::Internal::X, TooN::Internal::Y>::type e)\
 }\
 
 #define EXPECT(X) \
-	if(#X == string("NoError"))\
-		cerr << "Test OK on line " << lineno << " from " << func_lineno << endl;\
-	else\
-		cerr << "Test FAILED on line " << lineno << " from " << func_lineno << ". Expected " << #X << ", got nothing." << endl;\
+	throw TooN::Internal::NoError();\
 }\
 catch(TooN::Internal::X e)\
 {\
@@ -42,31 +42,60 @@ EXPECT_CATCH(X, SliceError)\
 EXPECT_CATCH(X, StaticSliceError)\
 EXPECT_CATCH(X, SizeMismatch)\
 EXPECT_CATCH(X, StaticSizeMismatch)\
+EXPECT_CATCH(X, NoError)
 
-#define test_bad_static_slices(...) test_bad_static_slices_(__LINE__ , __VA_ARGS__)
-template<class C> void test_bad_static_slices_(int func_lineno, C v)
+#define test_static_static_slices(...) test_static_static_slices_(__LINE__ , __VA_ARGS__)
+template<class C> void test_static_static_slices_(int func_lineno, C v)
 {
 	TRY{
-		Vector<2> v;
-		v.slice<0, 3>();
+		v.template slice<0, 3>();
 	}
 	EXPECT(StaticSliceError);
 
 	TRY{
-		Vector<2> v;
-		v.slice<2, 2>();
+		v.template slice<2, 2>();
 	}
 	EXPECT(StaticSliceError);
 
 	TRY{
-		Vector<2> v;
-		v.slice<-1, 1>();
+		v.template slice<-1, 1>();
 	}
 	EXPECT(StaticSliceError);
+
+	TRY{
+		v.template slice<0, 2>();
+	}
+	EXPECT(NoError)
+
 }
 
-#define test_bad_dynamic_slices(...) test_bad_dynamic_slices_(__LINE__, __VA_ARGS__)
-template<class C> void test_bad_dynamic_slices_(int func_lineno, C v)
+#define test_static_dynamic_slices(...) test_static_dynamic_slices_(__LINE__ , __VA_ARGS__)
+template<class C> void test_static_dynamic_slices_(int func_lineno, C v)
+{
+	TRY{
+		v.template slice<0, 3>();
+	}
+	EXPECT(SliceError);
+
+	TRY{
+		v.template slice<2, 2>();
+	}
+	EXPECT(SliceError);
+
+	TRY{
+		v.template slice<-1, 1>();
+	}
+	EXPECT(StaticSliceError);
+
+	TRY{
+		v.template slice<0, 2>();
+	}
+	EXPECT(NoError);
+
+}
+
+#define test_dynamic_slices(...) test_dynamic_slices_(__LINE__, __VA_ARGS__)
+template<class C> void test_dynamic_slices_(int func_lineno, C v)
 {
 	TRY{
 		v.slice(0,3);
@@ -82,26 +111,31 @@ template<class C> void test_bad_dynamic_slices_(int func_lineno, C v)
 		v.slice(-1,1);
 	}
 	EXPECT(SliceError);
+
+	TRY{
+		v.template slice(0, 2);
+	}
+	EXPECT(NoError);
 }
 
 
 int main()
 {
-	test_bad_static_slices(Vector<2>());
-	test_bad_dynamic_slices(Vector<2>());
+	test_static_static_slices(Vector<2>());
+	test_dynamic_slices(Vector<2>());
 	
-	test_bad_static_slices(Vector<4>().slice<0,2>());
-	test_bad_dynamic_slices(Vector<4>().slice<0,2>());
+	test_static_static_slices(Vector<4>().slice<0,2>());
+	test_dynamic_slices(Vector<4>().slice<0,2>());
 
-	test_bad_static_slices(Vector<4>().slice(0,2));
-	test_bad_dynamic_slices(Vector<4>().slice(0,2));
+	test_static_dynamic_slices(Vector<4>().slice(0,2));
+	test_dynamic_slices(Vector<4>().slice(0,2));
 	
-	test_bad_static_slices(Vector<>(2));
-	test_bad_dynamic_slices(Vector<>(2));
+	test_static_dynamic_slices(Vector<>(2));
+	test_dynamic_slices(Vector<>(2));
 
-	test_bad_static_slices(Vector<>(4).slice<0,2>());
-	test_bad_dynamic_slices(Vector<>(4).slice<0,2>());
+	test_static_static_slices(Vector<>(4).slice<0,2>());
+	test_dynamic_slices(Vector<>(4).slice<0,2>());
 
-	test_bad_static_slices(Vector<>(4).slice(0,2));
-	test_bad_dynamic_slices(Vector<>(4).slice(0,2));
+	test_static_dynamic_slices(Vector<>(4).slice(0,2));
+	test_dynamic_slices(Vector<>(4).slice(0,2));
 }

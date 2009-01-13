@@ -13,7 +13,7 @@ namespace Internal
 	{
 		static void check()
 		{
-			BadSlice<(Start < 0) || (Start+Length>=Size)>::check();
+			BadSlice<(Start < 0) || (Start+Length>Size)>::check();
 		}
 	};	
 
@@ -24,7 +24,7 @@ namespace Internal
 		{
 			BadSlice<(Start != 2147483647 && Start < 0)>::check();
 
-			if(start < 0 || start + length >= size)
+			if(start < 0 || start + length > size)
 			{
 				#ifdef TOON_TEST_INTERNALS
 					throw Internal::SliceError();
