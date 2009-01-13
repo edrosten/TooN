@@ -1,19 +1,19 @@
 namespace Internal
 {
-	template<int Size, bool StaticBad> 
+	template<bool StaticBad> 
 	struct BadSlice;
 
-	template<int Size> 
-	struct BadSlice<Size, 0>{
+	template<> 
+	struct BadSlice<0>{
 		static void check(){}
 	};
 
-	template<int Size=-1, int Start=-1, int Length=-1> 
+	template<int Size=-1, int Start=2147483647, int Length=-1> 
 	struct CheckSlice
 	{
 		static void check()
 		{
-			BadSlice<Size, (Start+Length>=Size)>::check();
+			BadSlice<(Start < 0) || (Start+Length>=Size)>::check();
 		}
 	};	
 
@@ -22,7 +22,9 @@ namespace Internal
 	{
 		static void check(int size, int start, int length)
 		{
-			if(start + length >= size)
+			BadSlice<(Start != 2147483647 && Start < 0)>::check();
+
+			if(start < 0 || start + length >= size)
 			{
 				#ifdef TOON_TEST_INTERNALS
 					throw Internal::SliceError();
@@ -35,7 +37,7 @@ namespace Internal
 	};
 
 	#ifdef TOON_TEST_INTERNALS
-		template<int Size, bool StaticBad> 
+		template<bool StaticBad> 
 		struct BadSlice{
 			static void check(){
 				throw Internal::StaticSliceError();

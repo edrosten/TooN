@@ -281,7 +281,7 @@ public:
   template <int Start, int Length>
   Vector<Length, Precision, SVBase<Length,1,Precision> >
   slice(){
-    Internal::CheckSlice<>::check(my_size, Start, Length);
+    Internal::CheckSlice<-1, Start>::check(my_size, Start, Length);
     return Vector<Length, Precision, SVBase<Length,1,Precision> >(&(my_data[Start]));
   }
 
@@ -326,7 +326,7 @@ public:
   template <int Start, int Length>
   Vector<Length, Precision, SVBase<Length,Stride,Precision> >
   slice(){
-    Internal::CheckSlice<>::check(my_size, Start, Length);
+    Internal::CheckSlice<-1, Start>::check(my_size, Start, Length);
     return Vector<Length, Precision, SVBase<Length,Stride,Precision> >(&(my_data[Start]));
   }
 
