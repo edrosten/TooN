@@ -377,7 +377,6 @@ private:
   int my_stride;
 };
 
-
 // traits classes that help with building the vectors you actually
 // construct in code
 static const int MAX_SIZE=10;
