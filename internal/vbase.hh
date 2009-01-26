@@ -78,7 +78,7 @@ public:
   
   // constructor from arbitrary vector
   template<int Size2, class Base2>
-  inline VBase(const Vector<Size2, Precision, Base2>& from){}
+  inline VBase(const Vector<Size2, Precision, Base2>&){}
 
   Precision* data(){return my_data;}
   const Precision* data() const {return my_data;}

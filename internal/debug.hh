@@ -3,9 +3,9 @@ namespace Internal
 
 	
 
-	static inline void check_index(int s, int i)
-	{
-		#if defined  TOON_CHECK_BOUNDS  || defined TOON_TEST_INTERNALS
+	#if defined  TOON_CHECK_BOUNDS  || defined TOON_TEST_INTERNALS
+		static inline void check_index(int s, int i)
+		{
 			if(i<0 || i >= s)
 			{
 				#ifdef TOON_TEST_INTERNALS
@@ -15,6 +15,8 @@ namespace Internal
 					std::abort();
 				#endif
 			}
-		#endif
-	}
+		}
+	#else
+		static inline void check_index(int, int){}
+	#endif
 }

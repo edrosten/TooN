@@ -8,7 +8,7 @@ struct SizeMismatch;
 // special cases which do exist
 template<int Size>
 struct SizeMismatch<Size,Size>{
-  static inline void test(int size1, int size2){}
+  static inline void test(int, int){}
 };
 
 template<int Size>
