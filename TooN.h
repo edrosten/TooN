@@ -5,6 +5,10 @@
 #include <cstdlib>
 namespace TooN
 {
+	
+	static const unsigned int max_bytes_on_stack=1000;
+
+
 	#ifdef TOON_TEST_INTERNALS
 		namespace Internal
 		{
@@ -16,12 +20,17 @@ namespace TooN
 		}
 
 	#endif
-
+	
+	#include <TooN/internal/allocator.hh>
 	#include <TooN/internal/size_mismatch.hh>
 	#include <TooN/internal/slice_error.hh>
 	#include <TooN/internal/debug.hh>
 	#include <TooN/internal/vbase.hh>
 	#include <TooN/internal/vector.hh>
+
+	#include <TooN/internal/mbase.hh>
+	#include <TooN/internal/matrix.hh>
+
 	#include <TooN/internal/make_vector.hh>
 	#include <TooN/operators.h>
 }

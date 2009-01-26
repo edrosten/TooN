@@ -75,3 +75,20 @@ inline std::ostream& operator<< (std::ostream& os, const Vector<Size,Precision,B
 }
 
 
+template<int Rows, int Cols, typename Precision, template<int, int, class> class Base>
+inline std::ostream& operator<< (std::ostream& os, const Matrix<Rows, Cols, Precision, Base>& m){
+	for(int i=0; i < m.num_rows(); i++)
+	{
+		for(int j=0; j < m.num_cols(); j++)
+		{
+			if(j != 0)
+				os << " ";
+			os << m(i,j);
+		}
+		os << std::endl;
+	}
+	return os;
+}
+
+
+
