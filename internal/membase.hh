@@ -3,15 +3,36 @@
 static const int TOON_MAX_STACK_SIZE=10;
 #endif
 
-template <int Rows, int Cols>
-struct MMemSize{
-  static const int size=Rows*Cols;
+template <int Rows, int Cols, typename Precision, int Place=(Rows*Cols>TOON_MAX_STACK_SIZE?1:0)>
+struct MMemBase;
+
+// Place=0 => stack
+template <int Rows, int Cols, typename Precision>
+struct MMemBase<Rows, Cols, Precision, 0> {
+  Precision my_data[Rows*Cols];
 };
 
-template<>
-struct MMemSize<-1,-1> {
-  static const int size=-1;
+
+// Place=1 => heap
+template <int Rows, int Cols, typename Precision>
+struct MMemBase <Rows, Cols, Precision, 1>{
+  MMemBase() : my_data(new Precision[Rows*Cols]) {}
+  ~MMemBase() {delete[] my_data}
+  Precision* const my_data;
 };
+
+
+// Rows=Cols=-1 => dynamic
+tempate<typename Precision>
+struct MMembase<-1,-1,Precision,0> {
+  MMemBase(unsigned int r, unsigned int c) : my_data(new Precision[r*c]), my_rows(r), my_cols(c){}
+  ~MMemBase() {delete[] my_data;}
+  Precision* my_data;
+  unsigned int my_rows;
+  unsigned int my_cols;
+};
+
+
 
 
 template<int Size, typename Precision, int Place=(Size>TOON_MAX_STACK_SIZE?1:0)>
