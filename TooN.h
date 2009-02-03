@@ -7,6 +7,7 @@ namespace TooN
 {
 	
 	static const unsigned int max_bytes_on_stack=1000;
+	struct Slicing{};
 
 
 	#ifdef TOON_TEST_INTERNALS

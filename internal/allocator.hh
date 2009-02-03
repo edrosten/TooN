@@ -54,3 +54,15 @@ template<class Precision> class DynamicSizedAllocator
 template<int Size, class Precision> class StaticSizedAllocator: public StackOrHeap<Size, Precision, (sizeof(Precision)*Size>max_bytes_on_stack) >
 {
 };
+
+
+template<class Precision> struct SliceHolder
+{
+	SliceHolder(Precision* p)
+	:my_data(p)
+	{}
+
+	Precision* my_data;
+};
+
+

@@ -9,7 +9,7 @@ class Matrix : public Layout<Rows, Cols, Precision>
 	Matrix(){}
 
 	Matrix(Precision* data, Slicing)
-	:Layout<Rows, Cols, Precision>(data){}
+	:Layout<Rows, Cols, Precision>(data,Slicing()){}
 
 
 	Precision* data() {
