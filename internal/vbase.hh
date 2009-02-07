@@ -342,15 +342,15 @@ private:
 // SDVBase is for dynamically sized vectors that do not own their data
 // They have an additional stride member
 template <typename Precision>
-class SSDVBase{
+class SDDVBase{
 public:
-  SSDVBase(Precision* data_in, int size_in, int stride_in):
+  SDDVBase(Precision* data_in, int size_in, int stride_in):
     my_data(data_in) {
     my_size=size_in;
     my_stride=stride_in;
   };
 
-  SSDVBase(const SSDVBase& from)
+  SDDVBase(const SDDVBase& from)
     : my_data(from.my_data),
       my_size(from.my_size),
       my_stride(from.my_stride){

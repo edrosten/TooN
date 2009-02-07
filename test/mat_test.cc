@@ -5,7 +5,7 @@
 using namespace TooN;
 using namespace std;
 
-template<int R, int C, class P, template<int,int,class> class L> void foo(Matrix<R,C,P,L>& m)
+template<int R, int C, class P, class L> void foo(Matrix<R,C,P,L>& m)
 {
 	cout << "In foo:\n";
 	m[0][0] = 1;

@@ -23,82 +23,8 @@
 
 template<int,int,class,class> class Matrix;
 template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor;
+template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericColMajor;
 
-//Closure used to acquire strides
-//-1 means dynamic stride
-//-2 means dynamic stride is tied to size
-template<int Stride> struct Slice
-{
-	struct RowMajor
-	{
-		template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, Stride, MatrixSlice<Rows, Cols, Precision> >
-		{
-			//Optional constructors.
-			
-			Layout(Precision* p)
-			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p)
-			{
-			}
-
-			Layout(Precision* p, int stride)
-			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
-			{
-			}
-
-			Layout(Precision* p, int rows, int cols)
-			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
-			{
-			}
-
-			Layout(Precision* p, int rows, int cols, int stride)
-			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, stride)
-			{
-			}
-
-		};
-	};
-};
-
-
-struct RowMajor
-{
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, (Cols==-1?-2:Cols), MatrixAlloc<Rows, Cols, Precision> >
-	{
-		//Optional constructors.
-		
-		Layout(){}
-
-		Layout(int rows, int cols)
-		:GenericRowMajor<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
-		{}
-	};
-};
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Given the rows, cols, and stride, what should the resulting vector type be?
-//
-
-template<int Rows, int Cols, typename Precision> struct RMVec
-{
-	typedef Vector<Cols, Precision, SVBase<Cols, 1, Precision> > Type;
-
-	static Type vec(Precision* d, int /*cols*/)
-	{
-		return Type(d);
-	}
-};
-
-template<typename Precision> struct RMVec<-1, -1, Precision>
-{
-	typedef Vector<-1, Precision, SDVBase<1, Precision> > Type;
-
-	static Type vec(Precision* d, int cols)
-	{
-		return Type(d, cols);
-	}
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -134,6 +60,141 @@ template<> struct StrideHolder<-2>{
 };
 
 ////////////////////////////////////////////////////////////////////////////////
+//Closure used to acquire strides
+//-1 means dynamic stride
+//-2 means dynamic stride is tied to size
+template<int Stride> struct Slice
+{
+	struct RowMajor
+	{
+		template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, Stride, MatrixSlice<Rows, Cols, Precision> >
+		{
+			//Optional constructors.
+			
+			Layout(Precision* p)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p)
+			{
+			}
+
+			Layout(Precision* p, int stride)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
+			{
+			}
+
+			Layout(Precision* p, int rows, int cols)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
+			{
+			}
+
+			Layout(Precision* p, int rows, int cols, int stride)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, stride)
+			{
+			}
+
+		};
+	};
+
+	struct ColMajor
+	{
+		template<int Rows, int Cols, class Precision> struct Layout: public GenericColMajor<Rows, Cols, Precision, Stride, MatrixSlice<Rows, Cols, Precision> >
+		{
+			//Optional constructors.
+			
+			Layout(Precision* p)
+			:GenericColMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p)
+			{
+			}
+
+			Layout(Precision* p, int stride)
+			:GenericColMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
+			{
+			}
+
+			Layout(Precision* p, int rows, int cols)
+			:GenericColMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
+			{
+			}
+
+			Layout(Precision* p, int rows, int cols, int stride)
+			:GenericColMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, stride)
+			{
+			}
+
+		};
+	};
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Classes for Matrices owning memory
+//
+//
+struct RowMajor
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, (Cols==-1?-2:Cols), MatrixAlloc<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(){}
+
+		Layout(int rows, int cols)
+		:GenericRowMajor<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		{}
+	};
+};
+
+struct ColMajor
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public GenericColMajor<Rows, Cols, Precision, (Rows==-1?-2:Rows), MatrixAlloc<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(){}
+
+		Layout(int rows, int cols)
+		:GenericColMajor<Rows, Cols, Precision, (Rows == -1 ? -2 : Rows), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		{}
+	};
+};
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Row major matrix implementation
+//
+
+
+////////////////////////////////////////
+//
+// Given the rows, cols, and stride, 
+// what should the resulting vector type 
+// be?
+//
+
+template<int Rows, int Cols, typename Precision> struct RMVec
+{
+	typedef Vector<Cols, Precision, SVBase<Cols, 1, Precision> > Type;
+
+	static Type vec(Precision* d, int /*cols*/)
+	{
+		return Type(d);
+	}
+};
+
+template<typename Precision> struct RMVec<-1, -1, Precision>
+{
+	typedef Vector<-1, Precision, SDVBase<1, Precision> > Type;
+
+	static Type vec(Precision* d, int cols)
+	{
+		return Type(d, cols);
+	}
+};
+
+////////////////////////////////////////
 //
 //Generic access to Row Major data.
 //
@@ -202,4 +263,147 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl){
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(my_data+stride()*rs +cs, rl, cl, stride(), Slicing());
 	}
+
+
+	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor> T(){
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	}
 };
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Column major matrix implementation
+//
+
+
+////////////////////////////////////////
+//
+// Given the rows, cols, and stride, 
+// what should the resulting vector type 
+// be?
+//
+
+template<int Rows, int Cols, int Stride, typename Precision> struct CMVec
+{
+	typedef Vector<Cols, Precision, SVBase<Cols, Stride, Precision> > Type;
+
+	static Type vec(Precision* d, int /*cols*/, int /*stride*/)
+	{
+		return Type(d);
+	}
+};
+
+template<int Rows, int Cols, typename Precision> struct CMVec<Rows, Cols, -1, Precision>
+{
+	//FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+	//There should be a statically sized, dynamically strided vector type
+	typedef Vector<-1, Precision, SDDVBase<Precision> > Type;
+
+	static Type vec(Precision* d, int /*cols*/, int stride)
+	{
+		return Type(d, Cols, stride);
+	}
+};
+
+template<int Stride, typename Precision> struct CMVec<-1, -1, Stride, Precision>
+{
+	typedef Vector<-1, Precision, SDVBase<Stride, Precision> > Type;
+
+	static Type vec(Precision* d, int cols, int /*stride*/)
+	{
+		return Type(d, cols);
+	}
+};
+
+template<typename Precision> struct CMVec<-1, -1, -1, Precision>
+{
+	typedef Vector<-1, Precision, SDDVBase<Precision> > Type;
+
+	static Type vec(Precision* d, int cols, int stride)
+	{
+		return Type(d, cols, stride);
+	}
+};
+
+////////////////////////////////////////
+//
+//Generic access to Col Major data.
+//
+template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericColMajor: public Mem
+{
+	//Slices can never have tied strides
+	static const int SliceStride = Stride == -2?-1: Stride;
+
+	//This little hack returns the stride value if it exists,
+	//or one of the implied strides if they exist.
+	int tied_stride() const{ 
+		//Only valid if stride is -2
+		return num_rows();
+	}
+	StrideHolder<Stride> my_stride;
+	int stride() const {
+		return my_stride.get(this);
+	}
+
+
+	//Optional constructors
+	
+	GenericColMajor(){}
+
+	GenericColMajor(Precision* p)
+	:Mem(p) {}
+
+	GenericColMajor(Precision* p, int s)
+	:Mem(p),my_stride(s) {}
+
+	GenericColMajor(Precision* p, int r, int c)
+	:Mem(p, r, c) {}
+
+	GenericColMajor(Precision* p, int r, int c, int stride)
+	:Mem(p, r, c),my_stride(stride) {}
+
+	GenericColMajor(int r, int c)
+	:Mem(r, c) {}
+
+	using Mem::my_data;
+	using Mem::num_cols;
+	using Mem::num_rows;
+
+	Precision& operator()(int r, int c){
+		return my_data[c*stride() + r];
+	}
+
+	const Precision& operator()(int r, int c) const {
+		return my_data[c*stride() + r];
+	}
+	
+	typedef CMVec<Rows, Cols, Stride, Precision> Vec;
+	typename Vec::Type operator[](int r)
+	{
+		return Vec::vec(my_data + r, num_cols(), stride());
+	}
+
+	template<int Rstart, int Cstart, int Rlength, int Clength>
+	Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor> slice()
+	{
+		//Always pass the stride as a run-time parameter. It will be ignored
+		//by SliceHolder (above) if it is statically determined.
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor>(my_data+Rstart + stride()*Cstart, stride(), Slicing());
+	}
+
+	Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor > slice(int rs, int cs, int rl, int cl){
+		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(my_data+rs +stride()*cs, rl, cl, stride(), Slicing());
+	}
+
+	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor> T(){
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	}
+};
+
+
+

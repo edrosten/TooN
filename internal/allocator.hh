@@ -125,8 +125,8 @@ template<int R, int C, class Precision> struct MatrixSlice
 	MatrixSlice(Precision* p)
 	:my_data(p){}
 
-	//MatrixSlice(Precision* p, int /*rows*/, int /*cols*/)
-	//:my_data(p){}
+	MatrixSlice(Precision* p, int /*rows*/, int /*cols*/)
+	:my_data(p){}
 };
 
 template<class Precision> struct MatrixSlice<-1, -1, Precision>
