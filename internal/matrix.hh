@@ -16,6 +16,11 @@ class Matrix : public Layout<Rows, Cols, Precision>
 	Matrix(Precision* data, int stride, Slicing)
 	:Layout<Rows, Cols, Precision>(data, stride){}
 
+
+	Matrix(int rows, int cols)
+	:Layout<Rows,Cols,Precision>(rows, cols)
+	{}
+
 	Precision* data() {
 	  return my_data;
 	}

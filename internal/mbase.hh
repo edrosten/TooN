@@ -133,10 +133,12 @@ template<> struct StrideHolder<-2>{
 //
 template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor: public Mem
 {
+	//Slices can never have tied strides
+	static const int SliceStride = Stride == -2?-1: Stride;
 
 	//This little hack returns the stride value if it exists,
 	//or one of the implied strides if they exist.
-	int tied_stride(){ 
+	int tied_stride() const{ 
 		//Only valid if stride is -2
 		return num_cols();
 	}
@@ -151,16 +153,16 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	GenericRowMajor(){}
 
 	GenericRowMajor(Precision* p)
-	:Mem(p)
-	{}
+	:Mem(p) {}
 
 	GenericRowMajor(Precision* p, int s)
-	:Mem(p),my_stride(s)
-	{}
+	:Mem(p),my_stride(s) {}
 
 	GenericRowMajor(Precision* p, int r, int c)
-	:Mem(p, r, c)
-	{}
+	:Mem(p, r, c) {}
+
+	GenericRowMajor(int r, int c)
+	:Mem(r, c) {}
 
 	using Mem::my_data;
 	using Mem::num_cols;
@@ -181,16 +183,14 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
-	Matrix<Rlength, Clength, Precision, Slice<Stride>::template RowMajor> slice()
+	Matrix<Rlength, Clength, Precision, Slice<SliceStride>::template RowMajor> slice()
 	{
 		//Always pass the stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
-		return Matrix<Rlength, Clength, Precision, Slice<Stride>::template RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, Slice<SliceStride>::template RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
 	}
 
-	Matrix<-1, -1, Precision, Slice<Stride>::template RowMajor > slice(int rs, int cs, int rl, int cl){
-		return Matrix<-1, -1, Precision, Slice<Stride>::template RowMajor >(my_data+stride()*rs +cs, rl, cl, stride());
+	Matrix<-1, -1, Precision, Slice<SliceStride>::template RowMajor > slice(int rs, int cs, int rl, int cl){
+		return Matrix<-1, -1, Precision, Slice<SliceStride>::template RowMajor >(my_data+stride()*rs +cs, rl, cl, stride());
 	}
-
-
 };

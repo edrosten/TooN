@@ -100,11 +100,11 @@ template<class Precision> struct MatrixAlloc<-1, -1, Precision>
 	}
 
 	int num_rows() const {
-		return num_rows;
+		return my_rows;
 	}
 
 	int num_cols() const {
-		return num_cols;
+		return my_cols;
 	}
 };
 
@@ -141,11 +141,11 @@ template<class Precision> struct MatrixSlice<-1, -1, Precision>
 	}
 
 	int num_rows() const {
-		return num_rows;
+		return my_rows;
 	}
 
 	int num_cols() const {
-		return num_cols;
+		return my_cols;
 	}
 };
 
