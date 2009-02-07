@@ -33,6 +33,6 @@ namespace TooN
 	#include <TooN/internal/matrix.hh>
 
 	#include <TooN/internal/make_vector.hh>
-	#include <TooN/operators.h>
+	#include <TooN/internal/operators.hh>
 }
 #endif
