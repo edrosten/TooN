@@ -66,3 +66,96 @@ template<class Precision> struct SliceHolder
 };
 
 
+
+
+
+
+
+
+
+
+template<int R, int C, class Precision> struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
+{
+	int num_rows() const {
+		return R;
+	}
+
+	int num_cols() const {
+		return C;
+	}
+};
+
+template<class Precision> struct MatrixAlloc<-1, -1, Precision>
+{
+	const int my_rows;
+	const int my_cols;
+	Precision* const my_data;
+
+	MatrixAlloc(int r, int c)
+	:my_rows(r),my_cols(c),my_data(new Precision[r*c]) {
+	}
+
+	~MatrixAlloc() {
+		delete[] my_data;
+	}
+
+	int num_rows() const {
+		return num_rows;
+	}
+
+	int num_cols() const {
+		return num_cols;
+	}
+};
+
+
+
+template<int R, int C, class Precision> struct MatrixSlice
+{
+	int num_rows() const {
+		return R;
+	}
+
+	int num_cols() const {
+		return C;
+	}
+	//Optional Constructors
+	
+	Precision* const my_data;
+	MatrixSlice(Precision* p)
+	:my_data(p){}
+
+	//MatrixSlice(Precision* p, int /*rows*/, int /*cols*/)
+	//:my_data(p){}
+};
+
+template<class Precision> struct MatrixSlice<-1, -1, Precision>
+{
+	Precision* const my_data;
+	const int my_rows;
+	const int my_cols;
+
+	MatrixSlice(Precision d, int r, int c)
+	:my_data(d), my_rows(r),my_cols(c),my_data(d)
+	{
+	}
+
+	int num_rows() const {
+		return num_rows;
+	}
+
+	int num_cols() const {
+		return num_cols;
+	}
+};
+
+
+
+
+
+
+
+
+
+
+

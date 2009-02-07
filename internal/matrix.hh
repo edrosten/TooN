@@ -9,8 +9,12 @@ class Matrix : public Layout<Rows, Cols, Precision>
 	Matrix(){}
 
 	Matrix(Precision* data, Slicing)
-	:Layout<Rows, Cols, Precision>(data,Slicing()){}
-
+	:Layout<Rows, Cols, Precision>(data){}
+	
+	//The stride is always passed during a slice. If it is not
+	//needed, it will be ignored later and not stored.
+	Matrix(Precision* data, int stride, Slicing)
+	:Layout<Rows, Cols, Precision>(data, stride){}
 
 	Precision* data() {
 	  return my_data;
