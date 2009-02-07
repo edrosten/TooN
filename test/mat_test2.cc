@@ -2,7 +2,7 @@
 using namespace TooN;
 using namespace std;
 
-template<int R, int C, template<int,int,class> class B> void statictest(Matrix<R,C,double,B> m)
+template<int R, int C, class B> void statictest(Matrix<R,C,double,B> m)
 {
 	for(int i=0; i < 12; i++)
 		(&m[0][0])[i] = i;
@@ -33,7 +33,7 @@ template<int R, int C, template<int,int,class> class B> void statictest(Matrix<R
 	cout << endl;
 }
 
-template<int R, int C, template<int,int,class> class B> void staticdynamictest(Matrix<R,C,double,B> m)
+template<int R, int C, class B> void staticdynamictest(Matrix<R,C,double,B> m)
 {
 	for(int i=0; i < 12; i++)
 		(&m[0][0])[i] = i;

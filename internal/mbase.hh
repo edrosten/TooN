@@ -21,7 +21,7 @@
 // The new case is that for strides, -2 means that the stride is 
 // the same as num_cols/num_rows, which must be dynamically sized.
 
-template<int,int,class,template<int,int,class> class> class Matrix;
+template<int,int,class,class> class Matrix;
 template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor;
 
 //Closure used to acquire strides
@@ -29,43 +29,49 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 //-2 means dynamic stride is tied to size
 template<int Stride> struct Slice
 {
-	template<int Rows, int Cols, class Precision> struct RowMajor: public GenericRowMajor<Rows, Cols, Precision, Stride, MatrixSlice<Rows, Cols, Precision> >
+	struct RowMajor
 	{
-		//Optional constructors.
-		
-		RowMajor(Precision* p)
-		:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p)
+		template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, Stride, MatrixSlice<Rows, Cols, Precision> >
 		{
-		}
+			//Optional constructors.
+			
+			Layout(Precision* p)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p)
+			{
+			}
 
-		RowMajor(Precision* p, int stride)
-		:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
-		{
-		}
+			Layout(Precision* p, int stride)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
+			{
+			}
 
-		RowMajor(Precision* p, int rows, int cols)
-		:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
-		{
-		}
+			Layout(Precision* p, int rows, int cols)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
+			{
+			}
 
-		RowMajor(Precision* p, int rows, int cols, int stride)
-		:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, stride)
-		{
-		}
+			Layout(Precision* p, int rows, int cols, int stride)
+			:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, stride)
+			{
+			}
 
+		};
 	};
 };
 
 
-template<int Rows, int Cols, class Precision> struct RowMajor: public GenericRowMajor<Rows, Cols, Precision, (Cols==-1?-2:Cols), MatrixAlloc<Rows, Cols, Precision> >
+struct RowMajor
 {
-	//Optional constructors.
-	
-	RowMajor(){}
+	template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, (Cols==-1?-2:Cols), MatrixAlloc<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(){}
 
-	RowMajor(int rows, int cols)
-	:GenericRowMajor<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
-	{}
+		Layout(int rows, int cols)
+		:GenericRowMajor<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		{}
+	};
 };
 
 
@@ -186,14 +192,14 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
-	Matrix<Rlength, Clength, Precision, Slice<SliceStride>::template RowMajor> slice()
+	Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor> slice()
 	{
 		//Always pass the stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
-		return Matrix<Rlength, Clength, Precision, Slice<SliceStride>::template RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
 	}
 
-	Matrix<-1, -1, Precision, Slice<SliceStride>::template RowMajor > slice(int rs, int cs, int rl, int cl){
-		return Matrix<-1, -1, Precision, Slice<SliceStride>::template RowMajor >(my_data+stride()*rs +cs, rl, cl, stride(), Slicing());
+	Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl){
+		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(my_data+stride()*rs +cs, rl, cl, stride(), Slicing());
 	}
 };
