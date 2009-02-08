@@ -166,38 +166,6 @@ struct ColMajor
 // Row major matrix implementation
 //
 
-
-////////////////////////////////////////
-//
-// Given the rows, cols, and stride, 
-// what should the resulting vector type 
-// be?
-//
-
-template<int Rows, int Cols, typename Precision> struct RMVec
-{
-	typedef Vector<Cols, Precision, SVBase<Cols, 1, Precision> > Type;
-
-	static Type vec(Precision* d, int /*cols*/)
-	{
-		return Type(d);
-	}
-};
-
-template<typename Precision> struct RMVec<-1, -1, Precision>
-{
-	typedef Vector<-1, Precision, SDVBase<1, Precision> > Type;
-
-	static Type vec(Precision* d, int cols)
-	{
-		return Type(d, cols);
-	}
-};
-
-////////////////////////////////////////
-//
-//Generic access to Row Major data.
-//
 template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor: public Mem
 {
 	//Slices can never have tied strides
@@ -245,11 +213,12 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	const Precision& operator()(int r, int c) const {
 		return my_data[r*stride() + c];
 	}
+
+
+	typedef Vector<Cols, Precision, SliceVBase<Cols, 1, Precision> > Vec;
 	
-	typedef RMVec<Rows, Cols, Precision> Vec;
-	typename Vec::Type operator[](int r)
-	{
-		return Vec::vec(my_data + stride()* r, num_cols());
+	Vec operator[](int r) {
+		return Vec(my_data + stride()* r, num_cols(), 1, Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
@@ -280,60 +249,6 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 // Column major matrix implementation
 //
 
-
-////////////////////////////////////////
-//
-// Given the rows, cols, and stride, 
-// what should the resulting vector type 
-// be?
-//
-
-template<int Rows, int Cols, int Stride, typename Precision> struct CMVec
-{
-	typedef Vector<Cols, Precision, SVBase<Cols, Stride, Precision> > Type;
-
-	static Type vec(Precision* d, int /*cols*/, int /*stride*/)
-	{
-		return Type(d);
-	}
-};
-
-template<int Rows, int Cols, typename Precision> struct CMVec<Rows, Cols, -1, Precision>
-{
-	//FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
-	//There should be a statically sized, dynamically strided vector type
-	typedef Vector<-1, Precision, SDDVBase<Precision> > Type;
-
-	static Type vec(Precision* d, int /*cols*/, int stride)
-	{
-		return Type(d, Cols, stride);
-	}
-};
-
-template<int Stride, typename Precision> struct CMVec<-1, -1, Stride, Precision>
-{
-	typedef Vector<-1, Precision, SDVBase<Stride, Precision> > Type;
-
-	static Type vec(Precision* d, int cols, int /*stride*/)
-	{
-		return Type(d, cols);
-	}
-};
-
-template<typename Precision> struct CMVec<-1, -1, -1, Precision>
-{
-	typedef Vector<-1, Precision, SDDVBase<Precision> > Type;
-
-	static Type vec(Precision* d, int cols, int stride)
-	{
-		return Type(d, cols, stride);
-	}
-};
-
-////////////////////////////////////////
-//
-//Generic access to Col Major data.
-//
 template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericColMajor: public Mem
 {
 	//Slices can never have tied strides
@@ -382,10 +297,9 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return my_data[c*stride() + r];
 	}
 	
-	typedef CMVec<Rows, Cols, Stride, Precision> Vec;
-	typename Vec::Type operator[](int r)
-	{
-		return Vec::vec(my_data + r, num_cols(), stride());
+	typedef Vector<Cols, Precision, SliceVBase<Cols, Stride, Precision> > Vec;
+	Vec operator[](int r) {
+		return Vec(my_data + r, num_cols(), stride(), Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>

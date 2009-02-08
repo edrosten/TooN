@@ -1,5 +1,5 @@
 const slices of vector
 const slices of matrices
 const vector indexing of matrices
-vector with static size and dynamic stride
 bounds checking for matrices
+.as_row() and .as_col() for vectors

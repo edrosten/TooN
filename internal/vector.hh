@@ -1,7 +1,6 @@
 //-*- c++ -*-
 
-template<int Size=-1, typename Precision=double,
-	 typename Base=typename VectorSelector<Size,Precision>::Type>
+template<int Size=-1, typename Precision=double, typename Base=VBase<Size, Precision> >
 class Vector : public Base {
 public:
   // sneaky hack: only one of these constructors will work with any given base
@@ -10,8 +9,8 @@ public:
   inline Vector(){}
   inline Vector(Precision* data) : Base (data) {}
   inline Vector(int size_in) : Base(size_in) {}
-  inline Vector(Precision* data_in, int size_in, int stride_in) : Base(data_in, size_in, stride_in) {}
-  inline Vector(Precision* data_in, int size_in) : Base(data_in, size_in) {}
+  inline Vector(Precision* data_in, int size_in, int stride_in, Slicing) : Base(data_in, size_in, stride_in) {}
+  inline Vector(Precision* data_in, int stride_in, Slicing) : Base(data_in, stride_in) {}
 
 
   // constructors to allow return value optimisations
@@ -63,40 +62,3 @@ public:
   }
 
 };
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Fill in function calls, now everything is visible
-
-template<int Size, typename Precision>
-Vector<-1, Precision, SDVBase<1, Precision> > VBase<Size, 0, Precision>:: slice(int start, int length){
-  Internal::CheckSlice<>::check(Size, start, length);
-  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
-}
-
-template<int Size, typename Precision>
-Vector<-1, Precision, SDVBase<1, Precision> > VBase<Size, 1, Precision>:: slice(int start, int length){
-  Internal::CheckSlice<>::check(Size, start, length);
-  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
-}
-
-template<int Size, int Stride, typename Precision>
-Vector<-1, Precision, SDVBase<Stride, Precision> > SVBase<Size, Stride, Precision>:: slice(int start, int length){
-  Internal::CheckSlice<>::check(Size, start, length);
-  return Vector<-1, Precision, SDVBase<Stride, Precision> >(my_data + start, length);
-}
-
-
-template<typename Precision>
-Vector<-1, Precision, SDVBase<1, Precision> > DVBase<Precision>:: slice(int start, int length){
-  Internal::CheckSlice<>::check(my_size, start, length);
-  return Vector<-1, Precision, SDVBase<1, Precision> >(my_data + start, length);
-}
-
-
-template<int Stride, typename Precision>
-Vector<-1, Precision, SDVBase<Stride, Precision> > SDVBase<Stride, Precision>:: slice(int start, int length){
-  Internal::CheckSlice<>::check(my_size, start, length);
-  return Vector<-1, Precision, SDVBase<Stride, Precision> >(my_data + start, length);
-}
-

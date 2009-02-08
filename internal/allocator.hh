@@ -67,10 +67,61 @@ template<class Precision> struct SliceHolder
 
 
 
+template<int Size, class Precision> struct VectorAlloc: public StaticSizedAllocator<Size, Precision>{
+	
+	int size() const {
+		return Size;
+	}
+};
+
+template<class Precision> struct VectorAlloc<-1, Precision> {
+	Precision * const my_data;
+	const int my_size;
+
+	VectorAlloc(int s)
+	:my_data(new Precision[s]), my_size(s)
+	{ }
+
+	int size() const {
+		return my_size;
+	}
+
+	~VectorAlloc(){
+		delete[] my_data;
+	}
+
+};
 
 
+template<int S, class Precision> struct VectorSlice
+{
+	int size() const {
+		return S;
+	}
 
+	//Optional Constructors
+	
+	Precision* const my_data;
+	VectorSlice(Precision* p)
+	:my_data(p){}
 
+	VectorSlice(Precision* p, int /*size*/)
+	:my_data(p){}
+};
+
+template<class Precision> struct VectorSlice<-1, Precision>
+{
+	Precision* const my_data;
+	const int my_size;
+
+	VectorSlice(Precision* d, int s)
+	:my_data(d), my_size(s)
+	{ }
+
+	int size() const {
+		return my_size;
+	}
+};
 
 
 
