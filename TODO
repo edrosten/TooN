@@ -2,4 +2,8 @@ const slices of vector
 const slices of matrices
 const vector indexing of matrices
 bounds checking for matrices
+slice checking for matrices
+bounds checking for vectors
+slice checking for vectors
 .as_row() and .as_col() for vectors
+matrix operators

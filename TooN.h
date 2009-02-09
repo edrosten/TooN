@@ -23,12 +23,14 @@ namespace TooN
 	#endif
 	
 	#include <TooN/internal/allocator.hh>
+
 	#include <TooN/internal/size_mismatch.hh>
 	#include <TooN/internal/slice_error.hh>
 	#include <TooN/internal/debug.hh>
+
 	#include <TooN/internal/vbase.hh>
 	#include <TooN/internal/vector.hh>
-
+	
 	#include <TooN/internal/mbase.hh>
 	#include <TooN/internal/matrix.hh>
 

@@ -31,26 +31,6 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 };
 
 
-template<class Precision> class DynamicSizedAllocator
-{
-	public:
-		DynamicSizedAllocator(int size)
-		:my_data(new Precision[size]){}
-
-
-		~DynamicSizedAllocator()
-		{
-			delete[] my_data;
-		}
-
-		Precision *my_data;
-
-	private:
-		DynamicSizedAllocator(const DynamicSizedAllocator& d);
-};
-
-
-
 template<int Size, class Precision> class StaticSizedAllocator: public StackOrHeap<Size, Precision, (sizeof(Precision)*Size>max_bytes_on_stack) >
 {
 };
