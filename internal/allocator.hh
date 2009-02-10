@@ -35,18 +35,6 @@ template<int Size, class Precision> class StaticSizedAllocator: public StackOrHe
 {
 };
 
-
-template<class Precision> struct SliceHolder
-{
-	SliceHolder(Precision* p)
-	:my_data(p)
-	{}
-
-	Precision* my_data;
-};
-
-
-
 template<int Size, class Precision> struct VectorAlloc: public StaticSizedAllocator<Size, Precision>{
 	
 	int size() const {
