@@ -23,7 +23,7 @@ template<int Size, int Stride, class Precision> struct SliceVBase: public Generi
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Classes for Matrices owning memory
+// Classes for Vectors owning memory
 //
 
 template<int Size, class Precision> struct VBase : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >{
