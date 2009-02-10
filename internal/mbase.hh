@@ -27,39 +27,6 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//
-// A class similar to mem, but to hold the stride information. It is only needed
-// for -1. For +int and -2, the stride is part fo teh type, or implicit.
-
-template<int s> struct StrideHolder
-{
-	//Constructos ignore superfluous arguments
-	StrideHolder(){}
-	StrideHolder(int){}
-
-	int get(const void*) const{
-		return s;
-	}
-};
-
-template<> struct StrideHolder<-1>
-{
-	StrideHolder(int s)
-	:stride(s){}
-
-	const int stride;
-	int get(const void*) const {
-		return stride;
-	}
-};
-
-template<> struct StrideHolder<-2>{
-	template<class C> int get(const C* c) const {
-		return c->tied_stride();
-	}
-};
-
-////////////////////////////////////////////////////////////////////////////////
 //Closure used to acquire strides
 //-1 means dynamic stride
 //-2 means dynamic stride is tied to size
@@ -166,38 +133,32 @@ struct ColMajor
 // Row major matrix implementation
 //
 
-template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor: public Mem
+template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericRowMajor: public Mem, StrideHolder<Stride>
 {
 	//Slices can never have tied strides
 	static const int SliceStride = Stride == -2?-1: Stride;
 
-	//This little hack returns the stride value if it exists,
-	//or one of the implied strides if they exist.
-	int tied_stride() const{ 
-		//Only valid if stride is -2
-		return num_cols();
-	}
-	StrideHolder<Stride> my_stride;
 	int stride() const {
-		return my_stride.get(this);
+		if(Stride == -2)
+			return num_cols();
+		else
+			return StrideHolder<Stride>::stride();
 	}
-
 
 	//Optional constructors
-	
 	GenericRowMajor(){}
 
 	GenericRowMajor(Precision* p)
 	:Mem(p) {}
 
 	GenericRowMajor(Precision* p, int s)
-	:Mem(p),my_stride(s) {}
+	:Mem(p),StrideHolder<Stride>(s) {}
 
 	GenericRowMajor(Precision* p, int r, int c)
 	:Mem(p, r, c) {}
 
 	GenericRowMajor(Precision* p, int r, int c, int stride)
-	:Mem(p, r, c),my_stride(stride) {}
+	:Mem(p, r, c),StrideHolder<Stride>(stride) {}
 
 	GenericRowMajor(int r, int c)
 	:Mem(r, c) {}
@@ -249,20 +210,16 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 // Column major matrix implementation
 //
 
-template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericColMajor: public Mem
+template<int Rows, int Cols, class Precision, int Stride, class Mem> struct GenericColMajor: public Mem, public StrideHolder<Stride>
 {
 	//Slices can never have tied strides
 	static const int SliceStride = Stride == -2?-1: Stride;
 
-	//This little hack returns the stride value if it exists,
-	//or one of the implied strides if they exist.
-	int tied_stride() const{ 
-		//Only valid if stride is -2
-		return num_rows();
-	}
-	StrideHolder<Stride> my_stride;
 	int stride() const {
-		return my_stride.get(this);
+		if(Stride == -2)
+			return num_rows();
+		else
+			return StrideHolder<Stride>::stride();
 	}
 
 
@@ -274,13 +231,13 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	:Mem(p) {}
 
 	GenericColMajor(Precision* p, int s)
-	:Mem(p),my_stride(s) {}
+	:Mem(p),StrideHolder<Stride>(s) {}
 
 	GenericColMajor(Precision* p, int r, int c)
 	:Mem(p, r, c) {}
 
 	GenericColMajor(Precision* p, int r, int c, int stride)
-	:Mem(p, r, c),my_stride(stride) {}
+	:Mem(p, r, c),StrideHolder<Stride>(stride) {}
 
 	GenericColMajor(int r, int c)
 	:Mem(r, c) {}

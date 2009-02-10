@@ -5,33 +5,6 @@ template<typename T> class Operator;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// A class similar to mem, but to hold the stride information. It is only needed
-// for -1. For +int and -2, the stride is part fo teh type, or implicit.
-
-template<int s> struct VStrideHolder
-{
-	//Constructos ignore superfluous arguments
-	VStrideHolder(){}
-	VStrideHolder(int){}
-
-	int stride() const{
-		return s;
-	}
-};
-
-template<> struct VStrideHolder<-1>
-{
-	VStrideHolder(int s)
-	:my_stride(s){}
-
-	const int my_stride;
-	int stride() const {
-		return my_stride;
-	}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-//
 // Slice holding class
 //
 
@@ -69,11 +42,10 @@ template<int Size, class Precision> struct VBase : public GenericVBase<Size, Pre
 // Generic implementation
 //
 
-template<int Size, typename Precision, int Stride, typename Mem> struct GenericVBase: public Mem
+template<int Size, typename Precision, int Stride, typename Mem> struct GenericVBase: public Mem, public StrideHolder<Stride>
 {	
-	VStrideHolder<Stride> my_stride;
 	int stride() const{
-		return my_stride.stride();
+		return StrideHolder<Stride>::stride();
 	}
 
 	//Optional constuctors
@@ -84,11 +56,11 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	{}
 
 	GenericVBase(Precision* d, int stride)
-	:Mem(d),my_stride(stride){
+	:Mem(d),StrideHolder<Stride>(stride){
 	}
 
 	GenericVBase(Precision* d, int length, int stride)
-	:Mem(d, length),my_stride(stride){
+	:Mem(d, length),StrideHolder<Stride>(stride){
 	}
 
 	using Mem::my_data;

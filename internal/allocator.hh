@@ -181,6 +181,33 @@ template<class Precision> struct MatrixSlice<-1, -1, Precision>
 };
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// A class similar to mem, but to hold the stride information. It is only needed
+// for -1. For +int and -2, the stride is part fo teh type, or implicit.
+
+template<int s> struct StrideHolder
+{
+	//Constructos ignore superfluous arguments
+	StrideHolder(){}
+	StrideHolder(int){}
+
+	int stride() const{
+		return s;
+	}
+};
+
+template<> struct StrideHolder<-1>
+{
+	StrideHolder(int s)
+	:my_stride(s){}
+
+	const int my_stride;
+	int stride() const {
+		return my_stride;
+	}
+};
+
 
 
 
