@@ -26,6 +26,7 @@ template<int Size, int Stride, class Precision> struct SliceVBase: public Generi
 // Classes for Vectors owning memory
 //
 
+// this class is really just a typedef
 template<int Size, class Precision> struct VBase : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >{
 	//Optional 
 	
