@@ -8,22 +8,33 @@ namespace Internal
 		static void check(){}
 	};
 
-	template<int Size=-1, int Start=2147483647, int Length=-1> 
-	struct CheckSlice
+	template<int Size, int Start, int Length> 
+	struct CheckStaticSlice
 	{
-		static void check()
+		static void check(int/*size*/)
 		{
-			BadSlice<(Start < 0) || (Start+Length>Size)>::check();
+			BadSlice<(Start < 0) || (Length < 1) || (Start+Length>Size)>::check();
 		}
 	};	
-
-	template<int Start, int Length> 
-	struct CheckSlice<-1, Start, Length>
-	{
-		static void check(int size, int start, int length)
+	
+	template<int Start, int Length> struct CheckStaticSlice<-1, Start, Length>{
+		static void check(int size)
 		{
-			BadSlice<(Start != 2147483647 && Start < 0)>::check();
+			BadSlice<(Start < 0) || (Length < 1)>::check();
+			if(Start + Length > size)
+			{
+				#ifdef TOON_TEST_INTERNALS
+					throw Internal::SliceError();
+				#else
+					std::cerr << "Toon slice out of range (static slice, synamic vector)" << std::endl;
+					std::abort();
+				#endif
+			}
+		}
+	};
 
+	struct CheckDynamicSlice{
+		static void check(int size, int start, int length){
 			if(start < 0 || start + length > size)
 			{
 				#ifdef TOON_TEST_INTERNALS

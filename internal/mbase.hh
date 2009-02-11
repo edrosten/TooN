@@ -179,10 +179,12 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	typedef Vector<Cols, Precision, SliceVBase<Cols, 1, Precision> > Vec;
 	
 	Vec operator[](int r) {
+		Internal::check_index(num_rows(), r);
 		return Vec(my_data + stride()* r, num_cols(), 1, Slicing());
 	}
 
 	const Vec operator[](int r) const {
+		Internal::check_index(num_rows(), r);
 		return Vec(const_cast<Precision*>(my_data + stride()* r), num_cols(), 1, Slicing());
 	}
 
@@ -191,20 +193,28 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	{
 		//Always pass the stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
+		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
+		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	const Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor> slice() const
 	{
+		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
+		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor>(const_cast<Precision*>(my_data+stride()*Rstart + Cstart), stride(), Slicing());
 	}
 
 	Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl){
+		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
+		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(my_data+stride()*rs +cs, rl, cl, stride(), Slicing());
 	}
 
 	const Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl) const {
+		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
+		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(const_cast<Precision*>(my_data+stride()*rs +cs), rl, cl, stride(), Slicing());
 	}
 
@@ -274,16 +284,20 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	
 	typedef Vector<Cols, Precision, SliceVBase<Cols, Stride, Precision> > Vec;
 	Vec operator[](int r) {
+		Internal::check_index(num_rows(), r);
 		return Vec(my_data + r, num_cols(), stride(), Slicing());
 	}
 
 	const Vec operator[](int r) const {
+		Internal::check_index(num_rows(), r);
 		return Vec(const_cast<Precision*>(my_data + r), num_cols(), stride(), Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor> slice()
 	{
+		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
+		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
 		//Always pass the stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor>(my_data+Rstart + stride()*Cstart, stride(), Slicing());
@@ -292,14 +306,20 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	const Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor> slice() const
 	{
+		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
+		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor>(const_cast<Precision*>(my_data+Rstart + stride()*Cstart), stride(), Slicing());
 	}
 	
 	Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor > slice(int rs, int cs, int rl, int cl){
+		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
+		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(my_data+rs +stride()*cs, rl, cl, stride(), Slicing());
 	}
 
 	const Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor > slice(int rs, int cs, int rl, int cl)const{
+		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
+		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(const_cast<Precision*>(my_data+rs +stride()*cs), rl, cl, stride(), Slicing());
 	}
 

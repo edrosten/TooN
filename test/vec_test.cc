@@ -119,6 +119,37 @@ template<class C> void test_dynamic_slices_(int func_lineno, C v)
 }
 
 
+#define test_index(...) test_index_(__LINE__, __VA_ARGS__)
+template<class C> void test_index_(int func_lineno, C v)
+{
+	TRY{
+		v[-2];
+	}
+	EXPECT(BadIndex);
+
+	TRY{
+		v[-1];
+	}
+	EXPECT(BadIndex);
+
+	TRY{
+		v[0];
+	}
+	EXPECT(NoError);
+
+	TRY{
+		v[1];
+	}
+	EXPECT(NoError);
+
+	TRY{
+		v[2];
+	}
+	EXPECT(BadIndex);
+}
+
+
+
 int main()
 {
 	test_static_static_slices(Vector<2>());
@@ -138,4 +169,7 @@ int main()
 
 	test_static_dynamic_slices(Vector<>(4).slice(0,2));
 	test_dynamic_slices(Vector<>(4).slice(0,2));
+
+	test_index(Vector<2>());
+	test_index(Vector<>(2));
 }
