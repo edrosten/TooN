@@ -182,6 +182,10 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return Vec(my_data + stride()* r, num_cols(), 1, Slicing());
 	}
 
+	const Vec operator[](int r) const {
+		return Vec(const_cast<Precision*>(my_data + stride()* r), num_cols(), 1, Slicing());
+	}
+
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor> slice()
 	{
@@ -190,13 +194,27 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor>(my_data+stride()*Rstart + Cstart, stride(), Slicing());
 	}
 
+	template<int Rstart, int Cstart, int Rlength, int Clength>
+	const Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor> slice() const
+	{
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::RowMajor>(const_cast<Precision*>(my_data+stride()*Rstart + Cstart), stride(), Slicing());
+	}
+
 	Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl){
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(my_data+stride()*rs +cs, rl, cl, stride(), Slicing());
+	}
+
+	const Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor > slice(int rs, int cs, int rl, int cl) const {
+		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::RowMajor >(const_cast<Precision*>(my_data+stride()*rs +cs), rl, cl, stride(), Slicing());
 	}
 
 
 	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor> T(){
 		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	}
+
+	const Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor> T() const{
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
 	}
 };
 
@@ -259,6 +277,10 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return Vec(my_data + r, num_cols(), stride(), Slicing());
 	}
 
+	const Vec operator[](int r) const {
+		return Vec(const_cast<Precision*>(my_data + r), num_cols(), stride(), Slicing());
+	}
+
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor> slice()
 	{
@@ -267,12 +289,26 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor>(my_data+Rstart + stride()*Cstart, stride(), Slicing());
 	}
 
+	template<int Rstart, int Cstart, int Rlength, int Clength>
+	const Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor> slice() const
+	{
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceStride>::ColMajor>(const_cast<Precision*>(my_data+Rstart + stride()*Cstart), stride(), Slicing());
+	}
+	
 	Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor > slice(int rs, int cs, int rl, int cl){
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(my_data+rs +stride()*cs, rl, cl, stride(), Slicing());
 	}
 
+	const Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor > slice(int rs, int cs, int rl, int cl)const{
+		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(const_cast<Precision*>(my_data+rs +stride()*cs), rl, cl, stride(), Slicing());
+	}
+
 	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor> T(){
 		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	}
+
+	const Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor> T() const {
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
 	}
 };
 

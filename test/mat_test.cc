@@ -5,9 +5,9 @@
 using namespace TooN;
 using namespace std;
 
-template<int R, int C, class P, class L> void foo(Matrix<R,C,P,L>& m)
+
+template<int R, int C, class P, class L> void set(Matrix<R,C,P,L>& m)
 {
-	cout << "In foo:\n";
 	m[0][0] = 1;
 	m[0][1] = 2;
 	m[0][2] = 3;
@@ -20,6 +20,11 @@ template<int R, int C, class P, class L> void foo(Matrix<R,C,P,L>& m)
 	m[2][1] = 10;
 	m[2][2] = 11;
 	m[2][3] = 12;
+}
+
+template<int R, int C, class P, class L> void foo(const Matrix<R,C,P,L>& m)
+{
+	cout << "In foo:\n";
 	
 	cout << "Slices:\n";
 	cout << m << endl;
@@ -46,7 +51,9 @@ template<int R, int C, class P, class L> void foo(Matrix<R,C,P,L>& m)
 int main()
 {
 	Matrix<3,4> m;	
+	set(m);
 	foo(m);
 	Matrix<3,4,double,ColMajor> n;	
+	set(n);
 	foo(n);
 }

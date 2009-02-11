@@ -74,12 +74,22 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return my_data[i * stride()];
 	}
 
+
 	template<int Start, int Length> 
 	Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice(){
 		return Vector<Length, Precision, SliceVBase<Length, Stride, Precision> >(my_data + stride()*Start, stride(), Slicing());
 	}
 
+	template<int Start, int Length> 
+	const Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice() const {
+		return Vector<Length, Precision, SliceVBase<Length, Stride, Precision> >(const_cast<Precision*>(my_data + stride()*Start), stride(), Slicing());
+	}
+
 	Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length){
 		return Vector<-1, Precision, SliceVBase<-1, Stride, Precision> >(my_data + stride()*start, length, stride(), Slicing());
+	}
+
+	const Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length) const {
+		return Vector<-1, Precision, SliceVBase<-1, Stride, Precision> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
 };
