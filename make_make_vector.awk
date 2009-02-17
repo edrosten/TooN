@@ -12,7 +12,7 @@ BEGIN{
 		print "){"
 		print  "  Vector<"i"> vals;"
 		for(j=1; j<= i; j++)
-			print "  vals["j"] = x"j";"
+			print "  vals["j-1"] = x"j";"
 
 		print "  return vals;"
 		print "}"
