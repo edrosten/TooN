@@ -61,12 +61,33 @@ public:
   }
 
 
-  Vector& operator/=(const Precision& rhs)
-  {
+  Vector& operator/=(const Precision& rhs) {
     for(int i=0; i<Base::size(); i++)
       (*this)[i]/=rhs;
 	return *this;
   }
 
+
+  Vector& operator*=(const Precision& rhs) {
+    for(int i=0; i<Base::size(); i++)
+      (*this)[i]*=rhs;
+	return *this;
+  }
+
+  template<int Size2, class Precision2, class Base2>
+  Vector& operator+=(const Vector<Size2, Precision2, Base2>& rhs) {
+	  SizeMismatch<Size,Size2>::test(Base::size(),rhs.size());
+	  for(int i=0; i<Base::size(); i++)
+        (*this)[i]+=rhs;
+      return *this;
+  }
+
+  template<int Size2, class Precision2, class Base2>
+  Vector& operator-=(const Vector<Size2, Precision2, Base2>& rhs) {
+	  SizeMismatch<Size,Size2>::test(Base::size(),rhs.size());
+	  for(int i=0; i<Base::size(); i++)
+        (*this)[i]-=rhs;
+      return *this;
+  }
 
 };
