@@ -3,6 +3,11 @@
 using namespace std;
 using namespace TooN;
 
+template<class C> void type(const C&)
+{
+	cout << __PRETTY_FUNCTION__ << endl;
+}
+
 int main()
 {
 	Vector<4> v1 = makeVector(1, 2, 3, 4);
@@ -12,5 +17,7 @@ int main()
 
 	v1.slice<0, 2>() /= 2;
 	cout << v1 << endl;
+
+	type(Vector<2>() + Vector<2, int>());
 }
 

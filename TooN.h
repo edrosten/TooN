@@ -3,6 +3,9 @@
 #define TOON_INCLUDE_TOON_H
 #include <iostream>
 #include <cstdlib>
+#include <TooN/internal/config.hh>
+#include <TooN/internal/typeof.hh>
+
 namespace TooN
 {
 	

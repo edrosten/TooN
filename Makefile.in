@@ -17,6 +17,9 @@ install:
 internal/make_vector.hh:  make_make_vector.awk
 	awk -f make_make_vector.awk > $@
 
+internal/builtin_typeof.h:make_typeof.awk
+	awk -f make_typeof.awk > $@
+
 clean:
 	rm -rf html
 
