@@ -60,4 +60,13 @@ public:
     return *this;
   }
 
+
+  Vector& operator/=(const Precision& rhs)
+  {
+    for(int i=0; i<Base::size(); i++)
+      (*this)[i]/=rhs;
+	return *this;
+  }
+
+
 };

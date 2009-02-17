@@ -86,16 +86,6 @@ Vector<Size, Precision, Base>& operator *= (Vector<Size, Precision, Base>& lhs, 
   return lhs;
 }
 
-// operator /= double
-template<int Size, typename Precision, typename Base>
-Vector<Size, Precision, Base>& operator /= (Vector<Size, Precision, Base>& lhs, double rhs){
-  const int s=lhs.size();
-  for(int i=0; i<s; i++){
-    lhs[i]/=rhs;
-  }
-  return lhs;
-}
-
 // output operator <<
 template <int Size, typename Precision, typename Base>
 inline std::ostream& operator<< (std::ostream& os, const Vector<Size,Precision,Base>& v){

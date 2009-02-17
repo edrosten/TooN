@@ -10,6 +10,7 @@ int main()
 
 	cout << v1 + v2 << endl;
 
-
+	v1.slice<0, 2>() /= 2;
+	cout << v1 << endl;
 }
 
