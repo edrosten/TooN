@@ -37,6 +37,13 @@ template<int Size, class Precision> class StaticSizedAllocator: public StackOrHe
 
 template<int Size, class Precision> struct VectorAlloc: public StaticSizedAllocator<Size, Precision>{
 	
+	VectorAlloc()
+	{ }
+
+	VectorAlloc(int /*s*/)
+	{ }
+
+
 	int size() const {
 		return Size;
 	}
