@@ -73,6 +73,18 @@ namespace Internal{
 		}
 	};
 
+	//FIXME what about BLAS?
+	template<typename Precision> struct MatrixMultiply
+	{
+		template<int R, int C, typename B, int R1, int C1, typename P1, typename B1, int R2, int C2, typename P2, typename B2> 
+		static void eval(Matrix<R, C, Precision, B>& res, const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
+		{
+			for(int i=0; i < res.num_rows(); ++i)
+				for(int j=0; j < res.num_cols(); ++j)
+					res[i][j] = m1[i] * (m2.T()[j]);
+		}
+	};
+
 	//Mini operators for passing to Pairwise, etc
 	struct Add{ template<class A, class B, class C>      static A op(const B& b, const C& c){return b+c;} };
 	struct Subtract{ template<class A, class B, class C> static A op(const B& b, const C& c){return b-c;} };
@@ -80,10 +92,10 @@ namespace Internal{
 	struct Divide{ template<class A, class B, class C>   static A op(const B& b, const C& c){return b/c;} };
 	
 	//Automatic type deduction of return types
-	template<class L, class R> struct AddType {      typedef TOON_TYPEOF((L()+R())) type; };
-	template<class L, class R> struct SubtractType { typedef TOON_TYPEOF((L()-R())) type; };
-	template<class L, class R> struct MultiplyType { typedef TOON_TYPEOF((L()*R())) type; };
-	template<class L, class R> struct DivideType {   typedef TOON_TYPEOF((L()*R())) type; };
+	template<class L, class R> struct AddType {      typedef TOON_TYPEOF( (*static_cast<L*>(0) + *static_cast<R*>(0))) type;};
+	template<class L, class R> struct SubtractType { typedef TOON_TYPEOF( (*static_cast<L*>(0) - *static_cast<R*>(0))) type;};
+	template<class L, class R> struct MultiplyType { typedef TOON_TYPEOF( (*static_cast<L*>(0) * *static_cast<R*>(0))) type;};
+	template<class L, class R> struct DivideType   { typedef TOON_TYPEOF( (*static_cast<L*>(0) / *static_cast<R*>(0))) type;};
 	
 	//Output size, given input size. Be static if possible.
 	template<int i, int j> struct Sizer{static const int size=i;};
@@ -96,6 +108,7 @@ namespace Internal{
 //
 // vector <op> vector
 //
+
 
 // Addition Vector + Vector
 template<int S1, int S2, typename P1, typename P2, typename B1, typename B2> 
@@ -128,7 +141,6 @@ typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Ve
 }
 
 
-
 // Addition Matrix + Matrix
 template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
 Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Internal::AddType<P1, P2>::type> operator+(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
@@ -147,6 +159,18 @@ Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Inte
 	SizeMismatch<R1, R2>:: test(m1.num_rows(),m2.num_rows());
 	SizeMismatch<C1, C2>:: test(m1.num_cols(),m2.num_cols());
 	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, Operator<Internal::Pairwise<restype, Internal::Subtract> >(), m1.num_rows(), m1.num_cols());
+}
+
+// Matrix multiplication Matrix * Matrix
+
+template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
+Matrix<Internal::Sizer<R1,R1>::size, Internal::Sizer<C2,C2>::size, typename Internal::MultiplyType<P1, P2>::type> operator*(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
+{
+	typedef typename Internal::MultiplyType<P1, P2>::type restype;
+
+	SizeMismatch<R1, C2>:: test(m1.num_rows(),m2.num_cols());
+	SizeMismatch<C1, R2>:: test(m1.num_cols(),m2.num_rows());
+	return Matrix<Internal::Sizer<R1,R1>::size, Internal::Sizer<C2,C2>::size,restype>(m1, m2, Operator<Internal::MatrixMultiply<restype> >(), m1.num_rows(), m2.num_cols());
 }
 
 
@@ -183,10 +207,10 @@ Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P
 	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
 }
 
-TOON_MAKE_SCALAR_OP_PAIR(Add, +)
-TOON_MAKE_SCALAR_OP_PAIR(Add, -)
-TOON_MAKE_SCALAR_OP_PAIR(Add, *)
-TOON_MAKE_SCALAR_OP_PAIR(Add, /)
+//TOON_MAKE_SCALAR_OP_PAIR(Add, +)
+//TOON_MAKE_SCALAR_OP_PAIR(Subtract, -)
+//TOON_MAKE_SCALAR_OP_PAIR(Multiply, *)
+//TOON_MAKE_SCALAR_OP_PAIR(Divide, /)
 
 #undef TOON_MAKE_SCALAR_OP_PAIR
 

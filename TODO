@@ -1,3 +1,5 @@
 .as_row() and .as_col() for vectors
-matrix operators
+BLAS 
+helpers.h
+fix up decompositions.
 iterators

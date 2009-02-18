@@ -27,6 +27,18 @@ int main()
 	cout << m1 << endl;
 
 	cout << (m1+m2) << endl;
-	cout << 1+(m1+m2)+2 << endl;
+	cout << (m1+m2) << endl;
+
+	Matrix<2,3> m3;
+	m3[0] = makeVector(0, 1, 2);
+	m3[1] = makeVector(3, 4, 5);
+	Matrix<3,2> m4;
+	m4[0] = makeVector(6, 7);
+	m4[1] = makeVector(8, 9);
+	m4[2] = makeVector(10, 11);
+
+	cout << m3<<endl;
+	cout << m4<<endl;
+	cout << m3*m4;
 }
 
