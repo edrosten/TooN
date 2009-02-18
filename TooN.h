@@ -25,6 +25,10 @@ namespace TooN
 
 	#endif
 	
+	template<int Stride> struct Slice;
+	template<int Size, class Precision, class Base> struct Vector;
+	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
+	
 	#include <TooN/internal/allocator.hh>
 
 	#include <TooN/internal/size_mismatch.hh>

@@ -40,5 +40,8 @@ int main()
 	cout << m3<<endl;
 	cout << m4<<endl;
 	cout << m3*m4;
+
+	
+	cout << makeVector(1,2).as_col() * makeVector(3,4).as_row() << endl;
 }
 

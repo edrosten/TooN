@@ -1,5 +1,5 @@
-.as_row() and .as_col() for vectors
 BLAS 
 helpers.h
 fix up decompositions.
 iterators
+half-dynamic Matrices (most (all??) of the work is in allocator.hh)

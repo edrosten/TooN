@@ -99,4 +99,20 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		Internal::CheckDynamicSlice::check(size(), start, length);
 		return Vector<-1, Precision, SliceVBase<-1, Stride, Precision> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
+
+	const Matrix<(Size==-1?-1:1), Size, Precision, typename Slice<Stride>::ColMajor> as_row() const{
+		return Matrix<(Size==-1?-1:1), Size, Precision, typename Slice<Stride>::ColMajor>(const_cast<Precision*>(my_data), 1, Size, stride(), Slicing());
+	}
+
+	Matrix<(Size==-1?-1:1), Size, Precision, typename Slice<Stride>::ColMajor> as_row(){
+		return Matrix<(Size==-1?-1:1), Size, Precision, typename Slice<Stride>::ColMajor>(my_data, 1, Size, stride(), Slicing());
+	}
+
+	const Matrix<Size, (Size==-1?-1:1), Precision, typename Slice<Stride>::RowMajor> as_col() const{
+		return Matrix<Size, (Size==-1?-1:1), Precision, typename Slice<Stride>::RowMajor>(const_cast<Precision*>(my_data), Size, 1, stride(), Slicing());
+	}
+
+	Matrix<Size, (Size==-1?-1:1), Precision, typename Slice<Stride>::RowMajor> as_col(){
+		return Matrix<Size, (Size==-1?-1:1), Precision, typename Slice<Stride>::RowMajor>(my_data, Size, 1, stride(), Slicing());
+	}
 };
