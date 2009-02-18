@@ -26,16 +26,14 @@ public:
     Op::eval(*this,lhs,rhs);
   }
 
-  // copy constructor listed explicitly
-  // this is a very special case. Copy construction
-  // goes all the way down to the bottom. GenericVBase has no
-  // idea how to copy itself. However, the underlying allocator objects do.
-  // In the case of static sized objects, C++ automatically copies the data.
-  // For slice objects, C++ copies all parts (pointer and size), which is correct.
-  // For dynamically sized non-slice objects the copying has to be done by hand.
-  inline Vector(const Vector&from)
-	: Base(from){
-  }
+  // Copy construction is a very special case. Copy construction goes all the
+  // way down to the bottom. GenericVBase has no idea how to copy itself.
+  // However, the underlying allocator objects do.  In the case of static sized
+  // objects, C++ automatically copies the data.  For slice objects, C++ copies
+  // all parts (pointer and size), which is correct.  For dynamically sized
+  // non-slice objects the copying has to be done by hand.
+
+  // inline Vector(const Vector&from);
 
   // constructor from arbitrary vector
   template<int Size2, typename Precision2, typename Base2>
