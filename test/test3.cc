@@ -25,5 +25,8 @@ int main()
 	
 	m1+=m2;
 	cout << m1 << endl;
+
+	cout << (m1+m2) << endl;
+	cout << 1+(m1+m2)+2 << endl;
 }
 

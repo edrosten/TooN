@@ -25,6 +25,14 @@ namespace Internal{
 			for(int i=0; i < res.size(); ++i)
 				res[i] = Op::template op<Precision,P1, P2>(v1[i],v2[i]);
 		}
+
+		template<int R, int C, typename B, int R1, int C1, typename P1, typename B1, int R2, int C2, typename P2, typename B2> 
+		static void eval(Matrix<R, C, Precision, B>& res, const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
+		{
+			for(int i=0; i < res.num_rows(); ++i)
+				for(int j=0; j < res.num_cols(); ++j)
+				res[i][j] = Op::template op<Precision,P1, P2>(m1[i][j],m2[i][j]);
+		}
 	};
 
 	template<typename Precision, typename Op> struct ApplyScalar 
@@ -35,6 +43,15 @@ namespace Internal{
 			for(int i=0; i < res.size(); ++i)
 				res[i] = Op::template op<Precision,P1, P2>(v[i],s);
 		}
+
+		template<int R, int C, typename B, int R1, int C1, typename P1, typename B1, typename P2>
+		static void eval(Matrix<R, C, Precision, B>& res, const Matrix<R1, C1, P1, B1>& m, const P2& s)
+		{		
+		
+			for(int i=0; i < res.num_rows(); ++i)
+				for(int j=0; j < res.num_cols(); ++j)
+					res[i][j] = Op::template op<Precision,P1, P2>(m[i][j],s);
+		}
 	};
 
 	template<typename Precision, typename Op> struct ApplyScalarLeft
@@ -44,6 +61,15 @@ namespace Internal{
 		{
 			for(int i=0; i < res.size(); ++i)
 				res[i] = Op::template op<Precision,P1, P2>(s, v[i]);
+		}
+
+		template<int R, int C, typename B, int R2, int C2, typename P1, typename B2, typename P2>
+		static void eval(Matrix<R, C, Precision, B>& res, const P1& s, const Matrix<R2, C2, P2, B2>& m)
+		{		
+		
+			for(int i=0; i < res.num_rows(); ++i)
+				for(int j=0; j < res.num_cols(); ++j)
+					res[i][j] = Op::template op<Precision,P1, P2>(s, m[i][j]);
 		}
 	};
 
@@ -103,6 +129,27 @@ typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Ve
 
 
 
+// Addition Matrix + Matrix
+template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
+Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Internal::AddType<P1, P2>::type> operator+(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
+{
+	typedef typename Internal::AddType<P1, P2>::type restype;
+	SizeMismatch<R1, R2>:: test(m1.num_rows(),m2.num_rows());
+	SizeMismatch<C1, C2>:: test(m1.num_cols(),m2.num_cols());
+	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, Operator<Internal::Pairwise<restype, Internal::Add> >(), m1.num_rows(), m1.num_cols());
+}
+
+// Addition Matrix - Matrix
+template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
+Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Internal::SubtractType<P1, P2>::type> operator-(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
+{
+	typedef typename Internal::SubtractType<P1, P2>::type restype;
+	SizeMismatch<R1, R2>:: test(m1.num_rows(),m2.num_rows());
+	SizeMismatch<C1, C2>:: test(m1.num_cols(),m2.num_cols());
+	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, Operator<Internal::Pairwise<restype, Internal::Subtract> >(), m1.num_rows(), m1.num_cols());
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // vector <op> scalar
@@ -121,6 +168,19 @@ Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& 
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
 	return Vector<S,restype>(s, v, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), v.size());\
+}\
+template<int R, int C, typename P1, typename B1, typename P2> \
+Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Matrix<R, C, P1, B1>& m, const P2& s)\
+{	\
+	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
+	return Matrix<R, C,restype>(m, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
+}\
+\
+template<int R, int C, typename P1, typename P2, typename B2> \
+Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Matrix<R, C, P2, B2>& m)\
+{	\
+	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
+	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
 }
 
 TOON_MAKE_SCALAR_OP_PAIR(Add, +)

@@ -117,6 +117,11 @@ template<class Precision> struct VectorSlice<-1, Precision>
 
 template<int R, int C, class Precision> struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
 {
+	MatrixAlloc(int,int)
+	{}
+
+	MatrixAlloc()
+	{}
 	int num_rows() const {
 		return R;
 	}
