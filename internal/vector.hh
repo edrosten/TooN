@@ -15,14 +15,14 @@ public:
   // constructors to allow return value optimisations
   // construction from 1-ary operator
   template <class T, class Op>
-  inline Vector(const T& arg, const Operator<Op>&) : Base(Op::size(arg)) {
+  inline Vector(const T& arg, const Operator<Op>&, int size) : Base(size) {
     Op::eval(*this,arg);
   }
 
   // constructor from 2-ary operator
   template <class LHS, class RHS, class Op>
-  inline Vector(const LHS& lhs, const RHS& rhs, const Operator<Op>&)
-    : Base(Op::size(lhs, rhs)) {
+  inline Vector(const LHS& lhs, const RHS& rhs, const Operator<Op>&, int size)
+    : Base(size) {
     Op::eval(*this,lhs,rhs);
   }
 
@@ -60,6 +60,19 @@ public:
     return *this;
   }
 
+
+  Vector& operator+=(const Precision& rhs) {
+    for(int i=0; i<Base::size(); i++)
+      (*this)[i]+=rhs;
+	return *this;
+  }
+
+
+  Vector& operator-=(const Precision& rhs) {
+    for(int i=0; i<Base::size(); i++)
+      (*this)[i]-=rhs;
+	return *this;
+  }
 
   Vector& operator/=(const Precision& rhs) {
     for(int i=0; i<Base::size(); i++)
