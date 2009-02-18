@@ -35,7 +35,6 @@ public:
   // For dynamically sized non-slice objects the copying has to be done by hand.
   inline Vector(const Vector&from)
 	: Base(from){
-  	std::cout<< "Hello. My name is Inigo Montoya.\n";
   }
 
   // constructor from arbitrary vector
