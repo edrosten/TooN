@@ -27,15 +27,21 @@ public:
   }
 
   // copy constructor listed explicitly
-  inline Vector(const Vector<Size,Precision,Base>& from)
-    : Base(from) {
-    (*this)=from;
+  // this is a very special case. Copy construction
+  // goes all the way down to the bottom. GenericVBase has no
+  // idea how to copy itself. However, the underlying allocator objects do.
+  // In the case of static sized objects, C++ automatically copies the data.
+  // For slice objects, C++ copies all parts (pointer and size), which is correct.
+  // For dynamically sized non-slice objects the copying has to be done by hand.
+  inline Vector(const Vector&from)
+	: Base(from){
+  	std::cout<< "Hello. My name is Inigo Montoya.\n";
   }
 
   // constructor from arbitrary vector
   template<int Size2, typename Precision2, typename Base2>
   inline Vector(const Vector<Size2,Precision2,Base2>& from):
-    Base(from) {
+    Base(from.size()) {
     operator=(from);
   }
 

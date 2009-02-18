@@ -1,12 +1,16 @@
-// Allocators never copy
+// Allocators always copy data on copy construction.
+//
+// When a Vector/Matrix is constructed from a different, but compatible type
+// copying is done at a much higher level: above the level that knows how the
+// data is laid out in memory.
+//
+// At this level, copy construction is required since it is only known here 
+// whether data or a reference to data should be copied.
 
 template<int Size, class Precision, bool heap> class StackOrHeap
 {
 	public:
 		StackOrHeap()
-		{}
-
-		StackOrHeap(const StackOrHeap&)
 		{}
 
 		Precision my_data[Size];
@@ -26,8 +30,12 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 
 		Precision *my_data;
 	
-	private:
-		StackOrHeap(const StackOrHeap&);
+		StackOrHeap(const StackOrHeap& from)
+		:my_data(new Precision[Size])
+		{
+			for(int i=0; i < Size; i++)
+				my_data[i] = from.my_data[i];
+		}
 };
 
 
@@ -52,6 +60,13 @@ template<int Size, class Precision> struct VectorAlloc: public StaticSizedAlloca
 template<class Precision> struct VectorAlloc<-1, Precision> {
 	Precision * const my_data;
 	const int my_size;
+
+	VectorAlloc(const VectorAlloc& v)
+	:my_data(new Precision[v.my_size]), my_size(v.my_size)
+	{ 
+		for(int i=0; i < my_size; i++)
+			my_data[i] = v.my_data[i];
+	}
 
 	VectorAlloc(int s)
 	:my_data(new Precision[s]), my_size(s)
@@ -116,6 +131,13 @@ template<class Precision> struct MatrixAlloc<-1, -1, Precision>
 	const int my_rows;
 	const int my_cols;
 	Precision* const my_data;
+
+	MatrixAlloc(const MatrixAlloc& m)
+	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[my_rows*my_cols]) {
+		const int size=my_rows*my_cols;
+		for(int i=0; i < size; i++)
+			my_data[i] = m.my_data[i];
+	}
 
 	MatrixAlloc(int r, int c)
 	:my_rows(r),my_cols(c),my_data(new Precision[r*c]) {
