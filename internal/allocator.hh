@@ -131,6 +131,65 @@ template<int R, int C, class Precision> struct MatrixAlloc: public StaticSizedAl
 	}
 };
 
+
+template<int Rows, class Precision> struct MatrixAlloc<Rows, -1, Precision>
+{
+	const int my_cols;
+	Precision* const my_data;
+
+	MatrixAlloc(const MatrixAlloc& m)
+	:my_cols(m.my_cols),my_data(new Precision[Rows*my_cols]) {
+		const int size=Rows*my_cols;
+		for(int i=0; i < size; i++)
+			my_data[i] = m.my_data[i];
+	}
+
+	MatrixAlloc(int, int c)
+	:my_cols(c),my_data(new Precision[Rows*c]) {
+	}
+
+	~MatrixAlloc() {
+		delete[] my_data;
+	}
+
+	int num_rows() const {
+		return Rows;
+	}
+
+	int num_cols() const {
+		return my_cols;
+	}
+};
+
+template<int Cols, class Precision> struct MatrixAlloc<-1, Cols, Precision>
+{
+	const int my_rows;
+	Precision* const my_data;
+
+	MatrixAlloc(const MatrixAlloc& m)
+	:my_rows(m.my_rows),my_data(new Precision[my_rows*Cols]) {
+		const int size=Cols*my_rows;
+		for(int i=0; i < size; i++)
+			my_data[i] = m.my_data[i];
+	}
+
+	MatrixAlloc(int r, int)
+	:my_rows(r),my_data(new Precision[r*Cols]) {
+	}
+
+	~MatrixAlloc() {
+		delete[] my_data;
+	}
+
+	int num_rows() const {
+		return my_rows;
+	}
+
+	int num_cols() const {
+		return Cols;
+	}
+};
+
 template<class Precision> struct MatrixAlloc<-1, -1, Precision>
 {
 	const int my_rows;
@@ -180,6 +239,46 @@ template<int R, int C, class Precision> struct MatrixSlice
 
 	MatrixSlice(Precision* p, int /*rows*/, int /*cols*/)
 	:my_data(p){}
+};
+
+
+
+template<int Rows, class Precision> struct MatrixSlice<Rows, -1, Precision>
+{
+	Precision* const my_data;
+	const int my_cols;
+
+	MatrixSlice(Precision* d, int r, int c)
+	:my_data(d),my_cols(c)
+	{
+	}
+
+	int num_rows() const {
+		return Rows;
+	}
+
+	int num_cols() const {
+		return my_cols;
+	}
+};
+
+template<int Cols, class Precision> struct MatrixSlice<-1, Cols, Precision>
+{
+	Precision* const my_data;
+	const int my_rows;
+
+	MatrixSlice(Precision* d, int r, int c)
+	:my_data(d),my_rows(r)
+	{
+	}
+
+	int num_rows() const {
+		return my_rows;
+	}
+
+	int num_cols() const {
+		return Cols;
+	}
 };
 
 template<class Precision> struct MatrixSlice<-1, -1, Precision>
