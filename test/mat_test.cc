@@ -43,7 +43,7 @@ template<int R, int C, class P, class L> void foo(const Matrix<R,C,P,L>& m)
 
 	cout << "Layout:\n";
 
-	copy(m.data(), m.data()+m.num_rows()*m.num_cols(), ostream_iterator<double>(cout, " "));
+	copy(&m[0][0], &m[0][0]+m.num_rows()*m.num_cols(), ostream_iterator<double>(cout, " "));
 	cout << endl;
 }
 

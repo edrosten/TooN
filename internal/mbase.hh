@@ -219,12 +219,12 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	}
 
 
-	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor> T(){
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor> T(){
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
 	}
 
-	const Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor> T() const{
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::ColMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
+	const Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor> T() const{
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
 	}
 };
 
@@ -323,12 +323,12 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return Matrix<-1, -1, Precision, typename Slice<SliceStride>::ColMajor >(const_cast<Precision*>(my_data+rs +stride()*cs), rl, cl, stride(), Slicing());
 	}
 
-	Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor> T(){
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+	Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor> T(){
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
 	}
 
-	const Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor> T() const {
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceStride>::RowMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
+	const Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor> T() const {
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
 	}
 };
 
