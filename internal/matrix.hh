@@ -47,7 +47,7 @@ class Matrix : public Layout::template Layout<Rows, Cols, Precision>
 	    Op::eval(*this,lhs,rhs);
 	}
 
-	// constructor from arbitrary vector
+	// constructor from arbitrary matrix
 	template<int Rows2, int Cols2, typename Precision2, typename Base2>
 	inline Matrix(const Matrix<Rows2, Cols2,Precision2,Base2>& from)
 	:Layout::template Layout<Rows,Cols,Precision>(from.num_rows(), from.num_cols())
