@@ -1,5 +1,6 @@
 BLAS 
 helpers.h
-fix up decompositions.
+fix up SVD, SymEiggen, Cholesky, gaussian_elimination, gauss_jordan
+fix up SE3, SO3
+fix up downhill_simplex
 iterators
-half-dynamic Matrices (most (all??) of the work is in allocator.hh)
