@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cmath>
 #include <iostream>
 #include <TooN/TooN.h>
 #include <TooN/LU.h>
@@ -16,11 +17,8 @@ int main()
 			m[i][j] = drand48();
 
 	
-	LU<5,float> mlu(m);
-
-	cout << mlu.get_inverse() << endl;
-	Matrix<5,5,float> inv = mlu.get_inverse();
-	Matrix<5,5,float> a = m*inv;
+	LU<-1,float> mlu(m);
+	Matrix<5,5,float> a = m*mlu.get_inverse();
 
 	for(int i=0; i< m.num_rows(); i++)
 		for(int j=0; j< m.num_rows(); j++)

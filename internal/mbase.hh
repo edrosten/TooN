@@ -29,7 +29,8 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 ////////////////////////////////////////////////////////////////////////////////
 //Closure used to acquire strides
 //-1 means dynamic stride
-//-2 means dynamic stride is tied to size
+//-2 means dynamic stride is tied to size for a normal matrix
+//-3 means dynamic stride is tied to size for a transposed matrix
 template<int Stride> struct Slice
 {
 	struct RowMajor
@@ -139,7 +140,7 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	static const int SliceStride = Stride == -2?-1: Stride;
 
 	int stride() const {
-		if(Stride == -2)
+		if(Stride == -2) //Normal tied stride
 			return num_cols();
 		else
 			return StrideHolder<Stride>::stride();
@@ -220,11 +221,11 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 
 
 	Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor> T(){
-		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(my_data, num_cols(), num_rows(), stride(), Slicing());
 	}
 
 	const Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor> T() const{
-		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::ColMajor>(const_cast<Precision*>(my_data), num_cols(), num_rows(), stride(), Slicing());
 	}
 };
 
@@ -244,7 +245,7 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	static const int SliceStride = Stride == -2?-1: Stride;
 
 	int stride() const {
-		if(Stride == -2)
+		if(Stride == -2) //Normal tied stride
 			return num_rows();
 		else
 			return StrideHolder<Stride>::stride();
@@ -282,7 +283,7 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return my_data[c*stride() + r];
 	}
 	
-	typedef Vector<Cols, Precision, SliceVBase<Cols, Stride, Precision> > Vec;
+	typedef Vector<Cols, Precision, SliceVBase<Cols, SliceStride, Precision> > Vec;
 	Vec operator[](int r) {
 		Internal::check_index(num_rows(), r);
 		return Vec(my_data + r, num_cols(), stride(), Slicing());
@@ -324,11 +325,11 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	}
 
 	Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor> T(){
-		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(my_data, num_rows(), num_cols(), stride(), Slicing());
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(my_data, num_cols(), num_rows(), stride(), Slicing());
 	}
 
 	const Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor> T() const {
-		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(const_cast<Precision*>(my_data), num_rows(), num_cols(), stride(), Slicing());
+		return Matrix<Cols, Rows, Precision, typename Slice<Stride>::RowMajor>(const_cast<Precision*>(my_data), num_cols(), num_rows(), stride(), Slicing());
 	}
 };
 
