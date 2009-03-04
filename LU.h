@@ -57,11 +57,11 @@ class LU {
   }
 
   template <int Rows, int NRHS, class Base>
-  Matrix<Size,NRHS> backsub(const Matrix<Rows,NRHS,Precision,Base>& rhs){
+  Matrix<Size,NRHS,Precision> backsub(const Matrix<Rows,NRHS,Precision,Base>& rhs){
     //Check the number of rows is OK.
     SizeMismatch<Size, Rows>::test(my_lu.num_rows(), rhs.num_rows());
 	
-    Matrix<Size, NRHS> result(rhs);
+    Matrix<Size, NRHS, Precision> result(rhs);
 
     int M=rhs.num_cols();
     int N=my_lu.num_rows();
@@ -83,26 +83,30 @@ class LU {
     return result;
   }
   
+  template <int Rows, class Base>
+  Vector<Size,Precision> backsub(const Vector<Rows,Precision,Base>& rhs){
+    //Check the number of rows is OK.
+    SizeMismatch<Size, Rows>::test(my_lu.num_rows(), rhs.num_rows());
+	
+    Vector<Size, Precision> result(rhs);
 
-  //FIXME fix for Vector
-  /*template <class Accessor>
-  Vector<Size> backsub(const FixedVector<Size,Accessor>& rhs){
-    Vector<Size> result(rhs);
     int M=1;
-    int N=Size;
+    int N=my_lu.num_rows();
     double alpha=1;
-    int lda=Size;
+    int lda=my_lu.num_rows();
     int ldb=1;
-    dtrsm_("R","U","N","N",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
-    dtrsm_("R","L","N","U",&M,&N,&alpha,my_lu.get_data_ptr(),&lda,result.get_data_ptr(),&ldb);
+    trsm_("R","U","N","N",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0][0],&ldb);
+    trsm_("R","L","N","U",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0][0],&ldb);
+
+    // now do the row swapping (lapack dlaswp.f only shuffles fortran rows = Rowmajor cols)
     for(int i=N-1; i>=0; i--){
       const int swaprow = my_IPIV[i]-1; // fortran arrays start at 1
-      double temp = result[i];
-      result[i]=result[swaprow];
-      result[swaprow]=temp;
+      Precision temp = result[i];
+      result[i] = result[swaprow];
+      result[swaprow] = temp;
     }
     return result;
-  }*/
+  }
 
   Matrix<Size,Size,Precision> get_inverse(){
     Matrix<Size,Size,Precision> Inverse(my_lu);
