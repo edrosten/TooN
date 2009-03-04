@@ -8,16 +8,23 @@ template<typename T> class Operator;
 // Slice holding class
 //
 
-template<int Size, int Stride, class Precision> struct SliceVBase: public GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >{
+template<int Stride>
+struct SliceVBase {
+
+	// this class is really just a typedef
+	template<int Size, typename Precision>
+	struct Layout
+		: public GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> > {
 	
 
-	SliceVBase(Precision* d, int stride)
-	:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, stride){
-	}
+		Layout(Precision* d, int stride)
+			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, stride){
+		}
 
-	SliceVBase(Precision* d, int length, int stride)
-	:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, length, stride){
-	}
+		Layout(Precision* d, int length, int stride)
+			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, length, stride){
+		}
+	};
 
 };
 
@@ -26,16 +33,19 @@ template<int Size, int Stride, class Precision> struct SliceVBase: public Generi
 // Classes for Vectors owning memory
 //
 
-// this class is really just a typedef
-template<int Size, class Precision> struct VBase : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >{
-	//Optional 
-	
-	VBase(){}
+struct VBase {
 
-	VBase(int s)
-	:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
-	{
-	}
+	// this class is really just a typedef
+	template<int Size, class Precision>
+	struct Layout 
+		: public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
+	
+		VBase(){}
+
+		VBase(int s)
+			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
+		{}
+	};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,23 +91,23 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	template<int Start, int Length> 
 	Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice(){
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Length, Stride, Precision> >(my_data + stride()*Start, stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride()*Start, stride(), Slicing());
 	}
 
 	template<int Start, int Length> 
 	const Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice() const {
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Length, Stride, Precision> >(const_cast<Precision*>(my_data + stride()*Start), stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*Start), stride(), Slicing());
 	}
 
 	Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length){
 		Internal::CheckDynamicSlice::check(size(), start, length);
-		return Vector<-1, Precision, SliceVBase<-1, Stride, Precision> >(my_data + stride()*start, length, stride(), Slicing());
+		return Vector<-1, Precision, SliceVBase<Stride> >(my_data + stride()*start, length, stride(), Slicing());
 	}
 
 	const Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length) const {
 		Internal::CheckDynamicSlice::check(size(), start, length);
-		return Vector<-1, Precision, SliceVBase<-1, Stride, Precision> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
+		return Vector<-1, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
 
 	const Matrix<1, Size, Precision, typename Slice<Stride>::ColMajor> as_row() const{
