@@ -3,7 +3,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 mandir = @mandir@
 includedir = @includedir@
-
+datarootdir = @datarootdir@
 
 hdr = $(DESTDIR)/$(includedir)/TooN
 
@@ -11,8 +11,9 @@ all:
 
 install:
 	mkdir -p $(hdr)
-	cp *.h *.hh $(hdr)
+	cp *.h $(hdr)
 	cp -r optimization $(hdr)/
+	cp -r internal $(hdr)/
 
 internal/make_vector.hh:  make_make_vector.awk
 	awk -f make_make_vector.awk > $@
