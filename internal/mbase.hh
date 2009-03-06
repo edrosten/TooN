@@ -32,11 +32,6 @@ template<int RowStride, int ColStride> struct Slice
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// Row major matrix implementation
-//
-
 template<int Rows, int Cols, class Precision, int RowStride, int ColStride, class Mem> struct GenericMBase
 	: public Mem, 
 	RowStrideHolder<RowStride>,
