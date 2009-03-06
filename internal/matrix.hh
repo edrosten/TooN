@@ -1,12 +1,12 @@
 template <int Rows=-1, int Cols=Rows, class Precision=double, class Layout = RowMajor>
 class Matrix : public Layout::template Layout<Rows, Cols, Precision>
 {
-  private:
+private:
 	using Layout::template Layout<Rows, Cols, Precision>::my_data;
+public:
 	using Layout::template Layout<Rows, Cols, Precision>::num_rows;
 	using Layout::template Layout<Rows, Cols, Precision>::num_cols;
 
-  public:
 	//Use Tom's sneaky constructor hack...
 		
 	Matrix(){}
