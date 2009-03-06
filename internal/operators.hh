@@ -207,10 +207,10 @@ Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P
 	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
 }
 
-//TOON_MAKE_SCALAR_OP_PAIR(Add, +)
-//TOON_MAKE_SCALAR_OP_PAIR(Subtract, -)
-//TOON_MAKE_SCALAR_OP_PAIR(Multiply, *)
-//TOON_MAKE_SCALAR_OP_PAIR(Divide, /)
+TOON_MAKE_SCALAR_OP_PAIR(Add, +)
+TOON_MAKE_SCALAR_OP_PAIR(Subtract, -)
+TOON_MAKE_SCALAR_OP_PAIR(Multiply, *)
+TOON_MAKE_SCALAR_OP_PAIR(Divide, /)
 
 #undef TOON_MAKE_SCALAR_OP_PAIR
 
