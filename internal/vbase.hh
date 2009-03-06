@@ -109,20 +109,20 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return Vector<-1, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
 
-	const Matrix<1, Size, Precision, typename Slice<1,Stride>::Base> as_row() const{
-		return Matrix<1, Size, Precision, typename Slice<1,Stride>::Base>(const_cast<Precision*>(my_data), 1, Size, 1, stride(), Slicing());
+	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, Size, 1, stride(), Slicing());
 	}
 
-	Matrix<1, Size, Precision, typename Slice<1,Stride>::Base> as_row(){
-		return Matrix<1, Size, Precision, typename Slice<1,Stride>::Base>(my_data, 1, Size, 1, stride(), Slicing());
+	Matrix<1, Size, Precision, Slice<1,Stride> > as_row(){
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(my_data, 1, Size, 1, stride(), Slicing());
 	}
 
-	const Matrix<Size, 1, Precision, typename Slice<Stride,1>::Base> as_col() const{
-		return Matrix<Size, 1, Precision, typename Slice<Stride,1>::Base>(const_cast<Precision*>(my_data), Size, 1, stride(), 1, Slicing());
+	const Matrix<Size, 1, Precision, Slice<Stride,1> > as_col() const{
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(const_cast<Precision*>(my_data), Size, 1, stride(), 1, Slicing());
 	}
 
-	Matrix<Size, 1, Precision, typename Slice<Stride,1>::Base> as_col(){
-		return Matrix<Size, 1, Precision, typename Slice<Stride,1>::Base>(my_data, Size, 1, stride(), 1, Slicing());
+	Matrix<Size, 1, Precision, Slice<Stride,1> > as_col(){
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(my_data, Size, 1, stride(), 1, Slicing());
 	}
 };
 
