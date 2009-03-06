@@ -176,10 +176,13 @@ Matrix<Internal::Sizer<R1,R1>::size, Internal::Sizer<C2,C2>::size, typename Inte
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// vector <op> scalar
+// vector <op> scalar 
+// scalar <op> vector 
+// matrix <op> scalar 
+// scalar <op> matrix 
 //
 
-#define TOON_MAKE_SCALAR_OP_PAIR(OPNAME, OP) \
+#define TOON_MAKE_SCALAR_OPS(OPNAME, OP) \
 template<int S, typename P1, typename B1, typename P2> \
 Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Vector<S, P1, B1>& v, const P2& s)\
 {	\
@@ -207,12 +210,13 @@ Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P
 	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
 }
 
-TOON_MAKE_SCALAR_OP_PAIR(Add, +)
-TOON_MAKE_SCALAR_OP_PAIR(Subtract, -)
-TOON_MAKE_SCALAR_OP_PAIR(Multiply, *)
-TOON_MAKE_SCALAR_OP_PAIR(Divide, /)
+TOON_MAKE_SCALAR_OPS(Add, +)
+TOON_MAKE_SCALAR_OPS(Subtract, -)
+TOON_MAKE_SCALAR_OPS(Multiply, *)
+TOON_MAKE_SCALAR_OPS(Divide, /)
 
-#undef TOON_MAKE_SCALAR_OP_PAIR
+#undef TOON_MAKE_SCALAR_OPS
+
 
 
 
