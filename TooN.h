@@ -9,9 +9,6 @@
 namespace TooN
 {
 	
-	static const unsigned int max_bytes_on_stack=1000;
-	struct Slicing{};
-
 
 	#ifdef TOON_TEST_INTERNALS
 		namespace Internal
@@ -22,13 +19,19 @@ namespace TooN
 			struct SizeMismatch{};
 			struct StaticSizeMismatch{};
 		}
-
 	#endif
 	
-	template<int RowStride, int ColStride> struct Slice;	
+	namespace Internal
+	{
+		static const unsigned int max_bytes_on_stack=1000;
+		struct Slicing{};
+		template<int RowStride, int ColStride> struct Slice;	
+	}
+
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
-	
+	template<typename T> class Operator;
+
 	#include <TooN/internal/allocator.hh>
 
 	#include <TooN/internal/size_mismatch.hh>

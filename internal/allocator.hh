@@ -6,7 +6,8 @@
 //
 // At this level, copy construction is required since it is only known here 
 // whether data or a reference to data should be copied.
-
+namespace Internal
+{
 template<int Size, class Precision, bool heap> class StackOrHeap
 {
 	public:
@@ -349,9 +350,4 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 	{}
 };
 
-
-
-
-
-
-
+}

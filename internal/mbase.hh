@@ -1,8 +1,9 @@
+namespace Internal
+{
 // As usual, a positive integer means static and -1 means dynamic.
 // The new case is that for strides, -2 means that the stride is 
 // the same as num_cols/num_rows, which must be dynamically sized.
 
-template<int,int,class,class> class Matrix;
 template<int, int, class, int, int, class> class GenericMBase;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -29,42 +30,6 @@ template<int RowStride, int ColStride> struct Slice
 		};
 	};
 };
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// Classes for Matrices owning memory
-//
-//
-struct RowMajor
-{
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, MatrixAlloc<Rows, Cols, Precision> >
-	{
-		//Optional constructors.
-		
-		Layout(){}
-
-		Layout(int rows, int cols)
-		:GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
-		{}
-	};
-};
-
-struct ColMajor
-{
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), MatrixAlloc<Rows, Cols, Precision> >
-	{
-		//Optional constructors.
-		
-		Layout(){}
-
-		Layout(int rows, int cols)
-		:GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
-		{}
-	};
-};
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -179,7 +144,43 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	}
 };
 
+}
 
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Classes for Matrices owning memory
+//
+//
+struct RowMajor
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(){}
+
+		Layout(int rows, int cols)
+		:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		{}
+	};
+};
+
+struct ColMajor
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(){}
+
+		Layout(int rows, int cols)
+		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		{}
+	};
+};
 
 
 

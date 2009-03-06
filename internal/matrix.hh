@@ -16,10 +16,10 @@ public:
 
 	//The stride is always passed during a slice. If it is not
 	//needed, it will be ignored later and not stored.
-	Matrix(Precision* data, int rowstride, int colstride, Slicing)
+	Matrix(Precision* data, int rowstride, int colstride, Internal::Slicing)
 	:Layout::template Layout<Rows, Cols, Precision>(data, rowstride, colstride){}
 
-	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Slicing)
+	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Internal::Slicing)
 	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
 
 	Matrix(int rows, int cols)

@@ -1,5 +1,5 @@
 //-*- c++ -*-
-template<int Size=-1, typename Precision=double, typename Base=VBase>
+template<int Size=-1, typename Precision=double, typename Base=Internal::VBase>
 class Vector : public Base::template Layout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
@@ -8,8 +8,8 @@ public:
 	inline Vector(){}
 	inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
 	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
-	inline Vector(Precision* data_in, int size_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
-	inline Vector(Precision* data_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
+	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
+	inline Vector(Precision* data_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
 	
 	using Base::template Layout<Size, Precision>::size;
 

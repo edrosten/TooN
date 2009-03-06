@@ -1,6 +1,5 @@
-template<int,class,class> class Vector;
+namespace Internal{
 template<int Size, class Precision, int Stride, class Mem> struct GenericVBase;
-template<typename T> class Operator;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,3 +125,5 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return Matrix<Size, 1, Precision, typename Slice<Stride,1>::Base>(my_data, Size, 1, stride(), 1, Slicing());
 	}
 };
+
+}
