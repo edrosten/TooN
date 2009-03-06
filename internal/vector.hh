@@ -1,15 +1,15 @@
 //-*- c++ -*-
 template<int Size=-1, typename Precision=double, typename Base=VBase>
-class Vector : public Base::Layout<Size,Precision> {
+class Vector : public Base::template Layout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
 	inline Vector(){}
-	inline Vector(Precision* data) : Base::Layout (data) {}
-	inline Vector(int size_in) : Base::Layout(size_in) {}
-	inline Vector(Precision* data_in, int size_in, int stride_in, Slicing) : Base::Layout(data_in, size_in, stride_in) {}
-	inline Vector(Precision* data_in, int stride_in, Slicing) : Base::Layout(data_in, stride_in) {}
+	inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
+	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
+	inline Vector(Precision* data_in, int size_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
+	inline Vector(Precision* data_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
 
 
 	// constructors to allow return value optimisations

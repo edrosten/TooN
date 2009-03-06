@@ -177,7 +177,7 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 	}
 
 
-	typedef Vector<Cols, Precision, SliceVBase<Cols, 1, Precision> > Vec;
+	typedef Vector<Cols, Precision, SliceVBase<1> > Vec;
 	
 	Vec operator[](int r) {
 		Internal::check_index(num_rows(), r);
@@ -283,7 +283,7 @@ template<int Rows, int Cols, class Precision, int Stride, class Mem> struct Gene
 		return my_data[c*stride() + r];
 	}
 	
-	typedef Vector<Cols, Precision, SliceVBase<Cols, SliceStride, Precision> > Vec;
+	typedef Vector<Cols, Precision, SliceVBase<SliceStride> > Vec;
 	Vec operator[](int r) {
 		Internal::check_index(num_rows(), r);
 		return Vec(my_data + r, num_cols(), stride(), Slicing());

@@ -40,9 +40,9 @@ struct VBase {
 	struct Layout 
 		: public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
 	
-		VBase(){}
+		Layout(){}
 
-		VBase(int s)
+		Layout(int s)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
 		{}
 	};
@@ -89,23 +89,23 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 
 
 	template<int Start, int Length> 
-	Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice(){
+	Vector<Length, Precision, SliceVBase<Stride> > slice(){
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
 		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride()*Start, stride(), Slicing());
 	}
 
 	template<int Start, int Length> 
-	const Vector<Length, Precision, SliceVBase<Length, Stride, Precision> > slice() const {
+	const Vector<Length, Precision, SliceVBase<Stride> > slice() const {
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
 		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*Start), stride(), Slicing());
 	}
 
-	Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length){
+	Vector<-1, Precision, SliceVBase<Stride> > slice(int start, int length){
 		Internal::CheckDynamicSlice::check(size(), start, length);
 		return Vector<-1, Precision, SliceVBase<Stride> >(my_data + stride()*start, length, stride(), Slicing());
 	}
 
-	const Vector<-1, Precision, SliceVBase<-1, Stride, Precision> > slice(int start, int length) const {
+	const Vector<-1, Precision, SliceVBase<Stride> > slice(int start, int length) const {
 		Internal::CheckDynamicSlice::check(size(), start, length);
 		return Vector<-1, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
