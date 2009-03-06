@@ -10,19 +10,20 @@ public:
 	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
 	inline Vector(Precision* data_in, int size_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
 	inline Vector(Precision* data_in, int stride_in, Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
-
+	
+	using Base::template Layout<Size, Precision>::size;
 
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
-	inline Vector(const T& arg, const Operator<Op>&, int size) : Base::Layout(size) {
+	inline Vector(const T& arg, const Operator<Op>&, int size) : Base::template Layout<Size, Precision>(size) {
 		Op::eval(*this,arg);
 	}
 
 	// constructor from 2-ary operator
 	template <class LHS, class RHS, class Op>
 	inline Vector(const LHS& lhs, const RHS& rhs, const Operator<Op>&, int size)
-		: Base::Layout(size) {
+		: Base::template Layout<Size, Precision>(size) {
 		Op::eval(*this,lhs,rhs);
 	}
 
@@ -38,14 +39,14 @@ public:
 	// constructor from arbitrary vector
 	template<int Size2, typename Precision2, typename Base2>
 	inline Vector(const Vector<Size2,Precision2,Base2>& from):
-		Base::Layout(from.size()) {
+		Base::template Layout<Size, Precision>(from.size()) {
 		operator=(from);
 	}
 
 	// operator = from copy
 	inline Vector& operator= (const Vector& from){
-		SizeMismatch<Size,Size>::test(Base::size(), from.size());
-		const int s=Base::size();
+		SizeMismatch<Size,Size>::test(size(), from.size());
+		const int s=size();
 		for(int i=0; i<s; i++){
 			(*this)[i]=from[i];
 		}
@@ -55,8 +56,8 @@ public:
 	// operator =
 	template<int Size2, typename Precision2, typename Base2>
 	Vector<Size,Precision,Base >& operator= (const Vector<Size2, Precision2, Base2>& from){
-		SizeMismatch<Size,Size2>::test(Base::size(), from.size());
-		const int s=Base::size();
+		SizeMismatch<Size,Size2>::test(size(), from.size());
+		const int s=size();
 		for(int i=0; i<s; i++){
 			(*this)[i]=from[i];
 		}
@@ -92,16 +93,16 @@ public:
 	
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator+=(const Vector<Size2, Precision2, Base2>& rhs) {
-		SizeMismatch<Size,Size2>::test(Base::size(),rhs.size());
-		for(int i=0; i<Base::size(); i++)
+		SizeMismatch<Size,Size2>::test(size(),rhs.size());
+		for(int i=0; i<size(); i++)
 			(*this)[i]+=rhs;
 		return *this;
 	}
 
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator-=(const Vector<Size2, Precision2, Base2>& rhs) {
-		SizeMismatch<Size,Size2>::test(Base::size(),rhs.size());
-		for(int i=0; i<Base::size(); i++)
+		SizeMismatch<Size,Size2>::test(size(),rhs.size());
+		for(int i=0; i<size(); i++)
 			(*this)[i]-=rhs;
 		return *this;
 	}
