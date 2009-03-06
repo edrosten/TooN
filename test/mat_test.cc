@@ -53,6 +53,9 @@ int main()
 	Matrix<3,4> m;	
 	set(m);
 	foo(m);
+	
+	cout << m.my_data << endl;
+
 	Matrix<3,4,double,ColMajor> n;	
 	set(n);
 	foo(n);

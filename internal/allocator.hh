@@ -330,7 +330,18 @@ template<> struct StrideHolder<-1>
 };
 
 
+template<int S> struct RowStrideHolder: public StrideHolder<S>
+{
+	RowStrideHolder(int i)
+		:StrideHolder<S>(i){}
+};
 
+
+template<int S> struct ColStrideHolder: public StrideHolder<S>
+{
+	ColStrideHolder(int i)
+		:StrideHolder<S>(i){}
+};
 
 
 

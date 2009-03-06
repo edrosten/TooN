@@ -110,19 +110,19 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return Vector<-1, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
 	}
 
-	const Matrix<1, Size, Precision, typename Slice<Stride>::ColMajor> as_row() const{
-		return Matrix<1, Size, Precision, typename Slice<Stride>::ColMajor>(const_cast<Precision*>(my_data), 1, Size, stride(), Slicing());
+	const Matrix<1, Size, Precision, typename Slice<1,Stride>::Layout> as_row() const{
+		return Matrix<1, Size, Precision, typename Slice<1,Stride>::Layout>(const_cast<Precision*>(my_data), 1, Size, 1, stride(), Slicing());
 	}
 
-	Matrix<1, Size, Precision, typename Slice<Stride>::ColMajor> as_row(){
-		return Matrix<1, Size, Precision, typename Slice<Stride>::ColMajor>(my_data, 1, Size, stride(), Slicing());
+	Matrix<1, Size, Precision, typename Slice<1,Stride>::Layout> as_row(){
+		return Matrix<1, Size, Precision, typename Slice<1,Stride>::Layout>(my_data, 1, Size, 1, stride(), Slicing());
 	}
 
-	const Matrix<Size, 1, Precision, typename Slice<Stride>::RowMajor> as_col() const{
-		return Matrix<Size, 1, Precision, typename Slice<Stride>::RowMajor>(const_cast<Precision*>(my_data), Size, 1, stride(), Slicing());
+	const Matrix<Size, 1, Precision, typename Slice<Stride,1>::Layout> as_col() const{
+		return Matrix<Size, 1, Precision, typename Slice<Stride,1>::Layout>(const_cast<Precision*>(my_data), Size, 1, stride(), 1, Slicing());
 	}
 
-	Matrix<Size, 1, Precision, typename Slice<Stride>::RowMajor> as_col(){
-		return Matrix<Size, 1, Precision, typename Slice<Stride>::RowMajor>(my_data, Size, 1, stride(), Slicing());
+	Matrix<Size, 1, Precision, typename Slice<Stride,1>::Layout> as_col(){
+		return Matrix<Size, 1, Precision, typename Slice<Stride,1>::Layout>(my_data, Size, 1, stride(), 1, Slicing());
 	}
 };

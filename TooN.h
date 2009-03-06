@@ -25,7 +25,7 @@ namespace TooN
 
 	#endif
 	
-	template<int Stride> struct Slice;
+	template<int RowStride, int ColStride> struct Slice;	
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	
