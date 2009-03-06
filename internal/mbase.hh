@@ -3,6 +3,7 @@
 // the same as num_cols/num_rows, which must be dynamically sized.
 
 template<int,int,class,class> class Matrix;
+template<int, int, class, int, int, class> class GenericMBase;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Closure used to acquire strides
@@ -10,28 +11,16 @@ template<int,int,class,class> class Matrix;
 //-2 means dynamic stride is tied to size for a normal matrix
 template<int RowStride, int ColStride> struct Slice
 {
-	struct Layout{
+	//This can't be called Layout since apparently Layout::Layout is not
+	//allowed. Can anyone think of a better name than Base?
+	struct Base{
 		template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, RowStride, ColStride, MatrixSlice<Rows, Cols, Precision> >
 		{
 			//Optional constructors.
-			
-			Layout(Precision* p)
-				:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p)
+			Layout(Precision* p, int rowstride, int colstride)
+				:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rowstride, colstride)
 			{
 			}
-			
-#if 0
-			Layout(Precision* p, int stride)
-				:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, stride)
-			{
-			}
-			
-			Layout(Precision* p, int rows, int cols)
-				:GenericRowMajor<Rows,Cols,Precision,Stride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols)
-			{
-			}
-#endif		
-			
 			
 			Layout(Precision* p, int rows, int cols, int rowstride, int colstride)
 				:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, rowstride, colstride)
@@ -49,28 +38,28 @@ template<int RowStride, int ColStride> struct Slice
 //
 struct RowMajor
 {
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericRowMajor<Rows, Cols, Precision, (Cols==-1?-2:Cols), MatrixAlloc<Rows, Cols, Precision> >
+	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, MatrixAlloc<Rows, Cols, Precision> >
 	{
 		//Optional constructors.
 		
 		Layout(){}
 
 		Layout(int rows, int cols)
-		:GenericRowMajor<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		:GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
 	};
 };
 
 struct ColMajor
 {
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericColMajor<Rows, Cols, Precision, (Rows==-1?-2:Rows), MatrixAlloc<Rows, Cols, Precision> >
+	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), MatrixAlloc<Rows, Cols, Precision> >
 	{
 		//Optional constructors.
 		
 		Layout(){}
 
 		Layout(int rows, int cols)
-		:GenericColMajor<Rows, Cols, Precision, (Rows == -1 ? -2 : Rows), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+		:GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
 	};
 };
@@ -102,31 +91,21 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 
 	int colstride() const {
 		if(ColStride == -2) { //Normal tied stride
-			return num_row();
+			return num_rows();
 		} else {
 			return ColStrideHolder<ColStride>::stride();
 		}
 	}
 
 	//Optional constructors
-	GenericMBaser(){}
+	GenericMBase(){}
 
-	GenericMBase(Precision* p)
-	:Mem(p) {}
-
-	// We think we don't need these any more
-#if 0
-	GenericRowMajor(Precision* p, int s)
-	:Mem(p),StrideHolder<Stride>(s) {}
-
-	GenericRowMajor(Precision* p, int r, int c)
-	:Mem(p, r, c) {}
-#endif
-
+	GenericMBase(Precision* p, int rs, int cs)
+	:Mem(p),RowStrideHolder<RowStride>(rs),ColStrideHolder<ColStride>(cs) {}
 
 	GenericMBase(Precision* p, int r, int c, int rowstride, int colstride)
 	:Mem(p, r, c),
-	 RowStrideHolder<RowStride>(rowstride) 
+	 RowStrideHolder<RowStride>(rowstride),
 	 ColStrideHolder<ColStride>(colstride) 
 	{}
 
@@ -161,42 +140,42 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
-	Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride> > slice()
+	Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Base > slice()
 	{
 		//Always pass the stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
 		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
 		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Layout>(my_data+rowstride()*Rstart + colstride()*Cstart, rowstride(), colstride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Base>(my_data+rowstride()*Rstart + colstride()*Cstart, rowstride(), colstride(), Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
-	const Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Layout> slice() const
+	const Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Base> slice() const
 	{
 		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
 		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Layout>(const_cast<Precision*>(my_data+rowstride()*Rstart + colstride()*Cstart), rowstride(), colstride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, typename Slice<SliceRowStride,SliceColStride>::Base>(const_cast<Precision*>(my_data+rowstride()*Rstart + colstride()*Cstart), rowstride(), colstride(), Slicing());
 	}
 
-	Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::RowMajor > slice(int rs, int cs, int rl, int cl){
+	Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::Base > slice(int rs, int cs, int rl, int cl){
 		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
 		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
-		return Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::RowMajor >(my_data+rowstride()*rs +colstride()*cs, rl, cl, rowstride(), colstride(), Slicing());
+		return Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::Base >(my_data+rowstride()*rs +colstride()*cs, rl, cl, rowstride(), colstride(), Slicing());
 	}
 
-	const Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::RowMajor > slice(int rs, int cs, int rl, int cl) const {
+	const Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::Base > slice(int rs, int cs, int rl, int cl) const {
 		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
 		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
-		return Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::RowMajor >(const_cast<Precision*>(my_data+stride()*rs +colstride()*cs), rl, cl, rowstride(), colstride(), Slicing());
+		return Matrix<-1, -1, Precision, typename Slice<SliceRowStride,SliceColStride>::Base >(const_cast<Precision*>(my_data+rowstride()*rs +colstride()*cs), rl, cl, rowstride(), colstride(), Slicing());
 	}
 
 
-	Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Layout> T(){
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Layout>(my_data, num_cols(), num_rows(), colstride(), rowstride(), Slicing());
+	Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Base> T(){
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Base>(my_data, num_cols(), num_rows(), colstride(), rowstride(), Slicing());
 	}
 
-	const Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Layout> T() const{
-		return Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Layout>(const_cast<Precision*>(my_data), num_cols(), num_rows(), colstride(), rowstride(), Slicing());
+	const Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Base> T() const{
+		return Matrix<Cols, Rows, Precision, typename Slice<SliceColStride,SliceRowStride>::Base>(const_cast<Precision*>(my_data), num_cols(), num_rows(), colstride(), rowstride(), Slicing());
 	}
 };
 

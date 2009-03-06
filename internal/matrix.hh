@@ -14,16 +14,13 @@ public:
 		
 	Matrix(){}
 
-	Matrix(Precision* data, Slicing)
-	:Layout::template Layout<Rows, Cols, Precision>(data){}
-	
 	//The stride is always passed during a slice. If it is not
 	//needed, it will be ignored later and not stored.
-	Matrix(Precision* data, int stride, Slicing)
-	:Layout::template Layout<Rows, Cols, Precision>(data, stride){}
+	Matrix(Precision* data, int rowstride, int colstride, Slicing)
+	:Layout::template Layout<Rows, Cols, Precision>(data, rowstride, colstride){}
 
-	Matrix(Precision* data, int rows, int cols, int stride, Slicing)
-	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, stride){}
+	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Slicing)
+	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
 
 	Matrix(int rows, int cols)
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)

@@ -334,6 +334,9 @@ template<int S> struct RowStrideHolder: public StrideHolder<S>
 {
 	RowStrideHolder(int i)
 		:StrideHolder<S>(i){}
+
+	RowStrideHolder()
+	{}
 };
 
 
@@ -341,6 +344,9 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 {
 	ColStrideHolder(int i)
 		:StrideHolder<S>(i){}
+
+	ColStrideHolder()
+	{}
 };
 
 
