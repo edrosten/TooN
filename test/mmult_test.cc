@@ -24,11 +24,20 @@ template<int a, int b> void mmult_test()
 	m4[1] = makeVector(8, 9);
 	m4[2] = makeVector(10, 11);
 
+	Vector<V(a,3)> v(3);
+	v = makeVector(6,8,10);
+
 	cout << m3<<endl;
 	cout << m4<<endl;
 	cout << m3*m4;
 	
 	cout << "\n should be: \n    28    31\n  100   112\n";
+
+	cout << endl << v << endl;
+	cout << endl << m3*v << endl;
+
+	cout << "\n should be: \n    28    100\n" << endl;
+
 }
 
 int main()
