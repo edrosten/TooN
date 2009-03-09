@@ -190,11 +190,9 @@ Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Inte
 template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
 Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type> operator*(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
 {
-	typedef typename Internal::MultiplyType<P1, P2>::type restype;
-
 	SizeMismatch<R1, C2>:: test(m1.num_rows(),m2.num_cols());
 	SizeMismatch<C1, R2>:: test(m1.num_cols(),m2.num_rows());
-	return Matrix<Internal::Sizer<R1,R1>::size, Internal::Sizer<C2,C2>::size,restype>(m1, m2, Operator<Internal::MatrixMultiply>(), m1.num_rows(), m2.num_cols());
+	return Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type>(m1, m2, Operator<Internal::MatrixMultiply>(), m1.num_rows(), m2.num_cols());
 }
 
 // Matrix Vector multiplication Matrix * Vector
