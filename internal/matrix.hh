@@ -31,7 +31,7 @@ public:
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
-	inline Matrix(const T& arg, const Operator<Op>&, int rows, int cols) 
+	inline Matrix(const T& arg, int rows, int cols, const Operator<Op>&) 
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols) 
 	{
 	    Op::eval(*this,arg);
@@ -39,7 +39,7 @@ public:
 
 	// constructor from 2-ary operator
 	template <class LHS, class RHS, class Op>
-	inline Matrix(const LHS& lhs, const RHS& rhs, const Operator<Op>&, int rows, int cols)
+	inline Matrix(const LHS& lhs, const RHS& rhs, int rows, int cols, const Operator<Op>&)
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
 	{
 	    Op::eval(*this,lhs,rhs);

@@ -16,13 +16,13 @@ public:
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
-	inline Vector(const T& arg, const Operator<Op>&, int size) : Base::template Layout<Size, Precision>(size) {
+	inline Vector(const T& arg, int size, const Operator<Op>&) : Base::template Layout<Size, Precision>(size) {
 		Op::eval(*this,arg);
 	}
 
 	// constructor from 2-ary operator
 	template <class LHS, class RHS, class Op>
-	inline Vector(const LHS& lhs, const RHS& rhs, const Operator<Op>&, int size)
+	inline Vector(const LHS& lhs, const RHS& rhs, int size, const Operator<Op>&)
 		: Base::template Layout<Size, Precision>(size) {
 		Op::eval(*this,lhs,rhs);
 	}

@@ -140,7 +140,7 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> o
 {
 	typedef typename Internal::AddType<P1, P2>::type restype;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, Operator<Internal::Pairwise<restype, Internal::Add> >(), v1.size());
+	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Add> >());
 }
 
 // Addition Vector - Vector
@@ -149,7 +149,7 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::ty
 {
 	typedef typename Internal::SubtractType<P1, P2>::type restype;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, Operator<Internal::Pairwise<restype, Internal::Subtract> >(), v1.size());
+	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Subtract> >());
 }
 
 // Dot product Vector * Vector
@@ -176,7 +176,7 @@ Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Inte
 	typedef typename Internal::AddType<P1, P2>::type restype;
 	SizeMismatch<R1, R2>:: test(m1.num_rows(),m2.num_rows());
 	SizeMismatch<C1, C2>:: test(m1.num_cols(),m2.num_cols());
-	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, Operator<Internal::Pairwise<restype, Internal::Add> >(), m1.num_rows(), m1.num_cols());
+	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, m1.num_rows(), m1.num_cols(), Operator<Internal::Pairwise<restype, Internal::Add> >());
 }
 
 // Addition Matrix - Matrix
@@ -186,7 +186,7 @@ Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size, typename Inte
 	typedef typename Internal::SubtractType<P1, P2>::type restype;
 	SizeMismatch<R1, R2>:: test(m1.num_rows(),m2.num_rows());
 	SizeMismatch<C1, C2>:: test(m1.num_cols(),m2.num_cols());
-	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, Operator<Internal::Pairwise<restype, Internal::Subtract> >(), m1.num_rows(), m1.num_cols());
+	return Matrix<Internal::Sizer<R1,R2>::size, Internal::Sizer<C1,C2>::size,restype>(m1, m2, m1.num_rows(), m1.num_cols(), Operator<Internal::Pairwise<restype, Internal::Subtract> >());
 }
 
 // Matrix multiplication Matrix * Matrix
@@ -196,7 +196,7 @@ Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type> operator*(const Ma
 {
 	SizeMismatch<R1, C2>:: test(m1.num_rows(),m2.num_cols());
 	SizeMismatch<C1, R2>:: test(m1.num_cols(),m2.num_rows());
-	return Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type>(m1, m2, Operator<Internal::MatrixMultiply>(), m1.num_rows(), m2.num_cols());
+	return Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type>(m1, m2, m1.num_rows(), m2.num_cols(), Operator<Internal::MatrixMultiply>());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ template<int R, int C, int Size, typename P1, typename P2, typename B1, typename
 Vector<R, typename Internal::MultiplyType<P1,P2>::type> operator*(const Matrix<R, C, P1, B1>& m, const Vector<Size, P2, B2>& v)
 {
 	SizeMismatch<C,Size>::test(m.num_cols(), v.size());
-	return Vector<R, typename Internal::MultiplyType<P1,P2>::type> (m, v, Operator<Internal::MatrixVectorMultiply>(), m.num_rows() );
+	return Vector<R, typename Internal::MultiplyType<P1,P2>::type> (m, v, m.num_rows(), Operator<Internal::MatrixVectorMultiply>() );
 }
 																	
 // Vector Matrix multiplication Vector * Matrix
@@ -219,7 +219,7 @@ template<int Size, int R, int C, typename P1, typename P2, typename B1, typename
 Vector<C, typename Internal::MultiplyType<P1,P2>::type> operator*(const Vector<Size, P1, B1>& v, const Matrix<R, C, P2, B2>& m)
 {
 	SizeMismatch<R,Size>::test(m.num_rows(), v.size());
-	return Vector<C, typename Internal::MultiplyType<P1,P2>::type> (v, m, Operator<Internal::VectorMatrixMultiply>(), m.num_cols() );
+	return Vector<C, typename Internal::MultiplyType<P1,P2>::type> (v, m, m.num_cols(), Operator<Internal::VectorMatrixMultiply>() );
 }
 
 
@@ -238,14 +238,14 @@ template<int R, int C, typename P1, typename B1, typename P2> \
 Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Matrix<R, C, P1, B1>& m, const P2& s)\
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Matrix<R, C,restype>(m, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
+	return Matrix<R, C,restype>(m, s, m.num_rows(), m.num_cols(), Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >()); \
 }\
 \
 template<int S, typename P1, typename B1, typename P2> \
 Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Vector<S, P1, B1>& v, const P2& s)\
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Vector<S,restype>(v, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), v.size());\
+	return Vector<S,restype>(v, s, v.size(), Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >());\
 }
 
 // scalar on the left
@@ -254,14 +254,14 @@ template<int R, int C, typename P1, typename P2, typename B2> \
 Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Matrix<R, C, P2, B2>& m)\
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
+	return Matrix<R, C,restype>(s, m, m.num_rows(), m.num_cols(), Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >());\
 } \
 \
 template<int S, typename P1, typename P2, typename B2> \
 Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Vector<S, P2, B2>& v)\
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Vector<S,restype>(s, v, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), v.size());\
+	return Vector<S,restype>(s, v, v.size(), Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >());\
 }
 
 
