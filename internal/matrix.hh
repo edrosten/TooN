@@ -1,8 +1,6 @@
 template <int Rows=-1, int Cols=Rows, class Precision=double, class Layout = RowMajor>
 class Matrix : public Layout::template Layout<Rows, Cols, Precision>
 {
-private:
-	//using Layout::template Layout<Rows, Cols, Precision>::my_data;
 public:
 
 	using Layout::template Layout<Rows, Cols, Precision>::my_data;
