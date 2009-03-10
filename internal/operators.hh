@@ -164,6 +164,23 @@ typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Ve
   return result;
 }
 
+template <typename P1, typename P2>
+Vector<3, typename Internal::MultiplyType<P1,P2>::type> operator^(const Vector<3,P1>& v1, const Vector<3,P2>& v2){
+	// assume the result of adding two restypes is also a restype
+	typedef typename Internal::MultiplyType<P1,P2>::type restype;
+
+	Vector<3, restype> result;
+
+	result[0] = v1[1]*v2[2] - v1[2]*v2[1];
+    result[1] = v1[2]*v2[0] - v1[0]*v2[2];
+    result[2] = v1[0]*v2[1] - v1[1]*v2[0];
+
+	return result;
+}
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // matrix <op> matrix
