@@ -164,6 +164,10 @@ typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Ve
   return result;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// matrix <op> matrix
+//
 
 // Addition Matrix + Matrix
 template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
@@ -195,6 +199,11 @@ Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type> operator*(const Ma
 	return Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type>(m1, m2, Operator<Internal::MatrixMultiply>(), m1.num_rows(), m2.num_cols());
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// matrix <op> vector and vv.
+//
+
 // Matrix Vector multiplication Matrix * Vector
 
 template<int R, int C, int Size, typename P1, typename P2, typename B1, typename B2>
@@ -221,7 +230,7 @@ Vector<C, typename Internal::MultiplyType<P1,P2>::type> operator*(const Vector<S
 // matrix <op> scalar 
 // scalar <op> matrix 
 //
-// Except <scalar> / <matrix> does not exist
+// Except <scalar> / <matrix|vector> does not exist
 
 // scalar on the right
 #define TOON_MAKE_SCALAR_OP_RIGHT(OPNAME, OP) \
