@@ -235,279 +235,281 @@ namespace TooN {
     class Cholesky {
     public:
 
-	Cholesky() {}
+		Cholesky() {}
 
-	template<class Accessor>
-	Cholesky(const FixedMatrix<N,N,Accessor>& m){
-	    compute(m);
-	}
+		template<class Accessor>
+		Cholesky(const FixedMatrix<N,N,Accessor>& m){
+			compute(m);
+		}
     
-	template<class Accessor>
-	void compute(const FixedMatrix<N,N,Accessor>& m){
-	    rank = util::cholesky_compute(m,L,invdiag);
-	}
-	int get_rank() const { return rank; }
-
-	double get_determinant() const {
-	    double det = L[0][0];
-	    for (int i=1; i<N; i++)
-		det *= L[i][i];
-	    return det;
-	}
-
-	const Matrix<N>& get_L_D() const { return L; }
-
-	template <class A1, class A2> static void sqrt(const FixedMatrix<N,N,A1>& A, FixedMatrix<N,N,A2>& L) {
-	    for (int i=0; i<N; ++i) {
-		double a = A[i][i];
-		for (int k=0; k<i; ++k)
-		    a -= L[i][k]*L[i][k];
-		if (0<a) {
-		    L[i][i] = ::sqrt(a);
-		} else {
-		    Zero(L.slice(i,i,N-i,N-i));
-		    return;
+		template<class Accessor>
+		void compute(const FixedMatrix<N,N,Accessor>& m){
+			rank = util::cholesky_compute(m,L,invdiag);
 		}
-		const double id = 1.0/L[i][i];
-		for (int j=i+1; j<N; ++j) {
-		    L[i][j] = 0;
-		    double a = A[i][j];
-		    for (int k=0; k<i; ++k)
-			a -= L[i][k]*L[j][k];
-		    L[j][i] = a * id;
+		int get_rank() const { return rank; }
+		
+		double get_determinant() const {
+			double det = L[0][0];
+			for (int i=1; i<N; i++)
+				det *= L[i][i];
+			return det;
 		}
-	    }
-	}
 
-	template <class A1> static Matrix<N> sqrt(const FixedMatrix<N,N,A1>& A) { 
-	    Matrix<N> L;
-	    Cholesky<N>::sqrt(A,L);
-	    return L;
-	}
+		const Matrix<N>& get_L_D() const { return L; }
 
-	template <class A> void get_sqrt(FixedMatrix<N,N,A>& M) const {
-	    for (int i=0; i<N; ++i) {
-		const double root_d = ::sqrt(L[i][i]);
-		M[i][i] = root_d;
-		for (int j=i+1; j<N; ++j) {
-		    M[j][i] = L[j][i]*root_d;
-		    M[i][j] = 0;
+		template <class A1, class A2> static void sqrt(const FixedMatrix<N,N,A1>& A, FixedMatrix<N,N,A2>& L) {
+			for (int i=0; i<N; ++i) {
+				double a = A[i][i];
+				for (int k=0; k<i; ++k)
+					a -= L[i][k]*L[i][k];
+				if (0<a) {
+					L[i][i] = ::sqrt(a);
+				} else {
+					Zero(L.slice(i,i,N-i,N-i));
+					return;
+				}
+				const double id = 1.0/L[i][i];
+				for (int j=i+1; j<N; ++j) {
+					L[i][j] = 0;
+					double a = A[i][j];
+					for (int k=0; k<i; ++k)
+						a -= L[i][k]*L[j][k];
+					L[j][i] = a * id;
+				}
+			}
 		}
-	    }
-	}
+		
+		template <class A1> static Matrix<N> sqrt(const FixedMatrix<N,N,A1>& A) { 
+			Matrix<N> L;
+			Cholesky<N>::sqrt(A,L);
+			return L;
+		}
 
-	Matrix<N> get_sqrt() const {
-	    Matrix<N> S;
-	    get_sqrt(S);
-	    return S;
-	}
+		template <class A> void get_sqrt(FixedMatrix<N,N,A>& M) const {
+			for (int i=0; i<N; ++i) {
+				const double root_d = ::sqrt(L[i][i]);
+				M[i][i] = root_d;
+				for (int j=i+1; j<N; ++j) {
+					M[j][i] = L[j][i]*root_d;
+					M[i][j] = 0;
+				}
+			}
+		}
+		
+		Matrix<N> get_sqrt() const {
+			Matrix<N> S;
+			get_sqrt(S);
+			return S;
+		}
 	
-	Matrix<N> get_L() const { return get_sqrt(); }
+		Matrix<N> get_L() const { return get_sqrt(); }
 	
-	template <class A> void get_inv_sqrt(FixedMatrix<N,N,A>& M) const {
-	    Vector<N> root;
-	    for (int i=0; i<N; ++i)
-		root[i] = ::sqrt(invdiag[i]);
-	    for (int j=0; j<N; ++j) {
-		for (int i=j+1; i<N; ++i) {
-		    double sum = L[i][j];
-		    for (int k=j+1; k<i; ++k)
-			sum += L[i][k]*M[j][k];
-		    M[j][i] = -sum;
-		    M[i][j] = 0;
+		template <class A> void get_inv_sqrt(FixedMatrix<N,N,A>& M) const {
+			Vector<N> root;
+			for (int i=0; i<N; ++i)
+				root[i] = ::sqrt(invdiag[i]);
+			for (int j=0; j<N; ++j) {
+				for (int i=j+1; i<N; ++i) {
+					double sum = L[i][j];
+					for (int k=j+1; k<i; ++k)
+						sum += L[i][k]*M[j][k];
+					M[j][i] = -sum;
+					M[i][j] = 0;
+				}
+				M[j][j] = root[j];
+				for (int i=j+1; i<N; ++i)
+					M[j][i] *= root[i];
+			}
 		}
-		M[j][j] = root[j];
-		for (int i=j+1; i<N; ++i)
-		    M[j][i] *= root[i];
-	    }
-	}
 	
-	template <class A> double mahalanobis(const FixedVector<N,A>& v) const {
-	    Vector<N> L_inv_v;
-	    util::Forwardsub_L<N>::eval(L, v, L_inv_v);
-	    return util::Dot3<0,N-1>::eval(L_inv_v, L_inv_v, invdiag);
-	}
-
-	template <class F, int M, class A1, class A2> void transform_inverse(const FixedMatrix<M,N,A1>& J, FixedMatrix<M,M,A2>& T) const {
-	    Matrix<M,N> L_inv_JT;
-	    for (int i=0; i<M; ++i)
-		util::Forwardsub_L<N>::eval(L, J[i], L_inv_JT[i]);
-	    for (int i=0; i<M; ++i) {		
-		F::eval(T[i][i],util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[i], invdiag));
-		for (int j=i+1; j<M; ++j) {
-		    const double x = util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[j], invdiag);
-		    F::eval(T[i][j],x);
-		    F::eval(T[j][i],x);
+		template <class A> double mahalanobis(const FixedVector<N,A>& v) const {
+			Vector<N> L_inv_v;
+			util::Forwardsub_L<N>::eval(L, v, L_inv_v);
+			return util::Dot3<0,N-1>::eval(L_inv_v, L_inv_v, invdiag);
 		}
-	    }
-	}
-
-	template <class F, class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
-	    const int M = J.num_rows();
-	    assert( T.num_rows() == M && T.num_cols() == M);
-	    Matrix<> L_inv_JT(M,N);
-	    for (int i=0; i<M; ++i)
-		util::Forwardsub_L<N>::eval(L, J[i], L_inv_JT[i]);
-	    for (int i=0; i<M; ++i) {
-		F::eval(T[i][i],util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[i], invdiag));
-		for (int j=i+1; j<M; ++j) {
-		    const double x = util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[j], invdiag);
-		    F::eval(T[i][j],x);
-		    F::eval(T[j][i],x);
+		
+		template <class F, int M, class A1, class A2> void transform_inverse(const FixedMatrix<M,N,A1>& J, FixedMatrix<M,M,A2>& T) const {
+			Matrix<M,N> L_inv_JT;
+			for (int i=0; i<M; ++i)
+				util::Forwardsub_L<N>::eval(L, J[i], L_inv_JT[i]);
+			for (int i=0; i<M; ++i) {		
+				F::eval(T[i][i],util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[i], invdiag));
+				for (int j=i+1; j<M; ++j) {
+					const double x = util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[j], invdiag);
+					F::eval(T[i][j],x);
+					F::eval(T[j][i],x);
+				}
+			}
 		}
-	    }
-	}
+		
+		template <class F, class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
+			const int M = J.num_rows();
+			assert( T.num_rows() == M && T.num_cols() == M);
+			Matrix<> L_inv_JT(M,N);
+			for (int i=0; i<M; ++i)
+				util::Forwardsub_L<N>::eval(L, J[i], L_inv_JT[i]);
+			for (int i=0; i<M; ++i) {
+				F::eval(T[i][i],util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[i], invdiag));
+				for (int j=i+1; j<M; ++j) {
+					const double x = util::Dot3<0,N-1>::eval(L_inv_JT[i], L_inv_JT[j], invdiag);
+					F::eval(T[i][j],x);
+					F::eval(T[j][i],x);
+				}
+			}
+		}
+		
+		template <int M, class A1, class A2> void transform_inverse(const FixedMatrix<M,N,A1>& J, FixedMatrix<M,M,A2>& T) const {
+			transform_inverse<util::Assign>(J,T);
+		}
 
-	template <int M, class A1, class A2> void transform_inverse(const FixedMatrix<M,N,A1>& J, FixedMatrix<M,M,A2>& T) const {
-	    transform_inverse<util::Assign>(J,T);
-	}
+		template <class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
+			transform_inverse<util::Assign>(J,T);
+		}
+		
+		template <int M, class A> Matrix<M> transform_inverse(const FixedMatrix<M,N,A>& J) const {
+			Matrix<M> T;
+			transform_inverse(J,T);
+			return T;
+		}
+		
+		template <class A> Matrix<> transform_inverse(const DynamicMatrix<A>& J) const {
+			Matrix<> T(J.num_rows(), J.num_rows());
+			transform_inverse(J,T);
+			return T;
+		}
 
-	template <class A1, class M2> void transform_inverse(const DynamicMatrix<A1>& J, M2 & T) const {
-	    transform_inverse<util::Assign>(J,T);
-	}
+		template <class A1, class A2> inline 
+		void inverse_times(const FixedVector<N,A1>& v, FixedVector<N,A2>& x) const
+		{
+			util::cholesky_solve(L, invdiag, v, x);
+		}
+		
+		template <class Accessor> inline 
+		Vector<N> inverse_times(const FixedVector<N,Accessor>& v) const
+		{
+			Vector<N> x;
+			inverse_times(v, x);
+			return x;
+		}
+		
+		template <class Accessor> inline 
+		Vector<N> backsub(const FixedVector<N,Accessor>& v) const { return inverse_times(v); }
+		
+		template <class A, int M> inline Matrix<N,M> inverse_times(const FixedMatrix<N,M,A>& m)
+		{
+			Matrix<N,M> result;
+			for (int i=0; i<M; i++)
+				inverse_times(m.T()[i], result.T()[i]);
+			return result;
+		}
 
-	template <int M, class A> Matrix<M> transform_inverse(const FixedMatrix<M,N,A>& J) const {
-	    Matrix<M> T;
-	    transform_inverse(J,T);
-	    return T;
-	}
-
-	template <class A> Matrix<> transform_inverse(const DynamicMatrix<A>& J) const {
-	    Matrix<> T(J.num_rows(), J.num_rows());
-	    transform_inverse(J,T);
-	    return T;
-	}
-
-	template <class A1, class A2> inline 
-	void inverse_times(const FixedVector<N,A1>& v, FixedVector<N,A2>& x) const
-	{
-	    util::cholesky_solve(L, invdiag, v, x);
-	}
-
-	template <class Accessor> inline 
-	Vector<N> inverse_times(const FixedVector<N,Accessor>& v) const
-	{
-	    Vector<N> x;
-	    inverse_times(v, x);
-	    return x;
-	}
-
-	template <class Accessor> inline 
-	Vector<N> backsub(const FixedVector<N,Accessor>& v) const { return inverse_times(v); }
-      
-	template <class A, int M> inline Matrix<N,M> inverse_times(const FixedMatrix<N,M,A>& m)
-	{
-	    Matrix<N,M> result;
-	    for (int i=0; i<M; i++)
-		inverse_times(m.T()[i], result.T()[i]);
-	    return result;
-	}
-
-	template <class A> void get_inverse(FixedMatrix<N,N,A>& M) const {
-	    util::cholesky_inverse(L, invdiag, M);
-	}
-
-	Matrix<N> get_inverse() const {
-	    Matrix<N> M;
-	    get_inverse(M);
-	    return M;
-	}
+		template <class A> void get_inverse(FixedMatrix<N,N,A>& M) const {
+			util::cholesky_inverse(L, invdiag, M);
+		}
+		
+		Matrix<N> get_inverse() const {
+			Matrix<N> M;
+			get_inverse(M);
+			return M;
+		}
 	
-	template <int M, class A>  void update(const FixedMatrix<N,M,A>& V) {
-	    for (int i=0; i<M; ++i) {
-		Vector<N> p;
-		util::Forwardsub_L<N>::eval(L, V.T()[i], p);
-		util::cholesky_update(L, invdiag, p);
-	    }
-	}
-
-	template <class A>  void update(const FixedVector<N,A>& v) {
-	    Vector<N> p;
-	    util::Forwardsub_L<N>::eval(L, v, p);
-	    util::cholesky_update(L, invdiag, p);
-	}
+		template <int M, class A>  void update(const FixedMatrix<N,M,A>& V) {
+			for (int i=0; i<M; ++i) {
+				Vector<N> p;
+				util::Forwardsub_L<N>::eval(L, V.T()[i], p);
+				util::cholesky_update(L, invdiag, p);
+			}
+		}
+		
+		template <class A>  void update(const FixedVector<N,A>& v) {
+			Vector<N> p;
+			util::Forwardsub_L<N>::eval(L, v, p);
+			util::cholesky_update(L, invdiag, p);
+		}
 	
     private:
-	Matrix<N> L;
-	Vector<N> invdiag;
-	int rank;
+		Matrix<N> L;
+		Vector<N> invdiag;
+		int rank;
     };
   
+
+
     template <>
     class Cholesky<-1> {
     public:
 
-    Cholesky(){}
+		Cholesky(){}
 
-	template<class Accessor>
-	Cholesky(const DynamicMatrix<Accessor>& m) {
-	    compute(m);
-	}
+		template<class Accessor>
+		Cholesky(const DynamicMatrix<Accessor>& m) {
+			compute(m);
+		}
 
-	template<class Accessor>
-	void compute(const DynamicMatrix<Accessor>& m){
-	    assert(m.num_rows() == m.num_cols());
-	    L.assign(m);
-	    int N = L.num_rows();
-	    int info;
-	    dpotrf_("L", &N, L.get_data_ptr(), &N, &info);
-	    assert(info >= 0);
-	    if (info > 0)
-		rank = info-1;
-	}
-	int get_rank() const { return rank; }
+		template<class Accessor>
+		void compute(const DynamicMatrix<Accessor>& m){
+			assert(m.num_rows() == m.num_cols());
+			L.assign(m);
+			int N = L.num_rows();
+			int info;
+			dpotrf_("L", &N, L.get_data_ptr(), &N, &info);
+			assert(info >= 0);
+			if (info > 0)
+				rank = info-1;
+		}
+		int get_rank() const { return rank; }
 
-	template <class V> inline
-	Vector<> inverse_times(const V& v) const { return backsub(v); }
+		template <class V> inline
+		Vector<> inverse_times(const V& v) const { return backsub(v); }
 
-	template <class V> inline
-	Vector<> backsub(const V& v) const
-	{
-	    assert(v.size() == L.num_rows());
-	    Vector<> x = v;
-	    int N=L.num_rows();
-	    int NRHS=1;
-	    int info;
-	    dpotrs_("L", &N, &NRHS, L.get_data_ptr(), &N, x.get_data_ptr(), &N, &info);	    
-	    assert(info==0);
-	    return x;
-	}
+		template <class V> inline
+		Vector<> backsub(const V& v) const
+		{
+			assert(v.size() == L.num_rows());
+			Vector<> x = v;
+			int N=L.num_rows();
+			int NRHS=1;
+			int info;
+			dpotrs_("L", &N, &NRHS, L.get_data_ptr(), &N, x.get_data_ptr(), &N, &info);	    
+			assert(info==0);
+			return x;
+		}
 
-	template <class V> double mahalanobis(const V& v) const {
-	    return v * backsub(v);
-	}
+		template <class V> double mahalanobis(const V& v) const {
+			return v * backsub(v);
+		}
 
-	const Matrix<>& get_L() const {
-	    return L;
-	}
+		const Matrix<>& get_L() const {
+			return L;
+		}
 
-	double get_determinant() const {
-	    double det = L[0][0];
-	    for (int i=1; i<L.num_rows(); i++)
-		det *= L[i][i];
-	    return det*det;
-	}
+		double get_determinant() const {
+			double det = L[0][0];
+			for (int i=1; i<L.num_rows(); i++)
+				det *= L[i][i];
+			return det*det;
+		}
 
-	template <class Mat> void get_inverse(Mat& M) const {
-	    M = L;
-	    int N = L.num_rows();
-	    int info;
-	    dpotri_("L", &N, M.get_data_ptr(), &N, &info);
-	    assert(info == 0);
-	    TooN::Symmetrize(M);
-	}
-
-	Matrix<> get_inverse() const {
-	    Matrix<> M(L.num_rows(), L.num_rows());
-	    get_inverse(M);
-	    return M;
-	}
-
+		template <class Mat> void get_inverse(Mat& M) const {
+			M = L;
+			int N = L.num_rows();
+			int info;
+			dpotri_("L", &N, M.get_data_ptr(), &N, &info);
+			assert(info == 0);
+			TooN::Symmetrize(M);
+		}
+		
+		Matrix<> get_inverse() const {
+			Matrix<> M(L.num_rows(), L.num_rows());
+			get_inverse(M);
+			return M;
+		}
+		
     private:
-	Matrix<> L;	
-	int rank;
+		Matrix<> L;	
+		int rank;
     };
-
+	
 #ifndef TOON_NO_NAMESPACE
 }
 #endif 
