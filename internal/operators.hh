@@ -223,13 +223,30 @@ Vector<C, typename Internal::MultiplyType<P1,P2>::type> operator*(const Vector<S
 //
 // Except <scalar> / <matrix> does not exist
 
-#define TOON_MAKE_SCALAR_OP_LEFT(OPNAME, OP) \
+// scalar on the right
+#define TOON_MAKE_SCALAR_OP_RIGHT(OPNAME, OP) \
 template<int R, int C, typename P1, typename B1, typename P2> \
 Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Matrix<R, C, P1, B1>& m, const P2& s)\
 {	\
 	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
 	return Matrix<R, C,restype>(m, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
 }\
+\
+template<int S, typename P1, typename B1, typename P2> \
+Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Vector<S, P1, B1>& v, const P2& s)\
+{	\
+	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
+	return Vector<S,restype>(v, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), v.size());\
+}
+
+// scalar on the left
+#define TOON_MAKE_SCALAR_OP_LEFT(OPNAME, OP) \
+template<int R, int C, typename P1, typename P2, typename B2> \
+Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Matrix<R, C, P2, B2>& m)\
+{	\
+	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
+	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
+} \
 \
 template<int S, typename P1, typename P2, typename B2> \
 Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Vector<S, P2, B2>& v)\
@@ -238,20 +255,8 @@ Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& 
 	return Vector<S,restype>(s, v, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), v.size());\
 }
 
-#define TOON_MAKE_SCALAR_OP_RIGHT(OPNAME, OP) \
-template<int R, int C, typename P1, typename P2, typename B2> \
-Matrix<R, C, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const P1& s, const Matrix<R, C, P2, B2>& m)\
-{	\
-	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Matrix<R, C,restype>(s, m, Operator<Internal::ApplyScalarLeft<restype, Internal::OPNAME> >(), m.num_rows(), m.num_cols());\
-} \
-\
-template<int S, typename P1, typename B1, typename P2> \
-Vector<S, typename Internal::OPNAME##Type<P1, P2>::type> operator OP (const Vector<S, P1, B1>& v, const P2& s)\
-{	\
-	typedef typename Internal::OPNAME##Type<P1, P2>::type restype;\
-	return Vector<S,restype>(v, s, Operator<Internal::ApplyScalar<restype, Internal::OPNAME> >(), v.size());\
-}
+
+
 
 #define TOON_MAKE_SCALAR_OPS(OPNAME, OP)\
 TOON_MAKE_SCALAR_OP_LEFT(OPNAME, OP)\
@@ -261,7 +266,7 @@ TOON_MAKE_SCALAR_OPS(Add, +)
 TOON_MAKE_SCALAR_OPS(Subtract, -)
 TOON_MAKE_SCALAR_OPS(Multiply, *)
 
-TOON_MAKE_SCALAR_OP_LEFT(Divide, /)
+TOON_MAKE_SCALAR_OP_RIGHT(Divide, /)
 
 #undef TOON_MAKE_SCALAR_OPS
 #undef TOON_MAKE_SCALAR_OP_LEFT
