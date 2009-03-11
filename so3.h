@@ -21,7 +21,6 @@
 #define __SO3_H
 
 #include <TooN/TooN.h>
-#include <TooN/LU.h>
 #include <TooN/helpers.h>
 
 #ifndef TOON_NO_NAMESPACE
@@ -211,17 +210,15 @@ inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
 inline Vector<3> SO3::ln() const{
   Vector<3> result;
 
-  double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
+  const double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
 
-  // 2 * cos(theta) - 1 == trace
-
+  // 2 * cos(theta) + 1 == trace
   result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
   result[1] = (my_matrix[0][2]-my_matrix[2][0])/2;
   result[2] = (my_matrix[1][0]-my_matrix[0][1])/2;
 
-  if (trace > -0.95) {
       double sin_angle_abs = sqrt(result*result);
-      if (sin_angle_abs > 0.00001) {
+      if (sin_angle_abs > 0.000001 ) { // cannot use small angle approximation
 	  double angle;
 	  if(sin_angle_abs > 1.0) {
 	      sin_angle_abs = 1.0;
@@ -232,37 +229,29 @@ inline Vector<3> SO3::ln() const{
 		  angle = M_PI - angle;
 	  }
 	  result *= angle / sin_angle_abs;
+      } else if( trace < 1) { // antisymmetric part vanishes, but still large rotation, need information from symmetric part
+	// diagonal elements provide squares of rotation axis elements
+	const double ANom = 1.0/(3.0 - trace);
+	// explicit solution of the linear system for the squares of rotation axis elements
+	TooN::Vector<3> r2 = TooN::makeVector(
+		sqrt((+ my_matrix[0][0] - my_matrix[1][1] - my_matrix[2][2]  + 1.0) * ANom),
+		sqrt((- my_matrix[0][0] + my_matrix[1][1] - my_matrix[2][2]  + 1.0) * ANom),
+		sqrt((- my_matrix[0][0] - my_matrix[1][1] + my_matrix[2][2]  + 1.0) * ANom)
+	);
+	// antisymmetric part constrains sign (where possible)
+	if(result[0] < 0.0)
+		r2[0] *= -1;
+	if(result[1] < 0.0)
+		r2[1] *= -1;
+	if(result[2] < 0.0)
+		r2[2] *= -1;
+	// r2 contains now the rotation axis as unit vector, need to scale by correct angle !
+	const double angle = acos((trace - 1.0)* 0.5);
+	result = r2 * angle;
+      } else { // can use small angle approximation, because we are around zero
+	// nothing todo
       }
       return result;
-  } else {
-      TooN::Matrix<3> A = my_matrix;
-      A[0][0] -= 1.0;
-      A[1][1] -= 1.0;
-      A[2][2] -= 1.0;
-      TooN::LU<3> lu(A);
-      const TooN::Matrix<3,3,TooN::ColMajor>& u = lu.get_lu().T();
-      const double u0 = fabs(u[0][0]);
-      const double u1 = fabs(u[1][1]);
-      const double u2 = fabs(u[2][2]);
-      int row;
-      if (u0 < u1)
-	  row = u0 < u2 ? 0 : 2;
-      else
-	  row = u1 < u2 ? 1 : 2;
-      //std::cerr << u << std::endl;
-      //std::cerr << "row = " << row << std::endl;
-      TooN::Vector<3> r;
-      const double factor = acos(0.5*(trace-1));
-      switch (row) {
-      case 0: r[0] = factor; r[1] = 0; r[2] = 0; break;
-      case 1: r[0] = u[0][1]*u[2][2]; r[1] = -u[0][0]*u[2][2]; r[2] = 0; r *= factor/sqrt(r*r); break;
-      case 2: r[0] = u[0][1]*u[1][2] - u[0][2]*u[1][1]; r[1] = -u[0][0]*u[1][2]; r[2] = u[0][0]*u[1][1];  r *= factor/sqrt(r*r); break;
-      }
-      if (result * r < 0)
-	  return -r;
-      else
-	  return r;
-  }
 }
 
 inline SO3 SO3::inverse() const{
