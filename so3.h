@@ -236,21 +236,25 @@ inline Vector<3> SO3::ln() const{
 		my_matrix[1][1] - cos_angle,
 		my_matrix[2][2] - cos_angle
 	);
+	TooN::Vector<3> r2;
 	if(fabs(diag[0]) > fabs(diag[1]) && fabs(diag[0]) > fabs(diag[2])){ // first is largest, fill with first column
-		result[0] = diag[0];
-		result[1] = (my_matrix[1][0]+my_matrix[0][1])/2;
-		result[2] = (my_matrix[0][2]+my_matrix[2][0])/2;
+		r2[0] = diag[0];
+		r2[1] = (my_matrix[1][0]+my_matrix[0][1])/2;
+		r2[2] = (my_matrix[0][2]+my_matrix[2][0])/2;
 	} else if(fabs(diag[1]) > fabs(diag[2])) { 			    // second is largest, fill with second column
-		result[0] = (my_matrix[1][0]+my_matrix[0][1])/2;
-		result[1] = diag[1];
-		result[2] = (my_matrix[2][1]+my_matrix[1][2])/2;
+		r2[0] = (my_matrix[1][0]+my_matrix[0][1])/2;
+		r2[1] = diag[1];
+		r2[2] = (my_matrix[2][1]+my_matrix[1][2])/2;
 	} else {							    // third is largest, fill with third column
-		result[0] = (my_matrix[0][2]+my_matrix[2][0])/2;
-		result[1] = (my_matrix[2][1]+my_matrix[1][2])/2;
-		result[2] = diag[2];
-	}	
-	normalize(result);
-	result *= angle;
+		r2[0] = (my_matrix[0][2]+my_matrix[2][0])/2;
+		r2[1] = (my_matrix[2][1]+my_matrix[1][2])/2;
+		r2[2] = diag[2];
+	}
+	// flip, if we point in the wrong direction!
+	if(r2 * result < 0)
+		r2 *= -1;
+	normalize(r2);
+	result = angle * r2;
       } else { // can use small angle approximation, because we are around zero
 	       // nothing to do here
       }
