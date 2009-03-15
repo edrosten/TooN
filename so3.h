@@ -210,54 +210,45 @@ inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
 inline Vector<3> SO3::ln() const{
   Vector<3> result;
 
-  // 2 * cos(theta) + 1 == trace
-  const double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
+  const double cos_angle = (my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2] - 1.0) * 0.5;
   result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
   result[1] = (my_matrix[0][2]-my_matrix[2][0])/2;
   result[2] = (my_matrix[1][0]-my_matrix[0][1])/2;
 
-      double sin_angle_abs = sqrt(result*result);
-      if (sin_angle_abs > 1e-6 && trace >= 1) { // cannot use small angle approximation
-	  double angle;
-	  if(sin_angle_abs > 1.0) {
-	      sin_angle_abs = 1.0;
-	      angle = M_PI_2;
-	  } else {
-	      angle = asin(sin_angle_abs);
-	      if (trace < 1)
-		  angle = M_PI - angle;
-	  }
-	  result *= angle / sin_angle_abs;
-      } else if( trace < 1) { // antisymmetric part vanishes, but still large rotation, need information from symmetric part
-	const double cos_angle = (trace - 3) * 0.5 + 1; // cos(angle)
-	const double angle = M_PI - ((sin_angle_abs > 1e-6)?asin(sin_angle_abs):sin_angle_abs);  // small angle approximation, if possible
-	const TooN::Vector<3> diag = TooN::makeVector(
-		my_matrix[0][0] - cos_angle,
-		my_matrix[1][1] - cos_angle,
-		my_matrix[2][2] - cos_angle
-	);
+    double sin_angle_abs = sqrt(result*result);
+    if (cos_angle > M_SQRT1_2) {            // [0 - Pi/4[ use asin
+        if(sin_angle_abs > 0){
+            result *= asin(sin_angle_abs) / sin_angle_abs;
+        }
+    } else if( cos_angle > -M_SQRT1_2) {    // [Pi/4 - 3Pi/4[ use acos, but antisymmetric part
+        double angle = acos(cos_angle);
+	    result *= angle / sin_angle_abs;        
+    } else {  // rest use symmetric part
+        // antisymmetric part vanishes, but still large rotation, need information from symmetric part
+	const double angle = M_PI - asin(sin_angle_abs);
+    const double d0 = my_matrix[0][0] - cos_angle,
+	             d1 = my_matrix[1][1] - cos_angle,
+		         d2 = my_matrix[2][2] - cos_angle;
 	TooN::Vector<3> r2;
-	if(fabs(diag[0]) > fabs(diag[1]) && fabs(diag[0]) > fabs(diag[2])){ // first is largest, fill with first column
-		r2[0] = diag[0];
+	if(fabs(d0) > fabs(d1) && fabs(d0) > fabs(d2)){ // first is largest, fill with first column
+		r2[0] = d0;
 		r2[1] = (my_matrix[1][0]+my_matrix[0][1])/2;
 		r2[2] = (my_matrix[0][2]+my_matrix[2][0])/2;
-	} else if(fabs(diag[1]) > fabs(diag[2])) { 			    // second is largest, fill with second column
+	} else if(fabs(d1) > fabs(d2)) { 			    // second is largest, fill with second column
 		r2[0] = (my_matrix[1][0]+my_matrix[0][1])/2;
-		r2[1] = diag[1];
+		r2[1] = d1;
 		r2[2] = (my_matrix[2][1]+my_matrix[1][2])/2;
 	} else {							    // third is largest, fill with third column
 		r2[0] = (my_matrix[0][2]+my_matrix[2][0])/2;
 		r2[1] = (my_matrix[2][1]+my_matrix[1][2])/2;
-		r2[2] = diag[2];
+		r2[2] = d2;
 	}
 	// flip, if we point in the wrong direction!
 	if(r2 * result < 0)
 		r2 *= -1;
 	normalize(r2);
 	result = angle * r2;
-      } else { // can use small angle approximation, because we are around zero
-	       // nothing to do here
-      }
+      } 
       return result;
 }
 
