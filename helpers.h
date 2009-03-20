@@ -40,16 +40,6 @@ template<int Rows, int Cols, class Precision, class Base> void Zero(Matrix<Rows,
 }
 
 
-template<int Rows, int Cols, class Precision, class Base> void Identity(Matrix<Rows, Cols, Precision, Base>& m)
-{
-    SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
-	
-	Zero(m);
-	for(int i=0; i < m.num_rows(); i++)
-			m[i][i] = 1;
-}
-
-
 template<int Size, class Precision, class Base> void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
 {
 	for(int i=0; i < v.size(); i++)
@@ -64,6 +54,25 @@ template<int Rows, int Cols, class Precision, class Base> void Zero(Matrix<Rows,
 }
 
 
+
+namespace Internal{
+
+struct Identity
+{
+	template<int R, int C, class P, class B> static void eval(Matrix<R, C, P, B>& m)
+	{
+		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+
+		for(int r=0; r < m.num_rows(); r++)
+		  for(int c=0; c < m.num_rows(); c++)
+			m[r][c] = 0;
+
+		for(int i=0; i < m.num_rows(); i++)
+			m[i][i] = 1;
+	}
+};
+}
+static Operator<Internal::Identity> Identity;
 
 }
 #endif

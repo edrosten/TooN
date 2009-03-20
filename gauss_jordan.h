@@ -15,12 +15,12 @@ namespace TooN
 /// partial pivoting.
 ///
 /// @param m The matrix to be reduced.
-template<int R, int C, class X> void gauss_jordan(FixedMatrix<R, C, X>& m)
+template<int R, int C, class Precision, class Base> void gauss_jordan(Matrix<R, C, Precision, Base>& m)
 {
 	using std::swap;
 
 	//Loop over columns to reduce.
-	for(int col=0; col < R; col++)
+	for(int col=0; col < m.num_rows(); col++)
 	{
 		//Reduce the current column to a single element
 
@@ -34,19 +34,21 @@ template<int R, int C, class X> void gauss_jordan(FixedMatrix<R, C, X>& m)
 		{
 			int pivotpos = col;
 			double pivotval = abs(m[pivotpos][col]);
-			for(int p=col+1; p <R; p++)
+			for(int p=col+1; p <m.num_rows(); p++)
 				if(abs(m[p][col]) > pivotval)
 				{
 					pivotpos = p;
 					pivotval = abs(m[pivotpos][col]);
 				}
-
-			swap(m[col], m[pivotpos]);
+			
+			if(col != pivotpos)
+				for(int c=0; c < m.num_cols(); c++)
+					swap(m[col][c], m[pivotpos][c]);
 		}
 
 		//Reduce the current column in every row to zero, excluding elements on
 		//the leading diagonal.
-		for(int row = 0; row < R; row++)
+		for(int row = 0; row < m.num_rows(); row++)
 		{
 			if(row != col)
 			{
@@ -59,7 +61,7 @@ template<int R, int C, class X> void gauss_jordan(FixedMatrix<R, C, X>& m)
 				//Subtract the pivot row from all other rows, to make 
 				//column col zero.
 				m[row][col] = 0;
-				for(int c=col+1; c < C; c++)
+				for(int c=col+1; c < m.num_cols(); c++)
 					m[row][c] = m[row][c] - m[col][c] * multiple;
 			}
 		}
@@ -68,13 +70,13 @@ template<int R, int C, class X> void gauss_jordan(FixedMatrix<R, C, X>& m)
 	//Final pass to make diagonal elements one. Performing this in a final
 	//pass allows us to avoid any significant computations on the left-hand
 	//square matrix, since it is diagonal, and ends up as the identity.
-	for(int row=0;row < R; row++)
+	for(int row=0;row < m.num_rows(); row++)
 	{
 		double mul = 1/m[row][row];
 
 		m[row][row] = 1;
 
-		for(int col=R; col < C; col++)
+		for(int col=m.num_rows(); col < m.num_cols(); col++)
 			m[row][col] *= mul;
 	}
 }

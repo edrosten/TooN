@@ -82,11 +82,11 @@ struct UseGaussianEliminationInverse
 
 template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 {
-	double time=0, t_tmp;
+	double time=0, t_tmp, start = get_time_of_day();
 	double sum=0;
 	int n=0;
 
-	while(time < 1)
+	while(get_time_of_day() - start < .1)
 	{
 		Matrix<Size> a;
 		for(int r=0; r < Size; r++)
@@ -112,7 +112,7 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 		n++;
 	}
 
-	cout << Solver::name() << " " << Size << " " << Cols << " " << n / time << endl;
+	cout << Solver::name() << "\t" << n / time << "\t";
 
 	global_sum += sum;	
 }
@@ -149,8 +149,10 @@ template<int Size, int Cols, class Test> struct ColIter
 {
 	static void iter()
 	{
+		cout << Size << "\t" << Cols << "\t";
 		benchmark_iter<Size, Cols, Test>::iter();
-		ColIter<Size, Cols-50, Test>::iter();
+		cout << endl;
+		ColIter<Size, Cols-5, Test>::iter();
 	}
 };
 

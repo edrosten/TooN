@@ -23,7 +23,6 @@ public:
 	Matrix(int rows, int cols)
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
 	{}
-
 	
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
@@ -64,6 +63,12 @@ public:
 	  	  	(*this)[r][c] = from[r][c];
 
 	    return *this;
+	}
+
+	// operator = 0-ary operator
+	template<class Op> inline Matrix& operator= (const Operator<Op>&)
+	{
+		Op::eval(*this);
 	}
 
 	// operator =
