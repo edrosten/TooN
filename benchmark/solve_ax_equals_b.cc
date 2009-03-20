@@ -1,13 +1,20 @@
 #include <TooN/TooN.h>
 #include <TooN/LU.h>
+#include <TooN/helpers.h>
 #include <TooN/gaussian_elimination.h>
-#include <cvd/timer.h>
 #include <tr1/random>
+#include <sys/time.h>  //gettimeofday
 
 using namespace TooN;
 using namespace std;
 using namespace tr1;
-using namespace CVD;
+
+double get_time_of_day()
+{
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	return tv.tv_sec+tv.tv_usec * 1e-6;
+}
 
 std::tr1::mt19937 eng;
 std::tr1::uniform_real<double> rnd;
@@ -35,6 +42,7 @@ struct UseLUInv
 		LU<R> lu(a);
 
 		x = lu.get_inverse() * b;
+		//x = lu.backsub(b);
 	}
 
 	static string name()
@@ -42,6 +50,7 @@ struct UseLUInv
 		return "LI";
 	}
 };
+
 
 struct UseGaussianElimination
 {
@@ -55,11 +64,25 @@ struct UseGaussianElimination
 		return "GE";
 	}
 };
+struct UseGaussianEliminationInverse
+{
+	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
+	{
+		Matrix<R> i, inv;
+		Identity(i);
+		inv = gaussian_elimination(a, i);
+		x = inv * b;
+	}
+
+	static string name()
+	{
+		return "GI";
+	}
+};
 
 template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 {
-	cvd_timer t;
-	double time=0;
+	double time=0, t_tmp;
 	double sum=0;
 	int n=0;
 
@@ -77,9 +100,9 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 			for(int c=0; c < Cols; c++)
 				b[r][c] = rnd(eng);
 		
-		t.reset();
+		t_tmp = get_time_of_day();
 		Solver::template solve<Size, Cols>(a, b, x);
-		time += t.get_time();
+		time += get_time_of_day() - t_tmp;
 
 		
 		for(int r=0; r < Size; r++)
@@ -127,7 +150,7 @@ template<int Size, int Cols, class Test> struct ColIter
 	static void iter()
 	{
 		benchmark_iter<Size, Cols, Test>::iter();
-		ColIter<Size, Cols-1, Test>::iter();
+		ColIter<Size, Cols-50, Test>::iter();
 	}
 };
 
@@ -143,8 +166,8 @@ template<int Size, class Test> struct SizeIter
 {
 	static void iter()
 	{
-		ColIter<Size, Size*8+1, Test>::iter();
-		SizeIter<Size-1, Test>::iter();
+		ColIter<Size, 500+1, Test>::iter();
+		SizeIter<Size-4, Test>::iter();
 	}
 };
 
@@ -158,7 +181,7 @@ template<class Test> struct SizeIter<0, Test>
 
 int main()
 {
-	SizeIter<5, TypeList<UseGaussianElimination, TypeList<UseLU, Null> > >::iter();
+	SizeIter<4, TypeList<UseGaussianElimination, TypeList<UseGaussianEliminationInverse, TypeList<UseLUInv, TypeList<UseLU, Null> > > > >::iter();
 	
 	return global_sum != 123456789.0;
 }
