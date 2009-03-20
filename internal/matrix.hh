@@ -60,7 +60,7 @@ public:
 		SizeMismatch<Cols, Cols>::test(num_cols(), from.num_cols());
 
 	    for(int r=0; r < num_rows(); r++)
-	  	  for(int c=0; c < num_rows(); c++)
+	  	  for(int c=0; c < num_cols(); c++)
 	  	  	(*this)[r][c] = from[r][c];
 
 	    return *this;

@@ -66,12 +66,12 @@ void getrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO){
   dgetrf_(M, N, A, lda, IPIV, INFO);
 }
 
-inline void trsm_(char* SIDE, char* UPLO, char* TRANSA, char* DIAG, int* M, int* N, float* alpha, float* A, int* lda, float* B, int* ldb)
-{ strsm_(SIDE, UPLO, TRANSA, DIAG, M, N, alpha, A, lda, B, ldb);
+inline void trsm_(const char* SIDE, const char* UPLO, const char* TRANSA, const char* DIAG, int* M, int* N, float* alpha, float* A, int* lda, float* B, int* ldb) { 
+	strsm_(const_cast<char*>(SIDE), const_cast<char*>(UPLO), const_cast<char*>(TRANSA), const_cast<char*>(DIAG), M, N, alpha, A, lda, B, ldb);
 }
 
-inline void trsm_(char* SIDE, char* UPLO, char* TRANSA, char* DIAG, int* M, int* N, double* alpha, double* A, int* lda, double* B, int* ldb) {
-  dtrsm_(SIDE, UPLO, TRANSA, DIAG, M, N, alpha, A, lda, B, ldb);
+inline void trsm_(const char* SIDE, const char* UPLO, const char* TRANSA, const char* DIAG, int* M, int* N, double* alpha, double* A, int* lda, double* B, int* ldb) {
+	dtrsm_(const_cast<char*>(SIDE), const_cast<char*>(UPLO), const_cast<char*>(TRANSA), const_cast<char*>(DIAG), M, N, alpha, A, lda, B, ldb);
 }
 
 void getri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO){
