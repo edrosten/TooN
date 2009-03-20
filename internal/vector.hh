@@ -95,7 +95,7 @@ public:
 	Vector& operator+=(const Vector<Size2, Precision2, Base2>& rhs) {
 		SizeMismatch<Size,Size2>::test(size(),rhs.size());
 		for(int i=0; i<size(); i++)
-			(*this)[i]+=rhs;
+			(*this)[i]+=rhs[i];
 		return *this;
 	}
 
