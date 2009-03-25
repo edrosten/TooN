@@ -46,7 +46,7 @@ template<int Size, class Precision, class Base> void Fill(Vector<Size, Precision
 			v[i]= p;
 }
 
-template<int Rows, int Cols, class Precision, class Base> void Zero(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
+template<int Rows, int Cols, class Precision, class Base> void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
 {
 	for(int i=0; i < m.num_rows(); i++)
 		for(int j=0; j < m.num_cols(); j++)
