@@ -114,12 +114,14 @@ namespace Internal{
 	struct Subtract{ template<class A, class B, class C> static A op(const B& b, const C& c){return b-c;} };
 	struct Multiply{ template<class A, class B, class C> static A op(const B& b, const C& c){return b*c;} };
 	struct Divide{ template<class A, class B, class C>   static A op(const B& b, const C& c){return b/c;} };
-	
+
+	template<class C> C gettype();
+
 	//Automatic type deduction of return types
-	template<class L, class R> struct AddType {      typedef TOON_TYPEOF( (*static_cast<L*>(0) + *static_cast<R*>(0))) type;};
-	template<class L, class R> struct SubtractType { typedef TOON_TYPEOF( (*static_cast<L*>(0) - *static_cast<R*>(0))) type;};
-	template<class L, class R> struct MultiplyType { typedef TOON_TYPEOF( (*static_cast<L*>(0) * *static_cast<R*>(0))) type;};
-	template<class L, class R> struct DivideType   { typedef TOON_TYPEOF( (*static_cast<L*>(0) / *static_cast<R*>(0))) type;};
+	template<class L, class R> struct AddType {      typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
+	template<class L, class R> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
+	template<class L, class R> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
+	template<class L, class R> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
 	
 	//Output size, given input size. Be static if possible.
 	template<int i, int j> struct Sizer{static const int size=i;};
