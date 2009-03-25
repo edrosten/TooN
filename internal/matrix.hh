@@ -24,6 +24,14 @@ public:
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
 	{}
 	
+	Matrix(Precision* p, int rows, int cols)
+	:Layout::template Layout<Rows,Cols,Precision>(p, rows, cols)
+	{}
+
+	Matrix(Precision* p)
+	:Layout::template Layout<Rows,Cols,Precision>(p)
+	{}
+
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
 	template <class Op>

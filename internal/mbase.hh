@@ -57,6 +57,11 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	//Optional constructors
 	GenericMBase(){}
 
+	GenericMBase(Precision* p)
+	:Mem(p)
+	{}
+
+
 	GenericMBase(Precision* p, int rs, int cs)
 	:Mem(p),RowStrideHolder<RowStride>(rs),ColStrideHolder<ColStride>(cs) {}
 
@@ -174,6 +179,42 @@ struct ColMajor
 	};
 };
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Helper classes for matrices constructed as references to foreign data
+//
 
 
+struct RowMajorContigRef
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(Precision* p)
+		:Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+		{
+		}
 
+		Layout(Precision* p, int rows, int cols)
+		:Internal::GenericMBase<Rows, Cols, Precision, (Rows == -1 ? -2 : Rows), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols)
+		{}
+	};
+};
+
+struct ColMajorContigRef
+{
+	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >
+	{
+		//Optional constructors.
+		
+		Layout(Precision* p)
+		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+		{
+		}
+
+		Layout(Precision* p, int rows, int cols)
+		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols)
+		{}
+	};
+};
