@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <limits>
+#include <new>
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 

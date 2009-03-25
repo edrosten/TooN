@@ -194,19 +194,25 @@ template<int Cols, class Precision> struct MatrixAlloc<-1, Cols, Precision>
 
 template<class Precision> struct MatrixAlloc<-1, -1, Precision>
 {
+	size_t elements(int r, int c)
+	{
+		if(r < 0 || c < 0)
+			throw std::bad_alloc();
+		return r*c;
+	}
 	const int my_rows;
 	const int my_cols;
 	Precision* const my_data;
 
 	MatrixAlloc(const MatrixAlloc& m)
-	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[my_rows>=0 && my_cols >=0 ?my_rows*my_cols:-1]) {
+	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[elements(my_rows, my_cols)]){
 		const int size=my_rows*my_cols;
 		for(int i=0; i < size; i++)
 			my_data[i] = m.my_data[i];
 	}
 
 	MatrixAlloc(int r, int c)
-	:my_rows(r),my_cols(c),my_data(new Precision[r>=0 && c>=0 ?r*c:-1]) {
+	:my_rows(r),my_cols(c),my_data(new Precision[elements(r, c)]){
 	}
 
 	~MatrixAlloc() {
