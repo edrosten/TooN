@@ -26,7 +26,12 @@ public:
 	
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
-
+	template <class Op>
+	inline Matrix(const Operator<Op> &, int rows = Rows, int cols = Cols )
+	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
+	{
+		Op::eval(*this);
+	}
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>

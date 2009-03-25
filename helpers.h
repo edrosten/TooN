@@ -53,7 +53,11 @@ template<int Rows, int Cols, class Precision, class Base> void Fill(Matrix<Rows,
 			m[i][j] = p;
 }
 
-
+template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
+{
+	using std::sqrt;
+	return v/sqrt(v*v);
+}
 
 namespace Internal{
 
@@ -71,6 +75,17 @@ struct Identity
 			m[i][i] = 1;
 	}
 };
+
+struct Fill
+{
+	template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_rows(); c++)
+				m[r][c] = *data++;
+	}
+};
+
 }
 static Operator<Internal::Identity> Identity;
 
