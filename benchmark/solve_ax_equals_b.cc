@@ -2,6 +2,7 @@
 #include <TooN/LU.h>
 #include <TooN/helpers.h>
 #include <TooN/gaussian_elimination.h>
+#include <TooN/gauss_jordan.h>
 #include <tr1/random>
 #include <sys/time.h>  //gettimeofday
 
@@ -64,12 +65,13 @@ struct UseGaussianElimination
 		return "GE";
 	}
 };
+
 struct UseGaussianEliminationInverse
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
 		Matrix<R> i, inv;
-		Identity(i);
+		i = Identity;
 		inv = gaussian_elimination(a, i);
 		x = inv * b;
 	}
@@ -80,13 +82,30 @@ struct UseGaussianEliminationInverse
 	}
 };
 
+struct UseGaussJordanInverse
+{
+	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
+	{
+		Matrix<R, 2*R> m;
+		m.template slice<0,0,R,R>() = a;
+		m.template slice<0,R,R,R>() = Identity;
+		gauss_jordan(m);
+		x = m.template slice<0,R,R,R>() * b;
+	}
+
+	static string name()
+	{
+		return "GJ";
+	}
+};
+
 template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 {
 	double time=0, t_tmp, start = get_time_of_day();
 	double sum=0;
 	int n=0;
 
-	while(get_time_of_day() - start < .1)
+	while(get_time_of_day() - start < 1)
 	{
 		Matrix<Size> a;
 		for(int r=0; r < Size; r++)
@@ -183,7 +202,7 @@ template<class Test> struct SizeIter<0, Test>
 
 int main()
 {
-	SizeIter<4, TypeList<UseGaussianElimination, TypeList<UseGaussianEliminationInverse, TypeList<UseLUInv, TypeList<UseLU, Null> > > > >::iter();
+	SizeIter<4, TypeList<UseGaussJordanInverse, TypeList<UseGaussianElimination, TypeList<UseGaussianEliminationInverse, TypeList<UseLUInv, TypeList<UseLU, Null> > > > > >::iter();
 	
 	return global_sum != 123456789.0;
 }
