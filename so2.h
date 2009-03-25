@@ -23,143 +23,138 @@
 #define __SO2_H
 
 #include <TooN/TooN.h>
-#include <TooN/LU.h>
 #include <TooN/helpers.h>
 
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
 #endif
 
-    class SE2;
+template<class Precision> class SO2;
+template<class Precision> class SE2;
 
+template<class Precision> inline std::ostream & operator<<(std::ostream &, const SO2<Precision> & );
+template<class Precision> inline std::istream & operator>>(std::istream &, SO2<Precision> & );
+
+template<class Precision = double>
 class SO2 {
 public:
-  friend std::istream& operator>>(std::istream& is, SO2& rhs);
-  friend std::istream& operator>>(std::istream& is, class SE2& rhs);
-  friend class SE2;
-  inline SO2();
-  inline SO2(const Matrix<2>& rhs);
+  friend std::istream& operator>><Precision>(std::istream& is, SO2& rhs);
+  friend std::ostream& operator<< <Precision>(std::ostream& is, const SO2& rhs);
+  friend class SE2<Precision>;
+  inline SO2(); 
+  SO2(const Matrix<2,2,Precision>& rhs) { 
+      *this = rhs;
+  }
+  SO2(const Precision l) {
+    *this = exp(l);
+  }
+  
+  template <int R, int C, class P, class A> inline SO2& operator=(const Matrix<R,C,P,A>& rhs);
+  template <int R, int C, class P, class A> static inline void coerce(Matrix<R,C,P,A>& M);
 
-  inline SO2& operator=(const Matrix<2>& rhs);
-  template <class Accessor> static inline void coerce(FixedMatrix<2,2,Accessor>& M);
+  inline static SO2 exp(const Precision);
 
-  inline static SO2 exp(const double);
+  Precision ln() const {
+      return atan2(my_matrix[1][0], my_matrix[0][0]);
+  }
 
-  inline double ln() const;
+  SO2 inverse() const {
+    return SO2(*this, Invert());
+  }
 
-  inline double operator[](int i){return my_matrix[i/2][i%2];}
-
-  inline SO2 inverse() const;
-
-  inline SO2& operator *=(const SO2& rhs){
+  SO2& operator *=(const SO2& rhs){
     my_matrix=my_matrix*rhs.my_matrix;
     return *this;
   }
 
-  inline SO2 operator *(const SO2& rhs) const {
+  SO2 operator *(const SO2& rhs) const {
       return SO2(*this,rhs);
   }
 
-  inline const Matrix<2>& get_matrix()const {return my_matrix;}
-  // returns i-th generator times pos
-  inline static Vector<2> generator(Vector<2> pos);
+  const Matrix<2,2,Precision>& get_matrix() const {return my_matrix;}
+  
+  /// returns generator matrix
+  static Matrix<2,2,Precision> generator() {return my_generator;}
 
  private:
   struct Invert {};
   inline SO2(const SO2& so2, const Invert&) : my_matrix(so2.my_matrix.T()) {}
   inline SO2(const SO2& a, const SO2& b) : my_matrix(a.my_matrix*b.my_matrix) {}
       
-  Matrix<2> my_matrix;
+  Matrix<2,2,Precision> my_matrix;
+  static Matrix<2,2,Precision> my_generator;
 };
 
-inline std::ostream& operator<< (std::ostream& os, const SO2& rhs){
+template <class Precision>
+inline std::ostream& operator<< (std::ostream& os, const SO2<Precision> & rhs){
   return os << rhs.get_matrix();
 }
 
-inline std::istream& operator>>(std::istream& is, SO2& rhs){
+template <class Precision>
+inline std::istream& operator>>(std::istream& is, SO2<Precision>& rhs){
   return is >> rhs.my_matrix;
 }
 
-template<class Accessor> inline
-Vector<2> operator*(const SO2& lhs, const FixedVector<2,Accessor>& rhs){
+template<int D, class P1, class PV, class Accessor> inline
+Vector<2, typename Internal::MultiplyType<P1, PV>::type> operator*(const SO2<P1> & lhs, const Vector<D, PV, Accessor> & rhs){
   return lhs.get_matrix() * rhs;
 }
 
-template<class Accessor> inline
-Vector<2> operator*(const SO2& lhs, const DynamicVector<Accessor>& rhs){
-  assert(rhs.size() == 2);
-  return lhs.get_matrix() * rhs;
-}
-
-template<class Accessor> inline
-Vector<2> operator*(const DynamicVector<Accessor>& lhs, const SO2& rhs){
-  assert(lhs.size() == 2);
+template<int D, class P1, class PV, class Accessor>  inline
+Vector<2, typename Internal::MultiplyType<P1,PV>::type> operator*(const Vector<D, PV, Accessor>& lhs, const SO2<P1> & rhs){
   return lhs * rhs.get_matrix();
 }
 
-template<class Accessor> inline
-Vector<2> operator*(const FixedVector<2,Accessor>& lhs, const SO2& rhs){
-  return lhs * rhs.get_matrix();
-}
-
-template <int RHS, class Accessor> inline
-Matrix<2,RHS> operator*(const SO2& lhs, const FixedMatrix<2,RHS,Accessor>& rhs){
+template <int R, int C, class P1, class P2, class Accessor> inline
+Matrix<2,C,typename Internal::MultiplyType<P1,P2>::type> operator*(const SO2<P1> & lhs, const Matrix<R,C,P2,Accessor>& rhs){
   return lhs.get_matrix() * rhs;
 }
 
-template <int LHS, class Accessor> inline
-Matrix<LHS,2> operator*(const FixedMatrix<LHS,2,Accessor>& lhs, const SO2& rhs){
+template <int R, int C, class P1, class P2, class Accessor> inline
+Matrix<R,2,typename Internal::MultiplyType<P1,P2>::type> operator*(const Matrix<R,C,P1,Accessor>& lhs, const SO2<P2>& rhs){
   return lhs * rhs.get_matrix();
 }
 
 namespace SO2static
 {
-  static double identity[4]={1,0,0,1};
+  static double identity[4] = {1,0,0,1};
+  static double generator[4] = {0,-1,1,0};
 }
 
-inline SO2::SO2() :
-  my_matrix(SO2static::identity)
+template <class Precision> 
+inline SO2<Precision>::SO2() //:
+  //my_matrix(SO2static::identity,2,2, RowMajor::Layout<2,2,Precision>())
 {}
 
-inline SO2::SO2(const Matrix<2>& rhs){
-    *this = rhs;
-}
-
-inline SO2& SO2::operator=(const Matrix<2>& rhs){
+template <class P1>
+template <int R, int C, class P2, class A>
+inline SO2<P1> & SO2<P1>::operator=(const Matrix<R,C,P2,A>& rhs){
   my_matrix = rhs;
   coerce(my_matrix);
   return *this;
 }
 
-template <class Accessor> inline void SO2::coerce(FixedMatrix<2,2, Accessor>& M){
+template <class Precision>
+template <int R, int C, class P, class A> 
+inline void SO2<Precision>::coerce(Matrix<R,C,P,A>& M){
+  SizeMismatch<2,R>::test(2, M.num_rows());
+  SizeMismatch<2,C>::test(2, M.num_cols());
   normalize(M[0]);
   M[1] -= M[0] * (M[0]*M[1]);
   normalize(M[1]);
 }
 
-inline SO2 SO2::exp(const double d){
-  Matrix<2> m;
-  m[0][0] = m[1][1] = cos(d);
-  m[1][0] = sin(d);
-  m[0][1] = -m[1][0];
-  return SO2(m);
-}
-
-inline double SO2::ln() const{
-  return atan2(my_matrix[1][0], my_matrix[0][0]);
-}
-
-inline SO2 SO2::inverse() const{
-    return SO2(*this, Invert());
-}
-
-inline Vector<2> SO2::generator(Vector<2> pos){
-  Vector<2> result;
-  result[0] = pos[1];
-  result[1] = -pos[0];
+template <class Precision>
+inline SO2<Precision> SO2<Precision>::exp(const Precision d){
+  SO2<Precision> result;
+  result.my_matrix[0][0] = result.my_matrix[1][1] = cos(d);
+  result.my_matrix[1][0] = sin(d);
+  result.my_matrix[0][1] = -result.my_matrix[1][0];
   return result;
 }
- 
+
+template <class Precision> Matrix<2,2, Precision> SO2<Precision>::my_generator; //(SO2static::generator, 2, 2, RowMajor::Layout<2,2,Precision>());
+
 #ifndef TOON_NO_NAMESPACE
 }
 #endif
