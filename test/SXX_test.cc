@@ -4,7 +4,7 @@ using namespace std;
 
 #include <TooN/so2.h>
 
-int main(int, char *){
+int main(int, char* *){
     TooN::SO2<> r(M_PI_2);
     cout << r << endl;
     cout << r.generator() << endl;

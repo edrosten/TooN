@@ -3,6 +3,7 @@
 #define TOON_INCLUDE_TOON_H
 #include <iostream>
 #include <cstdlib>
+#include <limits>
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 
@@ -20,6 +21,14 @@ namespace TooN
 			struct StaticSizeMismatch{};
 		}
 	#endif
+
+	//Is the number a field? ie, *, -, *, / defined.
+	//Specialize this to make TooN work properly with new types
+	using std::numeric_limits;
+	template<class C> struct IsField
+	{
+		static const int value = numeric_limits<C>::is_specialized;
+	};
 	
 	namespace Internal
 	{

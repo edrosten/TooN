@@ -117,12 +117,27 @@ namespace Internal{
 
 	template<class C> C gettype();
 
+	template<class L, class R> struct Field
+	{
+		static const int is = IsField<L>::value && IsField<R>::value;
+	};
+
 	//Automatic type deduction of return types
-	template<class L, class R> struct AddType {      typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
-	template<class L, class R> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
-	template<class L, class R> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
-	template<class L, class R> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
+
+	//We have to use the traits here because it is not possible to 
+	//check for the existence of a valid operator *, especially
+	//in the presence of builtin operators. Therefore, the type is
+	//only deduced if both of the input types are fields.
+	template<class L, class R, int F = Field<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
+	template<class L, class R, int F = Field<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
+	template<class L, class R, int F = Field<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
+	template<class L, class R, int F = Field<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
 	
+	template<class L, class R> struct AddType<L, R, 0>         { typedef void type;};
+	template<class L, class R> struct SubtractType<L, R, 0>    { typedef void type;};
+	template<class L, class R> struct MultiplyType<L, R, 0>    { typedef void type;};
+	template<class L, class R> struct DivideType<L, R, 0>      { typedef void type;};
+
 	//Output size, given input size. Be static if possible.
 	template<int i, int j> struct Sizer{static const int size=i;};
 	template<int i> struct Sizer<-1, i>{static const int size=i;};
