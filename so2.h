@@ -139,7 +139,7 @@ namespace SO2static
   static double generator[4] = {0,-1,1,0};
 }
 
-template <class Precision> Matrix<2,2, Precision> SO2<Precision>::my_generator(SO2static::generator, 2, 2, Operator<Internal::Fill>());
+template <class Precision> Matrix<2,2, Precision> SO2<Precision>::my_generator(SO2static::generator, 2, 2, Operator<Internal::Copy>());
 
 #ifndef TOON_NO_NAMESPACE
 }

@@ -81,7 +81,7 @@ namespace Internal{
 		}
 	};
 	
-	struct Fill
+	struct Copy
 	{
 		template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
 		{
