@@ -80,6 +80,17 @@ namespace Internal{
 			}
 		}
 	};
+	
+	struct Fill
+	{
+		template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
+		{
+			for(int r=0; r < m.num_rows(); r++)
+				for(int c=0; c < m.num_rows(); c++)
+					m[r][c] = *data++;
+		}
+	};
+
 }
 
 static Operator<Internal::Zero> Zero;
