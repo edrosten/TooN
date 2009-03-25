@@ -8,6 +8,7 @@
 // whether data or a reference to data should be copied.
 namespace Internal
 {
+
 template<int Size, class Precision, bool heap> class StackOrHeap
 {
 	public:
@@ -198,14 +199,14 @@ template<class Precision> struct MatrixAlloc<-1, -1, Precision>
 	Precision* const my_data;
 
 	MatrixAlloc(const MatrixAlloc& m)
-	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[my_rows*my_cols]) {
+	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[my_rows>=0 && my_cols >=0 ?my_rows*my_cols:-1]) {
 		const int size=my_rows*my_cols;
 		for(int i=0; i < size; i++)
 			my_data[i] = m.my_data[i];
 	}
 
 	MatrixAlloc(int r, int c)
-	:my_rows(r),my_cols(c),my_data(new Precision[r*c]) {
+	:my_rows(r),my_cols(c),my_data(new Precision[r>=0 && c>=0 ?r*c:-1]) {
 	}
 
 	~MatrixAlloc() {
