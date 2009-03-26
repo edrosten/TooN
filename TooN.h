@@ -70,6 +70,8 @@ namespace TooN
 	template<typename T> class Operator;
 	template<typename T> class SliceSpec: public T{};
 
+	static const int Dynamic = -1;
+
 	#include <TooN/internal/allocator.hh>
 
 	#include <TooN/internal/size_mismatch.hh>
@@ -81,6 +83,7 @@ namespace TooN
 	
 	#include <TooN/internal/mbase.hh>
 	#include <TooN/internal/matrix.hh>
+	#include <TooN/internal/foreign_matrix.hh>
 
 	#include <TooN/internal/make_vector.hh>
 	#include <TooN/internal/operators.hh>
