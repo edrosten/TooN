@@ -14,6 +14,13 @@ public:
 	using Base::template Layout<Size, Precision>::size;
 
 	// constructors to allow return value optimisations
+	// construction from 0-ary operator
+	template <class Op>
+	inline Vector(const Operator<Op>&){
+		Op::eval(*this);
+	}
+
+	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
 	inline Vector(const T& arg, int size, const Operator<Op>&) : Base::template Layout<Size, Precision>(size) {
@@ -41,6 +48,12 @@ public:
 	inline Vector(const Vector<Size2,Precision2,Base2>& from):
 		Base::template Layout<Size, Precision>(from.size()) {
 		operator=(from);
+	}
+
+	// assignment from a 0-ary operator
+	template <class Op>
+	inline operator=(const Operator<Op>&){
+		Op::eval(*this);
 	}
 
 	// operator = from copy
