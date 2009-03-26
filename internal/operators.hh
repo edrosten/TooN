@@ -103,7 +103,7 @@ namespace Internal{
 		static void eval(Vector<Sout, Pout, Bout>& res, const Vector<Size, P2, B2>& v, const Matrix<R, C, P1, B1>& m)
 		{
 			for(int i=0; i < res.size(); ++i){
-				res[i] = v * m[i];
+				res[i] = v * m.T()[i];
 			}
 		}
 	};
