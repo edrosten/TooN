@@ -24,12 +24,10 @@ public:
 	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
 	{}
 	
-	Matrix(Precision* p, int rows, int cols)
-	:Layout::template Layout<Rows,Cols,Precision>(p, rows, cols)
-	{}
-
-	Matrix(Precision* p)
-	:Layout::template Layout<Rows,Cols,Precision>(p)
+	// Pass on a generic struct holding data about a slice
+	template<class C> 
+	Matrix(Precision* data, const SliceSpec<C>& slice)
+	:Layout::template Layout<Rows,Cols,Precision>(data, slice)
 	{}
 
 	//See vector.hh and allocator.hh for details about why the

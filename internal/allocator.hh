@@ -256,10 +256,8 @@ template<int Rows, class Precision> struct MatrixSlice<Rows, -1, Precision>
 	Precision* const my_data;
 	const int my_cols;
 
-	MatrixSlice(Precision* d, int r, int c)
-	:my_data(d),my_cols(c)
-	{
-	}
+	MatrixSlice(Precision* d, int r, int c) :my_data(d),my_cols(c) { } 
+	MatrixSlice(Precision* d, int c, const Internal::SpecifyCols&) :my_data(d),my_cols(c) { } 
 
 	int num_rows() const {
 		return Rows;
@@ -275,10 +273,8 @@ template<int Cols, class Precision> struct MatrixSlice<-1, Cols, Precision>
 	Precision* const my_data;
 	const int my_rows;
 
-	MatrixSlice(Precision* d, int r, int c)
-	:my_data(d),my_rows(r)
-	{
-	}
+	MatrixSlice(Precision* d, int r, int c) :my_data(d),my_rows(r) { }
+	MatrixSlice(Precision* d, int r, const Internal::SpecifyRows&) :my_data(d),my_rows(r) { }
 
 	int num_rows() const {
 		return my_rows;
@@ -330,6 +326,10 @@ template<> struct StrideHolder<-1>
 {
 	StrideHolder(int s)
 	:my_stride(s){}
+	
+	//This constructor is not allowed to ignore the argument
+	StrideHolder(int s, const Internal::NoIgnore&)
+	:my_stride(s){}
 
 	const int my_stride;
 	int stride() const {
@@ -341,7 +341,10 @@ template<> struct StrideHolder<-1>
 template<int S> struct RowStrideHolder: public StrideHolder<S>
 {
 	RowStrideHolder(int i)
-		:StrideHolder<S>(i){}
+	:StrideHolder<S>(i){}
+
+	RowStrideHolder(int i, const Internal::NoIgnore& n)
+	:StrideHolder<S>(i, n){}
 
 	RowStrideHolder()
 	{}
@@ -351,7 +354,10 @@ template<int S> struct RowStrideHolder: public StrideHolder<S>
 template<int S> struct ColStrideHolder: public StrideHolder<S>
 {
 	ColStrideHolder(int i)
-		:StrideHolder<S>(i){}
+	:StrideHolder<S>(i){}
+
+	ColStrideHolder(int i, const Internal::NoIgnore& n)
+	:StrideHolder<S>(i, n){}
 
 	ColStrideHolder()
 	{}

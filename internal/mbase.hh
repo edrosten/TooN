@@ -17,7 +17,7 @@ template<int RowStride, int ColStride> struct Slice
 	{
 		//Optional constructors.
 		Layout(Precision* p, int rowstride, int colstride)
-			:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rowstride, colstride)
+			:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rowstride, colstride, Internal::SpecifyStride())
 		{
 		}
 		
@@ -61,9 +61,16 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	:Mem(p)
 	{}
 
+	//Both size and stride require two integer parameters.
+	//In the case where only one is required, the meaning is 
+	//ambiguous. Therefore a tag is used to specify the meaning.
+	GenericMBase(Precision* p, int r, int c, Internal::SpecifySize)
+	:Mem(p, r, c)
+	{}
 
-	GenericMBase(Precision* p, int rs, int cs)
+	GenericMBase(Precision* p, int rs, int cs, Internal::SpecifyStride)
 	:Mem(p),RowStrideHolder<RowStride>(rs),ColStrideHolder<ColStride>(cs) {}
+
 
 	GenericMBase(Precision* p, int r, int c, int rowstride, int colstride)
 	:Mem(p, r, c),
@@ -73,6 +80,25 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 
 	GenericMBase(int r, int c)
 	:Mem(r, c) {}
+
+	//Unpack slice specifications in to specific constructors
+	//These slice specifications are not allowed to ignore superfluous data.
+	GenericMBase(Precision* p, const Spec_____& s):Mem(p                    )                                                                                                              {}
+	GenericMBase(Precision* p, const Spec____C& s):Mem(p                    )                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec___R_& s):Mem(p                    ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
+	GenericMBase(Precision* p, const Spec___RC& s):Mem(p                    ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec__C__& s):Mem(p, s.c ,SpecifyCols())                                                                                                              {}
+	GenericMBase(Precision* p, const Spec__C_C& s):Mem(p, s.c, SpecifyCols())                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec__CR_& s):Mem(p, s.c, SpecifyCols()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
+	GenericMBase(Precision* p, const Spec__CRC& s):Mem(p, s.c, SpecifyCols()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec_R___& s):Mem(p, s.r, SpecifyRows())                                                                                                              {}
+	GenericMBase(Precision* p, const Spec_R__C& s):Mem(p, s.r, SpecifyRows())                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec_R_R_& s):Mem(p, s.r, SpecifyRows()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
+	GenericMBase(Precision* p, const Spec_R_RC& s):Mem(p, s.r, SpecifyRows()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec_RC__& s):Mem(p, s.r, s.c          )                                                                                                              {}
+	GenericMBase(Precision* p, const Spec_RC_C& s):Mem(p, s.r, s.c          )                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
+	GenericMBase(Precision* p, const Spec_RCR_& s):Mem(p, s.r, s.c          ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
+	GenericMBase(Precision* p, const Spec_RCRC& s):Mem(p, s.r, s.c          ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
 
 	using Mem::my_data;
 	using Mem::num_cols;
@@ -184,37 +210,69 @@ struct ColMajor
 // Helper classes for matrices constructed as references to foreign data
 //
 
-
-struct RowMajorContigRef
+namespace Reference
 {
-	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >
+
+	struct RowMajor
 	{
-		//Optional constructors.
-		
-		Layout(Precision* p)
-		:Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >
 		{
-		}
-
-		Layout(Precision* p, int rows, int cols)
-		:Internal::GenericMBase<Rows, Cols, Precision, (Rows == -1 ? -2 : Rows), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols)
-		{}
+			template<class T> Layout(Precision* p, SliceSpec<T> spec)
+			:Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >(p, spec)
+			{
+			}
+		};
 	};
-};
-
-struct ColMajorContigRef
-{
-	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >
+/*
+	struct ColMajor
 	{
-		//Optional constructors.
-		
-		Layout(Precision* p)
-		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >
 		{
-		}
+			//Size fixed. Only data required.
+			Layout(Precision* p)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+			{
+			}
 
-		Layout(Precision* p, int rows, int cols)
-		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols)
-		{}
+			//Size dynamic: size and data needed.
+			Layout(Precision* p, int rows, int cols)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols, Internal::SpecifySize())
+			{}
+		};
 	};
-};
+
+
+	template<int Stride=-1> struct ColMajorStride
+	{
+		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, Stride, Internal::MatrixSlice<Rows, Cols, Precision> >
+		{
+			
+			//Size and stride fixed. Only data required.
+			Layout(Precision* p)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, Stride, Internal::MatrixSlice<Rows, Cols, Precision> >(p)
+			{
+			}
+
+			//Size fixed. Data and stride required.
+			Layout(Precision* p, int stride)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, Stride, Internal::MatrixSlice<Rows, Cols, Precision> >(p, 1, stride, Internal::SpecifySize())
+			{
+			}
+
+			//Stride fixed. Data and size required.
+			Layout(Precision* p, int rows, int cols)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, Stride, Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols, Internal::SpecifySize())
+			{}
+
+			//Dynamic: Stride,  data and size required.
+			Layout(Precision* p, int rows, int cols, int stride)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, Stride, Internal::MatrixAlloc<Rows, Cols, Precision> >(p, rows, cols, 1, stride)
+			{}
+		};
+	};*/
+}
+
+
+
+
+
