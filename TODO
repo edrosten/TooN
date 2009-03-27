@@ -1,7 +1,7 @@
 BLAS 
 helpers.h
-fix up SVD, SymEigen, Cholesky, gaussian_elimination, gauss_jordan
+fix up SVD, SymEigen, Cholesky
 fix up wls, wls_cholesky, irls
-fix up se3, so3, se2, so2
+fix up se3, so3, se2
 fix up downhill_simplex
 iterators

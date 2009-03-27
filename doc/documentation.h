@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005 Paul Smith
+    Copyright (c) 2005 Paul Smith, 2009 Edward Rosten
 
 	Permission is granted to copy, distribute and/or modify this document under
 	the terms of the GNU Free Documentation License, Version 1.2 or any later
@@ -25,30 +25,308 @@
 
 The %TooN library is a set of C++ header files which provide basic numerics facilities:
 	- @link TooN::Vector Vectors@endlink and @link TooN::Matrix matrices@endlink
-	- @link gDecomps Matrix decompositions@endlink (@link TooN::LU LU@endlink, @link TooN::SVD SVD@endlink, @link TooN::SymEigen symmetric eigen decomposition @endlink)
-	- @link gOptimize Function optimization@endlink (@link TooN::DownhillSimplex Downhill Simplex@endlink) 
-	- Some particular types of @link gTransforms transformation matrices@endlink (@link TooN::SO3 SO3@endlink and @link TooN::SE3 SE3@endlink) 
-	- Solvers for systems of @link gEquations linear equations@endlink using @link TooN::WLS weighted@endlink or @link TooN::IRLS iteratively-reweighted@endlink least squares.
-	
- It provides classes for statically- (known at compile time) and dynamically- (unknown at compile time) sized vectors and matrices and it delegates advanced functions (like SVD or multiplication of large matrices) to LAPACK and BLAS (this means you will need libblas and liblapack).
+	- @link gDecomps Matrix decompositions@endlink (@link TooN::LU LU@endlink,
+	  @link TooN::SVD SVD@endlink, @link TooN::SymEigen symmetric eigen
+	  decomposition @endlink)
+	- @link gOptimize Function optimization@endlink (@link
+	  TooN::DownhillSimplex Downhill Simplex@endlink) 
+	- Some particular types of @link gTransforms transformation
+	  matrices@endlink (@link TooN::SO3 SO3@endlink and @link TooN::SE3
+	  SE3@endlink) 
+	- Solvers for systems of @link gEquations linear equations@endlink using
+	  @link TooN::WLS weighted@endlink or @link TooN::IRLS
+	  iteratively-reweighted@endlink least squares.
 
-The library makes substantial internal use of templates to achieve run-time speed efficiency whilst retaining a (reasonably) clear programming syntax. Because of this use of templates, you will need a recent compiler (for example it does not work with g++ before version 3.0). Programs that use it can also take a \e long time to compile with -O3 under g++. Currently the library only supports double precision vectors and matrices. 
+It provides classes for statically- (known at compile time) and dynamically-
+(unknown at compile time) sized vectors and matrices and it delegates advanced
+functions (like SVD or multiplication of large matrices) to LAPACK and BLAS
+(this means you will need libblas and liblapack).
+
+The library makes substantial internal use of templates to achieve run-time
+speed efficiency whilst retaining a clear programming syntax.
 
 Why use this library?
- - because it supports statically sized vectors and matrices very efficiently (without introducing metadata)*
- - because it provides type safety for statically sized vectors and matrices (you can't attempt to multiply a 3x4 matrix and a 2-vector).
- - because it supports transposition and subscripting of matrices (to obtain a vector) very efficiently
- - because it exploits LAPACK and BLAS (for which optimised versions exist on many platforms).
+ - Because it supports statically sized vectors and matrices very efficiently.
+ - Because it provides extensive type safety for statically sized vectors and matrices (you can't attempt to multiply a 3x4 matrix and a 2-vector).
+ - Because it supports transposition, subscripting and slicing of matrices (to obtain a vector) very efficiently.
+ - Because it interfaces well to other libraries.
+ - Because it exploits LAPACK and BLAS (for which optimised versions exist on many platforms).
 
-(*) This is not always true (see Implementation, below)
- 
-\section sGetting How to get
+\section sUsage How to use TooN
+This section is arranged as a FAQ. Most answers include code fragments. Assume
+<code>using namespace TooN;</code>.
 
-The library can be obtained from savannah using anonymous cvs with the command:
+ - \ref sDownload
+ - \ref sStart
+ - \ref sCreateVector
+ - \ref sCreateMatrix
+ - \ref sFunctionVector
+ - \ref sGenericCode
+ - \ref sElemOps
+ - \ref sNoResize
+ - \ref sDebug
+ - \ref sSlices
+ - \ref sPrecision
+ - \ref sSolveLinear
+ - \ref sOtherStuff
+ - \ref sHandyFuncs
+ - \ref sNoInplace
+ - \ref sColMajor
+ - \ref sWrap
+ - \ref sWrap "How do I interface to other libraries?"
 
-<code> cvs -z3 -d:pserver:anonymous\@cvs.savannah.nongnu.org:/sources/toon co %TooN </code>
+ 	\subsection sDownload Getting the code and installing
+	
+	To get the code, visit this URL:
+	http://mi.eng.cam.ac.uk/~er258/cvd/toon.html
 
-\section sUsage How to use
+	The usual <code>./configure && make install </code> will  install TooN to
+	the correct place. Note there is no code to be compiled, but the configure
+	script performs some basic checks. If you don't want to use the configure
+	script, then create an empty file <code>internal/config.hh</code> in the
+	source directory to set up TooN to use the default configuration.
+
+	\subsection sStart Getting started
+
+		To begin, just in include the right file:
+
+		@code
+		#include <TooN/TooN.h>
+		@endcode
+
+		Everything lives in the <code>TooN</code> namespace.
+
+
+	\subsection sCreateVector How do I create a vector?
+
+		Vectors can be statically sized or dynamically sized.
+
+		@code
+			Vector<3> v1;    //Create a static sized vector of size 3
+			Vector<>  v2(4); //Create a dynamically sized vector of size 4
+			Vector<Dynamic>  v2(4); //Create a dynamically sized vector of size 4
+		@endcode
+
+		See also \ref sPrecision.
+
+
+	\subsection sCreateMatrix How do I create a matrix?
+
+		Matrices can be statically sized or dynamically sized.
+
+		@code
+			Matrix<3> m;              //A 3x3 matrix (statically sized)
+			Matrix<3,2>  m;           //A 3x2 matrix (statically sized)
+			Matrix<>  m(5,6);         //A 5x6 matrix (dynamically sized)
+			Matrix<3,Dynamic> m(3,6); //A 3x6 matrix with a dynamic number of columns and static number of rows.
+			Matrix<Dynamic,2> m(3,2); //A 2x3 matrix with a dynamic number of rows and static number of columns.
+		@endcode
+
+		See also \ref sPrecision.
+
+
+	\subsection sFunctionVector How do I write a function taking a vector?
+	
+		To write a function taking a local copy of a vector:
+		@code
+			template<int Size> void func(Vector<Size> v);
+		@endcode
+
+		To write a function taking any type of vector by reference:
+		@code
+			template<int Size, typename Base> void func(const Vector<Size, double, Base>& v);
+		@endcode
+		See also \ref sPrecision and \ref sGenericCode
+
+
+	\subsection sElemOps What elementary operations are supported?
+		
+		Assignments are performed using <code>=</code>. See also 
+		\ref sNoResize.
+
+
+		These operators apply to vectors or matrices and scalars. 
+		The operator is applied to every element with the scalar.
+		@code
+		+=, -=, *= /= +, -, *, / 
+		@endcode
+		
+		Vector and vectors or matrices and matrices:
+		@code
+		+, -, +=, -= 
+		@endcode
+		
+		Dot product:
+		@code
+		Vector * Vector
+		@endcode
+
+		Matrix multiply:
+		@code
+		Matrix * Matrix
+		@endcode
+
+		Matrix multiplying a column vector:
+		@code
+		Matrix * Vector
+		@endcode
+
+		Row vector multiplying a matrix:
+		@code
+		Vector * Matrix
+		@endcode
+		
+		3x3 Vector cross product:
+		@code
+		Vector<3> ^ Vector<3> 
+		@endcode
+
+		Getting the transpose of a matrix as a slice:
+		@code
+			Matrix.T()
+		@endcode
+		
+		Accessing elements:
+		@code
+		Vector[i]     //get element i
+		Matrix(i,j)   //get element i,j
+		Matrix[i]     //get row i as a vector
+		Matrix[i][j]  //get element i,j
+		@endcode
+		
+		Turning vectors in to matrices:
+		@code
+		Vector.as_row() //vector as a 1xN matrix
+		Vector.as_col() //vector as a Nx1 matrix
+		@endcode
+
+		Slicing:
+		@code
+		Vector.slice<Start, End>();                            //Static slice
+		Vector.slice<>(start, end);                            //Dynamic slice
+		Matrix.slice<RowStart, ColStart, NumRows, NumCols>();  //Static slice
+		Matrix.slice<>(rowstart, colstart, numrows, numcols);  //Dynamic slice
+		@endcode
+
+	\subsection sNoResize Why does assigning mismatched dynamic vectors fail?
+	
+	Vectors are not generic containers, and dynamic vectors have been designed
+	to have the same semantics as static vectors where possible. Therefore
+	trying to assign a vector of length 2 to a vector of length 3 is an error,
+	so it fails. See also \reg sResize
+
+	\subsection sResize How do I resize a dynamic vector/matrix?
+
+	You can't. Preventing resize allow all sorts of things to be const
+	which is great for optimization. If you want a genuinely resizable
+	structure, you may consider using a <code>std::vector</code>, and accessing
+	it as a TooN object when appropriate. See \ref sWrap. Also, the
+	speed and complexity of resizable matrices depends on the memory layout, so
+	you may wish to use column major matrices as opposed to the default row
+	major layout.
+
+	\subsection sDebug What debugging options are there?
+
+	By default, everything which is checked at compile time in the static case
+	is checked at run-time in the dynamic case. In other words, slices and sizes
+	are checked at run-time if need be. These checks can be disabled by defining
+	the macros TOON_NDEBUG_SLICE and TOON_NDEBUG_SIZE respectively. Bounds are
+	not checked by default. Bounds checking can be enabled by defining the macro
+	TOON_CHECK_BOUNDS. None of these macros change the interface, so debugging
+	code can be freely mixed with optimized code.
+
+	Errors are manifested to a call to <code>std::abort()</code>.
+
+	\subsection sSlices What are slices?
+
+	Slices are references to data belonging to another vector or matrix. Modifying
+	the data in a slice modifies the original object. Likewise, if the original 
+	object changes, the change will be reflected in the slice.
+
+
+	\subsection sPrecision Can I have a precision other than double?
+
+	Yes!
+	@code
+		Vector<3, float> v;          //Static sized vector of floats
+		Vector<Dynamic, float> v(4); //Dynamic sized vector of floats
+	@endcode
+
+	Likewise for matrix.
+
+	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
+
+	
+	\subsection sDecompos  Which decomposisions are there?
+
+		LU, SymEigen, SVD, Cholesky, gaussian_elimination, gauss_jordan
+
+
+	\subsection sOtherStuff What other stuff is there:
+
+		Optimization: WLS, IRLS, downhill_simplex, SO2, SE2, SO3, SE3
+
+
+	\subsection sHandyFuncs What handy functions are there (normalize, identity, fill, etc...)?
+
+
+	\subsection sNoInplace Why don't functions work in place?
+
+	\subsection sColMajor Can I have a column major matrix?
+
+	Yes!
+	@code
+		Matric<3, 3, double, ColMajor> m;          //3x3 Column major matrix
+	@endcode
+
+	\subsection sWrap I have a pointer to a bunch of data. How do I turn it in to a vector/matrix without copying?
+
+	\subsection sGenericCode How do I write generic code?
+	
+	The constructors for TooN objects are very permissive in that they 
+	accept run-time size arguments for statically sized objects, and then 
+	discard the values, This allows you to easily write generic code which 
+	works for both static and dynamic inputs.
+
+	Here is a function which mixes up a vector with a random matrix:
+	@code
+	template<int Size, class Precision, class Base> Vector<Size, Precision> mixup(const Vector<Size, Precision, Base>& v)
+	{
+		//Create a square matrix, of the same size as v. If v is of dynamic
+		//size, then Size == Dynamic, and so Matrix will also be dynamic. In
+		//this case, TooN will use the constructor arguments to select the
+		//matrix size. If Size is a real size, then TooN will simply ighore
+		//the constructor values.
+
+		Matrix<Size, Size, Precision> m(v.size(), v.size());
+		
+		//Fill the matrix with random values that sum up to 1.
+		Precision sum=0;
+		for(int i=0; i < v.size(); i++)
+			for(int j=0; j < v.size(); j++)
+				sum += (m[i][j] = rand());
+		
+		m/= sum;
+
+		return m * v;
+	}
+	@endcode
+
+	Writing functions which safely accept multiple objects requires assertions
+	on the sizes since they may be either static or dynamic. TooN's built in
+	size check will fail at compile time if mismatched static sizes are given,
+	and at run-time if mismatched dynamic sizes are given:
+	
+	@code
+	template<int S1, class B1, int S2, class B2> void func_of_2_vectors(const Vector<S1, double, B1>& v1, const Vector<S2, double, B2>& v2)
+	{
+		//Ensure that vectors are the same size
+		SizeMismatch<S1, S2>::test(v1.num_rows(), v2.num_rows());
+
+
+	}
+	@endcode
+
 
 \subsection ssCompiler Compiler setup
 
@@ -63,10 +341,9 @@ The library can be obtained from savannah using anonymous cvs with the command:
 Create two vectors and work out their inner (dot), outer and cross products
 @code
 // Initialise the vectors
-Vector<3> a;
-a = 3,5,0;
-Vector<3> b;
-b = 4,1,3;
+Vector<3> a = makeVector(3,5,0);
+Vector<3> b = makeVector(4,1,3);
+
 // Now work out the products
 double dot = a*b;                            // Dot product
 Matrix<3,3> outer = a.as_col() * b.as_row(); // Outer product
@@ -81,20 +358,18 @@ cout << "Cross:" << endl << cross << endl;
 Create a vector and a matrix and multiply the two together
 @code
 // Initialise a vector
-Vector<3> v;
-v = 1,2,3;
+Vector<3> v = makeVector(1,2,3);
+
 // Initialise a matrix
-double d[2][3] = {{2,4,5},{6,8,9}};
 Matrix<2,3> M(d);
+M[0] = makeVector(2,4,5);
+M[1] = makeVector(6,8,9);
+
 // Now perform calculations
 Vector<2> v2 = M*v;  // OK - answer is a static 2D vector
 Vector<> v3 = M*v;   // OK - vector is determined to be 2D at runtime
 Vector<> v4 = v*M;   // Compile error - dimensions of matrix and vector incompatible
 @endcode
-
-See the detailed documentation for @link TooN::Vector Vector@endlink, @link TooN::Matrix Matrix@endlink and
-the various @link gDecomps matrix decompositions @endlink for more examples.
-
 
 
 \section sImplementation Implementation
