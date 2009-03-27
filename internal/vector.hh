@@ -52,8 +52,9 @@ public:
 
 	// assignment from a 0-ary operator
 	template <class Op>
-	inline operator=(const Operator<Op>&){
+	inline Vector & operator=(const Operator<Op>&){
 		Op::eval(*this);
+		return *this;
 	}
 
 	// operator = from copy
