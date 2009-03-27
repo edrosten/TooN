@@ -25,8 +25,8 @@ namespace Internal
 			{
 				#ifdef TOON_TEST_INTERNALS
 					throw Internal::SliceError();
-				#else
-					std::cerr << "Toon slice out of range (static slice, synamic vector)" << std::endl;
+				#elif !defined TOON_NDEBUG_SLICE
+					std::cerr << "TooN slice out of range" << std::endl;
 					std::abort();
 				#endif
 			}
@@ -39,8 +39,8 @@ namespace Internal
 			{
 				#ifdef TOON_TEST_INTERNALS
 					throw Internal::SliceError();
-				#else
-					std::cerr << "Toon slice out of range" << std::endl;
+				#elif !defined TOON_NDEBUG_SLICE
+					std::cerr << "TooN slice out of range" << std::endl;
 					std::abort();
 				#endif
 			}
