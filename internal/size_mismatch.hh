@@ -17,8 +17,8 @@ struct SizeMismatch<-1,Size>{
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
 	  	throw Internal::SizeMismatch();
-	  #else
-		  std::cerr << "Toon Size Mismatch" << std::endl;
+	  #elif !defined TOON_NDEBUG_SIZE
+		  std::cerr << "TooN Size Mismatch" << std::endl;
 		  std::abort();
 	  #endif
     }
@@ -31,8 +31,8 @@ struct SizeMismatch<Size,-1>{
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
 	  	throw Internal::SizeMismatch();
-	  #else
-		  std::cerr << "Toon Size Mismatch" << std::endl;
+	  #elif !defined TOON_NDEBUG_SIZE
+		  std::cerr << "TooN Size Mismatch" << std::endl;
 		  std::abort();
 	  #endif
     }
@@ -45,22 +45,28 @@ struct SizeMismatch<-1,-1>{
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
 	  	throw Internal::SizeMismatch();
-	  #else
-		  std::cerr << "Toon Size Mismatch" << std::endl;
+	  #elif !defined TOON_NDEBUG_SIZE
+		  std::cerr << "TooN Size Mismatch" << std::endl;
 		  std::abort();
 	  #endif
     }
   }
 };
 
+namespace Internal
+{
+	struct BadSize;
+}
 
-#ifdef TOON_TEST_INTERNALS
-  template<int Size1, int Size2>
-  struct SizeMismatch
-  {
-    static inline void test(int, int)
-    {
-      throw Internal::StaticSizeMismatch();
-    }
-  };
-#endif
+template<int Size1, int Size2>
+struct SizeMismatch
+{
+	static inline void test(int, int)
+	{
+		#ifdef TOON_TEST_INTERNALS
+			throw Internal::StaticSizeMismatch();
+		#else
+			Internal::BadSize size_mismatch;
+		#endif
+	}
+};
