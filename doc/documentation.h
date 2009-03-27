@@ -63,6 +63,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sFunctionVector
  - \ref sGenericCode
  - \ref sElemOps
+ - \ref ssExamples
  - \ref sNoResize
  - \ref sDebug
  - \ref sSlices
@@ -74,6 +75,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sColMajor
  - \ref sWrap
  - \ref sWrap "How do I interface to other libraries?"
+ - \ref sImplementation
 
  	\subsection sDownload Getting the code and installing
 	
@@ -95,6 +97,11 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 
 		Everything lives in the <code>TooN</code> namespace.
+
+		Then, make sure the directory containing TooN is in your compiler's
+		search path. If you use any decompositions, you will need to link
+		against LAPACK, BLAS and any required support libraries. On a modern
+		unix system, linking against LAPACK will do this automatically.
 
 
 	\subsection sCreateVector How do I create a vector?
@@ -136,7 +143,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@code
 			template<int Size, typename Base> void func(const Vector<Size, double, Base>& v);
 		@endcode
-		See also \ref sPrecision and \ref sGenericCode
+		See also \ref sPrecision, \ref sGenericCode and \ref sNoInplace
 
 
 	\subsection sElemOps What elementary operations are supported?
@@ -181,7 +188,10 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector<3> ^ Vector<3> 
 		@endcode
 
-		Getting the transpose of a matrix as a slice:
+		All the functions listed below return slices. The slices 
+		are simply references to the original data and can be used as lvalues.
+
+		Getting the transpose of a matrix:
 		@code
 			Matrix.T()
 		@endcode
@@ -208,12 +218,14 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Matrix.slice<>(rowstart, colstart, numrows, numcols);  //Dynamic slice
 		@endcode
 
+		See also \ref sSlices
+
 	\subsection sNoResize Why does assigning mismatched dynamic vectors fail?
 	
 	Vectors are not generic containers, and dynamic vectors have been designed
 	to have the same semantics as static vectors where possible. Therefore
 	trying to assign a vector of length 2 to a vector of length 3 is an error,
-	so it fails. See also \reg sResize
+	so it fails. See also \ref sResize
 
 	\subsection sResize How do I resize a dynamic vector/matrix?
 
@@ -241,7 +253,22 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	Slices are references to data belonging to another vector or matrix. Modifying
 	the data in a slice modifies the original object. Likewise, if the original 
-	object changes, the change will be reflected in the slice.
+	object changes, the change will be reflected in the slice. Slices can be
+	used as lvalues. For example:
+
+	@code
+		Matrix<3> m = Identity;
+
+		m.slice<0,0,2,2>() *= 3; //Multiply the top-left 2x2 submatrix of m by 3.
+
+		m[2] /=10; //Divide the third row of M by 10.
+
+		m.T()[2] +=2; //Add 2 to every element of the second column of M.
+
+		m[1].slice<1,2>() = makeVector(3,4); //Set m_1,1 to 3 and m_1,2 to 4
+		
+		m[0][0]=6;
+	@endcode
 
 
 	\subsection sPrecision Can I have a precision other than double?
@@ -271,6 +298,58 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 
 	\subsection sNoInplace Why don't functions work in place?
+
+	Consider the function:
+	@code
+		void func(Vector<3>& v);
+	@endcode
+	It can accept a <code>Vector<3></code> by reference, and operate on it 
+	in place. A <code>Vector<3></code> is a type which allocates memory on the
+	stack. A slice merely references memory, and is a subtly different type. To
+	write a function taking any kind of vector (including slices) you can write:
+
+	@code
+		template<class Base> void func(Vector<3, double, Base>& v);
+	@endcode
+
+	A slice is a
+	temporary object, and according to the rules of C++, you can't pass a
+	temporary to a function as a non-const reference. TooN provides the
+	<code>.ref()</code> method to escape from this restriction, by returning a
+	reference as a non-temporary. You would then have to write:
+	@code
+		Vector<4> v;
+		...
+		func(v.slice<0,3>().ref());
+	@endcode
+	to get func to accept the slice.
+
+	Alternatively, you can observe that only TooN objects with the default base
+	class own the data. All other sorts are references, so copying them only
+	copies the reference, and the referred data is the same. You could therefore
+	write a function to forward on TooN objects with the default base:
+
+	@code
+		template<class Base> void func(Vector<3, double, Base> v); //This will operate in-place only on slices
+
+		void func(Vector<3>& v) //This will catch any non-slices and forward them on.
+		{
+			func(v.slice<0,3>());
+		}
+	@endcode
+
+	However, please consider writing functions that do not modify structures in
+	place. The \c unit function of TooN computes a unit vector given an input
+	vector. In the following context, the code:
+	@code
+		//There is some Vector, which may be a slice, etc called v;
+		v = unit(v);
+	@endcode
+	produces exactly the same compiler output as the hypothetical
+	<code>Normalize(v)</code> which operates in place. Consult the ChangeLog 
+	entry dated ``Wed 25 Mar, 2009 20:18:16''
+	for a further discussion of this.
+	
 
 	\subsection sColMajor Can I have a column major matrix?
 
@@ -328,15 +407,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@endcode
 
 
-\subsection ssCompiler Compiler setup
-
-	- Make sure you have a suitable compiler (g++ version < 3 is no good)
-	- Make sure the directory containing TooN/ is somewhere on your search path
-	- Add <code>#include <TooN/TooN.h></code>, and any other header files you might need e.g. <code>TooN/helpers.h</code> (for some more matrix and vector functions) or <code>TooN/SVD.h</code> (for the singular value decomposition) to your source code. 
-	- Add <code>using namespace %TooN</code> to your code (or prefix class declarations with <code>%TooN::</code>).
-	- You will need to link with <code>-llapack -lblas</code> (and <code>-lg2c</code> for g++. I'm not sure about other compilers). This means you will also need liblapack.{a,so} and libblas.{a,so} 
-
-\subsection ssExamples Examples
+\subsection ssExamples Are there any examples?
 
 Create two vectors and work out their inner (dot), outer and cross products
 @code
@@ -372,51 +443,113 @@ Vector<> v4 = v*M;   // Compile error - dimensions of matrix and vector incompat
 @endcode
 
 
-\section sImplementation Implementation
+\subsection sImplementation How is it implemented
 
-\subsection ssStatic Static-sized vectors and matrices
+\subsubsection ssStatic Static-sized vectors and matrices
 
-One aspect that makes this library efficient is that when you declare a 3-vector, all you get are 3 doubles - there's no metadata. So <code>sizeof(Vector<3>)</code> is 24. This means that when you write <code>Vector<3> v;</code> the data for <code>v</code> is allocated on the stack and hence <code>new</code>/<code>delete</code> (<code>malloc</code>/<code>free</code>) overhead is avoided. However, for large vectors and matrices, this would be a Bad Thing since <code>Vector<1000000> v;</code> would result in an object of 8 megabytes being allocated on the stack. I don't know about you, but my whole stack is only that big. %TooN gets around that problem by having a cutoff at which statically sized vectors are allocated on the heap. This is completely transparent to the programmer, the objects' behaviour is unchanged and you still get the type safety offered by statically sized vectors and matrices. The cutoff size at which the library changes the representation is defined in <code>toon.h</code> as the <code>const int MaxStackSize</code> in the class <code>NUMERICS</code>.
+One aspect that makes this library efficient is that when you declare a
+3-vector, all you get are 3 doubles - there's no metadata. So
+<code>sizeof(Vector<3>)</code> is 24. This means that when you write
+<code>Vector<3> v;</code> the data for <code>v</code> is allocated on the stack
+and hence <code>new</code>/<code>delete</code>
+(<code>malloc</code>/<code>free</code>) overhead is avoided. However, for large
+vectors and matrices, this would be a Bad Thing since <code>Vector<1000000>
+v;</code> would result in an object of 8 megabytes being allocated on the stack.
+I don't know about you, but my whole stack is only that big. %TooN gets around
+that problem by having a cutoff at which statically sized vectors are allocated
+on the heap. This is completely transparent to the programmer, the objects'
+behaviour is unchanged and you still get the type safety offered by statically
+sized vectors and matrices. The cutoff size at which the library changes the
+representation is defined in <code>TooN.h</code> as the <code>const int
+TooN::Internal::max_bytes_on_stack</code>.
 
-When you apply the subscript operator to a <code>Matrix<3,3></code> and the function simply returns the apropriate hunk of memory as a vector \e reference (i.e. it basically does no work). This avoids copying and also allows the resulting vector to be used as an l-value. Similarly the transpose operation applied to a matrix returns the memory corresponding to the matrix as a reference to a matrix with the opposite layout which also means the transpose can be used as an l-value so <code>M1 = M2.T();</code> and <code>M1.T() = M2;</code> do exactly the same thing.
+When you apply the subscript operator to a <code>Matrix<3,3></code> and the
+function simply returns the apropriate hunk of memory as a vector \e reference
+(i.e. it basically does no work apart from moving around a pointer). This avoids
+copying and also allows the resulting vector to be used as an l-value. Similarly
+the transpose operation applied to a matrix returns the memory corresponding to
+the matrix as a reference to a matrix with the opposite layout which also means
+the transpose can be used as an l-value so <code>M1 = M2.T();</code> and
+<code>M1.T() = M2;</code> do exactly the same thing.
 
-\subsection ssDynamic Dynamic sized vectors and matrices
+\subsubsection ssDynamic Dynamic sized vectors and matrices
 
-These are implemented in the obvious way using metadata with the rule that the object that allocated on the heap also deallocates. Other objects may reference the data (e.g. when you subscript a matrix and get a vector).
+These are implemented in the obvious way using metadata with the rule that the
+object that allocated on the heap also deallocates. Other objects may reference
+the data (e.g. when you subscript a matrix and get a vector).
 
 \subsection ssLazy Return value optimisation vs Lazy evaluation
-When you write <code>v1 = M * v2;</code> a naive implementation will compute <code>M * v2</code> and store the result in a temporary object. It will then copy this temporary object into <code>v1</code>. A method often advanced to avoid this is to have <code>M * v2</code> simply return an special object <code>O</code> which contains references to <code>M</code> and <code>v2</code>. When the compiler then resolves <code>v1 = O</code>, the special object computes <code>M*v2</code> directly into <code>v1</code>. This approach is often called lazy evaluation and the special objects lazy vectors or lazy matrices. Stroustrup (The C++ programming language Chapter 22) refers to them as composition closure objects or compositors.
 
-The killer is this: <b>What if v1 is just another name for v2?</b> i.e. you write something like <code>v = M * v;</code>. In this case the semantics have been broken because the values of <code>v</code> are being overwritten as the computation progresses and then the remainder of the computation is using the new values. In this library <code>v1</code> in the expression could equally well alias part of <code>M</code>, thus you can't even solve the problem by having a clever check for aliasing between <code>v1</code> and <code>v2</code>. This aliasing problem means that the only time the compiler can assume it's safe to omit the temporary is when <code>v1</code> is being constructed (and thus cannot alias anything else) i.e. <code>Vector<3> v1 = M * v2;</code>.
+When you write <code>v1 = M * v2;</code> a naive implementation will compute
+<code>M * v2</code> and store the result in a temporary object. It will then
+copy this temporary object into <code>v1</code>. A method often advanced to
+avoid this is to have <code>M * v2</code> simply return an special object
+<code>O</code> which contains references to <code>M</code> and <code>v2</code>.
+When the compiler then resolves <code>v1 = O</code>, the special object computes
+<code>M*v2</code> directly into <code>v1</code>. This approach is often called
+lazy evaluation and the special objects lazy vectors or lazy matrices.
+Stroustrup (The C++ programming language Chapter 22) refers to them as
+composition closure objects or compositors.
 
-%TooN provides this optimisation by providing the compiler with the opportunity to use a return value optimisation. It does this by making <code>M * v2</code> call a special constructor for <code>Vector<3></code> with <code>M</code> and <code>v2</code> as arguments. Since nothing is happening between the construction of the temporary and the copy construction of <code>v1</code> from the temporary (which is then destroyed), the compiler is permitted to optimise the construction of the return value directly into <code>v1</code>.
 
-Because a naive implemenation of this strategy would result in the vector and matrix classes having a very large number of constructors, these classes are provided with template constructors that take a standard form. The code that does this, declared in the header of class <code>Vector</code> is:
+The killer is this: <b>What if v1 is just another name for v2?</b> i.e. you
+write something like <code>v = M * v;</code>. In this case the semantics have
+been broken because the values of <code>v</code> are being overwritten as the
+computation progresses and then the remainder of the computation is using the
+new values. In this library <code>v1</code> in the expression could equally well
+alias part of <code>M</code>, thus you can't even solve the problem by having a
+clever check for aliasing between <code>v1</code> and <code>v2</code>. This
+aliasing problem means that the only time the compiler can assume it's safe to
+omit the temporary is when <code>v1</code> is being constructed (and thus cannot
+alias anything else) i.e. <code>Vector<3> v1 = M * v2;</code>.
+
+%TooN provides this optimisation by providing the compiler with the opportunity
+to use a return value optimisation. It does this by making <code>M * v2</code>
+call a special constructor for <code>Vector<3></code> with <code>M</code> and
+<code>v2</code> as arguments. Since nothing is happening between the
+construction of the temporary and the copy construction of <code>v1</code> from
+the temporary (which is then destroyed), the compiler is permitted to optimise
+the construction of the return value directly into <code>v1</code>.
+
+Because a naive implemenation of this strategy would result in the vector and
+matrix classes having a very large number of constructors, these classes are
+provided with template constructors that take a standard form. The code that
+does this, declared in the header of class <code>Vector</code> is: 
+
 @code
 // constructor from 2-ary operator
-template <class LHS, class RHS, class Op>
-inline Vector(const LHS& lhs, const RHS& rhs, const Operator<Op>&){Op::eval(*this,lhs,rhs);}
-@endcode
-The third argument of the constructor is a dummy, used to specify the construction method because you the standard doesn't allow you to supply template arguments when you call a constructor. Since the argument is unused, my compiler omits it (and I hope yours does too). 
+template <class LHS, class RHS, class Op> inline Vector(const LHS& lhs, const
+RHS& rhs, const Operator<Op>&){Op::eval(*this,lhs,rhs);} 
+@endcode 
 
-\subsection ssHow How it all really works
+The third argument of the constructor is a dummy, used to specify the
+construction method because you the standard doesn't allow you to supply
+template arguments when you call a constructor. Since the argument is unused, my
+compiler omits it (and I hope yours does too). 
+
+\subsubsection ssHow How it all really works
 
 This documentation is generated from a cleaned-up version of the interface, hiding the implementation 
 that allows all of the magic to work. If you want to know more and can understand idioms like:
 @code
-template <int Size, class AllocZone>
-class FixedVAccessor : public AllocZone {
+
+template<int, typename, int, typename> struct GenericVBase;
+template<int, typename> struct VectorAlloc;
+
+struct VBase {
+	template<int Size, class Precision>
+	struct Layout : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
+	    ...
+	};
+};
+
+template <int Size, class Precision, class Base=VBase>
+class Vector: public Base::template Layout<Size, Precision> {
    ...
 };
 @endcode
-and
-@code
-template <int Size>
-class Vector : public FixedVector<Size, FixedVAccessor<Size,typename SizeTraits<Size>::get_zone> > {
-   ...
-};
-@endcode
-Then take a look at the source code ... 
+
+then take a look at the source code ... 
 **/
 
 ///////////////////////////////////////////////////////
