@@ -121,4 +121,9 @@ public:
 		return *this;
 	}
 
+	Vector& ref()
+	{
+		return *this;
+	}
+
 };

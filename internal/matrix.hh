@@ -157,4 +157,9 @@ public:
 
 	    return *this;
 	}
+
+	Matrix& ref()
+	{
+		return *this;
+	}
 };
