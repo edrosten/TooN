@@ -105,7 +105,7 @@ template<> class Operator<Internal::Zero> {
  };
 
 
-static NoAliasOperator<Internal::Zero> Zero;
+static Operator<Internal::Zero> Zero;
 static Operator<Internal::Identity> Identity;
 
 

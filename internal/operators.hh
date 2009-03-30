@@ -13,14 +13,6 @@
 
 template<class Op> struct Operator{};
 
-template<class Op> struct NoAliasOperator : public Operator<Op> {
-	NoAliasOperator(){}
-	explicit NoAliasOperator(const Operator<Op>& op) : Operator<Op>(op) {}
-};
-
-template<class Op> NoAliasOperator<Op> NoAlias(const Operator<Op>& op){
-	return NoAliasOperator<Op>(op);
-}
 
 namespace Internal{
 	
@@ -153,18 +145,17 @@ namespace Internal{
 	template<int i> struct Sizer<-1, i>{static const int size=i;};
 	template<int i> struct Sizer<i, -1>{static const int size=i;};
 	template<> struct Sizer<-1, -1>    {static const int size=-1;};
+
+	template<typename Op,                           // the operation
+			 int S1, typename P1, typename B1,      // lhs vector
+			 int S2, typename P2, typename B2>      // rhs vector
+	struct VPairwise;
 }
 
-
 template<typename Op,                           // the operation
 		 int S1, typename P1, typename B1,      // lhs vector
 		 int S2, typename P2, typename B2>      // rhs vector
-struct VPairwise;
-
-template<typename Op,                           // the operation
-		 int S1, typename P1, typename B1,      // lhs vector
-		 int S2, typename P2, typename B2>      // rhs vector
-struct Operator<VPairwise<Op, S1, P1, B1, S2, P2, B2> > {
+struct Operator<Internal::VPairwise<Op, S1, P1, B1, S2, P2, B2> > {
 	const Vector<S1, P1, B1> & lhs;
 	const Vector<S2, P2, B2> & rhs;
 
@@ -189,12 +180,13 @@ struct Operator<VPairwise<Op, S1, P1, B1, S2, P2, B2> > {
 
 // Addition Vector + Vector
 template<int S1, int S2, typename P1, typename P2, typename B1, typename B2> 
-Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> operator+(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
+Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> 
+operator+(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
 {
 	typedef typename Internal::AddType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
 	const int S0=Internal::Sizer<S1,S2>::size;
-	return Vector<S0,P0>(Operator<VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2));
+	return Vector<S0,P0>(Operator<Internal::VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2));
 }
 
 // Addition Vector - Vector
@@ -204,7 +196,7 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::ty
 	typedef typename Internal::SubtractType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
 	const int S0=Internal::Sizer<S1,S2>::size;
-	return Vector<S0,P0>(Operator<VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2));
+	return Vector<S0,P0>(Operator<Internal::VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2));
 }
 
 // Dot product Vector * Vector
