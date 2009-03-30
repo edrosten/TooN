@@ -13,6 +13,15 @@
 
 template<class Op> struct Operator{};
 
+template<class Op> struct NoAliasOperator : public Operator<Op> {
+	NoAliasOperator(){}
+	explicit NoAliasOperator(const Operator<Op>& op) : Operator<Op>(op) {}
+};
+
+template<class Op> NoAliasOperator<Op> NoAlias(const Operator<Op>& op){
+	return NoAliasOperator<Op>(op);
+}
+
 namespace Internal{
 	
 	//Operator classes. These are evaluated in the constructor
@@ -186,16 +195,16 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> o
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
 	const int S0=Internal::Sizer<S1,S2>::size;
 	return Vector<S0,P0>(Operator<VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2));
-	// return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Add> >());
 }
 
 // Addition Vector - Vector
 template<int S1, int S2, typename P1, typename P2, typename B1, typename B2> 
 Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::type> operator-(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
 {
-	typedef typename Internal::SubtractType<P1, P2>::type restype;
+	typedef typename Internal::SubtractType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Subtract> >());
+	const int S0=Internal::Sizer<S1,S2>::size;
+	return Vector<S0,P0>(Operator<VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2));
 }
 
 // Dot product Vector * Vector

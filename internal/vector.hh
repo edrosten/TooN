@@ -53,7 +53,7 @@ public:
 
 	// assignment from a 0-ary operator
 	template <class Op>
-	inline Vector & operator=(const Operator<Op>& op){
+	inline Vector & operator=(const NoAliasOperator<Op>& op){
 		op.eval(*this);
 		return *this;
 	}

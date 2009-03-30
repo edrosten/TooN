@@ -68,6 +68,7 @@ namespace TooN
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	template<typename T> class Operator;
+	template<typename T> class NoAliasOperator;
 	template<typename T> class SliceSpec: public T{};
 
 	static const int Dynamic = -1;
