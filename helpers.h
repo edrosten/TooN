@@ -26,87 +26,107 @@
 namespace TooN {
 
 
-template<int Size, class Precision, class Base> void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
-{
-	for(int i=0; i < v.size(); i++)
+	template<int Size, class Precision, class Base> void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
+	{
+		for(int i=0; i < v.size(); i++)
 			v[i]= p;
-}
+	}
 
-template<int Rows, int Cols, class Precision, class Base> void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
-{
-	for(int i=0; i < m.num_rows(); i++)
-		for(int j=0; j < m.num_cols(); j++)
-			m[i][j] = p;
-}
+	template<int Rows, int Cols, class Precision, class Base> void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
+	{
+		for(int i=0; i < m.num_rows(); i++)
+			for(int j=0; j < m.num_cols(); j++)
+				m[i][j] = p;
+	}
 
-template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
-{
-	using std::sqrt;
-	return v/sqrt(v*v);
-}
-
-namespace Internal{
-
-	struct Zero {
-		template<int R, int C, class P, class B>
-			static void eval(Matrix<R, C, P, B>& m) {
-			for(int r=0; r < m.num_rows(); r++) {
-				for(int c=0; c < m.num_rows(); c++) {
-					m[r][c] = 0;
-				}
-			}
+	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
+		{
+			using std::sqrt;
+			return v/sqrt(v*v);
 		}
 
+	namespace Internal{
+
+		struct Zero {
+			template<int R, int C, class P, class B>
+				static void eval(Matrix<R, C, P, B>& m) {
+				for(int r=0; r < m.num_rows(); r++) {
+					for(int c=0; c < m.num_rows(); c++) {
+						m[r][c] = 0;
+					}
+				}
+			}
+
+			template<int Size, class Precision, class Base>
+				static void eval(Vector<Size, Precision, Base>& v) {
+				for(int i=0; i < v.size(); i++) {
+					v[i]= 0;
+				}
+			}
+		};
+
+		struct Identity {
+			template<int R, int C, class P, class B> static void eval(Matrix<R, C, P, B>& m) {
+				SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+			
+				for(int r=0; r < m.num_rows(); r++) {
+					for(int c=0; c < m.num_rows(); c++) {
+						m[r][c] = 0;
+					}
+				}
+			
+				for(int i=0; i < m.num_rows(); i++) {
+					m[i][i] = 1;
+				}
+			}
+		};
+	
+		struct Copy
+		{
+			template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
+			{
+				for(int r=0; r < m.num_rows(); r++)
+					for(int c=0; c < m.num_rows(); c++)
+						m[r][c] = *data++;
+			}
+		};
+
+		class SizedZero;
+	}
+
+
+	template<> struct Operator<Internal::SizedZero> {
+		int my_size;
+	Operator(int s): my_size(s) {}
+		int size() const {return my_size;}
 		template<int Size, class Precision, class Base>
-			static void eval(Vector<Size, Precision, Base>& v) {
+			void eval(Vector<Size, Precision, Base>& v) const {
 			for(int i=0; i < v.size(); i++) {
 				v[i]= 0;
 			}
 		}
+
 	};
 
-	struct Identity {
-		template<int R, int C, class P, class B> static void eval(Matrix<R, C, P, B>& m) {
-			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
-			
-			for(int r=0; r < m.num_rows(); r++) {
-				for(int c=0; c < m.num_rows(); c++) {
-					m[r][c] = 0;
-				}
-			}
-			
-			for(int i=0; i < m.num_rows(); i++) {
-				m[i][i] = 1;
+
+	template<> class Operator<Internal::Zero> {
+	public:
+		template<int Size, class Precision, class Base>
+			void eval(Vector<Size, Precision, Base>& v) const {
+			for(int i=0; i < v.size(); i++) {
+				v[i]= 0;
 			}
 		}
-	};
-	
-	struct Copy
-	{
-		template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
-		{
-			for(int r=0; r < m.num_rows(); r++)
-				for(int c=0; c < m.num_rows(); c++)
-					m[r][c] = *data++;
+
+		Operator<Internal::SizedZero> operator()(int s){
+			return Operator<Internal::SizedZero>(s);
 		}
+
 	};
 
-}
 
-
-template<> class Operator<Internal::Zero> {
- public:
-	template<int Size, class Precision, class Base>
-		void eval(Vector<Size, Precision, Base>& v) const {
-		for(int i=0; i < v.size(); i++) {
-			v[i]= 0;
-		}
-	}
- };
-
-
-static Operator<Internal::Zero> Zero;
-static Operator<Internal::Identity> Identity;
+	static Operator<Internal::Zero> Zero;
+	static Operator<Internal::Identity> Identity;
 
 
 }
