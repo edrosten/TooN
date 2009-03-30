@@ -16,9 +16,9 @@ public:
 	// construction from 0-ary operator
 	template <class Op>
 	inline Vector(const Operator<Op>& op)
-	// 	: Base::template Layout<Size, Precision> (op)
+		: Base::template Layout<Size, Precision> (op)
 	{
-		Op::eval(*this);
+		op.eval(*this);
 	}
 
 	// constructors to allow return value optimisations
@@ -53,8 +53,8 @@ public:
 
 	// assignment from a 0-ary operator
 	template <class Op>
-	inline Vector & operator=(const Operator<Op>&){
-		Op::eval(*this);
+	inline Vector & operator=(const Operator<Op>& op){
+		op.eval(*this);
 		return *this;
 	}
 

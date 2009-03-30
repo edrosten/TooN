@@ -93,6 +93,18 @@ namespace Internal{
 
 }
 
+
+template<> class Operator<Internal::Zero> {
+ public:
+	template<int Size, class Precision, class Base>
+		void eval(Vector<Size, Precision, Base>& v) const {
+		for(int i=0; i < v.size(); i++) {
+			v[i]= 0;
+		}
+	}
+ };
+
+
 static Operator<Internal::Zero> Zero;
 static Operator<Internal::Identity> Identity;
 

@@ -17,6 +17,7 @@ namespace Internal{
 	
 	//Operator classes. These are evaluated in the constructor
 	//of Vector = Vector+Vector, so make use of return value optimization.
+
 	template<typename Precision, typename Op> struct Pairwise
 	{
 		template<int S, typename B, int S1, typename P1, typename B1, int S2, typename P2, typename B2> 
@@ -145,6 +146,32 @@ namespace Internal{
 	template<> struct Sizer<-1, -1>    {static const int size=-1;};
 }
 
+
+template<typename Op,                           // the operation
+		 int S1, typename P1, typename B1,      // lhs vector
+		 int S2, typename P2, typename B2>      // rhs vector
+struct VPairwise;
+
+template<typename Op,                           // the operation
+		 int S1, typename P1, typename B1,      // lhs vector
+		 int S2, typename P2, typename B2>      // rhs vector
+struct Operator<VPairwise<Op, S1, P1, B1, S2, P2, B2> > {
+	const Vector<S1, P1, B1> & lhs;
+	const Vector<S2, P2, B2> & rhs;
+
+	Operator(const Vector<S1, P1, B1> & lhs_in, const Vector<S2, P2, B2> & rhs_in) : lhs(lhs_in), rhs(rhs_in) {}
+
+	template<int S0, typename P0, typename B0>
+	void eval(Vector<S0, P0, B0>& res) const
+	{
+		for(int i=0; i < res.size(); ++i)
+			res[i] = Op::template op<P0,P1, P2>(lhs[i],rhs[i]);
+	}
+	int size() const {return lhs.size();}
+};
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // vector <op> vector
@@ -155,9 +182,11 @@ namespace Internal{
 template<int S1, int S2, typename P1, typename P2, typename B1, typename B2> 
 Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> operator+(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
 {
-	typedef typename Internal::AddType<P1, P2>::type restype;
+	typedef typename Internal::AddType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Add> >());
+	const int S0=Internal::Sizer<S1,S2>::size;
+	return Vector<S0,P0>(Operator<VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2));
+	// return Vector<Internal::Sizer<S1,S2>::size,restype>(v1, v2, v1.size(), Operator<Internal::Pairwise<restype, Internal::Add> >());
 }
 
 // Addition Vector - Vector

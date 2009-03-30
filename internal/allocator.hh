@@ -45,14 +45,14 @@ template<int Size, class Precision> class StaticSizedAllocator: public StackOrHe
 {
 };
 
-template<int Size, class Precision> struct VectorAlloc: public StaticSizedAllocator<Size, Precision>{
+template<int Size, class Precision> struct VectorAlloc : public StaticSizedAllocator<Size, Precision> {
 	
-	VectorAlloc()
-	{ }
+	VectorAlloc() { }
+	
+	VectorAlloc(int /*s*/) { }
 
-	VectorAlloc(int /*s*/)
-	{ }
-
+	template<class Op>
+	VectorAlloc(const Operator<Op>& op) {}
 
 	int size() const {
 		return Size;
@@ -73,6 +73,9 @@ template<class Precision> struct VectorAlloc<-1, Precision> {
 	VectorAlloc(int s)
 	:my_data(new Precision[s]), my_size(s)
 	{ }
+
+	template <class Op>
+	VectorAlloc(const Operator<Op>& op) : my_data(new Precision[op.size()]), my_size(op.size()) {}
 
 	int size() const {
 		return my_size;
@@ -99,6 +102,9 @@ template<int S, class Precision> struct VectorSlice
 
 	VectorSlice(Precision* p, int /*size*/)
 	:my_data(p){}
+
+	template<class Op>
+	VectorSlice(const Operator<Op>& op) : my_data(op.data()) {}
 };
 
 template<class Precision> struct VectorSlice<-1, Precision>
@@ -109,6 +115,9 @@ template<class Precision> struct VectorSlice<-1, Precision>
 	VectorSlice(Precision* d, int s)
 	:my_data(d), my_size(s)
 	{ }
+
+	template<class Op>
+	VectorSlice(const Operator<Op>& op) : my_data(op.data()), my_size(op.size()) {}
 
 	int size() const {
 		return my_size;
@@ -317,6 +326,9 @@ template<int s> struct StrideHolder
 	StrideHolder(){}
 	StrideHolder(int){}
 
+	template<class Op>
+	StrideHolder(const Operator<Op>& op) {}
+
 	int stride() const{
 		return s;
 	}
@@ -330,6 +342,9 @@ template<> struct StrideHolder<-1>
 	//This constructor is not allowed to ignore the argument
 	StrideHolder(int s, const Internal::NoIgnore&)
 	:my_stride(s){}
+
+	template<class Op>
+	StrideHolder(const Operator<Op>& op) : my_stride(op.stride()) {}
 
 	const int my_stride;
 	int stride() const {

@@ -23,6 +23,10 @@ struct SliceVBase {
 		Layout(Precision* d, int length, int stride)
 			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, length, stride){
 		}
+
+		template<class Op>
+		Layout(const Operator<Op>& op)
+			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(op) {}
 	};
 
 };
@@ -44,6 +48,10 @@ struct VBase {
 		Layout(int s)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
 		{}
+
+		template<class Op>
+		Layout(const Operator<Op>& op)
+			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(op) {}
 	};
 };
 
@@ -68,6 +76,9 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	GenericVBase(Precision* d, int length, int stride)
 	:Mem(d, length),StrideHolder<Stride>(stride){
 	}
+	
+	template<class Op>
+	GenericVBase(const Operator<Op> & op) : Mem(op), StrideHolder<Stride>(op) {}
 
 	using Mem::my_data;
 	using Mem::size;
