@@ -9,14 +9,15 @@ public:
 	inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
 	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
 	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
-	inline Vector(Precision* data_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
+	// inline Vector(Precision* data_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, stride_in) {}
 	
 	using Base::template Layout<Size, Precision>::size;
 
 	// constructors to allow return value optimisations
 	// construction from 0-ary operator
 	template <class Op>
-	inline Vector(const Operator<Op>&){
+	inline Vector(const Operator<Op>& op)
+		: Base::template Layout<Size, Precision>(op.data(),op.size(), op.stride()) {
 		Op::eval(*this);
 	}
 

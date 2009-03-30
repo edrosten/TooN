@@ -65,10 +65,6 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	:Mem(s)
 	{}
 
-	GenericVBase(Precision* d, int stride)
-	:Mem(d),StrideHolder<Stride>(stride){
-	}
-
 	GenericVBase(Precision* d, int length, int stride)
 	:Mem(d, length),StrideHolder<Stride>(stride){
 	}
@@ -90,13 +86,13 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	template<int Start, int Length> 
 	Vector<Length, Precision, SliceVBase<Stride> > slice(){
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride()*Start, stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride()*Start, Length, stride(), Slicing());
 	}
 
 	template<int Start, int Length> 
 	const Vector<Length, Precision, SliceVBase<Stride> > slice() const {
 		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*Start), stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*Start), Length, stride(), Slicing());
 	}
 
 	Vector<-1, Precision, SliceVBase<Stride> > slice(int start, int length){
