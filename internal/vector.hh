@@ -16,7 +16,8 @@ public:
 	// construction from 0-ary operator
 	template <class Op>
 	inline Vector(const Operator<Op>& op)
-		: Base::template Layout<Size, Precision>(op.data(),op.size(), op.stride()) {
+	// 	: Base::template Layout<Size, Precision> (op)
+	{
 		Op::eval(*this);
 	}
 
