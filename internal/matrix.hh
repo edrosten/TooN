@@ -33,10 +33,10 @@ public:
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
 	template <class Op>
-	inline Matrix(const Operator<Op> &, int rows = Rows, int cols = Cols )
-	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
+	inline Matrix(const Operator<Op>& op)
+		:Layout::template Layout<Rows,Cols,Precision>(op)
 	{
-		Op::eval(*this);
+		op.eval(*this);
 	}
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
@@ -77,9 +77,9 @@ public:
 	}
 
 	// operator = 0-ary operator
-	template<class Op> inline Matrix& operator= (const Operator<Op>&)
+	template<class Op> inline Matrix& operator= (const Operator<Op>& op)
 	{
-		Op::eval(*this);
+		op.eval(*this);
 	}
 
 	// operator =

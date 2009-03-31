@@ -324,6 +324,12 @@ template<int S> struct RowStrideHolder: public StrideHolder<S>
 
 	RowStrideHolder()
 	{}
+
+	template<class Op>
+	RowStrideHolder(const Operator<Op>& op)
+		: StrideHolder<S>(op)
+	{}
+
 };
 
 
@@ -336,6 +342,11 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 	:StrideHolder<S>(i, n){}
 
 	ColStrideHolder()
+	{}
+
+	template<class Op>
+	ColStrideHolder(const Operator<Op>& op)
+		: StrideHolder<S>(op)
 	{}
 };
 

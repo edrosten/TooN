@@ -47,39 +47,11 @@ namespace TooN {
 
 	namespace Internal{
 
-		struct Zero {
-			template<int R, int C, class P, class B>
-				static void eval(Matrix<R, C, P, B>& m) {
-				for(int r=0; r < m.num_rows(); r++) {
-					for(int c=0; c < m.num_rows(); c++) {
-						m[r][c] = 0;
-					}
-				}
-			}
-
-			template<int Size, class Precision, class Base>
-				static void eval(Vector<Size, Precision, Base>& v) {
-				for(int i=0; i < v.size(); i++) {
-					v[i]= 0;
-				}
-			}
-		};
-
-		struct Identity {
-			template<int R, int C, class P, class B> static void eval(Matrix<R, C, P, B>& m) {
-				SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
-			
-				for(int r=0; r < m.num_rows(); r++) {
-					for(int c=0; c < m.num_rows(); c++) {
-						m[r][c] = 0;
-					}
-				}
-			
-				for(int i=0; i < m.num_rows(); i++) {
-					m[i][i] = 1;
-				}
-			}
-		};
+		struct Zero;
+		struct SizedZero;
+		struct RCZero;
+		struct Identity;
+		struct SizedIdentity;
 	
 		struct Copy
 		{
@@ -90,15 +62,41 @@ namespace TooN {
 						m[r][c] = *data++;
 			}
 		};
-
-		class SizedZero;
 	}
 
 
+	template<> struct Operator<Internal::RCZero> {
+	Operator(int r, int c) : my_rows(r), my_cols(c) {}
+
+		const int my_rows;
+		const int my_cols;
+
+		int num_rows() const {return my_rows;}
+		int num_cols() const {return my_cols;}
+
+		template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const {
+			for(int r=0; r<m.num_rows(); r++){
+				for(int c=0; c<m.num_cols(); c++){
+					m(r,c)=0;
+				}
+			}
+		}
+	};
+
+
 	template<> struct Operator<Internal::SizedZero> {
-		int my_size;
-	Operator(int s): my_size(s) {}
+
+		// no idea why this doesn't indent properly
+		Operator(int s)	: my_size(s) {}
+		
+		const int my_size;
+		
+
 		int size() const {return my_size;}
+		int num_rows() const {return my_size;}
+		int num_cols() const {return my_size;}
+
 		template<int Size, class Precision, class Base>
 			void eval(Vector<Size, Precision, Base>& v) const {
 			for(int i=0; i < v.size(); i++) {
@@ -106,15 +104,32 @@ namespace TooN {
 			}
 		}
 
+		template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const {
+			for(int r=0; r<m.num_rows(); r++){
+				for(int c=0; c<m.num_cols(); c++){
+					m(r,c)=0;
+				}
+			}
+		}
+		
 	};
 
 
-	template<> class Operator<Internal::Zero> {
-	public:
+	template<> struct Operator<Internal::Zero> {
 		template<int Size, class Precision, class Base>
 			void eval(Vector<Size, Precision, Base>& v) const {
 			for(int i=0; i < v.size(); i++) {
 				v[i]= 0;
+			}
+		}
+
+		template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const {
+			for(int r=0; r<m.num_rows(); r++){
+				for(int c=0; c<m.num_cols(); c++){
+					m(r,c)=0;
+				}
 			}
 		}
 
@@ -122,6 +137,59 @@ namespace TooN {
 			return Operator<Internal::SizedZero>(s);
 		}
 
+		Operator<Internal::RCZero> operator()(int r, int c){
+			return Operator<Internal::RCZero>(r,c);
+		}
+
+	};
+
+	template<> struct Operator<Internal::SizedIdentity> {
+		// no idea why this doesn't indent properly
+	Operator(int s)	: my_size(s) {}
+		
+		const int my_size;
+		
+		int num_rows() const {return my_size;}
+		int num_cols() const {return my_size;}
+
+		template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const {
+			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+
+			for(int r=0; r<m.num_rows(); r++){
+				for(int c=0; c<m.num_cols(); c++){
+					m(r,c)=0;
+				}
+			}
+						
+			for(int r=0; r < m.num_rows(); r++) {
+				m(r,r) = 1;
+			}
+		}
+	};
+		
+
+
+	template<> struct Operator<Internal::Identity> {
+
+		template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const {
+			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+
+			for(int r=0; r<m.num_rows(); r++){
+				for(int c=0; c<m.num_cols(); c++){
+					m(r,c)=0;
+				}
+			}
+						
+			for(int r=0; r < m.num_rows(); r++) {
+				m(r,r) = 1;
+			}
+		}
+
+		Operator<Internal::SizedIdentity> operator()(int s){
+			return Operator<Internal::SizedIdentity>(s);
+		}
 	};
 
 

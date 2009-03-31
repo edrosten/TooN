@@ -81,6 +81,13 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	GenericMBase(int r, int c)
 	:Mem(r, c) {}
 
+	template<class Op>
+	GenericMBase(const Operator<Op>& op)
+		: Mem(op),
+		  RowStrideHolder<RowStride>(op),
+		  ColStrideHolder<ColStride>(op)
+	{}
+
 	//Unpack slice specifications in to specific constructors
 	//These slice specifications are not allowed to ignore superfluous data.
 	GenericMBase(Precision* p, const Spec_____& s):Mem(p                    )                                                                                                              {}
@@ -186,8 +193,14 @@ struct RowMajor
 		Layout(){}
 
 		Layout(int rows, int cols)
-		:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
+			:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
+
+		template<class Op>
+		Layout(const Operator<Op>& op)
+			:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(op)
+		{}
+
 	};
 };
 
@@ -202,6 +215,12 @@ struct ColMajor
 		Layout(int rows, int cols)
 		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
+
+		template<class Op>
+		Layout(const Operator<Op>& op)
+			:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(op)
+		{}
+
 	};
 };
 
