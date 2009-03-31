@@ -126,13 +126,81 @@ template<class Precision> struct VectorSlice<-1, Precision>
 
 
 
-template<int R, int C, class Precision> struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// A class similar to StrideHolder, but to hold the size information for matrices.
+
+template<int s> struct SizeHolder
+{
+	//Constructors ignore superfluous arguments
+	SizeHolder(){}
+	SizeHolder(int){}
+
+	int size() const{
+		return s;
+	}
+};
+
+template<> struct SizeHolder<-1>
+{
+	SizeHolder(int s)
+	:my_size(s){}
+
+	const int my_size;
+	int size() const {
+		return my_size;
+	}
+};
+
+
+template<int S> struct RowSizeHolder: private SizeHolder<S>
+{
+	RowSizeHolder(int i)
+	:SizeHolder<S>(i){}
+
+	RowSizeHolder(int i, const Internal::NoIgnore& n)
+	:SizeHolder<S>(i, n){}
+
+	RowSizeHolder()
+	{}
+
+	template<typename Op>
+	RowSizeHolder(const Operator<Op>& op) : SizeHolder<S>(op.num_rows()) {}
+
+	int num_rows() const {return SizeHolder<S>::size();}
+};
+
+
+template<int S> struct ColSizeHolder: public SizeHolder<S>
+{
+	ColSizeHolder(int i)
+	:SizeHolder<S>(i){}
+
+	ColSizeHolder()
+	{}
+
+	template<typename Op>
+	ColSizeHolder(const Operator<Op>& op) : SizeHolder<S>(op.num_cols()) {}
+
+	int num_cols() const {return SizeHolder<S>::size();}	
+};
+
+
+
+template<int R, int C, class Precision, bool FullyStatic=(R>=0 && C>=0)> 
+struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
 {
 	MatrixAlloc(int,int)
 	{}
 
 	MatrixAlloc()
 	{}
+
+	template <class Op>
+	MatrixAlloc(const Operator<Op>& op)
+	{}
+
 	int num_rows() const {
 		return R;
 	}
@@ -143,175 +211,68 @@ template<int R, int C, class Precision> struct MatrixAlloc: public StaticSizedAl
 };
 
 
-template<int Rows, class Precision> struct MatrixAlloc<Rows, -1, Precision>
+template<int R, int C, class Precision> struct MatrixAlloc<R, C, Precision, false>
+	: public RowSizeHolder<R>,
+	ColSizeHolder<C>
 {
-	const int my_cols;
 	Precision* const my_data;
 
+	using RowSizeHolder<R>::num_rows;
+	using ColSizeHolder<C>::num_cols;
+	
+	// copy constructor so guaranteed contiguous
 	MatrixAlloc(const MatrixAlloc& m)
-	:my_cols(m.my_cols),my_data(new Precision[Rows*my_cols]) {
-		const int size=Rows*my_cols;
-		for(int i=0; i < size; i++)
+		:RowSizeHolder<R>(m.num_rows()),
+		 ColSizeHolder<C>(m.num_cols()),
+		 my_data(new Precision[num_rows()*num_cols()]) {
+		const int size=num_rows()*num_cols();
+		for(int i=0; i < size; i++) {
 			my_data[i] = m.my_data[i];
-	}
-
-	MatrixAlloc(int, int c)
-	:my_cols(c),my_data(new Precision[Rows*c]) {
-	}
-
-	~MatrixAlloc() {
-		delete[] my_data;
-	}
-
-	int num_rows() const {
-		return Rows;
-	}
-
-	int num_cols() const {
-		return my_cols;
-	}
-};
-
-template<int Cols, class Precision> struct MatrixAlloc<-1, Cols, Precision>
-{
-	const int my_rows;
-	Precision* const my_data;
-
-	MatrixAlloc(const MatrixAlloc& m)
-	:my_rows(m.my_rows),my_data(new Precision[my_rows*Cols]) {
-		const int size=Cols*my_rows;
-		for(int i=0; i < size; i++)
-			my_data[i] = m.my_data[i];
-	}
-
-	MatrixAlloc(int r, int)
-	:my_rows(r),my_data(new Precision[r*Cols]) {
-	}
-
-	~MatrixAlloc() {
-		delete[] my_data;
-	}
-
-	int num_rows() const {
-		return my_rows;
-	}
-
-	int num_cols() const {
-		return Cols;
-	}
-};
-
-template<class Precision> struct MatrixAlloc<-1, -1, Precision>
-{
-	size_t elements(int r, int c)
-	{
-		if(r < 0 || c < 0)
-			throw std::bad_alloc();
-		return r*c;
-	}
-	const int my_rows;
-	const int my_cols;
-	Precision* const my_data;
-
-	MatrixAlloc(const MatrixAlloc& m)
-	:my_rows(m.my_rows),my_cols(m.my_cols),my_data(new Precision[elements(my_rows, my_cols)]){
-		const int size=my_rows*my_cols;
-		for(int i=0; i < size; i++)
-			my_data[i] = m.my_data[i];
+		}
 	}
 
 	MatrixAlloc(int r, int c)
-	:my_rows(r),my_cols(c),my_data(new Precision[elements(r, c)]){
+		:RowSizeHolder<R>(r),
+		 ColSizeHolder<C>(c),
+		 my_data(new Precision[num_rows()*num_cols()]) {
 	}
+
+	template <class Op>	MatrixAlloc(const Operator<Op>& op)
+		:RowSizeHolder<R>(op),
+		 ColSizeHolder<C>(op),
+		 my_data(new Precision[num_rows()*num_cols()])
+	{}
 
 	~MatrixAlloc() {
 		delete[] my_data;
 	}
-
-	int num_rows() const {
-		return my_rows;
-	}
-
-	int num_cols() const {
-		return my_cols;
-	}
 };
-
 
 
 template<int R, int C, class Precision> struct MatrixSlice
+	: public RowSizeHolder<R>,
+	ColSizeHolder<C>
 {
-	int num_rows() const {
-		return R;
-	}
-
-	int num_cols() const {
-		return C;
-	}
-	//Optional Constructors
-	
 	Precision* const my_data;
+
+	using RowSizeHolder<R>::num_rows;
+	using ColSizeHolder<C>::num_cols;
+
+	//Optional Constructors
 	MatrixSlice(Precision* p)
 	:my_data(p){}
 
-	MatrixSlice(Precision* p, int /*rows*/, int /*cols*/)
-	:my_data(p){}
-};
-
-
-
-template<int Rows, class Precision> struct MatrixSlice<Rows, -1, Precision>
-{
-	Precision* const my_data;
-	const int my_cols;
-
-	MatrixSlice(Precision* d, int r, int c) :my_data(d),my_cols(c) { } 
-	MatrixSlice(Precision* d, int c, const Internal::SpecifyCols&) :my_data(d),my_cols(c) { } 
-
-	int num_rows() const {
-		return Rows;
-	}
-
-	int num_cols() const {
-		return my_cols;
-	}
-};
-
-template<int Cols, class Precision> struct MatrixSlice<-1, Cols, Precision>
-{
-	Precision* const my_data;
-	const int my_rows;
-
-	MatrixSlice(Precision* d, int r, int c) :my_data(d),my_rows(r) { }
-	MatrixSlice(Precision* d, int r, const Internal::SpecifyRows&) :my_data(d),my_rows(r) { }
-
-	int num_rows() const {
-		return my_rows;
-	}
-
-	int num_cols() const {
-		return Cols;
-	}
-};
-
-template<class Precision> struct MatrixSlice<-1, -1, Precision>
-{
-	Precision* const my_data;
-	const int my_rows;
-	const int my_cols;
-
-	MatrixSlice(Precision* d, int r, int c)
-	:my_data(d), my_rows(r),my_cols(c)
-	{
-	}
-
-	int num_rows() const {
-		return my_rows;
-	}
-
-	int num_cols() const {
-		return my_cols;
-	}
+	MatrixSlice(Precision* p, int r, int c)
+		:RowSizeHolder<R>(r),
+		 ColSizeHolder<C>(c),
+		 my_data(p){}
+	
+	template<class Op>
+	MatrixSlice(const Operator<Op>& op)
+		:RowSizeHolder<R>(op),
+		 ColSizeHolder<C>(op),
+		 my_data(op.data())
+	{}
 };
 
 
@@ -377,5 +338,9 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 	ColStrideHolder()
 	{}
 };
+
+
+
+
 
 }
