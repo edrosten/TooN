@@ -46,13 +46,6 @@ namespace TooN {
 		}
 
 	namespace Internal{
-
-		struct Zero;
-		struct SizedZero;
-		struct RCZero;
-		struct Identity;
-		struct SizedIdentity;
-	
 		struct Copy
 		{
 			template<int R, int C, class P, class B, class Data> static void eval(Matrix<R, C, P, B>& m, const Data * data)
@@ -62,8 +55,14 @@ namespace TooN {
 						m[r][c] = *data++;
 			}
 		};
-	}
 
+		// dummy structs that are used in 0-ary operators
+		struct Zero;
+		struct SizedZero;
+		struct RCZero;
+		struct Identity;
+		struct SizedIdentity;
+	}
 
 	template<> struct Operator<Internal::RCZero> {
 	Operator(int r, int c) : my_rows(r), my_cols(c) {}
