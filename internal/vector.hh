@@ -6,7 +6,7 @@ public:
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
 	inline Vector(){}
-	inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
+	// inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
 	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
 	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
 	
