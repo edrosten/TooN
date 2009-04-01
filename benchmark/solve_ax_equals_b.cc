@@ -5,6 +5,12 @@
 #include <TooN/gauss_jordan.h>
 #include <tr1/random>
 #include <sys/time.h>  //gettimeofday
+#include <vector>
+#include <utility>
+#include <string>
+#include <algorithm>
+#include <iomanip>
+
 
 using namespace TooN;
 using namespace std;
@@ -20,6 +26,61 @@ double get_time_of_day()
 std::tr1::mt19937 eng;
 std::tr1::uniform_real<double> rnd;
 double global_sum;
+
+
+struct Do2x2
+{
+	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
+	{
+		double idet = 1/(a[0][0]*a[1][1] - a[0][1] * a[1][0]);
+		double i00 =  a[1][1] * idet;
+		double i01 = -a[0][1] * idet;
+		double i10 = -a[1][0] * idet;
+		double i11 =  a[0][0] * idet;
+
+		for(int i=0; i < x.num_cols(); i++)
+		{
+			x[0][i] = b[0][i] * i00 + b[1][i] * i01;
+			x[1][i] = b[0][i] * i10 + b[1][i] * i11;
+		}
+	}
+
+	static string name()
+	{
+		return "2H";
+	}
+};
+
+struct Do3x3
+{
+	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
+	{
+		double idet = a[0][0]*(a[2][2]*a[1][1]-a[2][1]*a[1][2])-a[1][0]*(a[2][2]*a[0][1]-a[2][1]*a[0][2])+a[2][0]*(a[1][2]*a[0][1]-a[1][1]*a[0][2]);
+
+		double i00 =   (a[2][2]*a[1][1]-a[2][1]*a[1][2]) * idet;
+		double i01 =  -(a[2][2]*a[0][1]-a[2][1]*a[0][2]) * idet;
+		double i02 =   (a[1][2]*a[0][1]-a[1][1]*a[0][2]) * idet;
+		double i10 =  -(a[2][2]*a[1][0]-a[2][0]*a[1][2]) * idet;
+		double i11 =   (a[2][2]*a[0][0]-a[2][0]*a[0][2]) * idet;
+		double i12 =  -(a[1][2]*a[0][0]-a[1][0]*a[0][2]) * idet;
+		double i20 =   (a[2][1]*a[1][0]-a[2][0]*a[1][1]) * idet;
+		double i21 =  -(a[2][1]*a[0][0]-a[2][0]*a[0][1]) * idet;
+		double i22 =   (a[1][1]*a[0][0]-a[1][0]*a[0][1]) * idet;
+
+		for(int i=0; i < x.num_cols(); i++)
+		{
+			x[0][i] = b[0][i] * i00 + b[1][i] * i01 + b[2][i] * i02;
+			x[1][i] = b[0][i] * i10 + b[1][i] * i11 + b[2][i] * i12;
+			x[2][i] = b[0][i] * i20 + b[1][i] * i21 + b[2][i] * i22;
+		}
+	}
+
+	static string name()
+	{
+		return "3H";
+	}
+};
+
 
 struct UseLU
 {
@@ -99,9 +160,9 @@ struct UseGaussJordanInverse
 	}
 };
 
-template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
+template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(vector<pair<double, string> >& results)
 {
-	double time=0, t_tmp, start = get_time_of_day();
+	double time=0, t_tmp, start = get_time_of_day(), t_tmp2;
 	double sum=0;
 	int n=0;
 
@@ -119,9 +180,13 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 			for(int c=0; c < Cols; c++)
 				b[r][c] = rnd(eng);
 		
-		t_tmp = get_time_of_day();
+		a[0][0] += (t_tmp=get_time_of_day()) * 1e-20;
 		Solver::template solve<Size, Cols>(a, b, x);
-		time += get_time_of_day() - t_tmp;
+		global_sum += (t_tmp2=get_time_of_day())*x[Size-1][Cols-1];
+			
+		
+		time += t_tmp2 - t_tmp;
+
 
 		
 		for(int r=0; r < Size; r++)
@@ -131,51 +196,37 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b()
 		n++;
 	}
 
-	cout << Solver::name() << "\t" << n / time << "\t";
+	results.push_back(make_pair(n/time, Solver::name()));
 
 	global_sum += sum;	
 }
 
-template<class A, class B> struct TypeList
-{
-	typedef A a;
-	typedef B b;
-};
-
-struct Null{};
-
-template<int R, int C, class L> struct benchmark_iter
+template<int Size, int C, bool End=0> struct ColIter
 {
 	static void iter()
 	{
-		benchmark_ax_eq_b<R, C, typename L::a>();
-		benchmark_iter<R, C, typename L::b>::iter();
-	}
-};
-
-
-template<int R, int C> struct benchmark_iter<R, C, Null>
-{
-	static void iter()
-	{
-	}
-};
-
-
-
-
-template<int Size, int Cols, class Test> struct ColIter
-{
-	static void iter()
-	{
+		static const int Lin = Size*2;
+		static const int Grow = 2;
+		static const int Cols = C + (C<=Lin?0:(C-Lin)*(C-Lin)/Grow);
+		vector<pair<double, string> > results;
 		cout << Size << "\t" << Cols << "\t";
-		benchmark_iter<Size, Cols, Test>::iter();
+
+		benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
+		benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
+		benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
+		benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
+		benchmark_ax_eq_b<Size, Cols, UseLU>(results);
+		benchmark_ax_eq_b<Size, Cols, Do2x2>(results);
+
+		sort(results.begin(), results.end());
+		for(unsigned int i=0; i < results.size(); i++)
+			cout << results[i].second << " " << setprecision(5) << setw(10) << results[i].first << "            ";
 		cout << endl;
-		ColIter<Size, Cols-5, Test>::iter();
+		ColIter<Size, C+1, (Cols> Size*20)>::iter();
 	}
 };
 
-template<int Size,class Test> struct ColIter<Size, 1, Test>
+template<int Size,int C> struct ColIter<Size, C, 1>
 {
 	static void iter()
 	{
@@ -183,16 +234,16 @@ template<int Size,class Test> struct ColIter<Size, 1, Test>
 };
 
 
-template<int Size, class Test> struct SizeIter
+template<int Size, bool End=(Size<= 0)> struct SizeIter
 {
 	static void iter()
 	{
-		ColIter<Size, 500+1, Test>::iter();
-		SizeIter<Size-4, Test>::iter();
+		ColIter<Size, 1>::iter();
+		SizeIter<Size-16>::iter();
 	}
 };
 
-template<class Test> struct SizeIter<0, Test>
+template<int S> struct SizeIter<S, 1>
 {
 	static void iter()
 	{
@@ -202,7 +253,7 @@ template<class Test> struct SizeIter<0, Test>
 
 int main()
 {
-	SizeIter<4, TypeList<UseGaussJordanInverse, TypeList<UseGaussianElimination, TypeList<UseGaussianEliminationInverse, TypeList<UseLUInv, TypeList<UseLU, Null> > > > > >::iter();
+	SizeIter<2>::iter();
 	
 	return global_sum != 123456789.0;
 }
