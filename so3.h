@@ -21,273 +21,222 @@
 #define __SO3_H
 
 #include <TooN/TooN.h>
-#include <TooN/LU.h>
 #include <TooN/helpers.h>
 
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
 #endif
 
-    class SE3;
+template <typename Precision> class SO3;
 
+template<class Precision> inline std::istream & operator>>(std::istream &, SO3<Precision> & );
+
+template <typename Precision = double>
 class SO3 {
 public:
-  friend std::istream& operator>>(std::istream& is, SO3& rhs);
-  friend std::istream& operator>>(std::istream& is, class SE3& rhs);
-  friend class SE3;
-  inline SO3();
-  inline SO3(const Matrix<3>& rhs);
+	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
+	
+	SO3() : my_matrix(Identity) {}
+	
+	template <int S, typename P, typename A>
+	SO3(const Vector<S, P, A> & v) { *this = exp(v); }
+	
+	template <int R, int C, typename P, typename A>
+	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
+	
+	template <int R, int C, typename P, typename A>
+	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
+		my_matrix = rhs;
+		coerce(my_matrix);
+		return *this;
+	}
+	
+	template <int R, int C, typename P, typename A>
+	static void coerce(Matrix<R,C,P,A>& M){
+		SizeMismatch<3,R>::test(3, M.num_rows());
+		SizeMismatch<3,C>::test(3, M.num_cols());
+		M[0] = unit(M[0]);
+		M[1] -= M[0] * (M[0]*M[1]);
+		M[1] = unit(M[1]);
+		M[2] -= M[0] * (M[0]*M[2]);
+		M[2] -= M[1] * (M[1]*M[2]);
+		M[2] = unit(M[2]);
+	}
+	
+	template<int S, typename A> inline static SO3 exp(const Vector<S,Precision,A>& vect);
+	
+	inline Vector<3, Precision> ln() const;
+	
+	SO3 inverse() const { return SO3(*this, Invert()); }
 
-  inline SO3& operator=(const Matrix<3>& rhs);
-  template <class Accessor> static inline void coerce(FixedMatrix<3,3,Accessor>& M);
+	SO3& operator *=(const SO3& rhs) {
+		my_matrix=my_matrix*rhs.my_matrix;
+		return *this;
+	}
 
-  template<class Accessor> inline static SO3 exp(const FixedVector<3,Accessor>& vect);
-  template <class Accessor> inline static double exp_with_half(const FixedVector<3,Accessor>& vect, SO3& first, SO3& second, double& shtot);
+	SO3 operator *(const SO3& rhs) const { return SO3(*this,rhs); }
 
-  inline Vector<3> ln() const;
+	const Matrix<3,3, Precision> & get_matrix() const {return my_matrix;}
 
-  inline double operator[](int i) const {return my_matrix[i/3][i%3];}
-
-  inline SO3 inverse() const;
-
-  inline SO3& operator *=(const SO3& rhs){
-    my_matrix=my_matrix*rhs.my_matrix;
-    return *this;
-  }
-
-  inline SO3 operator *(const SO3& rhs) const {
-      return SO3(*this,rhs);
-  }
-
-  inline const Matrix<3>& get_matrix()const {return my_matrix;}
-  // returns i-th generator times pos
-  inline static Vector<3> generator_field(int i, Vector<3> pos);
-
-  // adjoint transformation on the Lie algebra
-  inline Vector<3> adjoint(Vector<3> vect) const ;
-
- private:
-  struct Invert {};
-  inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
-  inline SO3(const SO3& a, const SO3& b) : my_matrix(a.my_matrix*b.my_matrix) {}
-
-  Matrix<3> my_matrix;
+	inline static Matrix<3,3, Precision> generator(int i){
+		Matrix<3,3,Precision> result(Zero);
+		result[(i+1)%3][(i+2)%3] = -1;
+		result[(i+2)%3][(i+1)%3] = 1;
+		return result;
+	}
+	
+	// adjoint transformation on the Lie algebra
+	template <int S, typename A>
+	inline Vector<3, Precision> adjoint(Vector<3, Precision, A> vect) const { return *this * vect; }
+	
+private:
+	struct Invert {};
+	inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
+	inline SO3(const SO3& a, const SO3& b) : my_matrix(a.my_matrix*b.my_matrix) {}
+	
+	Matrix<3,3, Precision> my_matrix;
 };
 
-inline std::ostream& operator<< (std::ostream& os, const SO3& rhs){
-  return os << rhs.get_matrix();
+template <typename Precision>
+inline std::ostream& operator<< (std::ostream& os, const SO3<Precision>& rhs){
+	return os << rhs.get_matrix();
 }
 
-inline std::istream& operator>>(std::istream& is, SO3& rhs){
-  return is >> rhs.my_matrix;
+template <typename Precision>
+inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
+	return is >> rhs.my_matrix;
 }
 
-
-
-
-template<class Accessor> inline
-Vector<3> operator*(const SO3& lhs, const FixedVector<3,Accessor>& rhs){
-  return lhs.get_matrix() * rhs;
-}
-
-template<class Accessor> inline
-Vector<3> operator*(const SO3& lhs, const DynamicVector<Accessor>& rhs){
-  assert(rhs.size() == 3);
-  return lhs.get_matrix() * rhs;
-}
-
-
-
-
-template<class Accessor> inline
-Vector<3> operator*(const DynamicVector<Accessor>& lhs, const SO3& rhs){
-  assert(lhs.size() == 3);
-  return lhs * rhs.get_matrix();
-}
-
-template<class Accessor> inline
-Vector<3> operator*(const FixedVector<3,Accessor>& lhs, const SO3& rhs){
-  return lhs * rhs.get_matrix();
-}
-
-template <int RHS, class Accessor> inline
-Matrix<3,RHS> operator*(const SO3& lhs, const FixedMatrix<3,RHS,Accessor>& rhs){
-  return lhs.get_matrix() * rhs;
-}
-
-template <int LHS, class Accessor> inline
-Matrix<LHS,3> operator*(const FixedMatrix<LHS,3,Accessor>& lhs, const SO3& rhs){
-  return lhs * rhs.get_matrix();
-}
-
-namespace SO3static
-{
-  static double identity[9]={1,0,0,0,1,0,0,0,1};
-}
-
-inline SO3::SO3() :
-  my_matrix(SO3static::identity)
-{}
-
-inline SO3::SO3(const Matrix<3>& rhs){
-    *this = rhs;
-}
-
-inline SO3& SO3::operator=(const Matrix<3>& rhs){
-  my_matrix = rhs;
-  coerce(my_matrix);
-  return *this;
-}
-
- template <class Accessor> inline void SO3::coerce(FixedMatrix<3,3, Accessor>& M){
-     normalize(M[0]);
-     M[1] -= M[0] * (M[0]*M[1]);
-     normalize(M[1]);
-     M[2] -= M[0] * (M[0]*M[2]);
-     M[2] -= M[1] * (M[1]*M[2]);
-     normalize(M[2]);
-}
-
-template <class A1, class A2>
-inline void rodrigues_so3_exp(const TooN::FixedVector<3,A1>& w, const double A, const double B, TooN::FixedMatrix<3,3,A2>& R)
-{
-    {
-	const double wx2 = w[0]*w[0];
-	const double wy2 = w[1]*w[1];
-	const double wz2 = w[2]*w[2];
-
-	R[0][0] = 1.0 - B*(wy2 + wz2);
-	R[1][1] = 1.0 - B*(wx2 + wz2);
-	R[2][2] = 1.0 - B*(wx2 + wy2);
-    }
-    {
-	const double a = A*w[2];
-	const double b = B*(w[0]*w[1]);
-	R[0][1] = b - a;
-	R[1][0] = b + a;
-    }
-    {
-	const double a = A*w[1];
-	const double b = B*(w[0]*w[2]);
-	R[0][2] = b + a;
-	R[2][0] = b - a;
-    }
-    {
-	const double a = A*w[0];
-	const double b = B*(w[1]*w[2]);
-	R[1][2] = b - a;
-	R[2][1] = b + a;
-    }
-}
-
-template <class Accessor>
-inline SO3 SO3::exp(const FixedVector<3,Accessor>& w){
-    static const double one_6th = 1.0/6.0;
-    static const double one_20th = 1.0/20.0;
-
-    SO3 result;
-
-    const double theta_sq = w*w;
-    const double theta = sqrt(theta_sq);
-    double A, B;
-
-    if (theta_sq < 1e-8) {
-	A = 1.0 - one_6th * theta_sq;
-	B = 0.5;
-    } else {
-	if (theta_sq < 1e-6) {
-	    B = 0.5 - 0.25 * one_6th * theta_sq;
-	    A = 1.0 - theta_sq * one_6th*(1.0 - one_20th * theta_sq);
-	} else {
-	    const double inv_theta = 1.0/theta;
-	    A = sin(theta) * inv_theta;
-	    B = (1 - cos(theta)) * (inv_theta * inv_theta);
+template <typename Precision, typename VA, typename MA>
+inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
+	{
+		const Precision wx2 = w[0]*w[0];
+		const Precision wy2 = w[1]*w[1];
+		const Precision wz2 = w[2]*w[2];
+	
+		R[0][0] = 1.0 - B*(wy2 + wz2);
+		R[1][1] = 1.0 - B*(wx2 + wz2);
+		R[2][2] = 1.0 - B*(wx2 + wy2);
 	}
-    }
-    rodrigues_so3_exp(w, A, B, result.my_matrix);
-    return result;
+	{
+		const Precision a = A*w[2];
+		const Precision b = B*(w[0]*w[1]);
+		R[0][1] = b - a;
+		R[1][0] = b + a;
+	}
+	{
+		const Precision a = A*w[1];
+		const Precision b = B*(w[0]*w[2]);
+		R[0][2] = b + a;
+		R[2][0] = b - a;
+	}
+	{
+		const Precision a = A*w[0];
+		const Precision b = B*(w[1]*w[2]);
+		R[1][2] = b - a;
+		R[2][1] = b + a;
+	}
 }
 
-inline Vector<3> SO3::ln() const{
-  Vector<3> result;
-
-  double trace = my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2];
-
-  // 2 * cos(theta) - 1 == trace
-
-  result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
-  result[1] = (my_matrix[0][2]-my_matrix[2][0])/2;
-  result[2] = (my_matrix[1][0]-my_matrix[0][1])/2;
-
-  if (trace > -0.95) {
-      double sin_angle_abs = sqrt(result*result);
-      if (sin_angle_abs > 0.00001) {
-	  double angle;
-	  if(sin_angle_abs > 1.0) {
-	      sin_angle_abs = 1.0;
-	      angle = M_PI_2;
-	  } else {
-	      angle = asin(sin_angle_abs);
-	      if (trace < 1)
-		  angle = M_PI - angle;
-	  }
-	  result *= angle / sin_angle_abs;
-      }
-      return result;
-  } else {
-      TooN::Matrix<3> A = my_matrix;
-      A[0][0] -= 1.0;
-      A[1][1] -= 1.0;
-      A[2][2] -= 1.0;
-      TooN::LU<3> lu(A);
-      const TooN::Matrix<3,3,TooN::ColMajor>& u = lu.get_lu().T();
-      const double u0 = fabs(u[0][0]);
-      const double u1 = fabs(u[1][1]);
-      const double u2 = fabs(u[2][2]);
-      int row;
-      if (u0 < u1)
-	  row = u0 < u2 ? 0 : 2;
-      else
-	  row = u1 < u2 ? 1 : 2;
-      //std::cerr << u << std::endl;
-      //std::cerr << "row = " << row << std::endl;
-      TooN::Vector<3> r;
-      const double factor = acos(0.5*(trace-1));
-      switch (row) {
-      case 0: r[0] = factor; r[1] = 0; r[2] = 0; break;
-      case 1: r[0] = u[0][1]*u[2][2]; r[1] = -u[0][0]*u[2][2]; r[2] = 0; r *= factor/sqrt(r*r); break;
-      case 2: r[0] = u[0][1]*u[1][2] - u[0][2]*u[1][1]; r[1] = -u[0][0]*u[1][2]; r[2] = u[0][0]*u[1][1];  r *= factor/sqrt(r*r); break;
-      }
-      if (result * r < 0)
-	  return -r;
-      else
-	  return r;
-  }
+template <typename Precision>
+template<int S, typename VA>
+inline SO3<Precision> SO3<Precision>::exp(const Vector<S,Precision,VA>& w){
+	SizeMismatch<3,S>::test(3, w.size());
+	
+	static const Precision one_6th = 1.0/6.0;
+	static const Precision one_20th = 1.0/20.0;
+	
+	SO3<Precision> result;
+	
+	const Precision theta_sq = w*w;
+	const Precision theta = sqrt(theta_sq);
+	Precision A, B;
+	
+	if (theta_sq < 1e-8) {
+		A = 1.0 - one_6th * theta_sq;
+		B = 0.5;
+	} else {
+		if (theta_sq < 1e-6) {
+			B = 0.5 - 0.25 * one_6th * theta_sq;
+			A = 1.0 - theta_sq * one_6th*(1.0 - one_20th * theta_sq);
+		} else {
+			const Precision inv_theta = 1.0/theta;
+			A = sin(theta) * inv_theta;
+			B = (1 - cos(theta)) * (inv_theta * inv_theta);
+		}
+	}
+	rodrigues_so3_exp(w, A, B, result.my_matrix);
+	return result;
 }
 
-inline SO3 SO3::inverse() const{
-    return SO3(*this, Invert());
+template <typename Precision>
+inline Vector<3, Precision> SO3<Precision>::ln() const{
+	Vector<3, Precision> result;
+	
+	const Precision cos_angle = (my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2] - 1.0) * 0.5;
+	result[0] = (my_matrix[2][1]-my_matrix[1][2])/2;
+	result[1] = (my_matrix[0][2]-my_matrix[2][0])/2;
+	result[2] = (my_matrix[1][0]-my_matrix[0][1])/2;
+	
+	Precision sin_angle_abs = sqrt(result*result);
+	if (cos_angle > M_SQRT1_2) {            // [0 - Pi/4[ use asin
+		if(sin_angle_abs > 0){
+			result *= asin(sin_angle_abs) / sin_angle_abs;
+		}
+	} else if( cos_angle > -M_SQRT1_2) {    // [Pi/4 - 3Pi/4[ use acos, but antisymmetric part
+		double angle = acos(cos_angle);
+		result *= angle / sin_angle_abs;        
+	} else {  // rest use symmetric part
+		// antisymmetric part vanishes, but still large rotation, need information from symmetric part
+		const Precision angle = M_PI - asin(sin_angle_abs);
+		const Precision d0 = my_matrix[0][0] - cos_angle,
+					 d1 = my_matrix[1][1] - cos_angle,
+					 d2 = my_matrix[2][2] - cos_angle;
+		TooN::Vector<3> r2;
+		if(fabs(d0) > fabs(d1) && fabs(d0) > fabs(d2)){ // first is largest, fill with first column
+			r2[0] = d0;
+			r2[1] = (my_matrix[1][0]+my_matrix[0][1])/2;
+			r2[2] = (my_matrix[0][2]+my_matrix[2][0])/2;
+		} else if(fabs(d1) > fabs(d2)) { 			    // second is largest, fill with second column
+			r2[0] = (my_matrix[1][0]+my_matrix[0][1])/2;
+			r2[1] = d1;
+			r2[2] = (my_matrix[2][1]+my_matrix[1][2])/2;
+		} else {							    // third is largest, fill with third column
+			r2[0] = (my_matrix[0][2]+my_matrix[2][0])/2;
+			r2[1] = (my_matrix[2][1]+my_matrix[1][2])/2;
+			r2[2] = d2;
+		}
+		// flip, if we point in the wrong direction!
+		if(r2 * result < 0)
+			r2 *= -1;
+		r2 = unit(r2);
+		result = angle * r2;
+	} 
+	return result;
+}
+
+template<int S, typename P, typename PV, typename A> inline
+Vector<3, typename Internal::MultiplyType<P, PV>::type> operator*(const SO3<P>& lhs, const Vector<S, PV, A>& rhs){
+	return lhs.get_matrix() * rhs;
+}
+
+template<int S, typename P, typename PV, typename A> inline
+Vector<3, typename Internal::MultiplyType<PV, P>::type> operator*(const Vector<S, PV, A>& lhs, const SO3<P>& rhs){
+	return lhs * rhs.get_matrix();
+}
+
+template<int R, int C, typename P, typename PM, typename A> inline
+Matrix<3, C, typename Internal::MultiplyType<P, PM>::type> operator*(const SO3<P>& lhs, const Matrix<R, C, PM, A>& rhs){
+	return lhs.get_matrix() * rhs;
+}
+
+template<int R, int C, typename P, typename PM, typename A> inline
+Matrix<R, 3, typename Internal::MultiplyType<PM, P>::type> operator*(const Matrix<R, C, PM, A>& lhs, const SO3<P>& rhs){
+	return lhs * rhs.get_matrix();
 }
 
 
-// SO3& SO3::operator *=(const SO3& rhs){
-//   *this = *this * rhs;
-//   return *this;
-// }
-
-// SO3 SO3::operator *(const SO3& rhs)const{
-//   SO3 result;
-//   result.my_matrix = my_matrix * rhs.my_matrix;
-//   return result;
-// }
-
-inline Vector<3> SO3::generator_field(int i, Vector<3> pos){
-  Vector<3> result;
-  result[i]=0;
-  result[(i+1)%3] = - pos[(i+2)%3];
-  result[(i+2)%3] = pos[(i+1)%3];
-  return result;
-}
+#if 0	// will be moved to another header file ?
 
 inline Vector<3> SO3::adjoint(Vector<3> vect)const {
   return my_matrix * vect;
@@ -353,6 +302,7 @@ Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x, Fix
     return project_transformed_point(pose, transform(pose,x), J_x, J_pose);
 }
 
+#endif
 
 #ifndef TOON_NO_NAMESPACE
 }
