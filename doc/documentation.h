@@ -82,11 +82,12 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	To get the code, visit this URL:
 	http://mi.eng.cam.ac.uk/~er258/cvd/toon.html
 
-	The usual <code>./configure && make install </code> will  install TooN to
-	the correct place. Note there is no code to be compiled, but the configure
-	script performs some basic checks. If you don't want to use the configure
-	script, then create an empty file <code>internal/config.hh</code> in the
-	source directory to set up TooN to use the default configuration.
+	The code will work as-is, and comes with a default configuration, which
+	should work on any system.
+
+	On a unix system, <code>./configure && make install </code> will  install
+	TooN to the correct place.  Note there is no code to be compiled, but the
+	configure script performs some basic checks.
 
 	\subsection sStart Getting started
 
