@@ -1,16 +1,7 @@
 //-*- c++ -*-
-// Operations:
-//  vector+vector
-//  vector-vector
-//  vector dot evctor
-//  vector * constant
-//  vector / constant
-//  vector +
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-//               Type computation for scalar operations used in this file
+//             Type  and size computation for scalar operations used in this file
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace Internal {
@@ -72,50 +63,6 @@ namespace Internal {
 template<class Op> struct Operator{};
 
 
-namespace Internal{
-	
-	//Operator classes. These are evaluated in the constructor
-	//of Vector = Vector+Vector, so make use of return value optimization.
-
-	template<typename Precision, typename Op> struct Pairwise
-	{
-		template<int S, typename B, int S1, typename P1, typename B1, int S2, typename P2, typename B2> 
-		static void eval(Vector<S, Precision, B>& res, const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
-		{
-			for(int i=0; i < res.size(); ++i)
-				res[i] = Op::template op<Precision,P1, P2>(v1[i],v2[i]);
-		}
-
-		template<int R, int C, typename B, int R1, int C1, typename P1, typename B1, int R2, int C2, typename P2, typename B2> 
-		static void eval(Matrix<R, C, Precision, B>& res, const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
-		{
-			for(int i=0; i < res.num_rows(); ++i)
-				for(int j=0; j < res.num_cols(); ++j)
-				res[i][j] = Op::template op<Precision,P1, P2>(m1[i][j],m2[i][j]);
-		}
-	};
-
-
-	//FIXME what about BLAS?
-	struct MatrixMultiply
-	{
-		template<int R, int C, typename Precision, typename B, int R1, int C1, typename P1, typename B1, int R2, int C2, typename P2, typename B2> 
-		static void eval(Matrix<R, C, Precision, B>& res, const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
-		{
-			for(int i=0; i < res.num_rows(); ++i)
-				for(int j=0; j < res.num_cols(); ++j)
-					res[i][j] = m1[i] * (m2.T()[j]);
-		}
-	};
-
-
-
-
-
-
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////
 //                         Vector <op> Vector
 //////////////////////////////////////////////////////////////////////////////////
@@ -150,20 +97,16 @@ template<int S1, int S2, typename P1, typename P2, typename B1, typename B2>
 Vector<Internal::Sizer<S1,S2>::size, typename Internal::AddType<P1, P2>::type> 
 operator+(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
 {
-	typedef typename Internal::AddType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	const int S0=Internal::Sizer<S1,S2>::size;
-	return Vector<S0,P0>(Operator<Internal::VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2));
+	return Operator<Internal::VPairwise<Internal::Add,S1,P1,B1,S2,P2,B2> >(v1,v2);
 }
 
 // Subtraction Vector - Vector
 template<int S1, int S2, typename P1, typename P2, typename B1, typename B2> 
 Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::type> operator-(const Vector<S1, P1, B1>& v1, const Vector<S2, P2, B2>& v2)
 {
-	typedef typename Internal::SubtractType<P1, P2>::type P0;
 	SizeMismatch<S1, S2>:: test(v1.size(),v2.size());
-	const int S0=Internal::Sizer<S1,S2>::size;
-	return Vector<S0,P0>(Operator<Internal::VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2));
+	return Operator<Internal::VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2);
 }
 
 // Dot product Vector * Vector
@@ -204,6 +147,10 @@ namespace Internal {
 			 int R1, int C1, typename P1, typename B1,      // lhs matrix
 			 int R2, int C2, typename P2, typename B2>      // rhs matrix
 	struct MPairwise;
+
+	template<int R1, int C1, typename P1, typename B1,      // lhs matrix
+			 int R2, int C2, typename P2, typename B2>      // rhs matrix
+	struct MatrixMultiply;
 };
 
 template<typename Op,                           // the operation
@@ -249,13 +196,39 @@ operator-(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
 }
 
 
+
+template<int R1, int C1, typename P1, typename B1,      // lhs matrix
+		 int R2, int C2, typename P2, typename B2>      // rhs matrix
+struct Operator<Internal::MatrixMultiply<R1, C1, P1, B1, R2, C2, P2, B2> > {
+	const Matrix<R1, C1, P1, B1> & lhs;
+	const Matrix<R2, C2, P2, B2> & rhs;
+
+	Operator(const Matrix<R1, C1, P1, B1> & lhs_in, const Matrix<R2, C2, P2, B2> & rhs_in) : lhs(lhs_in), rhs(rhs_in) {}
+
+	template<int R0, int C0, typename P0, typename B0>
+	void eval(Matrix<R0, C0, P0, B0>& res) const
+	{
+
+		for(int r=0; r < res.num_rows(); ++r) {
+			for(int c=0; c < res.num_cols(); ++c) {
+				res(r,c) = lhs[r] * (rhs.T()[c]);
+			}
+		}
+	}
+	int num_rows() const {return lhs.num_rows();}
+	int num_cols() const {return rhs.num_cols();}
+};
+
+
+
+
 // Matrix multiplication Matrix * Matrix
 
 template<int R1, int C1, int R2, int C2, typename P1, typename P2, typename B1, typename B2> 
 Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type> operator*(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
 {
 	SizeMismatch<C1, R2>:: test(m1.num_cols(),m2.num_rows());
-	return Matrix<R1, C2, typename Internal::MultiplyType<P1, P2>::type>(m1, m2, m1.num_rows(), m2.num_cols(), Operator<Internal::MatrixMultiply>());
+	return Operator<Internal::MatrixMultiply<R1,C1,P1,B1,R2,C2,P2,B2> >(m1,m2);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -295,9 +268,7 @@ template<int R, int C, int Size, typename P1, typename P2, typename B1, typename
 Vector<R, typename Internal::MultiplyType<P1,P2>::type> operator*(const Matrix<R, C, P1, B1>& m, const Vector<Size, P2, B2>& v)
 {
 	SizeMismatch<C,Size>::test(m.num_cols(), v.size());
-	typedef typename Internal::MultiplyType<P1,P2>::type P0;
-
-	return Vector<R, P0> (Operator<Internal::MatrixVectorMultiply<R,C,P1,B1,Size,P2,B2> >(m,v) );
+	return Operator<Internal::MatrixVectorMultiply<R,C,P1,B1,Size,P2,B2> >(m,v);
 }
 																	
 // Vector Matrix multiplication Vector * Matrix
@@ -323,9 +294,7 @@ Vector<R, typename Internal::MultiplyType<P1,P2>::type> operator*(const Vector<S
 																  const Matrix<R,C,P2,B2>& m)
 {
 	SizeMismatch<C,Size>::test(m.num_rows(), v.size());
-	typedef typename Internal::MultiplyType<P1,P2>::type P0;
-
-	return Vector<C, P0> (Operator<Internal::VectorMatrixMultiply<Size,P1,B1,R,C,P2,B2> >(v,m) );
+	return Operator<Internal::VectorMatrixMultiply<Size,P1,B1,R,C,P2,B2> >(v,m);
 }
 
 
