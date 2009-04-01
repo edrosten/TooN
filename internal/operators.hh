@@ -72,6 +72,9 @@ namespace Internal {
 			 int S1, typename P1, typename B1,      // lhs vector
 			 int S2, typename P2, typename B2>      // rhs vector
 	struct VPairwise;
+
+	template <int S, typename P, typename A>        // input vector
+	struct VNegate;
 };
 
 template<typename Op,                           // the operation
@@ -109,6 +112,25 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::ty
 	return Operator<Internal::VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2);
 }
 
+template<int S, typename P, typename A>
+struct Operator<Internal::VNegate<S, P, A> > {
+	const Vector<S, P, A> & input;
+	Operator( const Vector<S, P, A> & in ) : input(in) {}
+	
+	template<int S0, typename P0, typename A0>
+	void eval(Vector<S0, P0, A0> & res) const
+	{
+		res = input * -1;
+	}
+	int size() const { return input.size(); }
+};
+
+// Negation -Vector
+template <int S, typename P, typename A>
+Vector<S, P> operator-(const Vector<S,P,A> & v){
+	return Operator<Internal::VNegate<S,P,A> >(v);
+}
+
 // Dot product Vector * Vector
 template<int Size1, typename Precision1, typename Base1, int Size2, typename Precision2, typename Base2>
 typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Vector<Size1, Precision1, Base1>& v1, const Vector<Size2, Precision2, Base2>& v2){
@@ -121,16 +143,16 @@ typename Internal::MultiplyType<Precision1, Precision2>::type operator*(const Ve
   return result;
 }
 
-template <typename P1, typename P2>
-Vector<3, typename Internal::MultiplyType<P1,P2>::type> operator^(const Vector<3,P1>& v1, const Vector<3,P2>& v2){
+template <typename P1, typename P2, typename B1, typename B2>
+Vector<3, typename Internal::MultiplyType<P1,P2>::type> operator^(const Vector<3,P1,B1>& v1, const Vector<3,P2,B2>& v2){
 	// assume the result of adding two restypes is also a restype
 	typedef typename Internal::MultiplyType<P1,P2>::type restype;
 
 	Vector<3, restype> result;
 
 	result[0] = v1[1]*v2[2] - v1[2]*v2[1];
-    result[1] = v1[2]*v2[0] - v1[0]*v2[2];
-    result[2] = v1[0]*v2[1] - v1[1]*v2[0];
+	result[1] = v1[2]*v2[0] - v1[0]*v2[2];
+	result[2] = v1[0]*v2[1] - v1[1]*v2[0];
 
 	return result;
 }
@@ -151,6 +173,9 @@ namespace Internal {
 	template<int R1, int C1, typename P1, typename B1,      // lhs matrix
 			 int R2, int C2, typename P2, typename B2>      // rhs matrix
 	struct MatrixMultiply;
+
+	template<int R, int C, typename P, typename A>         // input matrix
+	struct MNegate;
 };
 
 template<typename Op,                           // the operation
@@ -195,7 +220,25 @@ operator-(const Matrix<R1, C1, P1, B1>& m1, const Matrix<R2, C2, P2, B2>& m2)
 	return Operator<Internal::MPairwise<Internal::Subtract,R1,C1,P1,B1,R2,C2,P2,B2> >(m1,m2);
 }
 
+template<int R, int C, typename P, typename A>
+struct Operator<Internal::MNegate<R,C, P, A> > {
+	const Matrix<R,C,P,A> & input;
+	Operator( const Matrix<R,C,P,A> & in ) : input(in) {}
+	
+	template<int R0, int C0, typename P0, typename A0>
+	void eval(Matrix<R0,C0,P0,A0> & res) const
+	{
+		res = input * -1;
+	}
+	int num_rows() const { return input.num_rows(); }
+	int num_cols() const { return input.num_cols(); }
+};
 
+// Negation -Matrix
+template <int R, int C, typename P, typename A>
+Matrix<R, C, P> operator-(const Matrix<R,C,P,A> & v){
+	return Operator<Internal::MNegate<R,C,P,A> >(v);
+}
 
 template<int R1, int C1, typename P1, typename B1,      // lhs matrix
 		 int R2, int C2, typename P2, typename B2>      // rhs matrix
