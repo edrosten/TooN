@@ -404,7 +404,6 @@ Vector<Size, typename Internal::Divide::Return<P1,P2>::Type> operator/(const Vec
 	return Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Internal::Divide> > (v,s);
 }
 
-
 template<int Size, typename P1, typename B1, typename P2, typename Op>
 struct Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Op> > {
 	const P2& lhs;
@@ -415,7 +414,7 @@ struct Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Op> > {
 	template<int S0, typename P0, typename B0>
 	void eval(Vector<S0,P0,B0>& v) const {
 		for(int i=0; i<v.size(); i++){
-			v[i]= Op::template op<P0,P1,P2> (lhs,rhs[i]);
+			v[i]= Op::template op<P0,P2,P1> (lhs,rhs[i]);
 		}
 	}
 
@@ -545,6 +544,14 @@ inline std::ostream& operator<< (std::ostream& os, const Vector<Size,Precision,B
   return os;
 }
 
+// operator istream& >>
+template <int Size, typename Precision, typename Base>
+std::istream& operator >> (std::istream& is, Vector<Size, Precision, Base>& v){
+	for (int i=0; i<v.size(); i++){
+		is >>  v[i];
+	}
+	return is;
+}
 
 template<int Rows, int Cols, typename Precision, class Base>
 inline std::ostream& operator<< (std::ostream& os, const Matrix<Rows, Cols, Precision, Base>& m){
@@ -561,5 +568,13 @@ inline std::ostream& operator<< (std::ostream& os, const Matrix<Rows, Cols, Prec
 	return os;
 }
 
-
-
+// operator istream& >>
+template <int Rows, int Cols, typename Precision, typename Base>
+std::istream& operator >> (std::istream& is, Matrix<Rows, Cols, Precision, Base>& m){
+	for(int r=0; r<m.num_rows(); r++){
+		for(int c=0; c < m.num_cols(); c++){
+			is >> m(r,c);
+		}
+	}
+	return is;
+}
