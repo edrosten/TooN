@@ -1,10 +1,12 @@
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
 #include <TooN/so2.h>
 #include <TooN/se2.h>
 #include <TooN/so3.h>
+#include <TooN/se3.h>
 
 void test_so2(){
     cout << "---------------SO2 Tests---------------\n";
@@ -49,6 +51,11 @@ void test_so2(){
     cout << "set from matrix (uses coerce) " << m << "\n";
     r = m;
     cout << r << endl;
+
+    cout << "read from istream\n";
+    istringstream is("0 -1 1 0");
+    is >> r;
+    cout << r << endl;
 }
 
 void test_se2(){
@@ -60,6 +67,9 @@ void test_se2(){
     cout << "default constructor <int>\n";
     TooN::SE2<int> r2;
     cout << r2 << endl;
+    
+    cout << "from vector 1 1 0\n";
+    cout << TooN::SE2<>::exp(TooN::makeVector(1,1,0)) << endl;
     
     TooN::SE2<> r3(TooN::makeVector(1,1,1));
     cout << "from vector 1 1 1\n";
@@ -80,7 +90,6 @@ void test_se2(){
     // cout << t1 * r3 << endl; // this is not well defined, should the output be a 3 vector ?
     cout << t2 * r3 << endl;    
 
-#if 0    
     TooN::Matrix<3> m1;
     TooN::Matrix<> m2(3,3);
     TooN::Matrix<3,10> m3;
@@ -92,7 +101,15 @@ void test_se2(){
     cout << m1 * r3 << endl;
     cout << m2 * r3 << endl;
     cout << m3.T() * r3 << endl;
-#endif
+
+    TooN::SO2<> r(-1);
+    cout << "so2 * se2\n";
+    cout << r * r3 << endl;
+    
+    cout << "read from istream\n";
+    istringstream is("0 -1 2 1 0 3");
+    is >> r3;
+    cout << r3 << endl;
 }
 
 void test_so3(){
@@ -141,12 +158,106 @@ void test_so3(){
     cout << "set from matrix (uses coerce)\n" << m << "\n";
     r = m;
     cout << r << endl;
+
+    cout << "read from istream\n";
+    istringstream is("0 -1 0 1 0 0 0 0 1");
+    is >> r;
+    cout << r << endl;
+}
+
+void test_se3(){
+    cout << "---------------SE3 Tests---------------\n";
+    
+    TooN::SE3<> r1;
+    cout << "default constructor\n";
+    cout << r1 << endl;
+    cout << "default constructor <int>\n";
+    TooN::SE3<int> r2;
+    cout << r2 << endl;
+    TooN::SE3<> r(TooN::makeVector(0.1, 0.1, 0.1, 0.2, -0.2, 0.2));
+    cout << "constructor\n";
+    cout << r << endl;
+    cout << "generator 0,1,2,3,4,5\n";
+    cout << TooN::SE3<>::generator(0) ;
+    cout << TooN::SE3<>::generator(1) ;
+    cout << TooN::SE3<>::generator(2) << endl;
+    cout << TooN::SE3<>::generator(3) ;
+    cout << TooN::SE3<>::generator(4) ;
+    cout << TooN::SE3<>::generator(5) << endl;
+    cout << "ln()\n";
+    cout << r.ln() << endl;
+    cout << "inverse\n";
+    cout << r.inverse() << endl;
+    cout << "times\n";
+    cout << r * r.inverse() << endl;
+    cout << (r *= r.inverse()) << endl;
+    r = TooN::SE3<>::exp(TooN::makeVector(0.1, 0.1, 0.1, 0.2, -0.2, 0.2));
+
+    TooN::Vector<4> t = TooN::makeVector(0,1,2,3);
+    cout << "right and left multiply with vector " << t << "\n";
+    cout << r * t << endl;
+    cout << t * r << endl;
+    TooN::Vector<3> t3 = TooN::makeVector(0,1,2);
+    cout << "right with a 3 vector " << t3 << "\n";
+    cout << r * t3 << endl;
+
+    TooN::Matrix<4> l = TooN::Identity;
+    cout << "right and left multiply with matrix\n" << l << "\n";
+    cout << r * l << endl;
+    cout << l * r << endl;
+    TooN::Matrix<4,6> l2(TooN::Zero);
+    l2[0] = TooN::makeVector(0,1,2,3,4,5);
+    cout << "right with rectangular matrix\n";
+    cout << r * l2 << endl;
+    cout << l2.T() * r << endl;
+    
+    TooN::SO3<> rot(TooN::makeVector(-0.2, 0.2, -0.2));
+    cout << "mult with SO3\n";
+    cout << rot * r << endl;
+    
+    TooN::Vector<6> a = TooN::makeVector(0,1,2,0.1, 0.2, 0.3);
+    cout << "adjoint with a " << a << "\n";
+    cout << r.adjoint(a) << endl;
+    cout << "0 0 0 0 0 0 = " << r.adjoint(a) - (r * TooN::SE3<>(a) * r.inverse()).ln() << endl;
+    cout << "trinvadjoint with a " << a << "\n";
+    cout << r.trinvadjoint(a) << endl;
+    cout << "0 = " << r.trinvadjoint(a) * r.adjoint(a) - a * a << endl; 
+
+    TooN::Matrix<6> ma(TooN::Identity);
+    ma[0] = TooN::makeVector(0.1, 0.2, 0.1, 0.2, 0.1, 0.3);
+    ma = ma.T() * ma;
+    cout << "adjoint with ma\n" << ma << "\n";
+    cout << r.adjoint(ma) << endl;
+    cout << "trinvadjoint with ma\n";
+    cout << r.trinvadjoint(ma) << endl;
+
+    cout << "read from istream\n";
+    istringstream is("0 -1 0 1 1 0 0 2 0 0 1 3");
+    is >> r;
+    cout << r << endl;
+}
+
+
+void test_se2_exp(){
+    cout << "------------------SE2 check------------------\n";
+
+    TooN::SE2<> s2(TooN::makeVector(1,0,1));
+    TooN::SE3<> s3(TooN::makeVector(0,1,0,1,0,0));
+    cout << s2 << endl;
+    cout << s3 << endl;
+    
+    cout << s2.ln() << "\tvs\t" << s3.ln() << endl;
+    
 }
 
 int main(int, char* *){
  
     test_so2();
     test_so3();
+    test_se2();
+    test_se3();
+ 
+    test_se2_exp();
  
     return 0;
 }

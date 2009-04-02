@@ -28,13 +28,17 @@ namespace TooN {
 #endif
 
 template <typename Precision> class SO3;
+template <typename Precision> class SE3;
 
 template<class Precision> inline std::istream & operator>>(std::istream &, SO3<Precision> & );
+template<class Precision> inline std::istream & operator>>(std::istream &, SE3<Precision> & );
 
 template <typename Precision = double>
 class SO3 {
 public:
 	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
+	friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
+	friend class SE3<Precision>;
 	
 	SO3() : my_matrix(Identity) {}
 	
@@ -235,12 +239,7 @@ Matrix<R, 3, typename Internal::MultiplyType<PM, P>::type> operator*(const Matri
 	return lhs * rhs.get_matrix();
 }
 
-
 #if 0	// will be moved to another header file ?
-
-inline Vector<3> SO3::adjoint(Vector<3> vect)const {
-  return my_matrix * vect;
-}
 
 template <class A> inline
 Vector<3> transform(const SO3& pose, const FixedVector<3,A>& x) { return pose*x; }

@@ -26,49 +26,354 @@
 namespace TooN {
 #endif
 
+template <typename Precision = double>
 class SE3 {
-    friend SE3 operator*(const SO3& lhs, const SE3& rhs);
-    friend std::istream& operator>> (std::istream& is, SE3& rhs);
-  
 public:
-    inline SE3();
-    template <class A> inline SE3(const SO3& R, const FixedVector<3,A>& T) : my_rotation(R), my_translation(T) {}
-      
+	inline SE3() : my_translation(Zero) {}
 
-    inline SO3& get_rotation(){return my_rotation;}
-    inline const SO3& get_rotation() const {return my_rotation;}
-    inline Vector<3>& get_translation() {return my_translation;}
-    inline const Vector<3>& get_translation() const {return my_translation;}
+	template <int S, typename P, typename A> 
+	SE3(const SO3<Precision> & R, const Vector<S, P, A>& T) : my_rotation(R), my_translation(T) {}
+	template <int S, typename P, typename A>
+	SE3(const Vector<S, P, A> & v) { *this = exp(v); }
 
-    static inline SE3 exp(const Vector<6>& vect);
-    static inline Vector<6> ln(const SE3& se3);
-    inline Vector<6> ln() const { return SE3::ln(*this); }
+	inline SO3<Precision>& get_rotation(){return my_rotation;}
+	inline const SO3<Precision>& get_rotation() const {return my_rotation;}
+	inline Vector<3, Precision>& get_translation() {return my_translation;}
+	inline const Vector<3, Precision>& get_translation() const {return my_translation;}
 
-    inline SE3 inverse() const;
+	template <int S, typename P, typename A>
+	static inline SE3 exp(const Vector<S, P, A>& vect);
+	static inline Vector<6, Precision> ln(const SE3& se3);
+	inline Vector<6, Precision> ln() const { return SE3::ln(*this); }
 
-    inline SE3& operator *=(const SE3& rhs);
-    inline SE3 operator *(const SE3& rhs) const { return SE3(my_rotation*rhs.my_rotation, my_translation + my_rotation*rhs.my_translation); }
-    inline SE3& left_multiply_by(const SE3& left);
+	inline SE3 inverse() const {
+		const SO3<Precision> rinv = get_rotation().inverse();
+		return SE3(rinv, -(rinv*my_translation));
+	}
 
-    static inline Vector<4> generator_field(int i, Vector<4> pos);
+	inline SE3& operator *=(const SE3& rhs) {
+		get_translation() += get_rotation() * rhs.get_translation();
+		get_rotation() *= rhs.get_rotation();
+		return *this;
+	}
+	inline SE3 operator *(const SE3& rhs) const { return SE3(get_rotation()*rhs.get_rotation(), get_translation() + get_rotation()*rhs.get_translation()); }
 
+	inline SE3& left_multiply_by(const SE3& left) {
+		get_translation() = left.get_translation() + left.get_rotation() * get_translation();
+		get_rotation() = left.get_rotation() * get_rotation();
+		return *this;
+	}
 
-    template<class Accessor>
-    inline void adjoint(FixedVector<6,Accessor>& vect)const;
+	static inline Matrix<4,4,Precision> generator(int i){
+		Matrix<4,4,Precision> result(Zero);
+		if(i < 3){
+			result[i][3]=1;
+			return result;
+		}
+		result[(i+1)%3][(i+2)%3] = -1;
+		result[(i+2)%3][(i+1)%3] = 1;
+		return result;
+	}
 
-    template<class Accessor>
-    inline void trinvadjoint(FixedVector<6,Accessor>& vect)const;
+	template<int S, typename Accessor>
+	inline Vector<6, Precision> adjoint(const Vector<S,Precision, Accessor>& vect)const;
 
-    template <class Accessor>
-    inline void adjoint(FixedMatrix<6,6,Accessor>& M)const;
+	template<int S, typename Accessor>
+	inline Vector<6, Precision> trinvadjoint(const Vector<S,Precision,Accessor>& vect)const;
 
-    template <class Accessor>
-    inline void trinvadjoint(FixedMatrix<6,6,Accessor>& M)const;
+	template <int R, int C, typename Accessor>
+	inline Matrix<6,6,Precision> adjoint(const Matrix<R,C,Precision,Accessor>& M)const;
+
+	template <int R, int C, typename Accessor>
+	inline Matrix<6,6,Precision> trinvadjoint(const Matrix<R,C,Precision,Accessor>& M)const;
 
 private:
-    SO3 my_rotation;
-    Vector<3> my_translation;
+	SO3<Precision> my_rotation;
+	Vector<3, Precision> my_translation;
 };
+
+// transfers a vector in the Lie algebra
+// from one coord frame to another
+// so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
+template<typename Precision>
+template<int S, typename Accessor>
+inline Vector<6, Precision> SE3<Precision>::adjoint(const Vector<S,Precision, Accessor>& vect) const{
+	SizeMismatch<6,S>::test(6, vect.size());
+	Vector<6, Precision> result;
+	result.template slice<3,3>() = get_rotation() * vect.template slice<3,3>();
+	result.template slice<0,3>() = get_rotation() * vect.template slice<0,3>();
+	result.template slice<0,3>() += get_translation() ^ result.template slice<3,3>();
+	return result;
+}
+
+// tansfers covectors between frames
+// (using the transpose of the inverse of the adjoint)
+// so that trinvadjoint(vect1) * adjoint(vect2) = vect1 * vect2
+template<typename Precision>
+template<int S, typename Accessor>
+inline Vector<6, Precision> SE3<Precision>::trinvadjoint(const Vector<S,Precision, Accessor>& vect) const{
+	SizeMismatch<6,S>::test(6, vect.size());
+	Vector<6, Precision> result;
+	result.template slice<3,3>() = get_rotation() * vect.template slice<3,3>();
+	result.template slice<0,3>() = get_rotation() * vect.template slice<0,3>();
+	result.template slice<3,3>() += get_translation() ^ result.template slice<0,3>();
+	return result;
+}
+
+template<typename Precision>
+template<int R, int C, typename Accessor>
+inline Matrix<6,6,Precision> SE3<Precision>::adjoint(const Matrix<R,C,Precision,Accessor>& M)const{
+	SizeMismatch<6,R>::test(6, M.num_cols());
+	SizeMismatch<6,C>::test(6, M.num_rows());
+
+	Matrix<6,6,Precision> result;
+	for(int i=0; i<6; i++){
+		result.T()[i] = adjoint(M.T()[i]);
+	}
+	for(int i=0; i<6; i++){
+		result[i] = adjoint(result[i]);
+	}
+	return result;
+}
+
+template<typename Precision>
+template<int R, int C, typename Accessor>
+inline Matrix<6,6,Precision> SE3<Precision>::trinvadjoint(const Matrix<R,C,Precision,Accessor>& M)const{
+	SizeMismatch<6,R>::test(6, M.num_cols());
+	SizeMismatch<6,C>::test(6, M.num_rows());
+
+	Matrix<6,6,Precision> result;
+	for(int i=0; i<6; i++){
+		result.T()[i] = trinvadjoint(M.T()[i]);
+	}
+	for(int i=0; i<6; i++){
+		result[i] = trinvadjoint(result[i]);
+	}
+	return result;
+}
+
+// operator ostream& <<
+template <typename Precision>
+inline std::ostream& operator <<(std::ostream& os, const SE3<Precision>& rhs){
+	for(int i=0; i<3; i++){
+		os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
+	}
+	return os;
+}
+
+// operator istream& >>
+template <typename Precision>
+inline std::istream& operator>>(std::istream& is, SE3<Precision>& rhs){
+	for(int i=0; i<3; i++){
+		is >> rhs.get_rotation().my_matrix[i].ref() >> rhs.get_translation()[i];
+	}
+	return is;
+}
+
+//////////////////
+// operator *   //
+// SE3 * Vector //
+//////////////////
+
+namespace Internal {
+template<int S, typename PV, typename A, typename P>
+struct SE3VMult;
+}
+
+template<int S, typename PV, typename A, typename P>
+struct Operator<Internal::SE3VMult<S,PV,A,P> > {
+	const SE3<P> & lhs;
+	const Vector<S,PV,A> & rhs;
+	
+	Operator(const SE3<P> & l, const Vector<S,PV,A> & r ) : lhs(l), rhs(r) {}
+	
+	template <int S0, typename P0, typename A0>
+	void eval(Vector<S0, P0, A0> & res ) const {
+		SizeMismatch<4,S>::test(4, rhs.size());
+		res.template slice<0,3>()=lhs.get_rotation() * rhs.template slice<0,3>();
+		res.template slice<0,3>()+=lhs.get_translation() * rhs[3];
+		res[3] = rhs[3];
+	}
+	int size() const { return 4; }
+};
+
+template<int S, typename PV, typename A, typename P> inline
+Vector<4, typename Internal::MultiplyType<P,PV>::type> operator*(const SE3<P> & lhs, const Vector<S,PV,A>& rhs){
+	return Vector<4, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::SE3VMult<S,PV,A,P> >(lhs,rhs));
+}
+
+template <typename PV, typename A, typename P> inline
+Vector<3, typename Internal::MultiplyType<P,PV>::type> operator*(const SE3<P>& lhs, const Vector<3,PV,A>& rhs){
+	return lhs.get_translation() + lhs.get_rotation() * rhs;
+}
+
+//////////////////
+// operator *   //
+// Vector * SE3 //
+//////////////////
+
+namespace Internal {
+template<int S, typename PV, typename A, typename P>
+struct VSE3Mult;
+}
+
+template<int S, typename PV, typename A, typename P>
+struct Operator<Internal::VSE3Mult<S,PV,A,P> > {
+	const Vector<S,PV,A> & lhs;
+	const SE3<P> & rhs;
+	
+	Operator( const Vector<S,PV,A> & l, const SE3<P> & r ) : lhs(l), rhs(r) {}
+	
+	template <int S0, typename P0, typename A0>
+	void eval(Vector<S0, P0, A0> & res ) const {
+		SizeMismatch<4,S>::test(4, lhs.size());
+		res.template slice<0,3>()=lhs.template slice<0,3>() * rhs.get_rotation();
+		res[3] = lhs[3];
+		res[3] += lhs.template slice<0,3>() * rhs.get_translation();
+	}
+	int size() const { return 4; }
+};
+
+template<int S, typename PV, typename A, typename P> inline
+Vector<4, typename Internal::MultiplyType<P,PV>::type> operator*( const Vector<S,PV,A>& lhs, const SE3<P> & rhs){
+	return Vector<4, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::VSE3Mult<S,PV,A,P> >(lhs,rhs));
+}
+
+//////////////////
+// operator *   //
+// SE3 * Matrix //
+//////////////////
+
+namespace Internal {
+template <int R, int C, typename PM, typename A, typename P>
+struct SE3MMult;
+}
+
+template<int R, int Cols, typename PM, typename A, typename P>
+struct Operator<Internal::SE3MMult<R, Cols, PM, A, P> > {
+	const SE3<P> & lhs;
+	const Matrix<R,Cols,PM,A> & rhs;
+	
+	Operator(const SE3<P> & l, const Matrix<R,Cols,PM,A> & r ) : lhs(l), rhs(r) {}
+	
+	template <int R0, int C0, typename P0, typename A0>
+	void eval(Matrix<R0, C0, P0, A0> & res ) const {
+		SizeMismatch<4,R>::test(4, rhs.num_rows());
+		for(int i=0; i<rhs.num_cols(); ++i)
+			res.T()[i] = lhs * rhs.T()[i];
+	}
+	int num_cols() const { return rhs.num_cols(); }
+	int num_rows() const { return 4; }
+};
+
+template <int R, int Cols, typename PM, typename A, typename P> inline 
+Matrix<4,Cols, typename Internal::MultiplyType<P,PM>::type> operator*(const SE3<P> & lhs, const Matrix<R,Cols,PM, A>& rhs){
+	return Matrix<4,Cols,typename Internal::MultiplyType<P,PM>::type>(Operator<Internal::SE3MMult<R, Cols, PM, A, P> >(lhs,rhs));
+}
+
+//////////////////
+// operator *   //
+// Matrix * SE3 //
+//////////////////
+
+namespace Internal {
+template <int Rows, int C, typename PM, typename A, typename P>
+struct MSE3Mult;
+}
+
+template<int Rows, int C, typename PM, typename A, typename P>
+struct Operator<Internal::MSE3Mult<Rows, C, PM, A, P> > {
+	const Matrix<Rows,C,PM,A> & lhs;
+	const SE3<P> & rhs;
+	
+	Operator( const Matrix<Rows,C,PM,A> & l, const SE3<P> & r ) : lhs(l), rhs(r) {}
+	
+	template <int R0, int C0, typename P0, typename A0>
+	void eval(Matrix<R0, C0, P0, A0> & res ) const {
+		SizeMismatch<4, C>::test(4, lhs.num_cols());
+		for(int i=0; i<lhs.num_rows(); ++i)
+			res[i] = lhs[i] * rhs;
+	}
+	int num_cols() const { return 4; }
+	int num_rows() const { return lhs.num_rows(); }
+};
+
+template <int Rows, int C, typename PM, typename A, typename P> inline 
+Matrix<Rows,4, typename Internal::MultiplyType<PM,P>::type> operator*(const Matrix<Rows,C,PM, A>& lhs, const SE3<P> & rhs ){
+	return Matrix<Rows,4,typename Internal::MultiplyType<PM,P>::type>(Operator<Internal::MSE3Mult<Rows, C, PM, A, P> >(lhs,rhs));
+}
+
+template <typename Precision>
+template <int S, typename P, typename VA>
+inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
+	SizeMismatch<6,S>::test(6, mu.size());
+	static const Precision one_6th = 1.0/6.0;
+	static const Precision one_20th = 1.0/20.0;
+	
+	SE3<Precision> result;
+	
+	const Vector<3,Precision> w = mu.template slice<3,3>();
+	const Precision theta_sq = w*w;
+	const Precision theta = sqrt(theta_sq);
+	double A, B;
+	
+	const Vector<3,Precision> cross = w ^ mu.template slice<0,3>();
+	if (theta_sq < 1e-8) {
+		A = 1.0 - one_6th * theta_sq;
+		B = 0.5;
+		result.get_translation() = mu.template slice<0,3>() + 0.5 * cross;
+	} else {
+		double C;
+		if (theta_sq < 1e-6) {
+			C = one_6th*(1.0 - one_20th * theta_sq);
+			A = 1.0 - theta_sq * C;
+			B = 0.5 - 0.25 * one_6th * theta_sq;
+		} else {
+			const double inv_theta = 1.0/theta;
+			A = sin(theta) * inv_theta;
+			B = (1 - cos(theta)) * (inv_theta * inv_theta);
+			C = (1 - A) * (inv_theta * inv_theta);
+		}
+		result.get_translation() = mu.template slice<0,3>() + B * cross + C * (w ^ cross);
+	}
+	rodrigues_so3_exp(w, A, B, result.get_rotation().my_matrix);
+	return result;
+}
+
+template <typename Precision>
+inline Vector<6, Precision> SE3<Precision>::ln(const SE3<Precision>& se3) {
+	Vector<3,Precision> rot = se3.get_rotation().ln();
+	const Precision theta = sqrt(rot*rot);
+
+	Precision shtot = 0.5;	
+	if(theta > 0.00001) {
+		shtot = sin(theta/2)/theta;
+	}
+	
+	// now do the rotation
+	const SO3<Precision> halfrotator = SO3<Precision>::exp(rot * -0.5);
+	Vector<3, Precision> rottrans = halfrotator * se3.get_translation();
+	
+	if(theta > 0.001){
+		rottrans -= rot * ((se3.get_translation() * rot) * (1-2*shtot) / (rot*rot));
+	} else {
+		rottrans -= rot * ((se3.get_translation() * rot)/24);
+	}
+	
+	rottrans /= (2 * shtot);
+	
+	Vector<6, Precision> result;
+	result.template slice<0,3>()=rottrans;
+	result.template slice<3,3>()=rot;
+	return result;
+}
+
+template <typename Precision>
+inline SE3<Precision> operator*(const SO3<Precision>& lhs, const SE3<Precision>& rhs){
+	return SE3<Precision>(lhs*rhs.get_rotation(),lhs*rhs.get_translation());
+}
+
+#if 0 // should be moved to another header file
 
     template <class A> inline
     Vector<3> transform(const SE3& pose, const FixedVector<3,A>& x) { return pose.get_rotation()*x + pose.get_translation(); }
@@ -236,272 +541,7 @@ private:
 	return uv;
     }
 
-
-
-
-// left multiply an SE3 by an SO3 
-inline SE3 operator*(const SO3& lhs, const SE3& rhs);
-
-
-// transfers a vector in the Lie algebra
-// from one coord frame to another
-// so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
-template<class Accessor>
-inline void SE3::adjoint(FixedVector<6,Accessor>& vect)const{
-    vect.template slice<3,3>() = my_rotation * vect.template slice<3,3>();
-    vect.template slice<0,3>() = my_rotation * vect.template slice<0,3>();
-    vect.template slice<0,3>() += my_translation ^ vect.template slice<3,3>();
-}
-
-// tansfers covectors between frames
-// (using the transpose of the inverse of the adjoint)
-// so that trinvadjoint(vect1) * adjoint(vect2) = vect1 * vect2
-template<class Accessor>
-inline void SE3::trinvadjoint(FixedVector<6,Accessor>& vect)const{
-    vect.template slice<3,3>() = my_rotation * vect.template slice<3,3>();
-    vect.template slice<0,3>() = my_rotation * vect.template slice<0,3>();
-    vect.template slice<3,3>() += my_translation ^ vect.template slice<0,3>();
-}
-
-template <class Accessor>
-inline void SE3::adjoint(FixedMatrix<6,6,Accessor>& M)const{
-    for(int i=0; i<6; i++){
-	adjoint(M.T()[i]);
-    }
-    for(int i=0; i<6; i++){
-	adjoint(M[i]);
-    }
-}
-  
-template <class Accessor>
-inline void SE3::trinvadjoint(FixedMatrix<6,6,Accessor>& M)const{
-    for(int i=0; i<6; i++){
-	trinvadjoint(M.T()[i]);
-    }
-    for(int i=0; i<6; i++){
-	trinvadjoint(M[i]);
-    }
-}
-
-
-// operator ostream& <<
-inline std::ostream& operator <<(std::ostream& os, const SE3& rhs){
-    for(int i=0; i<3; i++){
-	os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
-    }
-    return os;
-}
-
-// operator istream& >>
-inline std::istream& operator>>(std::istream& is, SE3& rhs){
-    for(int i=0; i<3; i++){
-	is >> rhs.get_rotation().my_matrix[i] >> rhs.get_translation()[i];
-    }
-    return is;
-}
-
-
-//////////////////
-// operator *   //
-// SE3 * Vector //
-//////////////////
-
-template<class VectorType>
-struct SE3VMult {
-    inline static void eval(Vector<4>& ret, const SE3& lhs, const VectorType& rhs){
-	ret.template slice<0,3>()=lhs.get_rotation()*rhs.template slice<0,3>();
-	ret.template slice<0,3>()+=lhs.get_translation() * rhs[3];
-	ret[3] = rhs[3];
-    }
-};
-
-template<class Accessor> inline
-Vector<4> operator*(const SE3& lhs, const FixedVector<4,Accessor>& rhs){
-    return Vector<4>(lhs,rhs,Operator<SE3VMult<FixedVector<4, Accessor> > >());
-}
-
-template<class Accessor> inline
-Vector<4> operator*(const SE3& lhs, const DynamicVector<Accessor>& rhs){
-    //FIXME: size checking
-    return Vector<4>(lhs,rhs,Operator<SE3VMult<DynamicVector<Accessor> > >());
-}
-
-template <class Accessor> inline
-Vector<3> operator*(const SE3& lhs, const FixedVector<3,Accessor>& rhs){
-    return lhs.get_rotation()*rhs + lhs.get_translation();
-}
-
-
-//////////////////
-// operator *   //
-// Vector * SE3 //
-//////////////////
-
-template<class Accessor>
-struct VSE3Mult {
-    inline static void eval(Vector<4>& ret, const FixedVector<4,Accessor>& lhs, const SE3& rhs){
-	ret.template slice<0,3>() = lhs.template slice<0,3>() * rhs.get_rotation();
-	ret[3] = lhs[3];
-	ret[3] += lhs.template slice<0,3>() * rhs.get_translation();
-    }
-};
-
-template<class Accessor> inline
-Vector<4> operator*(const FixedVector<4,Accessor>& lhs, const SE3& rhs){
-    return Vector<4>(lhs,rhs,Operator<VSE3Mult<Accessor> >());
-}
-
-
-
-//////////////////
-// operator *   //
-// SE3 * Matrix //
-//////////////////
-
-template <int RHS, class Accessor>
-struct SE3MMult {
-    inline static void eval(Matrix<4,RHS>& ret, const SE3& lhs, const FixedMatrix<4,RHS,Accessor>& rhs){
-	for(int i=0; i<RHS; i++){
-	    ret.T()[i].template slice<0,3>() = lhs.get_rotation() * rhs.T()[i].template slice<0,3>();
-	    ret.T()[i].template slice<0,3>() += lhs.get_translation() * rhs(3,i);
-	    ret(3,i) = rhs(3,i);
-	}
-    }
-};
-
-
-template <int RHS, class Accessor> inline 
-Matrix<4,RHS> operator*(const SE3& lhs, const FixedMatrix<4,RHS,Accessor>& rhs){
-    return Matrix<4,RHS>(lhs,rhs,Operator<SE3MMult<RHS,Accessor> >());
-}
-
-
-//////////////////
-// operator *   //
-// Matrix * SE3 //
-//////////////////
-
-template <int LHS, class Accessor> 
-struct MSE3Mult {
-    inline static void eval(Matrix<LHS,4>& ret, const FixedMatrix<LHS,4,Accessor>& lhs, const SE3& rhs){
-	for(int i=0; i<LHS; i++){
-	    ret[i].template slice<0,3>() = lhs[i].template slice<0,3>() * rhs.get_rotation();
-	    ret(i,3) = rhs.get_translation() * lhs[i].template slice<0,3>();
-	    ret(i,3) += lhs(i,3);
-	}
-    }
-};
-
-
-template <int LHS, class Accessor> inline 
-Matrix<LHS,4> operator*(const FixedMatrix<LHS,4,Accessor>& lhs, const SE3& rhs){
-    return Matrix<LHS,4>(lhs,rhs,Operator<MSE3Mult<LHS,Accessor> >());
-}
-
-
-namespace SE3static 
-{
-    static double zero[3]={0,0,0};
-}
-
-inline SE3::SE3() :
-    my_translation(SE3static::zero)
-{}
-
-
-inline SE3 SE3::exp(const Vector<6>& mu){
-    static const double one_6th = 1.0/6.0;
-    static const double one_20th = 1.0/20.0;
-
-    SE3 result;
-
-    const Vector<3> w = mu.slice<3,3>();
-    const double theta_sq = w*w;
-    const double theta = sqrt(theta_sq);
-    double A, B;
-    
-    const Vector<3> cross = w ^ mu.slice<0,3>();
-    if (theta_sq < 1e-8) {
-	A = 1.0 - one_6th * theta_sq;
-	B = 0.5;
-	result.get_translation() = mu.slice<0,3>() + 0.5 * cross;
-    } else {
-	double C;
-	if (theta_sq < 1e-6) {
-	    C = one_6th*(1.0 - one_20th * theta_sq);
-	    A = 1.0 - theta_sq * C;
-	    B = 0.5 - 0.25 * one_6th * theta_sq;
-	} else {
-	    const double inv_theta = 1.0/theta;
-	    A = sin(theta) * inv_theta;
-	    B = (1 - cos(theta)) * (inv_theta * inv_theta);
-	    C = (1 - A) * (inv_theta * inv_theta);
-	}
-	result.get_translation() = mu.slice<0,3>() + B * cross + C * (w ^ cross);
-    }
-    rodrigues_so3_exp(w, A, B, result.my_rotation.my_matrix);
-    return result;
-}
-
-inline Vector<6> SE3::ln(const SE3& se3) {
-    Vector<3> rot = se3.my_rotation.ln();
-    double theta = sqrt(rot*rot);
-    double shtot = 0.5;
-    
-    if(theta > 0.00001) {
-	shtot = sin(theta/2)/theta;
-    }
-    
-    // now do the rotation
-    Vector<3> halfrot = rot * -0.5;
-    SO3 halfrotator = SO3::exp(halfrot);
-    
-    Vector<3> rottrans = halfrotator * se3.my_translation;
-    
-    if(theta > 0.001){
-	rottrans -= rot * ((se3.my_translation * rot) * (1-2*shtot) / (rot*rot));
-    } else {
-	rottrans -= rot * ((se3.my_translation * rot)/24);
-    }
-    
-    rottrans /= (2 * shtot);
-    
-    Vector<6> result;
-    result.slice<0,3>()=rottrans;
-    result.slice<3,3>()=rot;
-    return result;
-}
-
-inline SE3 SE3::inverse() const {
-    const SO3& rinv = my_rotation.inverse();
-    return SE3(rinv, -(rinv*my_translation));
-}
-
-inline SE3& SE3::left_multiply_by(const SE3& left) {
-    my_translation = left.my_translation + left.get_rotation() * my_translation;
-    my_rotation = left.my_rotation * my_rotation;
-    return *this;
-}
-
-inline Vector<4> SE3::generator_field(int i, Vector<4> pos){
-    double result_d[]={0,0,0,0};
-    Vector<4> result(result_d);
-    if(i < 3){
-	result[i]=pos[3];
-	return result;
-    }
-    result[(i+1)%3] = - pos[(i+2)%3];
-    result[(i+2)%3] = pos[(i+1)%3];
-    return result;
-}
-
-
-inline SE3 operator*(const SO3& lhs, const SE3& rhs){
-    SE3 result;
-    result.my_rotation = lhs*rhs.my_rotation;
-    result.my_translation = lhs*rhs.my_translation;
-    return result;
-}
+#endif
 
 #ifndef TOON_NO_NAMESPACE
 }

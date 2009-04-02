@@ -27,28 +27,32 @@
 namespace TooN {
 #endif
 
-template<class Precision> class SO2;
+template<typename Precision> class SO2;
+template <typename Precision> class SE2;
 
-template<class Precision> inline std::istream & operator>>(std::istream &, SO2<Precision> & );
+template<typename Precision> inline std::istream & operator>>(std::istream &, SO2<Precision> & );
+template<typename Precision> inline std::istream & operator>>(std::istream &, SE2<Precision> & );
 
-template<class Precision = double>
+template<typename Precision = double>
 class SO2 {
-public:
 	friend std::istream& operator>> <Precision>(std::istream&, SO2& );
+	friend std::istream& operator>> <Precision>(std::istream&, SE2<Precision>& );
+
+public:
 	SO2() : my_matrix(Identity) {} 
   
 	SO2(const Matrix<2,2,Precision>& rhs) {  *this = rhs; }
 
 	SO2(const Precision l) { *this = exp(l); }
   
-	template <int R, int C, class P, class A> 
+	template <int R, int C, typename P, typename A> 
 	inline SO2& operator=(const Matrix<R,C,P,A>& rhs){
 		my_matrix = rhs;
 		coerce(my_matrix);
 		return *this;
 	}
 
-	template <int R, int C, class P, class A> 
+	template <int R, int C, typename P, typename A> 
 	static inline void coerce(Matrix<R,C,P,A>& M){
 		SizeMismatch<2,R>::test(2, M.num_rows());
 		SizeMismatch<2,C>::test(2, M.num_cols());
@@ -93,32 +97,33 @@ public:
 	Matrix<2,2,Precision> my_matrix;
 };
 
-template <class Precision>
+template <typename Precision>
 inline std::ostream& operator<< (std::ostream& os, const SO2<Precision> & rhs){
 	return os << rhs.get_matrix();
 }
 
-template <class Precision>
+template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO2<Precision>& rhs){
 	return is >> rhs.my_matrix;
+	SO2<Precision>::coerce(rhs.my_matrix);
 }
 
-template<int D, class P1, class PV, class Accessor>
+template<int D, typename P1, typename PV, typename Accessor>
 inline Vector<2, typename Internal::MultiplyType<P1, PV>::type> operator*(const SO2<P1> & lhs, const Vector<D, PV, Accessor> & rhs){
 	return lhs.get_matrix() * rhs;
 }
 
-template<int D, class P1, class PV, class Accessor>
+template<int D, typename P1, typename PV, typename Accessor>
 inline Vector<2, typename Internal::MultiplyType<PV,P1>::type> operator*(const Vector<D, PV, Accessor>& lhs, const SO2<P1> & rhs){
 	return lhs * rhs.get_matrix();
 }
 
-template <int R, int C, class P1, class P2, class Accessor> 
+template <int R, int C, typename P1, typename P2, typename Accessor> 
 inline Matrix<2,C,typename Internal::MultiplyType<P1,P2>::type> operator*(const SO2<P1> & lhs, const Matrix<R,C,P2,Accessor>& rhs){
 	return lhs.get_matrix() * rhs;
 }
 
-template <int R, int C, class P1, class P2, class Accessor>
+template <int R, int C, typename P1, typename P2, typename Accessor>
 inline Matrix<R,2,typename Internal::MultiplyType<P1,P2>::type> operator*(const Matrix<R,C,P1,Accessor>& lhs, const SO2<P2>& rhs){
 	return lhs * rhs.get_matrix();
 }

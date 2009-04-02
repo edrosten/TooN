@@ -29,84 +29,87 @@
 namespace TooN {
 #endif
 
+template <typename Precision = double>
 class SE2 {
-  friend SE2 operator*(const SO2& lhs, const SE2& rhs);
-  friend std::istream& operator>> (std::istream& is, SE2& rhs);
-  
- public:
-  inline SE2();
-  template <class A> inline SE2(const SO2& R, const FixedVector<2,A>& T) : my_rotation(R), my_translation(T) {}
-      
+public:
+	SE2() : my_translation(Zero) {}
+	template <class A> SE2(const SO2<Precision>& R, const Vector<2,Precision,A>& T) : my_rotation(R), my_translation(T) {}
+	template <int S, class P, class A> SE2(const Vector<S, P, A> & v) { *this = exp(v); }
 
-  inline SO2& get_rotation(){return my_rotation;}
-  inline const SO2& get_rotation() const {return my_rotation;}
-  inline Vector<2>& get_translation() {return my_translation;}
-  inline const Vector<2>& get_translation() const {return my_translation;}
+	SO2<Precision> & get_rotation(){return my_rotation;}
+	const SO2<Precision> & get_rotation() const {return my_rotation;}
+	Vector<2, Precision> & get_translation() {return my_translation;}
+	const Vector<2, Precision> & get_translation() const {return my_translation;}
 
-  static inline SE2 exp(const Vector<3>& vect);
-  static inline Vector<3> ln(const SE2& se2);
-  inline Vector<3> ln() const { return SE2::ln(*this); }
+	template <int S, typename P, typename A>
+	static inline SE2 exp(const Vector<S,P, A>& vect);
+	static inline Vector<3, Precision> ln(const SE2& se2);
+	Vector<3, Precision> ln() const { return SE2::ln(*this); }
 
-  inline SE2 inverse() const;
+	SE2 inverse() const {
+		const SO2<Precision> & rinv = my_rotation.inverse();
+		return SE2(rinv, -(rinv*my_translation));
+	};
 
-  inline SE2& operator *=(const SE2& rhs);
-  inline SE2 operator *(const SE2& rhs) const { return SE2(my_rotation*rhs.my_rotation, my_translation + my_rotation*rhs.my_translation); }
-  inline SE2& left_multiply_by(const SE2& left);
+	inline SE2 operator *(const SE2& rhs) const { return SE2(my_rotation*rhs.my_rotation, my_translation + my_rotation*rhs.my_translation); }
+	inline SE2& operator *=(const SE2& rhs) { 
+		*this = *this * rhs; 
+		return *this; 
+	}
 
-  static inline Vector<3> generator_field(int i, Vector<3> pos);
+	static inline Matrix<3,3, Precision> generator(int i) {
+		Matrix<3,3,Precision> result(Zero);
+		if(i < 2){
+			result[i][2] = 1;
+			return result;
+		}
+		result[0][1] = -1;
+		result[1][0] = 1;
+		return result;
+	}
 
+	/// transfers a vector in the Lie algebra, from one coord frame to another
+	/// so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
+	template<typename Accessor>
+	inline Vector<3, Precision> adjoint(const Vector<3,Precision, Accessor> & vect) const {
+		Vector<3, Precision> result;
+		result[2] = vect[2];
+		result.template slice<0,2>() = my_rotation * vect.template slice<0,2>();
+		result[0] += vect[2] * my_translation[1];
+		result[1] -= vect[2] * my_translation[0];
+		return result;
+	}
 
-  template<class Accessor>
-  inline void adjoint(FixedVector<3,Accessor>& vect)const;
-
-  template <class Accessor>
-  inline void adjoint(FixedMatrix<3,3,Accessor>& M)const;
+	template <typename Accessor>
+	inline Matrix<3,3,Precision> adjoint(const Matrix<3,3,Precision,Accessor>& M) const {
+		Matrix<3,3,Precision> result;
+		for(int i=0; i<3; ++i)
+			result.T()[i] = adjoint(M.T()[i]);
+		for(int i=0; i<3; ++i)
+			result[i] = adjoint(result[i]);
+		return result;
+	}
 
 private:
-  SO2 my_rotation;
-  Vector<2> my_translation;
+	SO2<Precision> my_rotation;
+	Vector<2, Precision> my_translation;
 };
 
-
-// left multiply an SE2 by an SO2 
-inline SE2 operator*(const SO2& lhs, const SE2& rhs);
-
-
-// transfers a vector in the Lie algebra
-// from one coord frame to another
-// so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
-template<class Accessor>
-  inline void SE2::adjoint(FixedVector<3,Accessor>& vect)const{
-  vect.template slice<0,2>() = my_rotation * vect.template slice<0,2>();
-  vect[0] += vect[2] * my_translation[1];
-  vect[1] -= vect[2] * my_translation[0];
- }
- 
-template <class Accessor>
-inline void SE2::adjoint(FixedMatrix<3,3,Accessor>& M)const{
-  for(int i=0; i<3; i++){
-    adjoint(M.T()[i]);
-  }
-  for(int i=0; i<3; i++){
-    adjoint(M[i]);
-  }
-}
-
-
 // operator ostream& <<
-inline std::ostream& operator <<(std::ostream& os, const SE2& rhs){
-  for(int i=0; i<2; i++){
-    os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
-  }
-  return os;
+template <class Precision>
+inline std::ostream& operator<<(std::ostream& os, const SE2<Precision> & rhs){
+	for(int i=0; i<2; i++)
+		os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
+	return os;
 }
 
 // operator istream& >>
-inline std::istream& operator>>(std::istream& is, SE2& rhs){
-  for(int i=0; i<2; i++){
-    is >> rhs.get_rotation().my_matrix[i] >> rhs.get_translation()[i];
-  }
-  return is;
+template <class Precision>
+inline std::istream& operator>>(std::istream& is, SE2<Precision>& rhs){
+	for(int i=0; i<2; i++)
+		is >> rhs.get_rotation().my_matrix[i].ref() >> rhs.get_translation()[i];
+	SO2<Precision>::coerce(rhs.get_rotation().my_matrix);
+	return is;
 }
 
 
@@ -115,108 +118,133 @@ inline std::istream& operator>>(std::istream& is, SE2& rhs){
 // SE2 * Vector //
 //////////////////
 
-template<class VectorType>
-struct SE2VMult {
-  inline static void eval(Vector<3>& ret, const SE2& lhs, const VectorType& rhs){
-    ret.template slice<0,2>()=lhs.get_rotation()*rhs.template slice<0,2>();
-    ret.template slice<0,2>()+=lhs.get_translation() * rhs[2];
-    ret[2] = rhs[2];
-  }
+namespace Internal {
+template<int S, typename P, typename PV, typename A>
+struct SE2VMult;
+}
+
+template<int S, typename P, typename PV, typename A>
+struct Operator<Internal::SE2VMult<S,P,PV,A> > {
+	const SE2<P> & lhs;
+	const Vector<S,PV,A> & rhs;
+	
+	Operator(const SE2<P> & l, const Vector<S,PV,A> & r ) : lhs(l), rhs(r) {}
+	
+	template <int S0, typename P0, typename A0>
+	void eval(Vector<S0, P0, A0> & res ) const {
+		SizeMismatch<3,S>::test(3, rhs.size());
+		res.template slice<0,2>()=lhs.get_rotation()*rhs.template slice<0,2>();
+		res.template slice<0,2>()+=lhs.get_translation() * rhs[2];
+		res[2] = rhs[2];
+	}
+	int size() const { return 3; }
 };
 
-template<class Accessor> inline
-Vector<3> operator*(const SE2& lhs, const FixedVector<3,Accessor>& rhs){
-  return Vector<3>(lhs,rhs,Operator<SE2VMult<FixedVector<3, Accessor> > >());
+template<int S, typename P, typename PV, typename A>
+inline Vector<3, typename Internal::MultiplyType<P,PV>::type> operator*(const SE2<P> & lhs, const Vector<S,PV,A>& rhs){
+	return Vector<3, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::SE2VMult<S,P,PV,A> >(lhs,rhs));
 }
 
-template<class Accessor> inline
-Vector<3> operator*(const SE2& lhs, const DynamicVector<Accessor>& rhs){
-	//FIXME: size checking
-  return Vector<3>(lhs,rhs,Operator<SE2VMult<DynamicVector<Accessor> > >());
+template <typename P, typename PV, typename A>
+inline Vector<2, typename Internal::MultiplyType<P,PV>::type> operator*(const SE2<P>& lhs, const Vector<2,PV,A>& rhs){
+	return lhs.get_translation() + lhs.get_rotation() * rhs;
 }
-
-template <class Accessor> inline
-Vector<2> operator*(const SE2& lhs, const FixedVector<2,Accessor>& rhs){
-  return lhs.get_translation() + lhs.get_rotation() * rhs;
-}
-
 
 //////////////////
 // operator *   //
 // Vector * SE2 //
 //////////////////
 
-template<class Accessor>
-struct VSE2Mult {
-  inline static void eval(Vector<4>& ret, const FixedVector<4,Accessor>& lhs, const SE2& rhs){
-    ret.template slice<0,2>() = lhs.template slice<0,2>() * rhs.get_rotation();
-    ret[2] = lhs[2];
-    ret[2] += lhs.template slice<0,2>() * rhs.get_translation();
-  }
-};
-
-template<class Accessor> inline
-Vector<4> operator*(const FixedVector<4,Accessor>& lhs, const SE2& rhs){
-  return Vector<4>(lhs,rhs,Operator<VSE2Mult<Accessor> >());
+namespace Internal {
+template<int S, typename P, typename PV, typename A>
+struct VSE2Mult;
 }
 
+template<int S, typename P, typename PV, typename A>
+struct Operator<Internal::VSE2Mult<S,P,PV,A> > {
+	const Vector<S,PV,A> & lhs;
+	const SE2<P> & rhs;
+	
+	Operator(const Vector<S,PV,A> & l, const SE2<P> & r ) : lhs(l), rhs(r) {}
+	
+	template <int S0, typename P0, typename A0>
+	void eval(Vector<S0, P0, A0> & res ) const {
+		SizeMismatch<3,S>::test(3, lhs.size());
+		res.template slice<0,2>() = lhs.template slice<0,2>()*rhs.get_rotation();
+		res[2] = lhs[2];
+		res[2] += lhs.template slice<0,2>() * rhs.get_translation();
+	}
+	int size() const { return 3; }
+};
 
+template<int S, typename P, typename PV, typename A>
+inline Vector<3, typename Internal::MultiplyType<PV,P>::type> operator*(const Vector<S,PV,A>& lhs, const SE2<P> & rhs){
+	return Vector<3, typename Internal::MultiplyType<PV,P>::type>(Operator<Internal::VSE2Mult<S, P,PV,A> >(lhs,rhs));
+}
 
 //////////////////
 // operator *   //
 // SE2 * Matrix //
 //////////////////
 
-template <int RHS, class Accessor>
-struct SE2MMult {
-  inline static void eval(Matrix<4,RHS>& ret, const SE2& lhs, const FixedMatrix<4,RHS,Accessor>& rhs){
-    for(int i=0; i<RHS; i++){
-      ret.T()[i].template slice<0,2>() = lhs.get_rotation() * rhs.T()[i].template slice<0,2>();
-      ret.T()[i].template slice<0,2>() += lhs.get_translation() * rhs(2,i);
-      ret(2,i) = rhs(2,i);
-    }
-  }
-};
-
-
-template <int RHS, class Accessor> inline 
-Matrix<4,RHS> operator*(const SE2& lhs, const FixedMatrix<4,RHS,Accessor>& rhs){
-  return Matrix<4,RHS>(lhs,rhs,Operator<SE2MMult<RHS,Accessor> >());
+namespace Internal {
+template <int R, int C, typename PM, typename A, typename P>
+struct SE2MMult;
 }
 
+template<int R, int Cols, typename PM, typename A, typename P>
+struct Operator<Internal::SE2MMult<R, Cols, PM, A, P> > {
+	const SE2<P> & lhs;
+	const Matrix<R,Cols,PM,A> & rhs;
+	
+	Operator(const SE2<P> & l, const Matrix<R,Cols,PM,A> & r ) : lhs(l), rhs(r) {}
+	
+	template <int R0, int C0, typename P0, typename A0>
+	void eval(Matrix<R0, C0, P0, A0> & res ) const {
+		SizeMismatch<3,R>::test(3, rhs.num_rows());
+		for(int i=0; i<rhs.num_cols(); ++i)
+			res.T()[i] = lhs * rhs.T()[i];
+	}
+	int num_cols() const { return rhs.num_cols(); }
+	int num_rows() const { return 3; }
+};
+
+template <int R, int Cols, typename PM, typename A, typename P> 
+inline Matrix<3,Cols, typename Internal::MultiplyType<P,PM>::type> operator*(const SE2<P> & lhs, const Matrix<R,Cols,PM, A>& rhs){
+	return Matrix<3,Cols,typename Internal::MultiplyType<P,PM>::type>(Operator<Internal::SE2MMult<R, Cols, PM, A, P> >(lhs,rhs));
+}
 
 //////////////////
 // operator *   //
 // Matrix * SE2 //
 //////////////////
 
-template <int LHS, class Accessor> 
-struct MSE2Mult {
-  inline static void eval(Matrix<LHS,4>& ret, const FixedMatrix<LHS,4,Accessor>& lhs, const SE2& rhs){
-    for(int i=0; i<LHS; i++){
-      ret[i].template slice<0,2>() = lhs[i].template slice<0,2>() * rhs.get_rotation();
-      ret(i,2) = rhs.get_translation() * lhs[i].template slice<0,2>();
-      ret(i,2) += lhs(i,2);
-    }
-  }
+namespace Internal {
+template <int Rows, int C, typename PM, typename A, typename P>
+struct MSE2Mult;
+}
+
+template<int Rows, int C, typename PM, typename A, typename P>
+struct Operator<Internal::MSE2Mult<Rows, C, PM, A, P> > {
+	const Matrix<Rows,C,PM,A> & lhs;
+	const SE2<P> & rhs;
+	
+	Operator( const Matrix<Rows,C,PM,A> & l, const SE2<P> & r ) : lhs(l), rhs(r) {}
+	
+	template <int R0, int C0, typename P0, typename A0>
+	void eval(Matrix<R0, C0, P0, A0> & res ) const {
+		SizeMismatch<3, C>::test(3, lhs.num_cols());
+		for(int i=0; i<lhs.num_rows(); ++i)
+			res[i] = lhs[i] * rhs;
+	}
+	int num_cols() const { return 3; }
+	int num_rows() const { return lhs.num_rows(); }
 };
 
-
-template <int LHS, class Accessor> inline 
-Matrix<LHS,4> operator*(const FixedMatrix<LHS,4,Accessor>& lhs, const SE2& rhs){
-  return Matrix<LHS,4>(lhs,rhs,Operator<MSE2Mult<LHS,Accessor> >());
+template <int Rows, int C, typename PM, typename A, typename P> 
+inline Matrix<Rows,3, typename Internal::MultiplyType<PM,P>::type> operator*(const Matrix<Rows,C,PM, A>& lhs, const SE2<P> & rhs ){
+	return Matrix<Rows,3,typename Internal::MultiplyType<PM,P>::type>(Operator<Internal::MSE2Mult<Rows, C, PM, A, P> >(lhs,rhs));
 }
-
-
-namespace SE2static 
-{
-  static double zero[2]={0,0};
-}
-
-inline SE2::SE2() :
-  my_translation(SE2static::zero)
-{}
-
 
 /* inline SE2 SE2::exp(const Vector<3>& mu){ */
 /*   SE2 result; */
@@ -233,98 +261,60 @@ inline SE2::SE2() :
 /*   return result; */
 /* } */
 
-inline SE2 SE2::exp(const Vector<3>& mu)
+template <typename Precision>
+template <int S, typename PV, typename Accessor>
+inline SE2<Precision> SE2<Precision>::exp(const Vector<S, PV, Accessor>& mu)
 {
-  static const double one_6th = 1.0/6.0;
-  static const double one_20th = 1.0/20.0;
+	SizeMismatch<3,S>::test(3, mu.size());
+
+	static const Precision one_6th = 1.0/6.0;
+	static const Precision one_20th = 1.0/20.0;
   
-  SE2 result;
+	SE2<Precision> result;
   
-  const double theta = mu[2];
-  const double theta_sq = theta * theta;
+	const Precision theta = mu[2];
+	const Precision theta_sq = theta * theta;
   
-  Vector<2> cross;
-  cross[0] = -theta * mu[1];
-  cross[1] = theta * mu[0];
-  
-  result.my_rotation = SO2::exp(theta);
-  
-  if (theta_sq < 1e-8) 
-    {
-      result.get_translation() = mu.slice<0,2>() + 0.5 * cross;
-    } 
-  else 
-    {
-      double A, B, C;
-      if (theta_sq < 1e-6) 
-	{
-	  C = one_6th*(1.0 - one_20th * theta_sq);
-	  A = 1.0 - theta_sq * C;
-	  B = 0.5 - 0.25 * one_6th * theta_sq;
-	} 
-      else
-	{
-	  const double inv_theta = (1.0/theta);
-	  double sine = result.my_rotation.get_matrix()[1][0];
-	  double cosine = result.my_rotation.get_matrix()[0][0];
-	  A = sine * inv_theta;
-	  B = (1 - cosine) * (inv_theta * inv_theta);
-	  C = (1 - A) * (inv_theta * inv_theta);
+	const Vector<2, Precision> cross = makeVector( -theta * mu[1], theta * mu[0]);
+	result.get_rotation() = SO2<Precision>::exp(theta);
+
+	if (theta_sq < 1e-8){
+		result.get_translation() = mu.template slice<0,2>() + 0.5 * cross;
+	} else {
+		Precision A, B;
+		if (theta_sq < 1e-6) {
+			A = 1.0 - theta_sq * one_6th*(1.0 - one_20th * theta_sq);
+			B = 0.5 - 0.25 * one_6th * theta_sq;
+		} else {
+			const Precision inv_theta = (1.0/theta);
+			const Precision sine = result.my_rotation.get_matrix()[1][0];
+			const Precision cosine = result.my_rotation.get_matrix()[0][0];
+			A = sine * inv_theta;
+			B = (1 - cosine) * (inv_theta * inv_theta);
+		}
+		result.get_translation() = A * mu.template slice<0,2>() + B * cross;
 	}
-      result.get_translation() = (1.0 - C * theta_sq) * mu.slice<0,2>() + B * cross;
-    }
-  return result;
+	return result;
 }
  
+template <typename Precision>
+inline Vector<3, Precision> SE2<Precision>::ln(const SE2<Precision> & se2) {
+	const Precision theta = se2.get_rotation().ln();
 
-inline Vector<3> SE2::ln(const SE2& se2) {
-  double theta = se2.my_rotation.ln();
-  double shtot = 0.5;
-  
-  if(fabs(theta) > 0.00001) {
-    shtot = sin(theta/2)/theta;
-  }
-    
-  // now do the rotation
-  SO2 halfrotator = SO2::exp(-0.5 * theta );
-  Vector<2> rottrans = halfrotator * se2.my_translation;
-  rottrans /= (2 * shtot);
-  
-  Vector<3> result;
-  result.slice<0,2>()=rottrans;
-  result[2] = theta;
-  return result;
+	Precision shtot = 0.5;  
+	if(fabs(theta) > 0.00001)
+		shtot = sin(theta/2)/theta;
+
+	const SO2<Precision> halfrotator(theta * -0.5);
+	Vector<3, Precision> result;
+	result.template slice<0,2>() = (halfrotator * se2.get_translation())/(2 * shtot);
+	result[2] = theta;
+	return result;
 }
 
-inline SE2 SE2::inverse() const {
-  const SO2& rinv = my_rotation.inverse();
-    return SE2(rinv, -(rinv*my_translation));
-}
-
-inline SE2& SE2::left_multiply_by(const SE2& left) {
-    my_translation = left.my_translation + left.get_rotation() * my_translation;
-    my_rotation = left.my_rotation * my_rotation;
-    return *this;
-}
-
-inline Vector<3> SE2::generator_field(int i, Vector<3> pos){
-  double result_d[]={0,0,0};
-  Vector<3> result(result_d);
-  if(i < 2){
-    result[i]=pos[2];
-    return result;
-  }
-  result[0] = - pos[1];
-  result[1] =   pos[0];
-  return result;
-}
-
-
-inline SE2 operator*(const SO2& lhs, const SE2& rhs){
-  SE2 result;
-  result.my_rotation = lhs*rhs.my_rotation;
-  result.my_translation = lhs*rhs.my_translation;
-  return result;
+template <typename Precision>
+inline SE2<Precision> operator*(const SO2<Precision> & lhs, const SE2<Precision>& rhs){
+	return SE2<Precision>( lhs*rhs.get_rotation(), lhs*rhs.get_translation());
 }
 
 #ifndef TOON_NO_NAMESPACE
