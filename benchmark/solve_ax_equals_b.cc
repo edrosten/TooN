@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <map>
 #include <algorithm>
 #include <iomanip>
 
@@ -27,60 +28,21 @@ std::tr1::mt19937 eng;
 std::tr1::uniform_real<double> rnd;
 double global_sum;
 
+#include "solvers.cc"
 
-struct Do2x2
+
+struct UseCompiledCramer
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
-	{
-		double idet = 1/(a[0][0]*a[1][1] - a[0][1] * a[1][0]);
-		double i00 =  a[1][1] * idet;
-		double i01 = -a[0][1] * idet;
-		double i10 = -a[1][0] * idet;
-		double i11 =  a[0][0] * idet;
-
-		for(int i=0; i < x.num_cols(); i++)
-		{
-			x[0][i] = b[0][i] * i00 + b[1][i] * i01;
-			x[1][i] = b[0][i] * i10 + b[1][i] * i11;
-		}
+	{	
+		solve_direct(a, b, x);
 	}
 
 	static string name()
 	{
-		return "2H";
+		return "CC";
 	}
 };
-
-struct Do3x3
-{
-	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
-	{
-		double idet = a[0][0]*(a[2][2]*a[1][1]-a[2][1]*a[1][2])-a[1][0]*(a[2][2]*a[0][1]-a[2][1]*a[0][2])+a[2][0]*(a[1][2]*a[0][1]-a[1][1]*a[0][2]);
-
-		double i00 =   (a[2][2]*a[1][1]-a[2][1]*a[1][2]) * idet;
-		double i01 =  -(a[2][2]*a[0][1]-a[2][1]*a[0][2]) * idet;
-		double i02 =   (a[1][2]*a[0][1]-a[1][1]*a[0][2]) * idet;
-		double i10 =  -(a[2][2]*a[1][0]-a[2][0]*a[1][2]) * idet;
-		double i11 =   (a[2][2]*a[0][0]-a[2][0]*a[0][2]) * idet;
-		double i12 =  -(a[1][2]*a[0][0]-a[1][0]*a[0][2]) * idet;
-		double i20 =   (a[2][1]*a[1][0]-a[2][0]*a[1][1]) * idet;
-		double i21 =  -(a[2][1]*a[0][0]-a[2][0]*a[0][1]) * idet;
-		double i22 =   (a[1][1]*a[0][0]-a[1][0]*a[0][1]) * idet;
-
-		for(int i=0; i < x.num_cols(); i++)
-		{
-			x[0][i] = b[0][i] * i00 + b[1][i] * i01 + b[2][i] * i02;
-			x[1][i] = b[0][i] * i10 + b[1][i] * i11 + b[2][i] * i12;
-			x[2][i] = b[0][i] * i20 + b[1][i] * i21 + b[2][i] * i22;
-		}
-	}
-
-	static string name()
-	{
-		return "3H";
-	}
-};
-
 
 struct UseLU
 {
@@ -160,13 +122,13 @@ struct UseGaussJordanInverse
 	}
 };
 
-template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(vector<pair<double, string> >& results)
+template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, vector<double> >& results)
 {
 	double time=0, t_tmp, start = get_time_of_day(), t_tmp2;
 	double sum=0;
 	int n=0;
 
-	while(get_time_of_day() - start < 1)
+	while(get_time_of_day() - start < .1)
 	{
 		Matrix<Size> a;
 		for(int r=0; r < Size; r++)
@@ -196,64 +158,83 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(vector<pair<do
 		n++;
 	}
 
-	results.push_back(make_pair(n/time, Solver::name()));
+	results[Solver::name()].push_back(n/time);
 
 	global_sum += sum;	
 }
 
-template<int Size, int C, bool End=0> struct ColIter
+
+
+
+template<int Size, int Cols, typename Solver, bool Use> struct Optional
+{
+	static void solve(map<string, vector<double> >& r)
+	{
+		benchmark_ax_eq_b<Size, Cols, Solver>(r);
+	}
+};
+
+
+template<int Size, int Cols, typename Solver > struct Optional<Size, Cols, Solver, 0>
+{
+	static void solve(map<string, vector<double> >&)
+	{
+	}
+};
+
+template<int Size, int C=1, bool End=0> struct ColIter
 {
 	static void iter()
 	{
 		static const int Lin = Size*2;
 		static const int Grow = 2;
 		static const int Cols = C + (C<=Lin?0:(C-Lin)*(C-Lin)/Grow);
-		vector<pair<double, string> > results;
+		map<string, vector<double> > results;
 		cout << Size << "\t" << Cols << "\t";
+		
+		//Run each menchmark 10 times and select the median result
+		for(int i=0; i < 10; i++)
+		{
+			benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
+			benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
+			benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
+			benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
+			benchmark_ax_eq_b<Size, Cols, UseLU>(results);
+			Optional<Size, Cols, UseCompiledCramer, (Size<=highest_solver)>::solve(results);
+		}
+		
+		vector<pair<double, string> > res;
+		for(map<string, vector<double> >::iterator i=results.begin(); i != results.end(); i++)
+		{
+			sort(i->second.begin(), i->second.end());
+			res.push_back(make_pair(i->second[i->second.size()/2], i->first));
+		}
 
-		benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
-		benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
-		benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
-		benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
-		benchmark_ax_eq_b<Size, Cols, UseLU>(results);
-		benchmark_ax_eq_b<Size, Cols, Do2x2>(results);
 
-		sort(results.begin(), results.end());
-		for(unsigned int i=0; i < results.size(); i++)
-			cout << results[i].second << " " << setprecision(5) << setw(10) << results[i].first << "            ";
+
+		sort(res.begin(), res.end());
+		for(unsigned int i=0; i < res.size(); i++)
+			cout << res[i].second << " " << setprecision(5) << setw(10) << res[i].first << "            ";
 		cout << endl;
-		ColIter<Size, C+1, (Cols> Size*20)>::iter();
+		ColIter<Size, C+1, (Cols> 0)>::iter();
 	}
 };
 
-template<int Size,int C> struct ColIter<Size, C, 1>
+template<int Size, int C> struct ColIter<Size, C, 1> 
 {
+
 	static void iter()
 	{
 	}
 };
 
-
-template<int Size, bool End=(Size<= 0)> struct SizeIter
-{
-	static void iter()
-	{
-		ColIter<Size, 1>::iter();
-		SizeIter<Size-16>::iter();
-	}
-};
-
-template<int S> struct SizeIter<S, 1>
-{
-	static void iter()
-	{
-	}
-};
-
+#ifndef SIZE
+	#define SIZE 2
+#endif
 
 int main()
 {
-	SizeIter<2>::iter();
+	ColIter<SIZE>::iter();
 	
 	return global_sum != 123456789.0;
 }
