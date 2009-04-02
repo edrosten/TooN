@@ -52,7 +52,7 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 	VectorAlloc(int /*s*/) { }
 
 	template<class Op>
-	VectorAlloc(const Operator<Op>& op) {}
+	VectorAlloc(const Operator<Op>&) {}
 
 	int size() const {
 		return Size;
@@ -198,7 +198,7 @@ struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
 	{}
 
 	template <class Op>
-	MatrixAlloc(const Operator<Op>& op)
+	MatrixAlloc(const Operator<Op>&)
 	{}
 
 	int num_rows() const {
@@ -288,7 +288,7 @@ template<int s> struct StrideHolder
 	StrideHolder(int){}
 
 	template<class Op>
-	StrideHolder(const Operator<Op>& op) {}
+	StrideHolder(const Operator<Op>&) {}
 
 	int stride() const{
 		return s;
