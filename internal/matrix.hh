@@ -80,6 +80,7 @@ public:
 	template<class Op> inline Matrix& operator= (const Operator<Op>& op)
 	{
 		op.eval(*this);
+		return *this;
 	}
 
 	// operator =
