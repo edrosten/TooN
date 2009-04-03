@@ -74,7 +74,7 @@ public:
 	SO3 inverse() const { return SO3(*this, Invert()); }
 
 	SO3& operator *=(const SO3& rhs) {
-		my_matrix=my_matrix*rhs.my_matrix;
+		*this = *this * rhs;
 		return *this;
 	}
 
