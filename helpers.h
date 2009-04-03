@@ -45,6 +45,28 @@ namespace TooN {
 			return v/sqrt(v*v);
 		}
 
+	template<int Size, typename Precision, typename Base> inline Vector<Size-1, Precision> project( const Vector<Size, Precision, Base> & v){
+		return v.template slice<0,Size-1>() / v[Size-1];
+	}
+	
+	template<typename Precision, typename Base> inline Vector<-1, Precision> project( const Vector<-1, Precision, Base> & v){
+		return v.slice(0,v.size()-1) / v[v.size()-1];
+	}
+	
+	template<int Size, typename Precision, typename Base> inline Vector<Size+1, Precision> unproject( const Vector<Size, Precision, Base> & v){
+		Vector<Size+1, Precision> result;
+		result.template slice<0,Size>() = v;
+		result[Size] = 1;
+		return result;
+	}
+	
+	template<typename Precision, typename Base> inline Vector<-1, Precision> unproject( const Vector<-1, Precision, Base> & v){
+		Vector<-1, Precision> result(v.size()+1);
+		result.slice(0,v.size()) = v;
+		result[v.size()] = 1;
+		return result;
+	}
+
 	namespace Internal{
 		struct Copy
 		{
