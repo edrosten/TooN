@@ -20,8 +20,6 @@
 #ifndef CHOLESKY_H
 #define CHOLESKY_H
 
-#include <iostream>
-
 #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
@@ -31,6 +29,8 @@
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
 #endif 
+
+#if 0  // should be removed and possibly replaced with wls_cholesky implementation for small fixed sizes
     namespace util {
 	
 	template <int B, int E> struct Dot3 {
@@ -231,31 +231,40 @@ namespace TooN {
 	}
     }
 
-    template <int N=-1>
+    template <int N=-1, typename Precision = double>
     class Cholesky {
     public:
 
 		Cholesky() {}
 
-		template<class Accessor>
-		Cholesky(const FixedMatrix<N,N,Accessor>& m){
+		template<int R, int C, typename P, typename A>
+		Cholesky(const Matrix<R,C,P,A>& m) : L(m.num_rows(), m.num_cols()), invdiag(m.num_cols()) {
 			compute(m);
 		}
     
-		template<class Accessor>
-		void compute(const FixedMatrix<N,N,Accessor>& m){
-			rank = util::cholesky_compute(m,L,invdiag);
+		template<int R, int C, typename P, typename A>
+		void compute(const Matrix<R,C,P,A>& m){
+			SizeMismatch<R,C>::test(m.num_rows(), m.num_cols());
+			SizeMismatch<R,N>::test(m.num_rows(), L.num_rows());
+			// rank = util::cholesky_compute(m,L,invdiag);
+			L = m;
+			int Size = L.num_rows();
+			int info;
+			dpotrf_("L", &Size, L.get_data_ptr(), &Size, &info);
+			assert(info >= 0);
+			if (info > 0)
+				rank = info-1;
 		}
 		int get_rank() const { return rank; }
 		
-		double get_determinant() const {
-			double det = L[0][0];
-			for (int i=1; i<N; i++)
-				det *= L[i][i];
+		Precision get_determinant() const {
+			Precision det = L(0,0);
+			for (int i=1; i<L.num_rows(); ++i)
+				det *= L(i,i);
 			return det;
 		}
 
-		const Matrix<N>& get_L_D() const { return L; }
+		const Matrix<N,N,Precision> & get_L_D() const { return L; }
 
 		template <class A1, class A2> static void sqrt(const FixedMatrix<N,N,A1>& A, FixedMatrix<N,N,A2>& L) {
 			for (int i=0; i<N; ++i) {
@@ -428,94 +437,83 @@ namespace TooN {
 		}
 	
     private:
-		Matrix<N> L;
-		Vector<N> invdiag;
+		Matrix<N, N, Precision> L;
+		Vector<N, Precision> invdiag;
 		int rank;
     };
   
 
+#endif
 
-    template <>
-    class Cholesky<-1> {
-    public:
+template <int Size = -1, typename Precision = double>
+class Cholesky {
+public:
 
-		Cholesky(){}
+	Cholesky(){}
 
-		template<class Accessor>
-		Cholesky(const DynamicMatrix<Accessor>& m) {
-			compute(m);
-		}
+	template<int R, int C, typename P, typename B>
+	Cholesky(const Matrix<R,C,P,B> & m)  : L(m.num_rows(), m.num_cols()) {
+		compute(m);
+	}
 
-		template<class Accessor>
-		void compute(const DynamicMatrix<Accessor>& m){
-			assert(m.num_rows() == m.num_cols());
-			L.assign(m);
-			int N = L.num_rows();
-			int info;
-			dpotrf_("L", &N, L.get_data_ptr(), &N, &info);
-			assert(info >= 0);
-			if (info > 0)
-				rank = info-1;
-		}
-		int get_rank() const { return rank; }
+	template<int R, int C, typename P, typename B>
+	void compute(const Matrix<R,C,P,B> & m){
+		SizeMismatch<R,C>::test(m.num_rows(), m.num_cols());
+		SizeMismatch<R,Size>::test(m.num_rows(), L.num_rows());
+		L = m;
+		int N = L.num_rows();
+		potrf_("L", &N, L.my_data, &N, &info);
+	}
 
-		template <class V> inline
-		Vector<> inverse_times(const V& v) const { return backsub(v); }
+	int get_info() const { return info; }
 
-		template <class V> inline
-		Vector<> backsub(const V& v) const
-		{
-			assert(v.size() == L.num_rows());
-			Vector<> x = v;
-			int N=L.num_rows();
-			int NRHS=1;
-			int info;
-			dpotrs_("L", &N, &NRHS, L.get_data_ptr(), &N, x.get_data_ptr(), &N, &info);	    
-			assert(info==0);
-			return x;
-		}
+	template <int S, typename P, typename B>
+	Vector<Size, Precision> inverse_times(const Vector<S,P,B> & v) const { return backsub(v); }
 
-		template <class V> double mahalanobis(const V& v) const {
-			return v * backsub(v);
-		}
+	template <int S, typename P, typename B>
+	Vector<Size, Precision> backsub(const Vector<S,P,B> & v) const
+	{
+		SizeMismatch<S,Size>::test(v.size(), L.num_rows());
+		Vector<Size, Precision> x = v;
+		int N=L.num_rows();
+		int NRHS=1;
+		potrs_("L", &N, &NRHS, L.my_data, &N, x.my_data, &N, &info);	    
+		return x;
+	}
 
-		const Matrix<>& get_L() const {
-			return L;
-		}
+	template <int S, typename P, typename B>
+	Precision mahalanobis(const Vector<S,P,B> & v) const {
+		return v * backsub(v);
+	}
 
-		double get_determinant() const {
-			double det = L[0][0];
-			for (int i=1; i<L.num_rows(); i++)
-				det *= L[i][i];
-			return det*det;
-		}
+	const Matrix<Size,Size,Precision>& get_L() const {
+		return L;
+	}
 
-		template <class Mat> void get_inverse(Mat& M) const {
-			M = L;
-			int N = L.num_rows();
-			int info;
-			dpotri_("L", &N, M.get_data_ptr(), &N, &info);
-			assert(info == 0);
-			TooN::Symmetrize(M);
-		}
-		
-		Matrix<> get_inverse() const {
-			Matrix<> M(L.num_rows(), L.num_rows());
-			get_inverse(M);
-			return M;
-		}
-		
-    private:
-		Matrix<> L;	
-		int rank;
-    };
-	
+	Precision get_determinant() const {
+		Precision det = L(0,0);
+		for (int i=1; i<L.num_rows(); ++i)
+			det *= L(i,i);
+		return det*det;
+	}
+
+	Matrix<Size, Size, Precision> get_inverse() const {
+		Matrix<Size, Size, Precision> M = L;
+		int N = L.num_rows();
+		potri_("L", &N, M.my_data, &N, &info);
+		for(int i = 1; i < M.num_rows(); ++i)
+			for(int j = 0; j < i; ++j)
+				M(i,j) = M(j,i);
+		return M;
+	}
+
+private:
+	Matrix<Size, Size, Precision> L;
+	mutable int info;
+};
+
 #ifndef TOON_NO_NAMESPACE
 }
 #endif 
-
-
-
-
 
 #endif

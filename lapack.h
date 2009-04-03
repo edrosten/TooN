@@ -50,12 +50,15 @@ extern "C" {
 
     // Cholesky decomposition
     void dpotrf_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
+    void spotrf_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
 
     // Cholesky solve AX=B given decomposition
     void dpotrs_(const char* UPLO, const int* N, const int* NRHS, const double* A, const int* LDA, double* B, const int* LDB, int* INFO);
+    void spotrs_(const char* UPLO, const int* N, const int* NRHS, const float* A, const int* LDA, float* B, const int* LDB, int* INFO);
 
     // Cholesky inverse given decomposition
     void dpotri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
+    void spotri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
 }
 
 void getrf_(int* M, int *N, float* A, int* lda, int* IPIV, int* INFO){
@@ -80,6 +83,31 @@ void getri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, in
 
 void getri_(int* N, float* A, int* lda, int* IPIV, float* WORK, int* lwork, int* INFO){
 	sgetri_(N, A, lda, IPIV, WORK, lwork, INFO);
+}
+
+void potrf_(const char * UPLO, const int* N, double* A, const int* LDA, int* INFO){
+	dpotrf_(UPLO, N, A, LDA, INFO);
+}
+
+void potrf_(const char * UPLO, const int* N, float* A, const int* LDA, int* INFO){
+	spotrf_(UPLO, N, A, LDA, INFO);
+}
+// Cholesky solve AX=B given decomposition
+void potrs_(const char* UPLO, const int* N, const int* NRHS, const double* A, const int* LDA, double* B, const int* LDB, int* INFO){
+	dpotrs_(UPLO, N, NRHS, A, LDA, B, LDB, INFO);
+}
+
+void potrs_(const char* UPLO, const int* N, const int* NRHS, const float* A, const int* LDA, float* B, const int* LDB, int* INFO){
+	spotrs_(UPLO, N, NRHS, A, LDA, B, LDB, INFO);
+}
+
+// Cholesky inverse given decomposition
+void potri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO){
+	dpotri_(UPLO, N, A, LDA, INFO);
+}
+
+void potri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO){
+	spotri_(UPLO, N, A, LDA, INFO);
 }
 
 }
