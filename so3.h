@@ -1,21 +1,21 @@
-
+// -*- c++ -*-
 /*
-	 Copyright (C) 2005 Tom Drummond
+  Copyright (C) 2005 Tom Drummond
 
-     This library is free software; you can redistribute it and/or
-     modify it under the terms of the GNU Lesser General Public
-     License as published by the Free Software Foundation; either
-     version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-     This library is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-     Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-     You should have received a copy of the GNU Lesser General Public
-     License along with this library; if not, write to the Free Software
-     Foundation, Inc.
-     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc.
+  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 #ifndef __SO3_H
 #define __SO3_H
@@ -36,8 +36,8 @@ template<class Precision> inline std::istream & operator>>(std::istream &, SE3<P
 template <typename Precision = double>
 class SO3 {
 public:
-    friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
-    friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
+	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
+	friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
 	friend class SE3<Precision>;
 	
 	SO3() : my_matrix(Identity) {}
@@ -46,7 +46,7 @@ public:
 	SO3(const Vector<S, P, A> & v) { *this = exp(v); }
 	
 	template <int R, int C, typename P, typename A>
-	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
+	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; coerce();}
 	
 	template <int R, int C, typename P, typename A>
 	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
@@ -55,7 +55,7 @@ public:
 		return *this;
 	}
 	
-    void coerce() {
+	void coerce() {
 		my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
 		my_matrix[1] = unit(my_matrix[1]);
 		my_matrix[2] -= my_matrix[0] * (my_matrix[0]*my_matrix[2]);
@@ -190,8 +190,8 @@ inline Vector<3, Precision> SO3<Precision>::ln() const{
 		// antisymmetric part vanishes, but still large rotation, need information from symmetric part
 		const Precision angle = M_PI - asin(sin_angle_abs);
 		const Precision d0 = my_matrix[0][0] - cos_angle,
-					 d1 = my_matrix[1][1] - cos_angle,
-					 d2 = my_matrix[2][2] - cos_angle;
+			d1 = my_matrix[1][1] - cos_angle,
+			d2 = my_matrix[2][2] - cos_angle;
 		TooN::Vector<3> r2;
 		if(fabs(d0) > fabs(d1) && fabs(d0) > fabs(d2)){ // first is largest, fill with first column
 			r2[0] = d0;
@@ -243,58 +243,58 @@ Vector<3> transform(const SO3& pose, const FixedVector<3,A>& x) { return pose*x;
 template <class A1, class A2> inline
 Vector<3> transform(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<3,3,A2>& J_x)
 {
-    J_x = pose.get_matrix();
-    return pose * x;
+	J_x = pose.get_matrix();
+	return pose * x;
 }
 
 template <class A1, class A2, class A3> inline
 Vector<3> transform(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<3,3,A2>& J_x, FixedMatrix<3,3,A3>& J_pose)
 {
-    J_x = pose.get_matrix();
-    const Vector<3> cx = pose * x;
-    J_pose[0][0] = J_pose[1][1] = J_pose[2][2] = 0;
-    J_pose[1][0] = -(J_pose[0][1] = cx[2]);
-    J_pose[0][2] = -(J_pose[2][0] = cx[1]);
-    J_pose[2][1] = -(J_pose[1][2] = cx[0]);
-    return cx;
+	J_x = pose.get_matrix();
+	const Vector<3> cx = pose * x;
+	J_pose[0][0] = J_pose[1][1] = J_pose[2][2] = 0;
+	J_pose[1][0] = -(J_pose[0][1] = cx[2]);
+	J_pose[0][2] = -(J_pose[2][0] = cx[1]);
+	J_pose[2][1] = -(J_pose[1][2] = cx[0]);
+	return cx;
 }
 
 template <class A1, class A2, class A3> inline
 Vector<2> project_transformed_point(const SO3& pose, const FixedVector<3,A1>& in_frame, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,3,A3>& J_pose)
 {
-    const double z_inv = 1.0/in_frame[2];
-    const double x_z_inv = in_frame[0]*z_inv;
-    const double y_z_inv = in_frame[1]*z_inv;
-    const double cross = x_z_inv * y_z_inv;
-    J_pose[0][0] = -cross;
-    J_pose[0][1] = 1 + x_z_inv*x_z_inv;
-    J_pose[0][2] = -y_z_inv;
-    J_pose[1][0] = -1 - y_z_inv*y_z_inv;
-    J_pose[1][1] =  cross;
-    J_pose[1][2] =  x_z_inv;
+	const double z_inv = 1.0/in_frame[2];
+	const double x_z_inv = in_frame[0]*z_inv;
+	const double y_z_inv = in_frame[1]*z_inv;
+	const double cross = x_z_inv * y_z_inv;
+	J_pose[0][0] = -cross;
+	J_pose[0][1] = 1 + x_z_inv*x_z_inv;
+	J_pose[0][2] = -y_z_inv;
+	J_pose[1][0] = -1 - y_z_inv*y_z_inv;
+	J_pose[1][1] =  cross;
+	J_pose[1][2] =  x_z_inv;
 
-    const TooN::Matrix<3>& R = pose.get_matrix();
-    J_x[0][0] = z_inv*(R[0][0] - x_z_inv * R[2][0]);
-    J_x[0][1] = z_inv*(R[0][1] - x_z_inv * R[2][1]);
-    J_x[0][2] = z_inv*(R[0][2] - x_z_inv * R[2][2]);
-    J_x[1][0] = z_inv*(R[1][0] - y_z_inv * R[2][0]);
-    J_x[1][1] = z_inv*(R[1][1] - y_z_inv * R[2][1]);
-    J_x[1][2] = z_inv*(R[1][2] - y_z_inv * R[2][2]);
+	const TooN::Matrix<3>& R = pose.get_matrix();
+	J_x[0][0] = z_inv*(R[0][0] - x_z_inv * R[2][0]);
+	J_x[0][1] = z_inv*(R[0][1] - x_z_inv * R[2][1]);
+	J_x[0][2] = z_inv*(R[0][2] - x_z_inv * R[2][2]);
+	J_x[1][0] = z_inv*(R[1][0] - y_z_inv * R[2][0]);
+	J_x[1][1] = z_inv*(R[1][1] - y_z_inv * R[2][1]);
+	J_x[1][2] = z_inv*(R[1][2] - y_z_inv * R[2][2]);
 
-    return makeVector(x_z_inv, y_z_inv);
+	return makeVector(x_z_inv, y_z_inv);
 }
 
 
 template <class A1> inline
 Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x)
 {
-    return project(transform(pose,x));
+	return project(transform(pose,x));
 }
 
 template <class A1, class A2, class A3> inline
 Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x, FixedMatrix<2,3,A2>& J_x, FixedMatrix<2,3,A3>& J_pose)
 {
-    return project_transformed_point(pose, transform(pose,x), J_x, J_pose);
+	return project_transformed_point(pose, transform(pose,x), J_x, J_pose);
 }
 
 #endif
