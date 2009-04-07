@@ -36,8 +36,8 @@ template<class Precision> inline std::istream & operator>>(std::istream &, SE3<P
 template <typename Precision = double>
 class SO3 {
 public:
-	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
-	friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
+    friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
+    friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
 	friend class SE3<Precision>;
 	
 	SO3() : my_matrix(Identity) {}
@@ -51,20 +51,16 @@ public:
 	template <int R, int C, typename P, typename A>
 	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
 		my_matrix = rhs;
-		coerce(my_matrix);
+		coerce();
 		return *this;
 	}
 	
-	template <int R, int C, typename P, typename A>
-	static void coerce(Matrix<R,C,P,A>& M){
-		SizeMismatch<3,R>::test(3, M.num_rows());
-		SizeMismatch<3,C>::test(3, M.num_cols());
-		M[0] = unit(M[0]);
-		M[1] -= M[0] * (M[0]*M[1]);
-		M[1] = unit(M[1]);
-		M[2] -= M[0] * (M[0]*M[2]);
-		M[2] -= M[1] * (M[1]*M[2]);
-		M[2] = unit(M[2]);
+    void coerce() {
+		my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
+		my_matrix[1] = unit(my_matrix[1]);
+		my_matrix[2] -= my_matrix[0] * (my_matrix[0]*my_matrix[2]);
+		my_matrix[2] -= my_matrix[1] * (my_matrix[1]*my_matrix[2]);
+		my_matrix[2] = unit(my_matrix[2]);
 	}
 	
 	template<int S, typename A> inline static SO3 exp(const Vector<S,Precision,A>& vect);
