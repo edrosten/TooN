@@ -108,7 +108,7 @@ template <class Precision>
 inline std::istream& operator>>(std::istream& is, SE2<Precision>& rhs){
 	for(int i=0; i<2; i++)
 		is >> rhs.get_rotation().my_matrix[i].ref() >> rhs.get_translation()[i];
-	SO2<Precision>::coerce(rhs.get_rotation().my_matrix);
+	rhs.get_rotation().coerce();
 	return is;
 }
 

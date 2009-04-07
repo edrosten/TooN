@@ -158,6 +158,8 @@ void test_so3(){
     cout << "set from matrix (uses coerce)\n" << m << "\n";
     r = m;
     cout << r << endl;
+    TooN::SO3<> r5(m);
+    cout << r5 << endl;
 
     cout << "read from istream\n";
     istringstream is("0 -1 0 1 0 0 0 0 1");

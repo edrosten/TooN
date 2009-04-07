@@ -167,6 +167,7 @@ inline std::istream& operator>>(std::istream& is, SE3<Precision>& rhs){
 	for(int i=0; i<3; i++){
 		is >> rhs.get_rotation().my_matrix[i].ref() >> rhs.get_translation()[i];
 	}
+	rhs.get_rotation().coerce();
 	return is;
 }
 

@@ -46,7 +46,7 @@ public:
 	SO3(const Vector<S, P, A> & v) { *this = exp(v); }
 	
 	template <int R, int C, typename P, typename A>
-	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; coerce();}
+	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
 	
 	template <int R, int C, typename P, typename A>
 	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
@@ -56,6 +56,7 @@ public:
 	}
 	
 	void coerce() {
+		my_matrix[0] = unit(my_matrix[0]);
 		my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
 		my_matrix[1] = unit(my_matrix[1]);
 		my_matrix[2] -= my_matrix[0] * (my_matrix[0]*my_matrix[2]);
@@ -105,6 +106,7 @@ inline std::ostream& operator<< (std::ostream& os, const SO3<Precision>& rhs){
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 	return is >> rhs.my_matrix;
+	rhs.coerce();
 }
 
 template <typename Precision, typename VA, typename MA>

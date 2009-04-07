@@ -48,17 +48,14 @@ public:
 	template <int R, int C, typename P, typename A> 
 	inline SO2& operator=(const Matrix<R,C,P,A>& rhs){
 		my_matrix = rhs;
-		coerce(my_matrix);
+		coerce();
 		return *this;
 	}
 
-	template <int R, int C, typename P, typename A> 
-	static inline void coerce(Matrix<R,C,P,A>& M){
-		SizeMismatch<2,R>::test(2, M.num_rows());
-		SizeMismatch<2,C>::test(2, M.num_cols());
-		M[0] = unit(M[0]);
-		M[1] -= M[0] * (M[0]*M[1]);
-		M[1] = unit(M[1]);
+	void coerce(){
+		my_matrix[0] = unit(my_matrix[0]);
+		my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
+		my_matrix[1] = unit(my_matrix[1]);
 	}
 
 	inline static SO2 exp(const Precision & d){
@@ -105,7 +102,7 @@ inline std::ostream& operator<< (std::ostream& os, const SO2<Precision> & rhs){
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO2<Precision>& rhs){
 	return is >> rhs.my_matrix;
-	SO2<Precision>::coerce(rhs.my_matrix);
+	rhs.coerce();
 }
 
 template<int D, typename P1, typename PV, typename Accessor>
