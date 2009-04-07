@@ -1,4 +1,4 @@
-
+// -*- c++ -*-
 /*                       
 	 Copyright (C) 2005,2009 Tom Drummond, E. Rosten
 
@@ -39,11 +39,17 @@ namespace TooN {
 				m[i][j] = p;
 	}
 
+	template<int Size, class Precision, class Base> inline Precision norm(const Vector<Size, Precision, Base>& v)
+	{
+		using std::sqrt;
+		return sqrt(v*v);
+	}
+
 	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
-		{
-			using std::sqrt;
-			return v/sqrt(v*v);
-		}
+	{
+		using std::sqrt;
+		return v * (1/sqrt(v*v));
+	}
 
 	template<int Size, typename Precision, typename Base> inline Vector<Size-1, Precision> project( const Vector<Size, Precision, Base> & v){
 		return v.template slice<0,Size-1>() / v[Size-1];
