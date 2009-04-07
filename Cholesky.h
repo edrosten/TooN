@@ -20,7 +20,7 @@
 #ifndef CHOLESKY_H
 #define CHOLESKY_H
 
-#include <TooN/lapack.h>
+// #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
@@ -29,6 +29,86 @@
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
 #endif 
+
+
+
+	// Tom's attempt using the non-sqrt version of the decomposition
+	// symmetric M = L*D*L.T()
+template <int Size, class Precision=double>
+class Cholesky {
+public:
+	Cholesky(){}
+
+	template<class P2, class B2>
+	Cholesky(const Matrix<Size, Size, P2, B2>& m)
+		: my_cholesky(m) {
+		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
+		compute(m);
+	}
+	
+	// for Size=Dynamic
+	Cholesky(int size) : my_cholesky(size,size) {}
+
+
+	template<class P2, class B2> void compute(const Matrix<Size, Size, P2, B2>& m){
+		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
+		SizeMismatch<Size,Size>::test(m.num_rows(), my_cholesky.num_rows());
+		my_cholesky=m;
+		int size=my_cholesky.num_rows();
+		for(int col=0; col<size; col++){
+			for(int row=col; row < size; row++){
+				// correct for the parts of cholesky already computed
+				Precision val = my_cholesky(row,col);
+				for(int col2=0; col2<col; col2++){
+					val-=my_cholesky(col,col2)*my_cholesky(row,col2)*my_cholesky(col2,col2);
+				}
+				if(row>col){
+					// and divide my the diagonal element
+					my_cholesky(row,col)=val/my_cholesky(col,col);
+				} else {
+					// don't divide for the diagonal element
+					my_cholesky(row,col)=val;
+				}
+			}
+		}
+	}
+
+	template<int Size2, class P2, class B2>
+	Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) {
+		int size=my_cholesky.num_rows();
+		SizeMismatch<Size,Size2>::test(size, v.size());
+
+		// first backsub through L
+		Vector<Size, Precision> y(size);
+		for(int i=0; i<size; i++){
+			Precision val = v[i];
+			for(int j=0; j<i; j++){
+				val -= my_cholesky(i,j)*y[j];
+			}
+			y[i]=val;
+		}
+		
+		// backsub through diagonal
+		for(int i=0; i<size; i++){
+			y[i]/=my_cholesky(i,i);
+		}
+
+		// backsub through L.T()
+		Vector<Size,Precision> result(size);
+		for(int i=size-1; i>=0; i--){
+			Precision val = y[i];
+			for(int j=i+1; j<size; j++){
+				val -= my_cholesky(j,i)*result[j];
+			}
+			result[i]=val;
+		}
+
+		return result;
+	}
+
+	Matrix<Size,Size,Precision> my_cholesky;
+};
+
 
 #if 0  // should be removed and possibly replaced with wls_cholesky implementation for small fixed sizes
     namespace util {
@@ -442,8 +522,7 @@ namespace TooN {
 		int rank;
     };
   
-
-#endif
+	// #endif
 
 template <int Size = -1, typename Precision = double>
 class Cholesky {
@@ -511,6 +590,8 @@ private:
 	Matrix<Size, Size, Precision> L;
 	mutable int info;
 };
+
+#endif
 
 #ifndef TOON_NO_NAMESPACE
 }
