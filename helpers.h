@@ -287,5 +287,25 @@ namespace TooN {
 			result = result * result;
 		return result;
 	}
+	
+	/// Returns true if every element is finite
+	template<int S, class P, class B> bool isfinite(const Vector<S, P, B>& v)
+	{ 
+		using std::isfinite;
+		for(int i=0; i < v.size(); i++)
+			if(!isfinite(v[i]))
+				return 0;
+		return 1;
+	}
+
+	/// Returns true if any element is NaN
+	template<int S, class P, class B> bool isnan(const Vector<S, P, B>& v)
+	{ 
+		using std::isnan;
+		for(int i=0; i < v.size(); i++)
+			if(isnan(v[i]))
+				return 1;
+		return 0;
+	}
 }
 #endif
