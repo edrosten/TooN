@@ -86,7 +86,7 @@ class LU {
   template <int Rows, class Base>
   Vector<Size,Precision> backsub(const Vector<Rows,Precision,Base>& rhs){
     //Check the number of rows is OK.
-    SizeMismatch<Size, Rows>::test(my_lu.num_rows(), rhs.num_rows());
+    SizeMismatch<Size, Rows>::test(my_lu.num_rows(), rhs.size());
 	
     Vector<Size, Precision> result(rhs);
 
@@ -95,8 +95,8 @@ class LU {
     double alpha=1;
     int lda=my_lu.num_rows();
     int ldb=1;
-    trsm_("R","U","N","N",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0][0],&ldb);
-    trsm_("R","L","N","U",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0][0],&ldb);
+    trsm_("R","U","N","N",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0],&ldb);
+    trsm_("R","L","N","U",&M,&N,&alpha,&my_lu[0][0],&lda,&result[0],&ldb);
 
     // now do the row swapping (lapack dlaswp.f only shuffles fortran rows = Rowmajor cols)
     for(int i=N-1; i>=0; i--){
