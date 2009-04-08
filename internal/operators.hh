@@ -112,6 +112,14 @@ Vector<Internal::Sizer<S1,S2>::size, typename Internal::SubtractType<P1, P2>::ty
 	return Operator<Internal::VPairwise<Internal::Subtract,S1,P1,B1,S2,P2,B2> >(v1,v2);
 }
 
+// diagmult Vector, Vector
+template <int S1, int S2, typename P1, typename P2, typename B1, typename B2>
+Vector<Internal::Sizer<S1,S2>::size, typename Internal::MultiplyType<P1,P2>::type> diagmult(const Vector<S1,P1,B1>& v1, const Vector<S2,P2,B2>& v2)
+{
+	SizeMismatch<S1,S2>::test(v1.size(),v2.size());
+	return Operator<Internal::VPairwise<Internal::Multiply,S1,P1,B1,S2,P2,B2> >(v1,v2);
+}
+
 template<int S, typename P, typename A>
 struct Operator<Internal::VNegate<S, P, A> > {
 	const Vector<S, P, A> & input;
@@ -339,8 +347,6 @@ Vector<R, typename Internal::MultiplyType<P1,P2>::type> operator*(const Vector<S
 	SizeMismatch<C,Size>::test(m.num_rows(), v.size());
 	return Operator<Internal::VectorMatrixMultiply<Size,P1,B1,R,C,P2,B2> >(v,m);
 }
-
-
 
 
 
