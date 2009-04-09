@@ -1,6 +1,7 @@
 #ifndef TOON_BRENT_H
 #define TOON_BRENT_H
 #include <TooN/TooN.h>
+#include <TooN/helpers.h>
 #include <limits>
 #include <cmath>
 #include <cstdlib>
@@ -9,6 +10,7 @@
 
 #include <pstreams/pstream.h>
 #include <sstream>
+#include <cctype>
 
 class Plotter
 {
@@ -35,25 +37,42 @@ class Plotter
 		
 		template<class C> Plotter& addpt(const C& pt)
 		{
+			using std::isfinite;
 			std::ostringstream o;
-			o << pt << std::endl;
+
+			if(isfinite(pt))
+				o << pt << std::endl;
+			else
+				skip();
+
 			pdata.back() += o.str();
 			return *this;
 		}
 		
 		template<class C> Plotter& addpt(C p1, C p2)
 		{
+			using std::isfinite;
 			std::ostringstream o;
-			o << p1 << " " << p2 << std::endl;
+
+			if(isfinite(p1) && isfinite(p2))
+				o << p1 << " " << p2 << std::endl;
+			else
+				skip();
+	
 			pdata.back() += o.str();
 			return *this;
 		}
 
 		template<class C> Plotter& addpt(const std::vector<C>& pt)
 		{
+			using std::isfinite;
 			std::ostringstream o;
 			for(unsigned int i=0; i < pt.size(); i++)
-				o << pt[i] << std::endl;
+				if(isfinite(pt[i]))
+					o << pt[i] << std::endl;
+				else
+					skip();
+
 			pdata.back() += o.str();
 			return *this;
 		}
@@ -66,20 +85,38 @@ class Plotter
 
 		void draw()
 		{
+			//Check for data
+			std::vector<int> have_data(plots.size());
 			for(unsigned int i=0; i < plots.size(); i++)
-			{
-				if(i == 0)
-					plot << "plot \"-\"";
-				else
-					plot << ", \"-\"";
+				for(unsigned int j=0; j < pdata[i].size(); j++)
+					if(!std::isspace(pdata[i][j]))
+					{
+						have_data[i] = 1;
+						break;
+					}
+				
 
-				if(plots[i] != "")
-					plot << " with " << plots[i];
-			}
+
+			
+			for(unsigned int i=0, first=1; i < plots.size(); i++)
+				if(have_data[i])
+				{
+					if(first)
+					{
+						plot << "plot \"-\"";
+						first=0;
+					}
+					else
+						plot << ", \"-\"";
+
+					if(plots[i] != "")
+						plot << " with " << plots[i];
+				}
 
 			plot << std::endl;
 			for(unsigned int i=0; i < plots.size(); i++)
-				plot << pdata[i] << "e\n";
+				if(have_data[i])
+					plot << pdata[i] << "e\n";
 			plot << std::flush;
 			
 			plots.clear();
@@ -126,6 +163,8 @@ namespace TooN
 			ymin = min(curve.back()[1], ymin);
 			ymax = max(curve.back()[1], ymax);
 		}
+		ymin -= (ymax - ymin)/10;
+		plot.s() << "set yrange [" << ymin << ":" << ymax << "]\n";
 
 		//The golden ratio:
 		const Precision g = (3.0 - sqrt(5))/2;
@@ -156,7 +195,7 @@ namespace TooN
 			
 			//Plot the line and the brackets
 			plot.newline("line lt 1").addpt(curve);
-			plot.newline("line lt 1").addpt(a, ymin).addpt(a, ymax).skip().addpt(b, ymin).addpt(b,ymax);
+			plot.newline("line lt 1").addpt(a-.01, ymin).addpt(a+.01, ymax).skip().addpt(b+.01, ymin).addpt(b-.01,ymax);
 			plot.newline("line lt 2").addpt(v, ymin).addpt(v,ymax).newline("points lt 2").addpt(v, fv); 
 			plot.newline("line lt 3").addpt(w, ymin).addpt(w,ymax).newline("points lt 3").addpt(w, fw); 
 			plot.newline("line lt 4").addpt(x, ymin).addpt(x,ymax).newline("points lt 4").addpt(x, fx); 
@@ -172,46 +211,54 @@ namespace TooN
 			//not attempt a parabolic fit. This prevents bad parabolic
 			//fits spoiling the convergence. Also, do not attempt to fit if
 			//there is not yet enough unique information in x, w, v.
-			if(abs(e) > tol1 && w != v&& 0)
+			if(abs(e) > tol1 && w != v)
 			{
+
+
 				cout << "  Attempting parabolic fit\n";
-				//Attempt a parabolic through the best 3 points. Imagine
-				//constructing a Vandermonde matrix for polynomial fitting,
-				//shifted so that x = 0, and f(x) = 0
-				// xw = w-x
-				// xv = v-x
-				//     [  1  0   0    ]
-				// V = [  1  xw  xw^2 ]
-				//     [  1  xv  xv^2 ]
+				//Attempt a parabolic through the best 3 points. The pdata is shifted
+				//so that x = 0 and f(x) = 0. The remaining parameters are:
 				//
-				// det(V) = xw*xv^2-xw^2*xv
+				// xw  = w'    = w-x
+				// fxw = f'(w) = f(w) - f(x)
 				//
-				// The polynomial coefficients will be:
-				//               [    0    ]
-				//  C = inv(V) * [ fw - fx ]
-				//               [ fv - fx ]
-				//
-				// If the polynmial is y=c_1 x^2 + c_2 x + c_3, then the minimum is at -c_2/2c_3
-				// Which is clearly independent of the determenant. The minimum is at -c'_2/2c'_3
-				// where C' = inv(V) * |V| * [ 0  fw-fx fv-fx]'
-				
+				// etc:
 				const Precision fxw = fw - fx;
 				const Precision fxv = fv - fx;
 				const Precision xw = w-x;
 				const Precision xv = v-x;
 
-				const Precision c1 = fxw*xv-fxv*xw;
-				const Precision c2 = -fxw*xv*xv+fxv*xw*xw;
+				//The parabolic fit has only second and first order coefficients:
+				const Precision c1 = (fxv*xw - fxw*xv) / (xw*xv*(xv-xw));
+				const Precision c2 = (fxw*xv*xv - fxv*xw*xw) / (xw*xv*(xv-xw));
+				
+				//The minimum is at -.5*c2 / c1;
+				//
+				//This can be written as p/q where:
+				const Precision p = fxv*xw*xw - fxw*xv*xv;
+				const Precision q = 2*(fxv*xw - fxw*xv);
 
-				cout << "   fit parameters: " << c1  << " " << c2 << endl;
 
-				//d is the distance offset
-				//d = -0.5 * c2 / c1;
-
-				const Precision newd = -0.5 * c2 / c1;
-
-				if(c1 == 0 || abs(newd) > abs(e)*2 || x + newd > b || x+newd < a)
+				std::vector<Vector<2> > parabola(curve);
+				for(unsigned int i=0; i < parabola.size(); i++)
 				{
+					double p = parabola[i][0] - x;
+					parabola[i][1] =  fx + p * c2 + p*p*c1;
+				}
+
+				plot.newline("points lt 5").addpt(x+p/q, -.5*c2*c2/c1 + -.5*c2/c1*-.5*c2/c1*c1 + fx);
+				
+				//The minimum is at p/q. The minimum must lie within the bracket for it
+				//to be accepted. 
+				// Also, we want the step to be smaller than half the old one. So:
+
+				cout << "Motion         " << e << " " << p/q << endl;
+
+				if(q == 0 || x + p/q < a || x+p/q > b || abs(p/q) > abs(e/2))
+				{
+					cout << "Rejecting parabolic fit\n";
+
+					plot.newline("line lt 6").addpt(parabola);
 					//Parabolic fit no good. Take a golden section step instead
 					//and reset d and e.
 					if(x > xm)
@@ -223,9 +270,11 @@ namespace TooN
 				}
 				else
 				{
+					cout << "Keeping parabolic fit\n";
+					plot.newline("line lt 5").addpt(parabola);
 					//Parabolic fit was good. Shift d and e
 					e = d;
-					d = newd;
+					d = p/q;
 				}
 			}
 			else
@@ -258,7 +307,7 @@ namespace TooN
 				//Shift v, w, x
 				v=w; fv = fw;
 				w=x; fw = fx;
-				x=u; fx = fv;
+				x=u; fx = fu;
 			}
 			else
 			{
@@ -282,7 +331,7 @@ namespace TooN
 				}
 			}
 			
-			cout << "Iteration end: " << a << " " << b << endl;
+			cout << "Iteration end: " << a << " " << b << " " << x << " " << fx << endl;
 
 			plot.draw();
 			std::cin.get();
