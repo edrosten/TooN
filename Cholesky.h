@@ -60,13 +60,16 @@ public:
 				// correct for the parts of cholesky already computed
 				Precision val = my_cholesky(row,col);
 				for(int col2=0; col2<col; col2++){
-					val-=my_cholesky(col,col2)*my_cholesky(row,col2)*my_cholesky(col2,col2);
+					// val-=my_cholesky(col,col2)*my_cholesky(row,col2)*my_cholesky(col2,col2);
+					val-=my_cholesky(col2,col)*my_cholesky(row,col2);
 				}
 				if(row==col){
 					// this is the diagonal element so don't divide
 					my_cholesky(row,col)=val;
 					inv_diag=1/val;
 				} else {
+					// cache the value without division in the upper half
+					my_cholesky(col,row)=val;
 					// divide my the diagonal element for all others
 					my_cholesky(row,col)=val*inv_diag;
 				}
