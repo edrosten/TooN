@@ -8,122 +8,6 @@
 #include <iomanip>
 
 
-#include <pstreams/pstream.h>
-#include <sstream>
-#include <cctype>
-
-class Plotter
-{
-	std::vector<std::string> plots, pdata;
-	redi::opstream plot;
-
-	public:
-		Plotter()
-		:plot("gnuplot")
-		{}
-
-
-		std::ostream& s()
-		{
-			return plot;
-		}
-
-		Plotter& newline(const std::string& ps)
-		{
-			plots.push_back(ps);
-			pdata.push_back("");
-			return *this;
-		}
-		
-		template<class C> Plotter& addpt(const C& pt)
-		{
-			using std::isfinite;
-			std::ostringstream o;
-
-			if(isfinite(pt))
-				o << pt << std::endl;
-			else
-				skip();
-
-			pdata.back() += o.str();
-			return *this;
-		}
-		
-		template<class C> Plotter& addpt(C p1, C p2)
-		{
-			using std::isfinite;
-			std::ostringstream o;
-
-			if(isfinite(p1) && isfinite(p2))
-				o << p1 << " " << p2 << std::endl;
-			else
-				skip();
-	
-			pdata.back() += o.str();
-			return *this;
-		}
-
-		template<class C> Plotter& addpt(const std::vector<C>& pt)
-		{
-			using std::isfinite;
-			std::ostringstream o;
-			for(unsigned int i=0; i < pt.size(); i++)
-				if(isfinite(pt[i]))
-					o << pt[i] << std::endl;
-				else
-					skip();
-
-			pdata.back() += o.str();
-			return *this;
-		}
-	
-		Plotter& skip()
-		{
-			pdata.back() += "\n";
-			return *this;
-		}
-
-		void draw()
-		{
-			//Check for data
-			std::vector<int> have_data(plots.size());
-			for(unsigned int i=0; i < plots.size(); i++)
-				for(unsigned int j=0; j < pdata[i].size(); j++)
-					if(!std::isspace(pdata[i][j]))
-					{
-						have_data[i] = 1;
-						break;
-					}
-				
-
-
-			
-			for(unsigned int i=0, first=1; i < plots.size(); i++)
-				if(have_data[i])
-				{
-					if(first)
-					{
-						plot << "plot \"-\"";
-						first=0;
-					}
-					else
-						plot << ", \"-\"";
-
-					if(plots[i] != "")
-						plot << " with " << plots[i];
-				}
-
-			plot << std::endl;
-			for(unsigned int i=0; i < plots.size(); i++)
-				if(have_data[i])
-					plot << pdata[i] << "e\n";
-			plot << std::flush;
-			
-			plots.clear();
-			pdata.clear();
-		}
-};
-
 namespace TooN
 {
 	using std::numeric_limits;
@@ -147,24 +31,6 @@ namespace TooN
 		using std::max;
 
 		using std::abs;
-		using std::cout;
-		using std::endl;
-
-		Plotter plot;
-
-		plot.s() << "set nokey\n";
-
-		std::vector<Vector<2> > curve;
-		double ymin=1e99, ymax=-1e99;
-
-		for(double xx=a-.2; xx < b+.2; xx+= (b-a)/1000)
-		{
-			curve.push_back(makeVector(xx, func(xx)));
-			ymin = min(curve.back()[1], ymin);
-			ymax = max(curve.back()[1], ymax);
-		}
-		ymin -= (ymax - ymin)/10;
-		plot.s() << "set yrange [" << ymin << ":" << ymax << "]\n";
 
 		//The golden ratio:
 		const Precision g = (3.0 - sqrt(5))/2;
@@ -191,15 +57,6 @@ namespace TooN
 
 		while(abs(b-a) > (abs(a) + abs(b)) * tolerance + epsilon && i < maxiterations)
 		{
-			cout << "Starting iteration " << i << endl;
-			
-			//Plot the line and the brackets
-			plot.newline("line lt 1").addpt(curve);
-			plot.newline("line lt 1").addpt(a-.01, ymin).addpt(a+.01, ymax).skip().addpt(b+.01, ymin).addpt(b-.01,ymax);
-			plot.newline("line lt 2").addpt(v, ymin).addpt(v,ymax).newline("points lt 2").addpt(v, fv); 
-			plot.newline("line lt 3").addpt(w, ymin).addpt(w,ymax).newline("points lt 3").addpt(w, fw); 
-			plot.newline("line lt 4").addpt(x, ymin).addpt(x,ymax).newline("points lt 4").addpt(x, fx); 
-
 			i++;
 			//The midpoint of the bracket
 			const Precision xm = (a+b)/2;
@@ -213,9 +70,6 @@ namespace TooN
 			//there is not yet enough unique information in x, w, v.
 			if(abs(e) > tol1 && w != v)
 			{
-
-
-				cout << "  Attempting parabolic fit\n";
 				//Attempt a parabolic through the best 3 points. The pdata is shifted
 				//so that x = 0 and f(x) = 0. The remaining parameters are:
 				//
@@ -229,8 +83,8 @@ namespace TooN
 				const Precision xv = v-x;
 
 				//The parabolic fit has only second and first order coefficients:
-				const Precision c1 = (fxv*xw - fxw*xv) / (xw*xv*(xv-xw));
-				const Precision c2 = (fxw*xv*xv - fxv*xw*xw) / (xw*xv*(xv-xw));
+				//const Precision c1 = (fxv*xw - fxw*xv) / (xw*xv*(xv-xw));
+				//const Precision c2 = (fxw*xv*xv - fxv*xw*xw) / (xw*xv*(xv-xw));
 				
 				//The minimum is at -.5*c2 / c1;
 				//
@@ -238,27 +92,12 @@ namespace TooN
 				const Precision p = fxv*xw*xw - fxw*xv*xv;
 				const Precision q = 2*(fxv*xw - fxw*xv);
 
-
-				std::vector<Vector<2> > parabola(curve);
-				for(unsigned int i=0; i < parabola.size(); i++)
-				{
-					double p = parabola[i][0] - x;
-					parabola[i][1] =  fx + p * c2 + p*p*c1;
-				}
-
-				plot.newline("points lt 5").addpt(x+p/q, -.5*c2*c2/c1 + -.5*c2/c1*-.5*c2/c1*c1 + fx);
-				
 				//The minimum is at p/q. The minimum must lie within the bracket for it
 				//to be accepted. 
 				// Also, we want the step to be smaller than half the old one. So:
 
-				cout << "Motion         " << e << " " << p/q << endl;
-
 				if(q == 0 || x + p/q < a || x+p/q > b || abs(p/q) > abs(e/2))
 				{
-					cout << "Rejecting parabolic fit\n";
-
-					plot.newline("line lt 6").addpt(parabola);
 					//Parabolic fit no good. Take a golden section step instead
 					//and reset d and e.
 					if(x > xm)
@@ -270,8 +109,6 @@ namespace TooN
 				}
 				else
 				{
-					cout << "Keeping parabolic fit\n";
-					plot.newline("line lt 5").addpt(parabola);
 					//Parabolic fit was good. Shift d and e
 					e = d;
 					d = p/q;
@@ -279,7 +116,6 @@ namespace TooN
 			}
 			else
 			{
-				cout << "  Going for gold\n";
 				//Don't attempt a parabolic fit. Take a golden section step
 				//instead and reset d and e.
 				if(x > xm)
@@ -330,11 +166,6 @@ namespace TooN
 					v = u; fv = fu;
 				}
 			}
-			
-			cout << "Iteration end: " << a << " " << b << " " << x << " " << fx << endl;
-
-			plot.draw();
-			std::cin.get();
 		}
 
 		return makeVector(x, fx);
