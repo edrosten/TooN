@@ -1,4 +1,4 @@
-#include <TooN/optimization/golden_section.h>
+#include <TooN/optimization/brent.h>
 #include <utility>
 #include <cmath>
 #include <cassert>
@@ -156,11 +156,12 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	Precision old_y;     ///< Function at  old_x
 
 	Precision tolerance; ///< Tolerance used to determine if the optimization is complete. Defaults to square root of machine precision.
-	Precision epsilon;   ///< Additive term in tolerance to prevent excessive iterations if \f$x_\mathrm{optimal} = 0\f$. Known as \c ZEPS in numerical recipies.
+	Precision epsilon;   ///< Additive term in tolerance to prevent excessive iterations if \f$x_\mathrm{optimal} = 0\f$. Known as \c ZEPS in numerical recipies. Defaults to 1e-20
 	int       max_iterations; ///< Maximum number of iterations. Defaults to \c size\f$*100\f$
 
 	Precision bracket_initial_lambda;///< Initial stepsize used in bracketing the minimum for the line search. Defaults to 1.
 	Precision linesearch_tolerance; ///< Tolerance used to determine if the linesearch is complete. Defaults to square root of machine precision.
+	Precision linesearch_epsilon; ///< Additive term in tolerance to prevent excessive iterations if \f$x_\mathrm{optimal} = 0\f$. Known as \c ZEPS in numerical recipies. Defaults to 1e-20
 	int linesearch_max_iterations;  ///< Maximum number of iterations in the linesearch. Defaults to 100.
 
 	int iterations; ///< Number of iterations performed
@@ -188,6 +189,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		bracket_initial_lambda = 1;
 
 		linesearch_tolerance =  sqrt(numeric_limits<Precision>::epsilon());
+		linesearch_epsilon = 1e-20;
 		linesearch_max_iterations=100;
 
 		iterations=0;
@@ -227,7 +229,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		assert(a_val > b_val && b_val < c_val);
 		
 		//Find the real minimum
-		Vector<2, Precision>  m = golden_section_search(a, b, c, b_val, line, linesearch_max_iterations); 
+		Vector<2, Precision>  m = brent_line_search(a, b, c, b_val, line, linesearch_max_iterations, linesearch_tolerance, linesearch_epsilon); 
 	
 		assert(m[0] >= a && m[0] <= c);
 		assert(m[1] <= b_val);
