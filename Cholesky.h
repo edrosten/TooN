@@ -20,11 +20,7 @@
 #ifndef CHOLESKY_H
 #define CHOLESKY_H
 
-// #include <TooN/lapack.h>
-
 #include <TooN/TooN.h>
-#include <TooN/helpers.h>
-#include <limits>
 
 #ifndef TOON_NO_NAMESPACE
 namespace TooN {
@@ -32,8 +28,10 @@ namespace TooN {
 
 
 
-	// Tom's attempt using the non-sqrt version of the decomposition
-	// symmetric M = L*D*L.T()
+/// Cholesky decomposition of a symmetric matrix.
+/// Only the lower half of the matrix is considered
+/// This uses the non-sqrt version of the decomposition
+/// giving symmetric M = L*D*L.T() where the diagonal of L contains ones
 template <int Size, class Precision=double>
 class Cholesky {
 public:
