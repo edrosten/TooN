@@ -2,7 +2,7 @@
 
 //     Copyright (C) 2009 Tom Drummond (twd20@cam.ac.uk)
 //
-// This file is part of the GNU ISO C++ Library.  This library is free
+// This file is part of the TooN Library.  This library is free
 // software; you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the
 // Free Software Foundation; either version 2, or (at your option)
