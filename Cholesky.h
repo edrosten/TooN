@@ -43,8 +43,14 @@ namespace TooN {
 /// Only the lower half of the matrix is considered
 /// This uses the non-sqrt version of the decomposition
 /// giving symmetric M = L*D*L.T() where the diagonal of L contains ones
-template <int Size, class Precision=double>
-class Cholesky {
+/// @param Size the size of the matrix
+/// @param Cols also the size of the matrix (there to make Cholesky conform to other decompositions)
+/// @param Precision the precision of the entries in the matrix and its decomposition
+template <int Size=Dynamic, int Cols=Size, class Precision=double>
+class Cholesky;
+
+template <int Size, class Precision>
+class Cholesky<Size, Size, Precision> {
 public:
 	Cholesky(){}
 
