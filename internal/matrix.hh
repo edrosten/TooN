@@ -12,6 +12,19 @@ public:
 		
 	Matrix(){}
 
+	Matrix(int rows, int cols) :
+		Layout::template Layout<Rows,Cols,Precision>(rows, cols)
+	{}
+
+	Matrix(Precision* p) :
+		Layout::template Layout<Rows, Cols, Precision>(p)
+	{}
+
+	Matrix(Precision* p, int r, int c) :
+		Layout::template Layout<Rows, Cols, Precision>(p, r, c)
+	{}
+
+
 	//The stride is always passed during a slice. If it is not
 	//needed, it will be ignored later and not stored.
 	Matrix(Precision* data, int rowstride, int colstride, Internal::Slicing)
@@ -20,15 +33,13 @@ public:
 	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Internal::Slicing)
 	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
 
-	Matrix(int rows, int cols)
-	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
-	{}
+
 	
 	// Pass on a generic struct holding data about a slice
-	template<class C> 
-	Matrix(Precision* data, const SliceSpec<C>& slice)
-	:Layout::template Layout<Rows,Cols,Precision>(data, slice)
-	{}
+// 	template<class C> 
+// 	Matrix(Precision* data, const SliceSpec<C>& slice)
+// 	:Layout::template Layout<Rows,Cols,Precision>(data, slice)
+// 	{}
 
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.

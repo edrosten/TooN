@@ -1,3 +1,4 @@
+// -*- c++ -*-
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -9,12 +10,16 @@ namespace Reference
 
 	struct RowMajor
 	{
-		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >
+		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, Internal::MatrixSlice<Rows, Cols, Precision> >
 		{
-			template<class T> Layout(Precision* p, SliceSpec<T> spec)
-			:Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >(p, spec)
-			{
-			}
+			Layout(Precision* p, int r=0, int c=0)
+				: Internal::GenericMBase<Rows,Cols,Precision, (Cols==-1?-2:Cols), 1, Internal::MatrixSlice<Rows, Cols, Precision> > (p, r, c, 0, 0)
+			{}
+
+// 			template<class T> Layout(Precision* p, SliceSpec<T> spec)
+// 			:Internal::GenericMBase<Rows, Cols, Precision, (Rows==-1?-2:Rows), 1, Internal::MatrixSlice<Rows, Cols, Precision> >(p, spec)
+// 			{
+// 			}
 		};
 	};
 
@@ -22,21 +27,18 @@ namespace Reference
 	{
 		template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >
 		{
-			template<class T> Layout(Precision* p, SliceSpec<T> spec)
-			:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >(p, spec)
-			{
-			}
+			Layout(Precision* p, int r=0, int c=0)
+				: Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixSlice<Rows, Cols, Precision> >(p, r, c, 0, 0)
+			{}
 		};
 	};
 }
-
 
 template<int R, int C, typename Precision=double, class Type=Reference::RowMajor> struct Wrap
 {
 	static Matrix<R, C, Precision, Type> wrap(Precision* p)
 	{
-		SliceSpec<Internal::Spec_____> s;
-		return Matrix<R, C, Precision, Type>(p, s);
+		return Matrix<R, C, Precision, Type>(p);
 	}
 };
 
@@ -45,9 +47,7 @@ template<int R, typename Precision, class Type> struct Wrap<R, Dynamic, Precisio
 {
 	static Matrix<R, Dynamic, Precision, Type> wrap(Precision* p, int cols)
 	{
-		SliceSpec<Internal::Spec__C__> s;
-		s.c = cols;
-		return Matrix<R, Dynamic, Precision, Type>(p, s);
+		return Matrix<R, Dynamic, Precision, Type>(p, 0, cols);
 	}
 };
 
@@ -56,9 +56,7 @@ template<int C, typename Precision, class Type> struct Wrap<Dynamic, C, Precisio
 {
 	static Matrix<Dynamic, C, Precision, Type> wrap(Precision* p, int rows)
 	{
-		SliceSpec<Internal::Spec_R___> s;
-		s.r = rows;
-		return Matrix<Dynamic, C, Precision, Type>(p, s);
+		return Matrix<Dynamic, C, Precision, Type>(p, rows, 0);
 	}
 };
 
@@ -67,10 +65,7 @@ template<typename Precision, class Type> struct Wrap<Dynamic, Dynamic, Precision
 {
 	static Matrix<Dynamic, Dynamic, Precision, Type> wrap(Precision* p, int rows, int cols)
 	{
-		SliceSpec<Internal::Spec_RC__> s;
-		s.r = rows;
-		s.c = cols;
-		return Matrix<Dynamic, Dynamic, Precision, Type>(p, s);
+		return Matrix<Dynamic, Dynamic, Precision, Type>(p, rows, cols);
 	}
 };
 
