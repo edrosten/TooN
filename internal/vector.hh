@@ -1,22 +1,22 @@
 //-*- c++ -*-
 template<int Size=-1, typename Precision=double, typename Base=Internal::VBase>
-class Vector : public Base::template Layout<Size, Precision> {
+class Vector : public Base::template VLayout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
 	inline Vector(){}
-	// inline Vector(Precision* data) : Base::template Layout<Size, Precision> (data) {}
-	inline Vector(int size_in) : Base::template Layout<Size, Precision>(size_in) {}
-	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template Layout<Size, Precision>(data_in, size_in, stride_in) {}
+	// inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
+	inline Vector(int size_in) : Base::template VLayout<Size, Precision>(size_in) {}
+	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
 	
-	using Base::template Layout<Size, Precision>::size;
+	using Base::template VLayout<Size, Precision>::size;
 
 	// constructors to allow return value optimisations
 	// construction from 0-ary operator
 	template <class Op>
 	inline Vector(const Operator<Op>& op)
-		: Base::template Layout<Size, Precision> (op)
+		: Base::template VLayout<Size, Precision> (op)
 	{
 		op.eval(*this);
 	}
@@ -24,14 +24,14 @@ public:
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
-	inline Vector(const T& arg, int size, const Operator<Op>&) : Base::template Layout<Size, Precision>(size) {
+	inline Vector(const T& arg, int size, const Operator<Op>&) : Base::template VLayout<Size, Precision>(size) {
 		Op::eval(*this,arg);
 	}
 
 	// constructor from 2-ary operator
 	template <class LHS, class RHS, class Op>
 	inline Vector(const LHS& lhs, const RHS& rhs, int size, const Operator<Op>&)
-		: Base::template Layout<Size, Precision>(size) {
+		: Base::template VLayout<Size, Precision>(size) {
 		Op::eval(*this,lhs,rhs);
 	}
 
@@ -47,7 +47,7 @@ public:
 	// constructor from arbitrary vector
 	template<int Size2, typename Precision2, typename Base2>
 	inline Vector(const Vector<Size2,Precision2,Base2>& from):
-		Base::template Layout<Size, Precision>(from.size()) {
+		Base::template VLayout<Size, Precision>(from.size()) {
 		operator=(from);
 	}
 

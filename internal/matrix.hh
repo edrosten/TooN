@@ -1,37 +1,36 @@
 template <int Rows=-1, int Cols=Rows, class Precision=double, class Layout = RowMajor>
-class Matrix : public Layout::template Layout<Rows, Cols, Precision>
+class Matrix : public Layout::template MLayout<Rows, Cols, Precision>
 {
 public:
 
-	using Layout::template Layout<Rows, Cols, Precision>::my_data;
-
-	using Layout::template Layout<Rows, Cols, Precision>::num_rows;
-	using Layout::template Layout<Rows, Cols, Precision>::num_cols;
+	using Layout::template MLayout<Rows, Cols, Precision>::my_data;
+	using Layout::template MLayout<Rows, Cols, Precision>::num_rows;
+	using Layout::template MLayout<Rows, Cols, Precision>::num_cols;
 
 	//Use Tom's sneaky constructor hack...
 	Matrix(){}
 
 	Matrix(int rows, int cols) :
-		Layout::template Layout<Rows,Cols,Precision>(rows, cols)
+		Layout::template MLayout<Rows,Cols,Precision>(rows, cols)
 	{}
 
 	Matrix(Precision* p) :
-		Layout::template Layout<Rows, Cols, Precision>(p)
+		Layout::template MLayout<Rows, Cols, Precision>(p)
 	{}
 
 	Matrix(Precision* p, int r, int c) :
-		Layout::template Layout<Rows, Cols, Precision>(p, r, c)
+		Layout::template MLayout<Rows, Cols, Precision>(p, r, c)
 	{}
 
 	// Internal constructor used by GenericMBase::slice(...)
 	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Internal::Slicing)
-	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
+	:Layout::template MLayout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
 
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
 	template <class Op>
 	inline Matrix(const Operator<Op>& op)
-		:Layout::template Layout<Rows,Cols,Precision>(op)
+		:Layout::template MLayout<Rows,Cols,Precision>(op)
 	{
 		op.eval(*this);
 	}
@@ -40,7 +39,7 @@ public:
 	// construction from 1-ary operator
 	template <class T, class Op>
 	inline Matrix(const T& arg, int rows, int cols, const Operator<Op>&) 
-	:Layout::template Layout<Rows,Cols,Precision>(rows, cols) 
+	:Layout::template MLayout<Rows,Cols,Precision>(rows, cols) 
 	{
 	    Op::eval(*this,arg);
 	}
@@ -48,7 +47,7 @@ public:
 	// constructor from 2-ary operator
 	template <class LHS, class RHS, class Op>
 	inline Matrix(const LHS& lhs, const RHS& rhs, int rows, int cols, const Operator<Op>&)
-	:Layout::template Layout<Rows,Cols,Precision>(rows, cols)
+	:Layout::template MLayout<Rows,Cols,Precision>(rows, cols)
 	{
 	    Op::eval(*this,lhs,rhs);
 	}
@@ -56,7 +55,7 @@ public:
 	// constructor from arbitrary matrix
 	template<int Rows2, int Cols2, typename Precision2, typename Base2>
 	inline Matrix(const Matrix<Rows2, Cols2,Precision2,Base2>& from)
-	:Layout::template Layout<Rows,Cols,Precision>(from.num_rows(), from.num_cols())
+	:Layout::template MLayout<Rows,Cols,Precision>(from.num_rows(), from.num_cols())
 	{
 	    operator=(from);
 	}

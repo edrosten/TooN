@@ -1,3 +1,5 @@
+// -*- c++ -*-
+
 namespace Internal
 {
 // As usual, a positive integer means static and -1 means dynamic.
@@ -13,9 +15,9 @@ template<int, int, class, int, int, class> class GenericMBase;
 template<int RowStride, int ColStride> struct Slice
 {
   
-	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, RowStride, ColStride, MatrixSlice<Rows, Cols, Precision> >
+	template<int Rows, int Cols, class Precision> struct MLayout: public GenericMBase<Rows, Cols, Precision, RowStride, ColStride, MatrixSlice<Rows, Cols, Precision> >
 	{
-		Layout(Precision* p, int rows, int cols, int rowstride, int colstride)
+		MLayout(Precision* p, int rows, int cols, int rowstride, int colstride)
 			:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, rowstride, colstride)
 		{
 		}
@@ -151,18 +153,18 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 //
 struct RowMajor
 {
-	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >
+	template<int Rows, int Cols, class Precision> struct MLayout: public Internal::GenericMBase<Rows, Cols, Precision, (Cols==-1?-2:Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >
 	{
 		//Optional constructors.
 		
-		Layout(){}
+		MLayout(){}
 
-		Layout(int rows, int cols)
+		MLayout(int rows, int cols)
 			:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
 
 		template<class Op>
-		Layout(const Operator<Op>& op)
+		MLayout(const Operator<Op>& op)
 			:Internal::GenericMBase<Rows, Cols, Precision, (Cols == -1 ? -2 : Cols), 1, Internal::MatrixAlloc<Rows, Cols, Precision> >(op)
 		{}
 
@@ -171,18 +173,18 @@ struct RowMajor
 
 struct ColMajor
 {
-	template<int Rows, int Cols, class Precision> struct Layout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >
+	template<int Rows, int Cols, class Precision> struct MLayout: public Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows==-1?-2:Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >
 	{
 		//Optional constructors.
 		
-		Layout(){}
+		MLayout(){}
 
-		Layout(int rows, int cols)
+		MLayout(int rows, int cols)
 		:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(rows, cols)
 		{}
 
 		template<class Op>
-		Layout(const Operator<Op>& op)
+		MLayout(const Operator<Op>& op)
 			:Internal::GenericMBase<Rows, Cols, Precision, 1, (Rows == -1 ? -2 : Rows), Internal::MatrixAlloc<Rows, Cols, Precision> >(op)
 		{}
 

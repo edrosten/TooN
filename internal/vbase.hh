@@ -1,3 +1,5 @@
+// -*- c++ -*-
+
 namespace Internal{
 template<int Size, class Precision, int Stride, class Mem> struct GenericVBase;
 
@@ -12,20 +14,20 @@ struct SliceVBase {
 
 	// this class is really just a typedef
 	template<int Size, typename Precision>
-	struct Layout
+	struct VLayout
 		: public GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> > {
 	
 
-		Layout(Precision* d, int stride)
+		VLayout(Precision* d, int stride)
 			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, stride){
 		}
 
-		Layout(Precision* d, int length, int stride)
+		VLayout(Precision* d, int length, int stride)
 			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, length, stride){
 		}
 
 		template<class Op>
-		Layout(const Operator<Op>& op)
+		VLayout(const Operator<Op>& op)
 			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(op) {}
 	};
 
@@ -40,17 +42,17 @@ struct VBase {
 
 	// this class is really just a typedef
 	template<int Size, class Precision>
-	struct Layout 
+	struct VLayout 
 		: public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
 	
-		Layout(){}
+		VLayout(){}
 
-		Layout(int s)
+		VLayout(int s)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
 		{}
 
 		template<class Op>
-		Layout(const Operator<Op>& op)
+		VLayout(const Operator<Op>& op)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(op) {}
 	};
 };
