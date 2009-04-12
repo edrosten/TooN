@@ -9,7 +9,6 @@ public:
 	using Layout::template Layout<Rows, Cols, Precision>::num_cols;
 
 	//Use Tom's sneaky constructor hack...
-		
 	Matrix(){}
 
 	Matrix(int rows, int cols) :
@@ -24,22 +23,9 @@ public:
 		Layout::template Layout<Rows, Cols, Precision>(p, r, c)
 	{}
 
-
-	//The stride is always passed during a slice. If it is not
-	//needed, it will be ignored later and not stored.
-	Matrix(Precision* data, int rowstride, int colstride, Internal::Slicing)
-	:Layout::template Layout<Rows, Cols, Precision>(data, rowstride, colstride){}
-
+	// Internal constructor used by GenericMBase::slice(...)
 	Matrix(Precision* data, int rows, int cols, int rowstride, int colstride, Internal::Slicing)
 	:Layout::template Layout<Rows, Cols, Precision>(data, rows, cols, rowstride, colstride){}
-
-
-	
-	// Pass on a generic struct holding data about a slice
-// 	template<class C> 
-// 	Matrix(Precision* data, const SliceSpec<C>& slice)
-// 	:Layout::template Layout<Rows,Cols,Precision>(data, slice)
-// 	{}
 
 	//See vector.hh and allocator.hh for details about why the
 	//copy constructor should be default.
@@ -49,6 +35,7 @@ public:
 	{
 		op.eval(*this);
 	}
+
 	// constructors to allow return value optimisations
 	// construction from 1-ary operator
 	template <class T, class Op>
