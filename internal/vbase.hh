@@ -17,11 +17,6 @@ struct SliceVBase {
 	struct VLayout
 		: public GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> > {
 	
-
-		VLayout(Precision* d, int stride)
-			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, stride){
-		}
-
 		VLayout(Precision* d, int length, int stride)
 			:GenericVBase<Size, Precision, Stride, VectorSlice<Size, Precision> >(d, length, stride){
 		}
