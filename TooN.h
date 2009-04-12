@@ -56,7 +56,7 @@ namespace TooN
 	
 	#include <TooN/internal/mbase.hh>
 	#include <TooN/internal/matrix.hh>
-	#include <TooN/internal/foreign_matrix.hh>
+	#include <TooN/internal/reference.hh>
 
 	#include <TooN/internal/make_vector.hh>
 	#include <TooN/internal/operators.hh>
