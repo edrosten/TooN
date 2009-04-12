@@ -15,12 +15,6 @@ template<int RowStride, int ColStride> struct Slice
   
 	template<int Rows, int Cols, class Precision> struct Layout: public GenericMBase<Rows, Cols, Precision, RowStride, ColStride, MatrixSlice<Rows, Cols, Precision> >
 	{
-		//Optional constructors.
-// 		Layout(Precision* p, int rowstride, int colstride)
-// 			:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rowstride, colstride, Internal::SpecifyStride())
-// 		{
-// 		}
-		
 		Layout(Precision* p, int rows, int cols, int rowstride, int colstride)
 			:GenericMBase<Rows,Cols,Precision,RowStride,ColStride,MatrixSlice<Rows, Cols, Precision> >(p, rows, cols, rowstride, colstride)
 		{
@@ -61,16 +55,6 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	:Mem(p)
 	{}
 
-	//Both size and stride require two integer parameters.
-	//In the case where only one is required, the meaning is 
-	//ambiguous. Therefore a tag is used to specify the meaning.
-// 	GenericMBase(Precision* p, int r, int c, Internal::SpecifySize)
-// 	:Mem(p, r, c)
-// 	{}
-
-// 	GenericMBase(Precision* p, int rs, int cs, Internal::SpecifyStride)
-// 	:Mem(p),RowStrideHolder<RowStride>(rs),ColStrideHolder<ColStride>(cs) {}
-
 
 	GenericMBase(Precision* p, int r, int c, int rowstride, int colstride)
 	:Mem(p, r, c),
@@ -87,25 +71,6 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 		  RowStrideHolder<RowStride>(op),
 		  ColStrideHolder<ColStride>(op)
 	{}
-
-	//Unpack slice specifications in to specific constructors
-	//These slice specifications are not allowed to ignore superfluous data.
-// 	GenericMBase(Precision* p, const Spec_____& s):Mem(p                    )                                                                                                              {}
-// 	GenericMBase(Precision* p, const Spec____C& s):Mem(p                    )                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec___R_& s):Mem(p                    ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
-// 	GenericMBase(Precision* p, const Spec___RC& s):Mem(p                    ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec__C__& s):Mem(p, s.c ,SpecifyCols())                                                                                                              {}
-// 	GenericMBase(Precision* p, const Spec__C_C& s):Mem(p, s.c, SpecifyCols())                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec__CR_& s):Mem(p, s.c, SpecifyCols()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
-// 	GenericMBase(Precision* p, const Spec__CRC& s):Mem(p, s.c, SpecifyCols()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec_R___& s):Mem(p, s.r, SpecifyRows())                                                                                                              {}
-// 	GenericMBase(Precision* p, const Spec_R__C& s):Mem(p, s.r, SpecifyRows())                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec_R_R_& s):Mem(p, s.r, SpecifyRows()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
-// 	GenericMBase(Precision* p, const Spec_R_RC& s):Mem(p, s.r, SpecifyRows()), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec_RC__& s):Mem(p, s.r, s.c          )                                                                                                              {}
-// 	GenericMBase(Precision* p, const Spec_RC_C& s):Mem(p, s.r, s.c          )                                                        ,ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
-// 	GenericMBase(Precision* p, const Spec_RCR_& s):Mem(p, s.r, s.c          ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore())                                                      {}
-// 	GenericMBase(Precision* p, const Spec_RCRC& s):Mem(p, s.r, s.c          ), RowStrideHolder<RowStride>(s.rs, Internal::NoIgnore()),ColStrideHolder<ColStride>(s.cs,Internal::NoIgnore()){}
 
 	using Mem::my_data;
 	using Mem::num_cols;
@@ -137,11 +102,11 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice()
 	{
-		//Always pass the stride as a run-time parameter. It will be ignored
+		//Always pass the size and stride as a run-time parameter. It will be ignored
 		//by SliceHolder (above) if it is statically determined.
 		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
 		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(my_data+rowstride()*Rstart + colstride()*Cstart, rowstride(), colstride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(my_data+rowstride()*Rstart + colstride()*Cstart, Rlength, Clength, rowstride(), colstride(), Slicing());
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
@@ -149,7 +114,7 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	{
 		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
 		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(const_cast<Precision*>(my_data+rowstride()*Rstart + colstride()*Cstart), rowstride(), colstride(), Slicing());
+		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(const_cast<Precision*>(my_data+rowstride()*Rstart + colstride()*Cstart), Rlength, Clength, rowstride(), colstride(), Slicing());
 	}
 
 	Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl){
