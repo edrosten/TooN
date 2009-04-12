@@ -30,4 +30,8 @@ int main()
 	cout << Wrap<Dynamic,3,double,Reference::ColMajor>::wrap(data,2) << endl;
 	cout << Wrap<Dynamic, Dynamic,double,Reference::ColMajor>::wrap(data,2,3) << endl;
 
+
+	cout << Vector<6,double,Reference> (data) << endl;
+	cout << Vector<-1,double,Reference> (data,6) << endl;
+
 };
