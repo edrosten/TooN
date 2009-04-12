@@ -159,9 +159,6 @@ template<int S> struct RowSizeHolder: private SizeHolder<S>
 	RowSizeHolder(int i)
 	:SizeHolder<S>(i){}
 
-	RowSizeHolder(int i, const Internal::NoIgnore& n)
-	:SizeHolder<S>(i, n){}
-
 	RowSizeHolder()
 	{}
 
@@ -299,10 +296,6 @@ template<> struct StrideHolder<-1>
 {
 	StrideHolder(int s)
 	:my_stride(s){}
-	
-	//This constructor is not allowed to ignore the argument
-	StrideHolder(int s, const Internal::NoIgnore&)
-	:my_stride(s){}
 
 	template<class Op>
 	StrideHolder(const Operator<Op>& op) : my_stride(op.stride()) {}
@@ -319,9 +312,6 @@ template<int S> struct RowStrideHolder: public StrideHolder<S>
 	RowStrideHolder(int i)
 	:StrideHolder<S>(i){}
 
-	RowStrideHolder(int i, const Internal::NoIgnore& n)
-	:StrideHolder<S>(i, n){}
-
 	RowStrideHolder()
 	{}
 
@@ -337,9 +327,6 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 {
 	ColStrideHolder(int i)
 	:StrideHolder<S>(i){}
-
-	ColStrideHolder(int i, const Internal::NoIgnore& n)
-	:StrideHolder<S>(i, n){}
 
 	ColStrideHolder()
 	{}
