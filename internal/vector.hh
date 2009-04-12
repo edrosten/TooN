@@ -25,20 +25,6 @@ public:
 		op.eval(*this);
 	}
 
-	// constructors to allow return value optimisations
-	// construction from 1-ary operator
-	template <class T, class Op>
-	inline Vector(const T& arg, int size, const Operator<Op>&) : Base::template VLayout<Size, Precision>(size) {
-		Op::eval(*this,arg);
-	}
-
-	// constructor from 2-ary operator
-	template <class LHS, class RHS, class Op>
-	inline Vector(const LHS& lhs, const RHS& rhs, int size, const Operator<Op>&)
-		: Base::template VLayout<Size, Precision>(size) {
-		Op::eval(*this,lhs,rhs);
-	}
-
 	// Copy construction is a very special case. Copy construction goes all the
 	// way down to the bottom. GenericVBase has no idea how to copy itself.
 	// However, the underlying allocator objects do.  In the case of static sized
