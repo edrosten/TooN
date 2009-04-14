@@ -28,15 +28,12 @@
 // the GNU General Public License.
 
 
-#ifndef CHOLESKY_H
-#define CHOLESKY_H
+#ifndef TOON_INCLUDE_CHOLESKY_H
+#define TOON_INCLUDE_CHOLESKY_H
 
 #include <TooN/TooN.h>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif 
-
 
 
 /// Cholesky decomposition of a symmetric matrix.
@@ -178,8 +175,6 @@ private:
 };
 
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif 
 
 #endif

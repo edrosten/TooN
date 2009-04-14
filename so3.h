@@ -27,15 +27,13 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-#ifndef __SO3_H
-#define __SO3_H
+#ifndef TOON_INCLUDE_SO3_H
+#define TOON_INCLUDE_SO3_H
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif
 
 template <typename Precision> class SO3;
 template <typename Precision> class SE3;
@@ -311,8 +309,6 @@ Vector<2> transform_and_project(const SO3& pose, const FixedVector<3,A1>& x, Fix
 
 #endif
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif
 
 #endif

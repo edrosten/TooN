@@ -27,14 +27,12 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-#ifndef __SE3_H
-#define __SE3_H
+#ifndef TOON_INCLUDE_SE3_H
+#define TOON_INCLUDE_SE3_H
 
 #include <TooN/so3.h>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif
 
 template <typename Precision = double>
 class SE3 {
@@ -554,8 +552,6 @@ inline SE3<Precision> operator*(const SO3<Precision>& lhs, const SE3<Precision>&
 
 #endif
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif
 
 #endif

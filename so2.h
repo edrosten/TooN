@@ -28,15 +28,13 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-#ifndef __SO2_H
-#define __SO2_H
+#ifndef TOON_INCLUDE_SO2_H
+#define TOON_INCLUDE_SO2_H
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif
 
 template<typename Precision> class SO2;
 template <typename Precision> class SE2;
@@ -136,8 +134,6 @@ inline Matrix<R,2,typename Internal::MultiplyType<P1,P2>::type> operator*(const 
 	return lhs * rhs.get_matrix();
 }
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif
 
 #endif

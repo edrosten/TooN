@@ -27,8 +27,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-#ifndef __WLS_H
-#define __WLS_H
+#ifndef TOON_INCLUDE_WLS_H
+#define TOON_INCLUDE_WLS_H
 
 #include <TooN/TooN.h>
 #include <TooN/Cholesky.h>
@@ -36,9 +36,7 @@
 
 #include <cmath>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif
 
 /// Performs weighted least squares computation.
 /// @param Size The number of dimensions in the system
@@ -157,8 +155,6 @@ private:
 	int operator = ( WLS& copyof );
 };
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif
 
 #endif

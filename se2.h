@@ -30,14 +30,13 @@
 
 /* This code mostly made by copying from se3.h !! */
 
-#ifndef __SE2_H
-#define __SE2_H
+#ifndef TOON_INCLUDE_SE2_H
+#define TOON_INCLUDE_SE2_H
 
 #include <TooN/so2.h>
 
-#ifndef TOON_NO_NAMESPACE
+
 namespace TooN {
-#endif
 
 template <typename Precision = double>
 class SE2 {
@@ -327,8 +326,5 @@ inline SE2<Precision> operator*(const SO2<Precision> & lhs, const SE2<Precision>
 	return SE2<Precision>( lhs*rhs.get_rotation(), lhs*rhs.get_translation());
 }
 
-#ifndef TOON_NO_NAMESPACE
 }
-#endif
-
 #endif
