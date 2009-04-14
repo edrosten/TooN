@@ -67,7 +67,7 @@ public:
 		my_cholesky=m;
 		int size=my_cholesky.num_rows();
 		for(int col=0; col<size; col++){
-			Precision inv_diag;
+			Precision inv_diag = 1;
 			for(int row=col; row < size; row++){
 				// correct for the parts of cholesky already computed
 				Precision val = my_cholesky(row,col);
