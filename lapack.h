@@ -54,9 +54,9 @@ extern "C" {
 	       double* S, double *U, int* ldu, double* VT, int* ldvt,
 	       double* WORK, int* lwork, int* INFO);
 
-  // Eigen decomposition of a symmetric matrix of doubles
-  void dsyev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W,
-	      double* WORK, int* LWORK, int* INFO);
+    // Eigen decomposition of a symmetric matrix
+    void dsyev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W, double* WORK, int* LWORK, int* INFO);
+    void ssyev_(const char* JOBZ, const char* UPLO, int* N, float* A, int* lda, float* W, float* WORK, int* LWORK, int* INFO);
 
     // Cholesky decomposition
     void dpotrf_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
@@ -118,6 +118,13 @@ void potri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO
 
 void potri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO){
 	spotri_(UPLO, N, A, LDA, INFO);
+}
+
+void syev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W, double* WORK, int* LWORK, int* INFO){
+	dsyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
+}
+void syev_(const char* JOBZ, const char* UPLO, int* N, float* A, int* lda, float* W, float* WORK, int* LWORK, int* INFO){
+	ssyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
 }
 
 }
