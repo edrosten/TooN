@@ -57,6 +57,11 @@ namespace TooN {
 		return sqrt(v*v);
 	}
 
+	template<int Size, class Precision, class Base> inline Precision norm_sq(const Vector<Size, Precision, Base>& v)
+	{
+		v*v;
+	}
+
 	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
 	{
 		using std::sqrt;
