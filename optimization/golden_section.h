@@ -15,22 +15,6 @@ namespace TooN
 	/// must be in order, so  that \f$ a < b < c \f$ and \f$ f(a) > f(b) < f(c) \f$.
 	/// @param a The most negative point along the line.
 	/// @param b The central point.
-	/// @param c The most positive point along the line.
-	/// @param func The functor to minimize
-	/// @param maxiterations  Maximum number of iterations
-	/// @param tolerance Tolerance at which the search should be stopped.
-	/// @return The minima position is returned as the first element of the vector,
-	///         and the minimal value as the second element.
-	template<class Functor, class Precision> Vector<2, Precision> golden_section_search(Precision a, Precision b, Precision c, const Functor& func, int maxiterations, Precision tol = sqrt(numeric_limits<Precision>::epsilon()))
-	{
-		return golden_section_search(a, b, c, func(b), func, maxiterations, tol);
-	}
-
-	/// golden_section_search performs a golden section search line minimization
-	/// on the functor provided. The inputs a, b, c must bracket the minimum, and
-	/// must be in order, so  that \f$ a < b < c \f$ and \f$ f(a) > f(b) < f(c) \f$.
-	/// @param a The most negative point along the line.
-	/// @param b The central point.
 	/// @param fb The value of the function at the central point (\f$b\f$).
 	/// @param c The most positive point along the line.
 	/// @param func The functor to minimize
@@ -103,6 +87,22 @@ namespace TooN
 			return makeVector<Precision>(x1, fx1);
 		else
 			return makeVector<Precision>(x2, fx2);
+	}
+
+	/// golden_section_search performs a golden section search line minimization
+	/// on the functor provided. The inputs a, b, c must bracket the minimum, and
+	/// must be in order, so  that \f$ a < b < c \f$ and \f$ f(a) > f(b) < f(c) \f$.
+	/// @param a The most negative point along the line.
+	/// @param b The central point.
+	/// @param c The most positive point along the line.
+	/// @param func The functor to minimize
+	/// @param maxiterations  Maximum number of iterations
+	/// @param tolerance Tolerance at which the search should be stopped.
+	/// @return The minima position is returned as the first element of the vector,
+	///         and the minimal value as the second element.
+	template<class Functor, class Precision> Vector<2, Precision> golden_section_search(Precision a, Precision b, Precision c, const Functor& func, int maxiterations, Precision tol = sqrt(numeric_limits<Precision>::epsilon()))
+	{
+		return golden_section_search(a, b, c, func(b), func, maxiterations, tol);
 	}
 
 }
