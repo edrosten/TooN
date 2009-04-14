@@ -105,7 +105,7 @@ namespace TooN {
 	}
 
 	template<> struct Operator<Internal::RCZero> {
-	Operator(int r, int c) : my_rows(r), my_cols(c) {}
+		Operator(int r, int c) : my_rows(r), my_cols(c) {}
 
 		const int my_rows;
 		const int my_cols;
@@ -114,7 +114,7 @@ namespace TooN {
 		int num_cols() const {return my_cols;}
 
 		template<int R, int C, class P, class B>
-			void eval(Matrix<R,C,P,B>& m) const {
+		void eval(Matrix<R,C,P,B>& m) const {
 			for(int r=0; r<m.num_rows(); r++){
 				for(int c=0; c<m.num_cols(); c++){
 					m(r,c)=0;
@@ -137,14 +137,14 @@ namespace TooN {
 		int num_cols() const {return my_size;}
 
 		template<int Size, class Precision, class Base>
-			void eval(Vector<Size, Precision, Base>& v) const {
+		void eval(Vector<Size, Precision, Base>& v) const {
 			for(int i=0; i < v.size(); i++) {
 				v[i]= 0;
 			}
 		}
 
 		template<int R, int C, class P, class B>
-			void eval(Matrix<R,C,P,B>& m) const {
+		void eval(Matrix<R,C,P,B>& m) const {
 			for(int r=0; r<m.num_rows(); r++){
 				for(int c=0; c<m.num_cols(); c++){
 					m(r,c)=0;
@@ -157,14 +157,14 @@ namespace TooN {
 
 	template<> struct Operator<Internal::Zero> {
 		template<int Size, class Precision, class Base>
-			void eval(Vector<Size, Precision, Base>& v) const {
+		void eval(Vector<Size, Precision, Base>& v) const {
 			for(int i=0; i < v.size(); i++) {
 				v[i]= 0;
 			}
 		}
 
 		template<int R, int C, class P, class B>
-			void eval(Matrix<R,C,P,B>& m) const {
+		void eval(Matrix<R,C,P,B>& m) const {
 			for(int r=0; r<m.num_rows(); r++){
 				for(int c=0; c<m.num_cols(); c++){
 					m(r,c)=0;
@@ -183,8 +183,7 @@ namespace TooN {
 	};
 
 	template<> struct Operator<Internal::SizedIdentity> {
-		// no idea why this doesn't indent properly
-	Operator(int s)	: my_size(s) {}
+		Operator(int s)	: my_size(s) {}
 		
 		const int my_size;
 		
@@ -192,7 +191,7 @@ namespace TooN {
 		int num_cols() const {return my_size;}
 
 		template<int R, int C, class P, class B>
-			void eval(Matrix<R,C,P,B>& m) const {
+		void eval(Matrix<R,C,P,B>& m) const {
 			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
 
 			for(int r=0; r<m.num_rows(); r++){
@@ -212,7 +211,7 @@ namespace TooN {
 	template<> struct Operator<Internal::Identity> {
 
 		template<int R, int C, class P, class B>
-			void eval(Matrix<R,C,P,B>& m) const {
+		void eval(Matrix<R,C,P,B>& m) const {
 			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
 
 			for(int r=0; r<m.num_rows(); r++){
