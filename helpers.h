@@ -59,7 +59,7 @@ namespace TooN {
 
 	template<int Size, class Precision, class Base> inline Precision norm_sq(const Vector<Size, Precision, Base>& v)
 	{
-		v*v;
+		return v*v;
 	}
 
 	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
