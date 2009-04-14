@@ -1,7 +1,6 @@
-BLAS 
-helpers.h
-fix up SVD, SymEigen, Cholesky
-fix up wls, wls_cholesky, irls
-fix up se3, so3, se2
-fix up downhill_simplex
+use BLAS 
+more complete helpers.h
+fix up SVD, SymEigen
+fix up wls_cholesky, irls?
+fix up downhill_simplex?
 iterators
