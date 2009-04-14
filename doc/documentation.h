@@ -142,7 +142,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		To write a function taking any type of vector by reference:
 		@code
-			template<int Size, typename Base> void func(const Vector<Size, double, Base>& v);
+		template<int Size, typename Base> void func(const Vector<Size, double, Base>& v);
 		@endcode
 		See also \ref sPrecision, \ref sGenericCode and \ref sNoInplace
 
@@ -356,10 +356,25 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	Yes!
 	@code
-		Matric<3, 3, double, ColMajor> m;          //3x3 Column major matrix
+		Matrix<3, 3, double, ColMajor> m;          //3x3 Column major matrix
 	@endcode
 
 	\subsection sWrap I have a pointer to a bunch of data. How do I turn it in to a vector/matrix without copying?
+	To create a vector use
+	@code
+	double d[]={1,2,3,4};
+	Vector<4,double,Reference> v1(d);
+	Vector<Dynamic,double,Reference> v2(d,4);
+	@endcode
+
+	To crate a matrix use
+	@code
+	double d[]={1,2,3,4,5,6};
+	Matrix<2,3,double,Reference::RowMajor> m1(d);
+	Matrix<2,3,double,Reference::ColMajor> m2(d);
+	Matrix<Dynamic, Dynamic, double, Reference::RowMajor> m3(d, 2, 3);
+	Matrix<Dynamic, 3, double, Reference::RowMajor> m4(d, 2, 3); // note two size arguments are required for semi-dynamic matrices
+	@endcode
 
 	\subsection sGenericCode How do I write generic code?
 	
@@ -455,23 +470,26 @@ One aspect that makes this library efficient is that when you declare a
 and hence <code>new</code>/<code>delete</code>
 (<code>malloc</code>/<code>free</code>) overhead is avoided. However, for large
 vectors and matrices, this would be a Bad Thing since <code>Vector<1000000>
-v;</code> would result in an object of 8 megabytes being allocated on the stack.
-I don't know about you, but my whole stack is only that big. %TooN gets around
+v;</code> would result in an object of 8 megabytes being allocated on the stack and
+potentially overflowing it. %TooN gets around
 that problem by having a cutoff at which statically sized vectors are allocated
 on the heap. This is completely transparent to the programmer, the objects'
 behaviour is unchanged and you still get the type safety offered by statically
 sized vectors and matrices. The cutoff size at which the library changes the
 representation is defined in <code>TooN.h</code> as the <code>const int
-TooN::Internal::max_bytes_on_stack</code>.
+TooN::Internal::max_bytes_on_stack=1000;</code>.
 
 When you apply the subscript operator to a <code>Matrix<3,3></code> and the
-function simply returns the apropriate hunk of memory as a vector \e reference
+function simply returns a vector which points to the the apropriate hunk of memory as a reference
 (i.e. it basically does no work apart from moving around a pointer). This avoids
 copying and also allows the resulting vector to be used as an l-value. Similarly
-the transpose operation applied to a matrix returns the memory corresponding to
-the matrix as a reference to a matrix with the opposite layout which also means
+the transpose operation applied to a matrix returns a matrix which referes to the 
+same memory but with the opposite layout which also means
 the transpose can be used as an l-value so <code>M1 = M2.T();</code> and
 <code>M1.T() = M2;</code> do exactly the same thing.
+
+This also means that <code>M = M.T();</code> does the wrong thing.  However, since .T()
+essentially costs nothing, it should be very rare that you need to do this.
 
 \subsubsection ssDynamic Dynamic sized vectors and matrices
 
@@ -518,15 +536,13 @@ provided with template constructors that take a standard form. The code that
 does this, declared in the header of class <code>Vector</code> is: 
 
 @code
-// constructor from 2-ary operator
-template <class LHS, class RHS, class Op> inline Vector(const LHS& lhs, const
-RHS& rhs, const Operator<Op>&){Op::eval(*this,lhs,rhs);} 
-@endcode 
-
-The third argument of the constructor is a dummy, used to specify the
-construction method because you the standard doesn't allow you to supply
-template arguments when you call a constructor. Since the argument is unused, my
-compiler omits it (and I hope yours does too). 
+	template <class Op>
+	inline Vector(const Operator<Op>& op)
+		: Base::template VLayout<Size, Precision> (op)
+	{
+		op.eval(*this);
+	}
+@endcode
 
 \subsubsection ssHow How it all really works
 
@@ -539,13 +555,13 @@ template<int, typename> struct VectorAlloc;
 
 struct VBase {
 	template<int Size, class Precision>
-	struct Layout : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
+	struct VLayout : public GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> > {
 	    ...
 	};
 };
 
 template <int Size, class Precision, class Base=VBase>
-class Vector: public Base::template Layout<Size, Precision> {
+class Vector: public Base::template VLayout<Size, Precision> {
    ...
 };
 @endcode
