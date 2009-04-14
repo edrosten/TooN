@@ -87,7 +87,9 @@ void bar(int r, int c, double* dptr) {
   // ...
 }
 @endcode
-<code>Matrix<></endcode> is a synonym for <code>Matrix<-1,-1></endcode>
+
+<code>Matrix<></code> is a synonym for <code> Matrix<Dynamic, Dynamic> </code> which is
+<code>%Matrix<-1,-1></code>
 
 \par Row-major and column-major
 
@@ -100,9 +102,10 @@ is laid out in memory in raster scan order:
 You can override the default for a specific matrix by specifying the layout when
 you construct it:
 @code
-Matrix<3,3,ColMajor> M1;
-Matrix<-1,-1,RowMajor> M2(nrows, ncols);
+Matrix<3,3,double,ColMajor> M1;
+Matrix<-1,-1,double,RowMajor> M2(nrows, ncols);
 @endcode
+In this case the precision template argument must be given as it precedes the layout argument
 
 @ingroup gLinAlg
 **/

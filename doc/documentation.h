@@ -488,8 +488,8 @@ same memory but with the opposite layout which also means
 the transpose can be used as an l-value so <code>M1 = M2.T();</code> and
 <code>M1.T() = M2;</code> do exactly the same thing.
 
-This also means that <code>M = M.T();</code> does the wrong thing.  However, since .T()
-essentially costs nothing, it should be very rare that you need to do this.
+<b> Warning: This also means that <code>M = M.T();</code> does the wrong thing.</b>
+However, since .T() essentially costs nothing, it should be very rare that you need to do this.
 
 \subsubsection ssDynamic Dynamic sized vectors and matrices
 

@@ -26,7 +26,7 @@ namespace TooN
 {
 
 	/// A symbolic constant used as the size argument for dynamically sized vectors and matrices
-	const int Dynamic=1;
+	const int Dynamic=-1;
 
 	/// A series of overloaded functions to create a Vector from a list of numbers. See the detailed documentation
 	/// for Vector for information on usage.
