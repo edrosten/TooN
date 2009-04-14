@@ -3,6 +3,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 mandir = @mandir@
 includedir = @includedir@
+datarootdir = @datarootdir@
 
 
 hdr = $(DESTDIR)/$(includedir)/TooN
