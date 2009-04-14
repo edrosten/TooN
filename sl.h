@@ -40,59 +40,68 @@ namespace TooN {
 template <int N, typename P> class SL;
 template <int N, typename P> std::istream & operator>>(std::istream &, SL<N, P> &);
 
-/// represents an element from the group SL(n), the nxn matrices M with det(M) = 1.
+/// represents an element from the group SL(n), the NxN matrices M with det(M) = 1.
 /// This can be used to conveniently estimate homographies on n-1 dimentional spaces.
 /// The implementation uses the matrix exponential function @ref exp for
 /// exponentiation from an element in the Lie algebra and LU to compute an inverse.
 /// 
-/// The Lie algebra are the nxn matrices M with trace(M) = 0. The generators used
+/// The Lie algebra are the NxN matrices M with trace(M) = 0. The N*N-1 generators used
 /// to represent this vector space are the following:
-/// @item n-1 diag(...,1,-1,...), along the diagonal
-/// @item symmetric generators for every pair of off-diagonal elements
-/// @item anti-symmetric generators for every pair of off-diagonal elements
+/// - diag(...,1,-1,...), n-1 along the diagonal
+/// - symmetric generators for every pair of off-diagonal elements
+/// - anti-symmetric generators for every pair of off-diagonal elements
 /// This choice represents the fact that SL(n) can be interpreted as the product
 /// of all symmetric matrices with det() = 1 times SO(n).
+/// @ingroup gTransforms
 template <int N, typename Precision = double>
 class SL {
 	friend std::istream & operator>> <N,Precision>(std::istream &, SL &);
 public:
-	static const int size = N;
-	static const int dim = N*N - 1;
+	static const int size = N;          ///< size of the matrices represented by SL<N>
+	static const int dim = N*N - 1;     ///< dimension of the vector space represented by SL<N>
 
+	/// default constructor, creates identity element
 	SL() : my_matrix(Identity) {}
+
+	/// exp constructor, creates element through exponentiation of Lie algebra vector. see @ref SL::exp.
 	template <int S, typename P, typename B>
 	SL( const Vector<S,P,B> & v ) { *this = exp(v); }
 
+	/// copy constructor from a matrix, coerces matrix to be of determinant = 1
 	template <int R, int C, typename P, typename A>
-	SL(Matrix<R,C,P,A>& M) : my_matrix(M) {
-		coerce(M);
-	}
+	SL(Matrix<R,C,P,A>& M) : my_matrix(M) { coerce(); }
 
+	/// returns the represented matrix
 	const Matrix<N,N,Precision> & get_matrix() const { return my_matrix; }
+	/// returns the inverse using LU
 	SL inverse() const { return SL(*this, Invert()); }
 
+	/// multiplies to SLs together by multiplying the underlying matrices
 	SL operator*( const SL & rhs) const { return SL(*this, rhs); }
+	/// right multiplies this SL with another one
 	SL operator*=( const SL & rhs) { *this = *this*rhs; return *this; }
 
+	/// exponentiates a vector in the Lie algebra to compute the corresponding element
+	/// @arg v a vector of dimension SL::dim
 	template <int S, typename P, typename B>
 	static inline SL exp( const Vector<S,P,B> &);
 
+	/// returns one generator of the group. see SL for a detailed description of 
+	/// the generators used.
+	/// @arg i number of the generator between 0 and SL::dim -1 inclusive
 	static inline Matrix<N,N,Precision> generator(int);
-
-	template <int R, int C, typename P, typename A>
-	static void coerce(Matrix<R,C,P,A>& M){
-		using std::abs;
-		SizeMismatch<N,R>::test(N, M.num_rows());
-		SizeMismatch<N,C>::test(N, M.num_cols());
-		P det = LU<N>(M).determinant();
-		assert(abs(det) > 0);
-		M /= det;
-	}
 
 private:
 	struct Invert {};
 	SL( const SL & from, struct Invert ) : my_matrix(LU<N>(from.get_matrix()).get_inverse()) {}
 	SL( const SL & a, const SL & b) : my_matrix(a.get_matrix() * b.get_matrix()) {}
+
+	void coerce(){
+		using std::abs;
+		Precision det = LU<N>(my_matrix).determinant();
+		assert(abs(det) > 0);
+		my_matrix /= det;
+	}
 
 	/// these constants indicate which parts of the parameter vector 
 	/// map to which generators
@@ -148,12 +157,22 @@ inline Matrix<N,N,Precision> SL<N, Precision>::generator(int i){
 }
 
 template <int S, typename PV, typename B, int N, typename P>
-Vector<N, P> operator*( const SL<N, P> & lhs, const Vector<S,PV,B> & rhs ){
+Vector<N, typename Internal::MultiplyType<P, PV>::type> operator*( const SL<N, P> & lhs, const Vector<S,PV,B> & rhs ){
 	return lhs.get_matrix() * rhs;
 }
 
 template <int S, typename PV, typename B, int N, typename P>
-Vector<N, P> operator*( const Vector<S,PV,B> & lhs, const SL<N,P> & rhs ){
+Vector<N, typename Internal::MultiplyType<PV, P>::type> operator*( const Vector<S,PV,B> & lhs, const SL<N,P> & rhs ){
+	return lhs * rhs.get_matrix();
+}
+
+template<int R, int C, typename PM, typename A, int N, typename P> inline
+Matrix<N, C, typename Internal::MultiplyType<P, PM>::type> operator*(const SL<N,P>& lhs, const Matrix<R, C, PM, A>& rhs){
+	return lhs.get_matrix() * rhs;
+}
+
+template<int R, int C, typename PM, typename A, int N, typename P> inline
+Matrix<R, N, typename Internal::MultiplyType<PM, P>::type> operator*(const Matrix<R, C, PM, A>& lhs, const SL<N,P>& rhs){
 	return lhs * rhs.get_matrix();
 }
 
@@ -166,7 +185,7 @@ std::ostream & operator<<(std::ostream & out, const SL<N, P> & h){
 template <int N, typename P>
 std::istream & operator>>(std::istream & in, SL<N, P> & h){
 	in >> h.my_matrix;
-	SL<N,P>::coerce(h.my_matrix);
+	h.coerce();
 	return in;
 }
 
