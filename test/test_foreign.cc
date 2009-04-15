@@ -14,10 +14,6 @@ int main()
 	cout << Matrix<-1,3,double, Reference::RowMajor> (data,2,3) << endl;
 	cout << Matrix<-1,-1,double, Reference::RowMajor> (data,2,3) << endl;
 
-	cout << Wrap<2,3>::wrap(data) << endl;
-	cout << Wrap<2,Dynamic>::wrap(data,3) << endl;
-	cout << Wrap<Dynamic,3>::wrap(data,2) << endl;
-	cout << Wrap<Dynamic, Dynamic>::wrap(data,2,3) << endl;
 
 
 	cout << Matrix<2,3,double, Reference::ColMajor> (data) << endl;
@@ -25,12 +21,8 @@ int main()
 	cout << Matrix<-1,3,double, Reference::ColMajor> (data,2,3) << endl;
 	cout << Matrix<-1,-1,double, Reference::ColMajor> (data,2,3) << endl;
 
-	cout << Wrap<2,3,double,Reference::ColMajor>::wrap(data) << endl;
-	cout << Wrap<2,Dynamic,double,Reference::ColMajor>::wrap(data,3) << endl;
-	cout << Wrap<Dynamic,3,double,Reference::ColMajor>::wrap(data,2) << endl;
-	cout << Wrap<Dynamic, Dynamic,double,Reference::ColMajor>::wrap(data,2,3) << endl;
-
-
+	cout << wrapVector<6>(data) << endl;
+	cout << wrapVector(data, 6) << endl;
 	cout << Vector<6,double,Reference> (data) << endl;
 	cout << Vector<-1,double,Reference> (data,6) << endl;
 
