@@ -25,6 +25,7 @@ namespace TooN
 	/// @param epsilon Minimum bracket width (defaults to machine precision)
 	/// @return The minima position is returned as the first element of the vector,
 	///         and the minimal value as the second element.
+	/// @ingroup gOptimize
 	template<class Functor, class Precision> Vector<2, Precision> brent_line_search(Precision a, Precision x, Precision b, Precision fx, const Functor& func, int maxiterations, Precision tolerance = sqrt(numeric_limits<Precision>::epsilon()), Precision epsilon = numeric_limits<Precision>::epsilon())
 	{
 		using std::min;

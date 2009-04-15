@@ -36,13 +36,42 @@
 namespace TooN {
 
 
-/// Cholesky decomposition of a symmetric matrix.
-/// Only the lower half of the matrix is considered
-/// This uses the non-sqrt version of the decomposition
-/// giving symmetric M = L*D*L.T() where the diagonal of L contains ones
-/// @param Size the size of the matrix
-/// @param Cols also the size of the matrix (there to make Cholesky conform to other decompositions)
-/// @param Precision the precision of the entries in the matrix and its decomposition
+/**
+Decomposes a positive-semidefinite symmetric matrix A (such as a covariance) into L*D*L^T, where L is lower-triangular and D is diagonal.
+Also can compute A = S*S^T, with S lower triangular.  The LDL^T form is faster to compute than the class Cholesky decomposition.
+The decomposition can be used to compute A^-1*x, A^-1*M, M*A^-1*M^T, and A^-1 itself, though the latter rarely needs to be explicitly represented.
+Also efficiently computes det(A) and rank(A).
+It can be used as follows:
+@code
+// Declare some matrices.
+Matrix<3> A = ...; // we'll pretend it is pos-def
+Matrix<2,3> M;
+Matrix<2> B;
+Vector<3> y = (make_Vector, 2,3,4);
+// create the Cholesky decomposition of A
+Cholesky<3> chol(A);
+// compute x = A^-1 * y
+Vector<3> x = cholA.inverse_times(y);
+// Identical to above
+x = cholA.backsub(y);
+// compute B = M*A^-1*M^T
+B = cholA.transform_inverse(M);
+//compute A^-1
+Matrix<3> Ainv = cholA.get_inverse();
+Matrix<3> C = ... // again, C is pos-def
+//compute the 'square-root' of C
+Matrix<3> L = Cholesky<3>::sqrt(C);
+@endcode
+@ingroup gDecomps
+
+Cholesky decomposition of a symmetric matrix.
+Only the lower half of the matrix is considered
+This uses the non-sqrt version of the decomposition
+giving symmetric M = L*D*L.T() where the diagonal of L contains ones
+@param Size the size of the matrix
+@param Cols also the size of the matrix (there to make Cholesky conform to other decompositions)
+@param Precision the precision of the entries in the matrix and its decomposition
+**/
 template <int Size=Dynamic, int Cols=Size, class Precision=double>
 class Cholesky;
 
@@ -51,6 +80,9 @@ class Cholesky<Size, Size, Precision> {
 public:
 	Cholesky(){}
 
+    /// Construct the Cholesky decomposition of a matrix. This initialises the class, and
+    /// performs the decomposition immediately.
+    /// Run time is O(N^3)
 	template<class P2, class B2>
 	Cholesky(const Matrix<Size, Size, P2, B2>& m)
 		: my_cholesky(m) {
@@ -61,6 +93,8 @@ public:
 	Cholesky(int size) : my_cholesky(size,size) {}
 
 
+    /// Compute the LDL^T decomposition of another matrix.
+    /// Run time is O(N^3)
 	template<class P2, class B2> void compute(const Matrix<Size, Size, P2, B2>& m){
 		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
 		SizeMismatch<Size,Size>::test(m.num_rows(), my_cholesky.num_rows());
@@ -89,6 +123,8 @@ public:
 		}
 	}
 
+	/// Compute x = A^-1*v
+    /// Run time is O(N^2)
 	template<int Size2, class P2, class B2>
 	Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) {
 		int size=my_cholesky.num_rows();
@@ -122,7 +158,7 @@ public:
 		return result;
 	}
 
-
+	///@overload
 	template<int Size2, int C2, class P2, class B2>
 	Matrix<Size, C2, Precision> backsub (const Matrix<Size2, C2, P2, B2>& m) {
 		int size=my_cholesky.num_rows();
@@ -156,6 +192,8 @@ public:
 	}
 
 
+    /// Compute A^-1 and store in M
+    /// Run time is O(N^3)
 	// easy way to get inverse - could be made more efficient
 	Matrix<Size,Size,Precision> get_inverse(){
 		Matrix<Size,Size,Precision>I(Identity(my_cholesky.num_rows()));

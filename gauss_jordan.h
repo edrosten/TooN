@@ -45,6 +45,7 @@ namespace TooN
 /// partial pivoting.
 ///
 /// @param m The matrix to be reduced.
+/// @ingroup gDecomps
 template<int R, int C, class Precision, class Base> void gauss_jordan(Matrix<R, C, Precision, Base>& m)
 {
 	using std::swap;

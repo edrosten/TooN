@@ -22,6 +22,7 @@ namespace TooN
 	/// @param tolerance Tolerance at which the search should be stopped.
 	/// @return The minima position is returned as the first element of the vector,
 	///         and the minimal value as the second element.
+	/// @ingroup gOptimize
 	template<class Functor, class Precision> Vector<2, Precision> golden_section_search(Precision a, Precision b, Precision c, Precision fb, const Functor& func, int maxiterations, Precision tol = sqrt(numeric_limits<Precision>::epsilon()))
 	{
 		using std::abs;
@@ -100,6 +101,7 @@ namespace TooN
 	/// @param tolerance Tolerance at which the search should be stopped.
 	/// @return The minima position is returned as the first element of the vector,
 	///         and the minimal value as the second element.
+	/// @ingroup gOptimize
 	template<class Functor, class Precision> Vector<2, Precision> golden_section_search(Precision a, Precision b, Precision c, const Functor& func, int maxiterations, Precision tol = sqrt(numeric_limits<Precision>::epsilon()))
 	{
 		return golden_section_search(a, b, c, func(b), func, maxiterations, tol);

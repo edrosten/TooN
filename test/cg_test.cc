@@ -30,11 +30,13 @@ Vector<2> RosenbrockDerivatives(const Vector<2>& v)
 	return ret;
 }
 
+int evals=0;
 
 double Spiral(const Vector<2>& v)
 {
 	double x = v[0];
 	double y = v[1];
+	evals++;
 	
 	return sin(20.0*sqrt(x*x+y*y)+2.0*atan(y/x))+2.0*x*x+2.0*y*y;
 }
@@ -60,5 +62,7 @@ int main()
 	while(cg.iterate(Spiral, SpiralDerivatives))
 		cout << cg.x << " " << cg.y << endl;
 	cout << cg.x << " " << cg.y << endl;
+
+	cerr << "Total evaluations: " << evals << endl;
 }
 

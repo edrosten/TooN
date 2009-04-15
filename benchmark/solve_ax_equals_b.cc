@@ -122,6 +122,7 @@ struct UseGaussJordanInverse
 	}
 };
 
+
 template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, vector<double> >& results)
 {
 	double time=0, t_tmp, start = get_time_of_day(), t_tmp2;
@@ -146,15 +147,7 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, ve
 		Solver::template solve<Size, Cols>(a, b, x);
 		global_sum += (t_tmp2=get_time_of_day())*x[Size-1][Cols-1];
 			
-		
 		time += t_tmp2 - t_tmp;
-
-
-		
-		for(int r=0; r < Size; r++)
-			for(int c=0; c < Cols; c++)
-				sum += x[r][c];
-
 		n++;
 	}
 
@@ -187,8 +180,8 @@ template<int Size, int C=1, bool End=0> struct ColIter
 	static void iter()
 	{
 		static const int Lin = Size*2;
-		static const int Grow = 2;
-		static const int Cols = C + (C<=Lin?0:(C-Lin)*(C-Lin)/Grow);
+		static const int Grow = 1;
+		static const int Cols = C + (C<=Lin?0:(C-Lin)*(C-Lin)*(C-Lin)/Grow);
 		map<string, vector<double> > results;
 		cout << Size << "\t" << Cols << "\t";
 		
@@ -216,7 +209,7 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		for(unsigned int i=0; i < res.size(); i++)
 			cout << res[i].second << " " << setprecision(5) << setw(10) << res[i].first << "            ";
 		cout << endl;
-		ColIter<Size, C+1, (Cols> 0)>::iter();
+		ColIter<Size, C+1, (Cols> Size*1000)>::iter();
 	}
 };
 

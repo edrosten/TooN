@@ -41,6 +41,13 @@ template <typename Precision> class SE3;
 template<class Precision> inline std::istream & operator>>(std::istream &, SO3<Precision> & );
 template<class Precision> inline std::istream & operator>>(std::istream &, SE3<Precision> & );
 
+/// Class to represent a three-dimensional rotation matrix. Three-dimensional rotation
+/// matrices are members of the Special Orthogonal Lie group SO3. This group can be parameterised
+/// three numbers (a vector in the space of the Lie Algebra). In this class, the three parameters are the
+/// finite rotation vector, i.e. a three-dimensional vector whose direction is the axis of rotation
+/// and whose length is the angle of rotation in radians. Exponentiating this vector gives the matrix,
+/// and the logarithm of the matrix gives this vector.
+/// @ingroup gTransforms
 template <typename Precision = double>
 class SO3 {
 public:
@@ -48,6 +55,7 @@ public:
 	friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
 	friend class SE3<Precision>;
 	
+	/// Default constructor. Initialises the matrix to the identity (no rotation)
 	SO3() : my_matrix(Identity) {}
 	
 	template <int S, typename P, typename A>
@@ -56,6 +64,8 @@ public:
 	template <int R, int C, typename P, typename A>
 	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
 	
+	/// Assigment operator from a general matrix. This also calls coerce()
+	/// to make sure that the matrix is a valid rotation matrix.
 	template <int R, int C, typename P, typename A>
 	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
 		my_matrix = rhs;
@@ -63,6 +73,7 @@ public:
 		return *this;
 	}
 	
+	/// Modifies the matrix to make sure it is a valid rotation matrix.
 	void coerce() {
 		my_matrix[0] = unit(my_matrix[0]);
 		my_matrix[1] -= my_matrix[0] * (my_matrix[0]*my_matrix[1]);
@@ -72,29 +83,44 @@ public:
 		my_matrix[2] = unit(my_matrix[2]);
 	}
 	
+	/// Exponentiate a vector in the Lie algebra to generate a new SO3.
+	/// See the Detailed Description for details of this vector.
 	template<int S, typename A> inline static SO3 exp(const Vector<S,Precision,A>& vect);
 	
+	/// Take the logarithm of the matrix, generating the corresponding vector in the Lie Algebra.
+	/// See the Detailed Description for details of this vector.
 	inline Vector<3, Precision> ln() const;
 	
+	/// Returns the inverse of this matrix (=the transpose, so this is a fast operation)
 	SO3 inverse() const { return SO3(*this, Invert()); }
 
+	/// Right-multiply by another rotation matrix
 	SO3& operator *=(const SO3& rhs) {
 		*this = *this * rhs;
 		return *this;
 	}
 
+	/// Right-multiply by another rotation matrix
 	SO3 operator *(const SO3& rhs) const { return SO3(*this,rhs); }
 
+	/// Returns the SO3 as a Matrix<3>
 	const Matrix<3,3, Precision> & get_matrix() const {return my_matrix;}
 
+	/// Returns the i-th generator.  The generators of a Lie group are the basis
+	/// for the space of the Lie algebra.  For %SO3, the generators are three
+	/// \f$3\times3\f$ matrices representing the three possible (linearised)
+	/// rotations.
 	inline static Matrix<3,3, Precision> generator(int i){
 		Matrix<3,3,Precision> result(Zero);
 		result[(i+1)%3][(i+2)%3] = -1;
 		result[(i+2)%3][(i+1)%3] = 1;
 		return result;
 	}
-	
-	// adjoint transformation on the Lie algebra
+
+	/// Transfer a vector in the Lie Algebra from one
+	/// co-ordinate frame to another such that for a matrix 
+	/// \f$ M \f$, the adjoint \f$Adj()\f$ obeys
+	/// \f$ e^{\text{Adj}(v)} = Me^{v}M^{-1} \f$
 	template <int S, typename A>
 	inline Vector<3, Precision> adjoint(Vector<3, Precision, A> vect) const { return *this * vect; }
 	
@@ -106,11 +132,15 @@ private:
 	Matrix<3,3, Precision> my_matrix;
 };
 
+/// Write an SO3 to a stream 
+/// @relates SO3
 template <typename Precision>
 inline std::ostream& operator<< (std::ostream& os, const SO3<Precision>& rhs){
 	return os << rhs.get_matrix();
 }
 
+/// Read from SO3 to a stream 
+/// @relates SO3
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 	return is >> rhs.my_matrix;
@@ -225,21 +255,29 @@ inline Vector<3, Precision> SO3<Precision>::ln() const{
 	return result;
 }
 
+/// Right-multiply by a Vector
+/// @relates SO3
 template<int S, typename P, typename PV, typename A> inline
 Vector<3, typename Internal::MultiplyType<P, PV>::type> operator*(const SO3<P>& lhs, const Vector<S, PV, A>& rhs){
 	return lhs.get_matrix() * rhs;
 }
 
+/// Left-multiply by a Vector
+/// @relates SO3
 template<int S, typename P, typename PV, typename A> inline
 Vector<3, typename Internal::MultiplyType<PV, P>::type> operator*(const Vector<S, PV, A>& lhs, const SO3<P>& rhs){
 	return lhs * rhs.get_matrix();
 }
 
+/// Multiply two SO3 matrices
+/// @relates SO3
 template<int R, int C, typename P, typename PM, typename A> inline
 Matrix<3, C, typename Internal::MultiplyType<P, PM>::type> operator*(const SO3<P>& lhs, const Matrix<R, C, PM, A>& rhs){
 	return lhs.get_matrix() * rhs;
 }
 
+/// Multiply two SO3 matrices
+/// @relates SO3
 template<int R, int C, typename P, typename PM, typename A> inline
 Matrix<R, 3, typename Internal::MultiplyType<PM, P>::type> operator*(const Matrix<R, C, PM, A>& lhs, const SO3<P>& rhs){
 	return lhs * rhs.get_matrix();

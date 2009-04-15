@@ -34,9 +34,22 @@
 
 namespace TooN {
 
+
+/// Represent a three-dimensional Euclidean transformation (a rotation and a translation). 
+/// This can be represented by a \f$3\times\f$4 matrix operating on a homogeneous co-ordinate, 
+/// so that a vector \f$\underline{x}\f$ is transformed to a new location \f$\underline{x}'\f$
+/// by
+/// \f[\begin{aligned}\underline{x}' &= E\times\underline{x}\\ \begin{bmatrix}x'\\y'\\z'\end{bmatrix} &= \begin{pmatrix}r_{11} & r_{12} & r_{13} & t_1\\r_{21} & r_{22} & r_{23} & t_2\\r_{31} & r_{32} & r_{33} & t_3\end{pmatrix}\begin{bmatrix}x\\y\\z\\1\end{bmatrix}\end{aligned}\f]
+/// 
+/// This transformation is a member of the Special Euclidean Lie group SE3. These can be parameterised
+/// six numbers (in the space of the Lie Algebra). In this class, the first three parameters are a
+/// translation vector while the second three are a rotation vector, whose direction is the axis of rotation
+/// and length the amount of rotation (in radians), as for SO3
+/// @ingroup gTransforms
 template <typename Precision = double>
 class SE3 {
 public:
+	/// Default constructor. Initialises the the rotation to zero (the identity) and the translation to zero
 	inline SE3() : my_translation(Zero) {}
 
 	template <int S, typename P, typename A> 
@@ -44,14 +57,27 @@ public:
 	template <int S, typename P, typename A>
 	SE3(const Vector<S, P, A> & v) { *this = exp(v); }
 
+	/// Returns the rotation part of the transformation as a SO3
 	inline SO3<Precision>& get_rotation(){return my_rotation;}
+	/// @overload
 	inline const SO3<Precision>& get_rotation() const {return my_rotation;}
+
+	/// Returns the translation part of the transformation as a Vector
 	inline Vector<3, Precision>& get_translation() {return my_translation;}
+	/// @overload
 	inline const Vector<3, Precision>& get_translation() const {return my_translation;}
 
+	/// Exponentiate a Vector in the Lie Algebra to generate a new SE3.
+	/// See the Detailed Description for details of this vector.
+	/// @param vect The Vector to exponentiate
 	template <int S, typename P, typename A>
 	static inline SE3 exp(const Vector<S, P, A>& vect);
+
+
+	/// Take the logarithm of the matrix, generating the corresponding vector in the Lie Algebra.
+	/// See the Detailed Description for details of this vector.
 	static inline Vector<6, Precision> ln(const SE3& se3);
+	/// @overload
 	inline Vector<6, Precision> ln() const { return SE3::ln(*this); }
 
 	inline SE3 inverse() const {
@@ -59,11 +85,16 @@ public:
 		return SE3(rinv, -(rinv*my_translation));
 	}
 
+	/// Right-multiply by another SE3 (concatenate the two transformations)
+	/// @param rhs The multipier
 	inline SE3& operator *=(const SE3& rhs) {
 		get_translation() += get_rotation() * rhs.get_translation();
 		get_rotation() *= rhs.get_rotation();
 		return *this;
 	}
+
+	/// Right-multiply by another SE3 (concatenate the two transformations)
+	/// @param rhs The multipier
 	inline SE3 operator *(const SE3& rhs) const { return SE3(get_rotation()*rhs.get_rotation(), get_translation() + get_rotation()*rhs.get_translation()); }
 
 	inline SE3& left_multiply_by(const SE3& left) {
@@ -83,15 +114,24 @@ public:
 		return result;
 	}
 
+	/// Transfer a matrix in the Lie Algebra from one
+	/// co-ordinate frame to another. This is the operation such that for a matrix 
+	/// \f$ B \f$, 
+	/// \f$ e^{\text{Adj}(v)} = Be^{v}B^{-1} \f$
+	/// @param M The Matrix to transfer
 	template<int S, typename Accessor>
 	inline Vector<6, Precision> adjoint(const Vector<S,Precision, Accessor>& vect)const;
 
+	/// Transfer covectors between frames (using the transpose of the inverse of the adjoint)
+	/// so that trinvadjoint(vect1) * adjoint(vect2) = vect1 * vect2
 	template<int S, typename Accessor>
 	inline Vector<6, Precision> trinvadjoint(const Vector<S,Precision,Accessor>& vect)const;
-
+	
+	///@overload
 	template <int R, int C, typename Accessor>
 	inline Matrix<6,6,Precision> adjoint(const Matrix<R,C,Precision,Accessor>& M)const;
 
+	///@overload
 	template <int R, int C, typename Accessor>
 	inline Matrix<6,6,Precision> trinvadjoint(const Matrix<R,C,Precision,Accessor>& M)const;
 
@@ -160,7 +200,8 @@ inline Matrix<6,6,Precision> SE3<Precision>::trinvadjoint(const Matrix<R,C,Preci
 	return result;
 }
 
-// operator ostream& <<
+/// Write an SE3 to a stream 
+/// @relates SE3
 template <typename Precision>
 inline std::ostream& operator <<(std::ostream& os, const SE3<Precision>& rhs){
 	for(int i=0; i<3; i++){
@@ -169,7 +210,9 @@ inline std::ostream& operator <<(std::ostream& os, const SE3<Precision>& rhs){
 	return os;
 }
 
-// operator istream& >>
+
+/// Reads an SE3 from a stream 
+/// @relates SE3
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SE3<Precision>& rhs){
 	for(int i=0; i<3; i++){
@@ -206,11 +249,15 @@ struct Operator<Internal::SE3VMult<S,PV,A,P> > {
 	int size() const { return 4; }
 };
 
+/// Right-multiply by a Vector
+/// @relates SE3
 template<int S, typename PV, typename A, typename P> inline
 Vector<4, typename Internal::MultiplyType<P,PV>::type> operator*(const SE3<P> & lhs, const Vector<S,PV,A>& rhs){
 	return Vector<4, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::SE3VMult<S,PV,A,P> >(lhs,rhs));
 }
 
+/// Right-multiply by a Vector
+/// @relates SE3
 template <typename PV, typename A, typename P> inline
 Vector<3, typename Internal::MultiplyType<P,PV>::type> operator*(const SE3<P>& lhs, const Vector<3,PV,A>& rhs){
 	return lhs.get_translation() + lhs.get_rotation() * rhs;
@@ -243,6 +290,8 @@ struct Operator<Internal::VSE3Mult<S,PV,A,P> > {
 	int size() const { return 4; }
 };
 
+/// Left-multiply by a Vector
+/// @relates SE3
 template<int S, typename PV, typename A, typename P> inline
 Vector<4, typename Internal::MultiplyType<P,PV>::type> operator*( const Vector<S,PV,A>& lhs, const SE3<P> & rhs){
 	return Vector<4, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::VSE3Mult<S,PV,A,P> >(lhs,rhs));
@@ -275,6 +324,8 @@ struct Operator<Internal::SE3MMult<R, Cols, PM, A, P> > {
 	int num_rows() const { return 4; }
 };
 
+/// Right-multiply by a Matrix
+/// @relates SE3
 template <int R, int Cols, typename PM, typename A, typename P> inline 
 Matrix<4,Cols, typename Internal::MultiplyType<P,PM>::type> operator*(const SE3<P> & lhs, const Matrix<R,Cols,PM, A>& rhs){
 	return Matrix<4,Cols,typename Internal::MultiplyType<P,PM>::type>(Operator<Internal::SE3MMult<R, Cols, PM, A, P> >(lhs,rhs));
@@ -307,6 +358,8 @@ struct Operator<Internal::MSE3Mult<Rows, C, PM, A, P> > {
 	int num_rows() const { return lhs.num_rows(); }
 };
 
+/// Left-multiply by a Matrix
+/// @relates SE3
 template <int Rows, int C, typename PM, typename A, typename P> inline 
 Matrix<Rows,4, typename Internal::MultiplyType<PM,P>::type> operator*(const Matrix<Rows,C,PM, A>& lhs, const SE3<P> & rhs ){
 	return Matrix<Rows,4,typename Internal::MultiplyType<PM,P>::type>(Operator<Internal::MSE3Mult<Rows, C, PM, A, P> >(lhs,rhs));

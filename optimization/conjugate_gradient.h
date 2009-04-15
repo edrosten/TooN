@@ -10,21 +10,28 @@ namespace TooN{
 	
 
 	///Turn a multidimensional function in to a 1D function by specifying a
-	///point and direction.
+	///point and direction. A nre function is defined:
+	////\f[
+	/// g(a) = \Vec{s} + a \Vec{d}
+	///\f]
+	///@ingroup gOptimize
 	template<int Size, typename Precision, typename Func> struct LineSearch
 	{
-		const Vector<Size, Precision>& start, direction;
-		const Func& f;
-		
-		///@param s Start point.
-		///@param d direction
-		///@param func Function.
+		const Vector<Size, Precision>& start; ///< \f$\Vec{s}\f$
+		const Vector<Size, Precision>& direction;///< \f$\Vec{d}\f$
+
+		const Func& f;///< \f$f(\cdotp)\f$
+
+		///Set up the line search class.
+		///@param s Start point, \f$\Vec{s}\f$.
+		///@param d direction, \f$\Vec{d}\f$.
+		///@param func Function, \f$f(\cdotp)\f$.
 		LineSearch(const Vector<Size, Precision>& s, const Vector<Size, Precision>& d, const Func& func)
 		:start(s),direction(d),f(func)
 		{}
 		
 		///@param x Position to evaluate function
-		///@return \f$f(\vec{d} + x\vec{s})\f$
+		///@return \f$f(\vec{s} + x\vec{d})\f$
 		Precision operator()(Precision x) const
 		{
 			return f(start + x * direction); 
@@ -39,6 +46,7 @@ namespace TooN{
 	///@param initial_lambda Initial stepsize
 	///@return <code>m[i][0]</code> contains the values of \f$x\f$ for the bracket, in increasing order, 
 	///        and <code>m[i][1]</code> contains the corresponding values of \f$f(x)\f$.
+	///@ingroup gOptimize
 	template<typename Precision, typename Func> Matrix<3,2,Precision> bracket_minimum_forward(Precision a_val, const Func& func, Precision initial_lambda=1)
 	{
 		//Get a, b, c to  bracket a minimum along a line
@@ -137,11 +145,16 @@ int main()
 }
 @endcode
 
+The chances are that you will want to read the documentation for
+ConjugateGradient::ConjugateGradient and ConjugateGradient::iterate.
+
 Linesearch is currently performed using golden-section search and conjugate
 vector updates are performed using the Polak-Ribiere equations.  There many
 tunable parameters, and the internals are readily accessible, so alternative
 termination conditions etc can easily be substituted. However, ususally these
 will not be necessary.
+
+@ingroup gOptimize
 */
 template<int Size, class Precision=double> struct ConjugateGradient
 {
@@ -165,7 +178,11 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	int linesearch_max_iterations;  ///< Maximum number of iterations in the linesearch. Defaults to 100.
 
 	int iterations; ///< Number of iterations performed
-
+	
+	///Initialize the ConjugateGradient class with sensible values.
+	///@param start Starting point, \e x
+	///@param func  Function \e f  to compute \f$f(x)\f$
+	///@param deriv  Function to compute \f$\nabla f(x)\f$
 	template<class Func, class Deriv> ConjugateGradient(const Vector<Size>& start, const Func& func, const Deriv& deriv)
 	: size(start.size()),
 	  g(size),h(size),old_g(size),old_h(size),x(start),old_x(size)
@@ -197,8 +214,8 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	
 
 	///Perform a linesearch from the current point (x) along the current
-	///conjugate vector (h).  /The linesearch does not make use of derivatives.
-	///You probably do not want to use /this function. See iterate() instead.
+	///conjugate vector (h).  The linesearch does not make use of derivatives.
+	///You probably do not want to use this function. See iterate() instead.
 	///This function updates:
 	/// - x
 	/// - old_c

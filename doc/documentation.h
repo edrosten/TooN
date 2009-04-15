@@ -25,17 +25,10 @@
 
 The %TooN library is a set of C++ header files which provide basic numerics facilities:
 	- @link TooN::Vector Vectors@endlink and @link TooN::Matrix matrices@endlink
-	- @link gDecomps Matrix decompositions@endlink (@link TooN::LU LU@endlink,
-	  @link TooN::SVD SVD@endlink, @link TooN::SymEigen symmetric eigen
-	  decomposition @endlink)
-	- @link gOptimize Function optimization@endlink (@link
-	  TooN::DownhillSimplex Downhill Simplex@endlink) 
-	- Some particular types of @link gTransforms transformation
-	  matrices@endlink (@link TooN::SO3 SO3@endlink and @link TooN::SE3
-	  SE3@endlink) 
-	- Solvers for systems of @link gEquations linear equations@endlink using
-	  @link TooN::WLS weighted@endlink or @link TooN::IRLS
-	  iteratively-reweighted@endlink least squares.
+	- @link gDecomps Matrix decompositions@endlink
+	- @link gOptimize Function optimization@endlink
+	- @link gTransforms Parameterized matrices (eg transformations)@endlink 
+	- @link gEquations linear equations@endlink
 
 It provides classes for statically- (known at compile time) and dynamically-
 (unknown at compile time) sized vectors and matrices and it delegates advanced
@@ -586,5 +579,29 @@ then take a look at the source code ...
 /// @defgroup gEquations Linear equation solvers
 /// Classes to solve linear equations.
 
-/// @defgroup gOptimize Function optimization
-/// Classes to perform function optimization.
+/** 
+@defgroup gOptimize Function optimization
+
+Classes and functions to perform function optimization.
+
+@section gOneDim One dimensional function optimization
+
+The following functions find the minimum of a 1-D function:
+ - golden_section_search()
+ - brent_line_search()
+
+@section gMultiDim Multidimensional dimensional function optimization
+
+The following classes perform multidimensional function minimization:
+ - TooN::DownhillSimplex
+ - TooN::ConjugateGradient
+
+The mode of operation is to set up a mutable class, then repeatedly call an
+iterate function. This allows different sub algorithms (such as termination
+conditions) to be substituted in if need be.
+
+@defgroup gTooN Main parts of TooN
+
+
+@defgroup gInternal TooN internals
+*/
