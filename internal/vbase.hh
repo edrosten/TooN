@@ -142,19 +142,19 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	}
 
 	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
-		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, Size, 1, stride(), Slicing());
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, size(), 1, stride(), Slicing());
 	}
 
 	Matrix<1, Size, Precision, Slice<1,Stride> > as_row(){
-		return Matrix<1, Size, Precision, Slice<1,Stride> >(my_data, 1, Size, 1, stride(), Slicing());
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(my_data, 1, size(), 1, stride(), Slicing());
 	}
 
 	const Matrix<Size, 1, Precision, Slice<Stride,1> > as_col() const{
-		return Matrix<Size, 1, Precision, Slice<Stride,1> >(const_cast<Precision*>(my_data), Size, 1, stride(), 1, Slicing());
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(const_cast<Precision*>(my_data), size(), 1, stride(), 1, Slicing());
 	}
 
 	Matrix<Size, 1, Precision, Slice<Stride,1> > as_col(){
-		return Matrix<Size, 1, Precision, Slice<Stride,1> >(my_data, Size, 1, stride(), 1, Slicing());
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(my_data, size(), 1, stride(), 1, Slicing());
 	}
 };
 
