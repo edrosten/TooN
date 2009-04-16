@@ -110,8 +110,8 @@ namespace TooN {
 		struct Zero;
 		struct SizedZero;
 		struct RCZero;
-		struct Identity;
-		struct SizedIdentity;
+		template<class P> struct Identity;
+		template<class P> struct SizedIdentity;
 	}
 
 	template<> struct Operator<Internal::RCZero> {
@@ -192,11 +192,15 @@ namespace TooN {
 
 	};
 
-	template<> struct Operator<Internal::SizedIdentity> {
-		Operator(int s)	: my_size(s) {}
-		
+	template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > {
+
+		const Precision val;
 		const int my_size;
-		
+
+		Operator(int s, const Precision& v=1)
+		:my_size(s),val(v)
+		{}
+
 		int num_rows() const {return my_size;}
 		int num_cols() const {return my_size;}
 
@@ -211,15 +215,18 @@ namespace TooN {
 			}
 						
 			for(int r=0; r < m.num_rows(); r++) {
-				m(r,r) = 1;
+				m(r,r) = val;
 			}
 		}
 	};
+
+	template<class Precision> struct Operator<Internal::Identity<Precision> > {
+
+		const Precision val;
+		Operator(const Precision& v=1)
+		:val(v)
+		{}
 		
-
-
-	template<> struct Operator<Internal::Identity> {
-
 		template<int R, int C, class P, class B>
 		void eval(Matrix<R,C,P,B>& m) const {
 			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
@@ -231,18 +238,37 @@ namespace TooN {
 			}
 						
 			for(int r=0; r < m.num_rows(); r++) {
-				m(r,r) = 1;
+				m(r,r) = val;
 			}
 		}
 
-		Operator<Internal::SizedIdentity> operator()(int s){
-			return Operator<Internal::SizedIdentity>(s);
+		Operator<Internal::SizedIdentity<Precision> > operator()(int s){
+			return Operator<Internal::SizedIdentity<Precision> >(s);
 		}
 	};
+	
+	template<class P1, class P2> Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const P1& p, const Operator<Internal::Identity<P2> >& i)
+	{
+		return Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> >(p * i.val);
+	}
 
+	template<class P1, class P2> Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const Operator<Internal::Identity<P2> >& i, const P1&p)
+	{
+		return Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> >(p * i.val);
+	}
+
+	template<class P1, class P2> Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const P1& p, const Operator<Internal::SizedIdentity<P2> >& i)
+	{
+		return Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> >(i.my_size, p * i.val);
+	}
+
+	template<class P1, class P2> Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const Operator<Internal::SizedIdentity<P2> >& i, const P1&p)
+	{
+		return Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> >(i.my_size, p * i.val);
+	}
 
 	static Operator<Internal::Zero> Zero;
-	static Operator<Internal::Identity> Identity;
+	static Operator<Internal::Identity<double> > Identity;
 
 	/// row sum norm of input matrix m
 	/// computes the maximum of the sums of absolute values over rows
