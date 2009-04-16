@@ -78,11 +78,11 @@ struct Reference
 };
 
 
-                                          Vector<Dynamic, double,    Reference> wrapVector(double* data, int size)          { return Vector<Dynamic, double,    Reference>(data, size); }
-                                    const Vector<Dynamic, double,    Reference> wrapVector(const double* data, int size)    { return Vector<Dynamic, double,    Reference>(const_cast<double*>(data), size); }
-template<int Size>                        Vector<Size,    double,    Reference> wrapVector(double* data)                    { return Vector<Size,    double,    Reference>(data); }
-template<int Size>                  const Vector<Size,    double,    Reference> wrapVector(const double* data)              { return Vector<Size,    double,    Reference>(const_cast<double*>(data)); }
-template<class Precision>                 Vector<Dynamic, Precision, Reference> wrapVector(Precision* data, int size)       { return Vector<Dynamic, Precision, Reference>(data, size); }
-template<class Precision>           const Vector<Dynamic, Precision, Reference> wrapVector(const Precision* data, int size) { return Vector<Dynamic, Precision, Reference>(const_cast<Precision*>(data), size); }
-template<int Size, class Precision>       Vector<Size,    Precision, Reference> wrapVector(Precision* data)                 { return Vector<Size,    Precision, Reference>(data); }
-template<int Size, class Precision> const Vector<Size,    Precision, Reference> wrapVector(const Precision* data)           { return Vector<Size,    Precision, Reference>(const_cast<Precision*>(data)); }
+inline Vector<Dynamic, double,    Reference> wrapVector(double* data, int size)          { return Vector<Dynamic, double,    Reference>(data, size); }
+inline const Vector<Dynamic, double,    Reference> wrapVector(const double* data, int size)    { return Vector<Dynamic, double,    Reference>(const_cast<double*>(data), size); }
+template<int Size> inline Vector<Size,    double,    Reference> wrapVector(double* data)                    { return Vector<Size,    double,    Reference>(data); }
+template<int Size> inline const Vector<Size,    double,    Reference> wrapVector(const double* data)              { return Vector<Size,    double,    Reference>(const_cast<double*>(data)); }
+template<class Precision> inline Vector<Dynamic, Precision, Reference> wrapVector(Precision* data, int size)       { return Vector<Dynamic, Precision, Reference>(data, size); }
+template<class Precision> inline const Vector<Dynamic, Precision, Reference> wrapVector(const Precision* data, int size) { return Vector<Dynamic, Precision, Reference>(const_cast<Precision*>(data), size); }
+template<int Size, class Precision> inline Vector<Size,    Precision, Reference> wrapVector(Precision* data)                 { return Vector<Size,    Precision, Reference>(data); }
+template<int Size, class Precision> inline const Vector<Size,    Precision, Reference> wrapVector(const Precision* data)           { return Vector<Size,    Precision, Reference>(const_cast<Precision*>(data)); }
