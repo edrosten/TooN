@@ -117,6 +117,17 @@ public:
 		return result;
 	}
 
+  /// Returns the i-th generator times pos
+  template<typename Base>
+  inline static Vector<3,Precision> generator_field(int i, const Vector<3, Precision, Base>& pos)
+  {
+    Vector<3, Precision> result;
+    result[i]=0;
+    result[(i+1)%3] = - pos[(i+2)%3];
+    result[(i+2)%3] = pos[(i+1)%3];
+    return result;
+  }
+
 	/// Transfer a vector in the Lie Algebra from one
 	/// co-ordinate frame to another such that for a matrix 
 	/// \f$ M \f$, the adjoint \f$Adj()\f$ obeys

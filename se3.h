@@ -114,6 +114,20 @@ public:
 		return result;
 	}
 
+  /// Returns the i-th generator times pos
+  template<typename Base>
+  inline static Vector<4,Precision> generator_field(int i, const Vector<4, Precision, Base>& pos)
+  {
+    Vector<4, Precision> result(Zero);
+    if(i < 3){
+      result[i]=pos[3];
+      return result;
+    }
+    result[(i+1)%3] = - pos[(i+2)%3];
+    result[(i+2)%3] = pos[(i+1)%3];
+    return result;
+  }
+  
 	/// Transfer a matrix in the Lie Algebra from one
 	/// co-ordinate frame to another. This is the operation such that for a matrix 
 	/// \f$ B \f$, 
