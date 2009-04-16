@@ -67,6 +67,11 @@ namespace TooN {
 		using std::sqrt;
 		return v * (1/sqrt(v*v));
 	}
+	
+	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base> & v)
+	{
+		v /= std::sqrt(v*v);
+	}
 
 	template<int Size, typename Precision, typename Base> inline Vector<Size-1, Precision> project( const Vector<Size, Precision, Base> & v){
 		return v.template slice<0,Size-1>() / v[Size-1];
