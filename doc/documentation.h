@@ -328,7 +328,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		void func(Vector<3>& v) //This will catch any non-slices and forward them on.
 		{
-			func(v.slice<0,3>());
+			func(v.as_slice());
 		}
 	@endcode
 
