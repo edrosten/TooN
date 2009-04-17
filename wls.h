@@ -51,7 +51,9 @@ public:
 	/// Default constructor or construct with the number of dimensions for the Dynamic case
 	WLS(int size=0) :
 		my_C_inv(size,size),
-		my_vector(size)
+		my_vector(size),
+		my_decomposition(size),
+		my_my(size)
 	{
 		clear();
 	}
@@ -147,7 +149,7 @@ public:
 private:
 	Matrix<Size,Size,Precision> my_C_inv;
 	Vector<Size,Precision> my_vector;
-	Decomposition<Size,Size,Precision> my_decomposition;
+	Decomposition<Size,Precision> my_decomposition;
 	Vector<Size,Precision> my_mu;
 
 	// comment out to allow bitwise copying
