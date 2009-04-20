@@ -75,6 +75,8 @@ namespace TooN
 
 	static const int Dynamic = -1;
 
+	typedef double DefaultPrecision;
+
 	#include <TooN/internal/allocator.hh>
 
 	#include <TooN/internal/size_mismatch.hh>
