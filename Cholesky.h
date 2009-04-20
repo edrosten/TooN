@@ -47,7 +47,7 @@ It can be used as follows:
 Matrix<3> A = ...; // we'll pretend it is pos-def
 Matrix<2,3> M;
 Matrix<2> B;
-Vector<3> y = (make_Vector, 2,3,4);
+Vector<3> y = make_Vector(2,3,4);
 // create the Cholesky decomposition of A
 Cholesky<3> chol(A);
 // compute x = A^-1 * y
