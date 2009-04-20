@@ -51,16 +51,9 @@ Vector<3> y = (make_Vector, 2,3,4);
 // create the Cholesky decomposition of A
 Cholesky<3> chol(A);
 // compute x = A^-1 * y
-Vector<3> x = cholA.inverse_times(y);
-// Identical to above
 x = cholA.backsub(y);
-// compute B = M*A^-1*M^T
-B = cholA.transform_inverse(M);
 //compute A^-1
 Matrix<3> Ainv = cholA.get_inverse();
-Matrix<3> C = ... // again, C is pos-def
-//compute the 'square-root' of C
-Matrix<3> L = Cholesky<3>::sqrt(C);
 @endcode
 @ingroup gDecomps
 
