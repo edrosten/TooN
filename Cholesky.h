@@ -82,10 +82,11 @@ public:
 	template<class P2, class B2>
 	Cholesky(const Matrix<Size, Size, P2, B2>& m)
 		: my_cholesky(m) {
-		compute(m);
+		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
+		do_compute();
 	}
 	
-	// for Size=Dynamic
+	/// Constructor for Size=Dynamic
 	Cholesky(int size) : my_cholesky(size,size) {}
 
 
@@ -95,6 +96,10 @@ public:
 		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
 		SizeMismatch<Size,Size>::test(m.num_rows(), my_cholesky.num_rows());
 		my_cholesky=m;
+		do_compute();
+	}
+
+	void do_compute() {
 		int size=my_cholesky.num_rows();
 		for(int col=0; col<size; col++){
 			Precision inv_diag = 1;
