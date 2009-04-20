@@ -28,7 +28,7 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-template <int Rows=-1, int Cols=Rows, class Precision=double, class Layout = RowMajor>
+template <int Rows=-1, int Cols=Rows, class Precision=DefaultPrecision, class Layout = RowMajor>
 class Matrix : public Layout::template MLayout<Rows, Cols, Precision>
 {
 public:
