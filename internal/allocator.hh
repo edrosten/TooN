@@ -219,7 +219,7 @@ template<int S> struct RowSizeHolder: private SizeHolder<S>
 };
 
 
-template<int S> struct ColSizeHolder: public SizeHolder<S>
+template<int S> struct ColSizeHolder: private SizeHolder<S>
 {
 	ColSizeHolder(int i)
 	:SizeHolder<S>(i){}
