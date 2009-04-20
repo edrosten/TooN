@@ -71,7 +71,7 @@ giving symmetric M = L*D*L.T() where the diagonal of L contains ones
 @param Size the size of the matrix
 @param Precision the precision of the entries in the matrix and its decomposition
 **/
-template <int Size=Dynamic, class Precision=double>
+template <int Size=Dynamic, class Precision=DefaultPrecision>
 class Cholesky {
 public:
 	Cholesky(){}

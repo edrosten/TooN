@@ -40,7 +40,7 @@ static const double condition_no=1e9; // GK HACK TO GLOBAL
 
 // Use <-1> template for TooN2 SVD
 
-template<int Rows=Dynamic, int Cols=Rows, typename Precision=double>
+template<int Rows=Dynamic, int Cols=Rows, typename Precision=DefaultPrecision>
 class SVD {
 public:
 	// this is the size of the diagonal
