@@ -36,17 +36,37 @@
 //
 // At this level, copy construction is required since it is only known here 
 // whether data or a reference to data should be copied.
+
+#ifdef __GNUC__
+#define ALIGN8 __attribute__ ((aligned(8)))
+#else
+#define ALIGN8
+#endif
+
+
 namespace Internal
 {
 
-template<int Size, class Precision, bool heap> class StackOrHeap
-{
-	public:
-		StackOrHeap()
-		{}
+template<int Size, class Precision, bool heap> class StackOrHeap;
 
-		Precision my_data[Size];
+template<int Size, class Precision> class StackOrHeap<Size,Precision,0>
+{
+public:
+	StackOrHeap()
+	{}
+
+	Precision my_data[Size];
 };
+
+template<int Size> class StackOrHeap<Size,double,0>
+{
+public:
+		StackOrHeap()
+	{}
+
+	double my_data[Size] ALIGN8 ;
+};
+
 
 template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 {
@@ -372,3 +392,6 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 
 
 }
+
+
+#undef ALIGN8
