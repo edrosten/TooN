@@ -38,8 +38,52 @@ namespace TooN {
 	// TODO - should this depend on precision?
 static const double condition_no=1e9; // GK HACK TO GLOBAL
 
-// Use <-1> template for TooN2 SVD
 
+
+
+
+
+
+/**
+@class SVD TooN/SVD.h
+Performs %SVD and back substitute to solve equations.
+Singular value decompositions are more robust than LU decompositions in the face of 
+singular or nearly singular matrices. They decompose a matrix (of any shape) \f$M\f$ into:
+\f[M = U \times D \times V^T\f]
+where \f$D\f$ is a diagonal matrix of positive numbers whose dimension is the minimum 
+of the dimensions of \f$M\f$. If \f$M\f$ is tall and thin (more rows than columns) 
+then \f$U\f$ has the same shape as \f$M\f$ and \f$V\f$ is square (vice-versa if \f$M\f$ 
+is short and fat). The columns of \f$U\f$ and the rows of \f$V\f$ are orthogonal 
+and of unit norm (so one of them lies in SO(N)). The inverse of \f$M\f$ (or pseudo-inverse 
+if \f$M\f$ is not square) is then given by
+\f[M^{\dagger} = V \times D^{-1} \times U^T\f]
+ 
+If \f$M\f$ is nearly singular then the diagonal matrix \f$D\f$ has some small values 
+(relative to its largest value) and these terms dominate \f$D^{-1}\f$. To deal with 
+this problem, the inverse is conditioned by setting a maximum ratio 
+between the largest and smallest values in \f$D\f$ (passed as the <code>condition</code>
+parameter to the various functions). Any values which are too small 
+are set to zero in the inverse (rather than a large number)
+ 
+It can be used as follows to solve the \f$M\underline{x} = \underline{c}\f$ problem as follows:
+@code
+// construct M
+Matrix<3> M;
+M[0] = makeVector(1,2,3);
+M[1] = makeVector(4,5,6);
+M[2] = makeVector(7,8.10);
+// construct c
+ Vector<3> c;
+c = 2,3,4;
+// create the SVD decomposition of M
+SVD<3> svdM(M);
+// compute x = M^-1 * c
+Vector<3> x = svdM.backsub(c);
+ @endcode
+
+SVD<> (= SVD<-1>) can be used to create an SVD whose size is determined at run-time.
+@ingroup gDecomps
+**/
 template<int Rows=Dynamic, int Cols=Rows, typename Precision=DefaultPrecision>
 class SVD {
 public:
@@ -57,7 +101,8 @@ public:
 		  my_square(std::min(rows,cols), std::min(rows,cols))
 	{}
 
-	
+	/// Construct the %SVD decomposition of a matrix. This initialises the class, and
+	/// performs the decomposition immediately.
 	template <int R2, int C2, typename P2, typename B2>
 	SVD(const Matrix<R2,C2,P2,B2>& m)
 		: my_copy(m),
@@ -67,6 +112,7 @@ public:
 		do_compute();
 	}
 
+	/// Compute the %SVD decomposition of M, typically used after the default constructor
 	template <int R2, int C2, typename P2, typename B2>
 	void compute(const Matrix<R2,C2,P2,B2>& m){
 		my_copy=m;
@@ -120,25 +166,11 @@ public:
 
 	int min_dim(){ return std::min(my_copy.num_rows(), my_copy.num_cols()); }
 
-	Matrix<Rows,Min_Dim,Precision,RowMajor>& get_U(){
-		if(is_vertical()){
-			return my_copy;
-		} else {
-			return my_square;
-		}
-	}
 
-	Vector<Min_Dim,Precision>& get_diagonal(){ return my_diagonal; }
-
-	Matrix<Min_Dim,Cols,Precision,RowMajor>& get_VT(){
-		if(is_vertical()){
-			return my_square;
-		} else {
-			return my_copy;
-		}
-	}
-
-
+	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix. 
+	/// For a matrix \f$A\f$, this calculates \f$M^{\dagger}A\f$ by back substitution 
+	/// (i.e. without explictly calculating the (pseudo-)inverse). 
+	/// See the detailed description for a description of condition variables.
 	template <int Rows2, int Cols2, typename P2, typename B2>
 	Matrix<Cols,Cols2, typename Internal::MultiplyType<Precision,P2>::type >
 	backsub(const Matrix<Rows2,Cols2,P2,B2>& rhs, const Precision condition=condition_no)
@@ -148,6 +180,10 @@ public:
 		return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
 	}
 
+	/// Calculate result of multiplying the (pseudo-)inverse of M by a vector. 
+	/// For a vector \f$b\f$, this calculates \f$M^{\dagger}b\f$ by back substitution 
+	/// (i.e. without explictly calculating the (pseudo-)inverse). 
+	/// See the detailed description for a description of condition variables.
 	template <int Size, typename P2, typename B2>
 	Vector<Cols, typename Internal::MultiplyType<Precision,P2>::type >
 	backsub(const Vector<Size,P2,B2>& rhs, const Precision condition=condition_no)
@@ -157,13 +193,17 @@ public:
 		return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
 	}
 
+	/// Calculate (pseudo-)inverse of the matrix. This is not usually needed: 
+	/// if you need the inverse just to multiply it by a matrix or a vector, use 
+	/// one of the backsub() functions, which will be faster.
+	/// See the detailed description of the pseudo-inverse and condition variables.
 	Matrix<Cols,Rows> get_pinv(const Precision condition = condition_no){
 		Vector<Min_Dim> inv_diag(min_dim());
 		get_inv_diag(inv_diag,condition);
 		return diagmult(get_VT().T(),inv_diag) * get_U().T();
 	}
 
-	/// calculates the product of the singular values
+	/// Calculate the product of the singular values
 	/// for square matrices this is the determinant
 	Precision determinant() {
 		Precision result = my_diagonal[0];
@@ -173,6 +213,8 @@ public:
 		return result;
 	}
 	
+	/// Calculate the rank of the matrix.
+	/// See the detailed description of the pseudo-inverse and condition variables.
 	int rank(const Precision condition = condition_no) {
 		if (my_diagonal[0] == 0) return 0;
 		int result=1;
@@ -183,6 +225,32 @@ public:
 		}
 		return result;
 	}
+
+	/// Return the U matrix from the decomposition
+	/// The size of this depends on the shape of the original matrix
+	/// it is square if the original matrix is wide or tall if the original matrix is tall
+	Matrix<Rows,Min_Dim,Precision,RowMajor>& get_U(){
+		if(is_vertical()){
+			return my_copy;
+		} else {
+			return my_square;
+		}
+	}
+
+	/// Return the singular values as a vector
+	Vector<Min_Dim,Precision>& get_diagonal(){ return my_diagonal; }
+
+	/// Return the VT matrix from the decomposition
+	/// The size of this depends on the shape of the original matrix
+	/// it is square if the original matrix is tall or wide if the original matrix is wide
+	Matrix<Min_Dim,Cols,Precision,RowMajor>& get_VT(){
+		if(is_vertical()){
+			return my_square;
+		} else {
+			return my_copy;
+		}
+	}
+
 
 	void get_inv_diag(Vector<Min_Dim>& inv_diag, const Precision condition){
 		for(int i=0; i<min_dim(); i++){
@@ -207,6 +275,7 @@ private:
 
 /// version of SVD forced to be square
 /// princiapally here to allow use in WLS
+/// @ingroup gDecomps
 template<int Size, typename Precision>
 struct SQSVD : public SVD<Size, Size, Precision> {
 	// forward all constructors to SVD
