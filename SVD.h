@@ -97,9 +97,9 @@ public:
 			ldu = my_square.num_cols();
 		}
 
-		double* wk;
+		Precision* wk;
 
-		double size;
+		Precision size;
 		LWORK = -1;
 
 		// arguments are scrambled because we use rowmajor and lapack uses colmajor
@@ -108,7 +108,7 @@ public:
 				 &ldvt, uorvt, &ldu, &size, &LWORK, &INFO);
 	
 		LWORK = (long int)(size);
-		wk = new double[LWORK];
+		wk = new Precision[LWORK];
 
 		dgesvd_( &JOBVT, &JOBU, &m, &n, a, &lda, s, uorvt,
 				 &ldvt, uorvt, &ldu, wk, &LWORK, &INFO);
