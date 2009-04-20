@@ -54,7 +54,7 @@ public:
 	SVD(int rows, int cols)
 		: my_copy(rows,cols),
 		  my_diagonal(std::min(rows,cols)),
-		  my_square(std::min(rows,cols))
+		  my_square(std::min(rows,cols), std::min(rows,cols))
 	{}
 
 	
