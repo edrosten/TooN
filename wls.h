@@ -44,7 +44,7 @@ namespace TooN {
 /// @param Decomposition The class used to invert the inverse Covariance matrix (must have two size and one precision template arguments)
 /// @ingroup gEquations
 template <int Size=Dynamic, class Precision=double,
-		  template<int Rows, int Cols, class Precision> class Decomposition = Cholesky>
+		  template<int Size, class Precision> class Decomposition = Cholesky>
 class WLS {
 public:
 
@@ -53,7 +53,7 @@ public:
 		my_C_inv(size,size),
 		my_vector(size),
 		my_decomposition(size),
-		my_my(size)
+		my_mu(size)
 	{
 		clear();
 	}
@@ -142,8 +142,8 @@ public:
 	const Vector<Size,Precision>& get_mu() const {return my_mu;}
 	Vector<Size,Precision>& get_vector(){return my_vector;}
 	const Vector<Size,Precision>& get_vector() const {return my_vector;}
-	Decomposition<Size,Size,Precision>& get_decomposition(){return my_decomposition;}
-	const Decomposition<Size,Size,Precision>& get_decomposition() const {return my_decomposition;}
+	Decomposition<Size,Precision>& get_decomposition(){return my_decomposition;}
+	const Decomposition<Size,Precision>& get_decomposition() const {return my_decomposition;}
 
 
 private:
