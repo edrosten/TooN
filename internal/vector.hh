@@ -28,7 +28,7 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-template<int Size=-1, typename Precision=double, typename Base=Internal::VBase>
+template<int Size=-1, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 class Vector : public Base::template VLayout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
