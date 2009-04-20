@@ -30,275 +30,195 @@
 #ifndef __SVD_H
 #define __SVD_H
 
-#include <iostream>
-
+#include <TooN/TooN.h>
 #include <TooN/lapack.h>
 
-#include <TooN/TooN.h>
-
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif 
 
-enum{Horizontal,Vertical};
-
-template <int Rows, int Cols, int HV>
-class HV_SVD;
-
-// (for Rows > Cols)
-template <int Rows, int Cols>
-class HV_SVD <Rows,Cols,Vertical> {
- public:
-  static const int Inter = (Rows>Cols?Cols:Rows);
-
-  HV_SVD(){}
-
-  template<class Accessor>
-  HV_SVD(const FixedMatrix<Rows,Cols,Accessor>& m){
-    compute(m);
-  }
-
-  template<class Accessor>
-  void compute(const FixedMatrix<Rows,Cols,Accessor>& m){
-    my_U=m;
-    int width=Cols;
-    int height=Rows;
-    int lwork=-1;
-    int info;
-    double size;
-    // find out FORTRAN space requirements
-    dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,&size,&lwork,&info);
-    lwork = int(size);
-    double * WORK = new double[lwork];
-    dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&width,&height,my_U.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&width,WORK,&lwork,&info);
-    delete [] WORK;
-    if(info!=0){
-      std::cerr << "error - info was " << info << std::endl;
-    }
-  }
-
-  Matrix<Rows,Inter,RowMajor>& get_U(){return my_U;}
-  Vector<Inter>& get_diagonal(){return my_diagonal;}
-  Matrix<Inter,Cols,RowMajor>& get_VT(){return my_VT;}
-
- protected:
-  Matrix<Rows,Inter,RowMajor> my_U;
-  Vector<Inter> my_diagonal;
-  Matrix<Inter,Cols,RowMajor> my_VT;
-};
-
-
-// (for Rows < Cols)
-template <int Rows, int Cols>
-class HV_SVD <Rows,Cols,Horizontal> {
-public:
-  static const int Inter = (Rows>Cols?Cols:Rows);
-
-  HV_SVD(){}
-
-  template<class Accessor>
-  HV_SVD(const FixedMatrix<Rows,Cols,Accessor>& m){
-    compute(m);
-  }
-
-  template<class Accessor>
-  void compute(const FixedMatrix<Rows,Cols,Accessor>& m){
-    my_VT=m;
-    int width=Cols;
-    int height=Rows;
-    int lwork=-1;
-    int info;
-    double size;
-    // find out FORTRAN space requirements
-    dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,&size,&lwork,&info);
-    lwork = int(size);
-    double * WORK = new double[lwork];
-    dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&width,&height,my_VT.get_data_ptr(),&width,my_diagonal.get_data_ptr(),my_VT.get_data_ptr(),&width,my_U.get_data_ptr(),&height,WORK,&lwork,&info);
-    delete [] WORK;
-    if(info!=0){
-      std::cerr << "error - info was " << info << std::endl;
-    }
-  }
-
-  Matrix<Rows,Inter,RowMajor>& get_U(){return my_U;}
-  Vector<Inter>& get_diagonal(){return my_diagonal;}
-  Matrix<Inter,Cols,RowMajor>& get_VT(){return my_VT;}
-
- protected:
-  Matrix<Rows,Inter> my_U;
-  Vector<Inter> my_diagonal;
-  Matrix<Inter,Cols> my_VT;
-};
-
-
+	// TODO - should this depend on precision?
 static const double condition_no=1e9; // GK HACK TO GLOBAL
 
-template <int Rows=-1, int Cols=Rows>
-class SVD : public HV_SVD< Rows, Cols, (Rows<Cols?Horizontal:Vertical) > {
-  public:
-  SVD(){}
+// Use <-1> template for TooN2 SVD
 
-
-
-  template<class Accessor>
-  SVD(const FixedMatrix<Rows,Cols,Accessor>& m): HV_SVD< Rows, Cols, (Rows<Cols?Horizontal:Vertical) > (m) {}
-
-  template <int RHS, class Accessor>
-    Matrix<Cols,RHS> backsub(const FixedMatrix<Rows,RHS,Accessor>& rhs, const double condition=condition_no){
-    get_inv_diag(condition);
-    return (this->my_VT.T() * diagmult(this->inv_diag, (this->my_U.T() * rhs)));
-  }
-
-  template<class Accessor>
-    Matrix<> backsub(const DynamicMatrix<Accessor>& rhs, const double condition=condition_no){
-    get_inv_diag(condition);
-    return (this->my_VT.T() * diagmult(this->inv_diag, (this->my_U.T() * rhs)));
-  }
-
-  template <class Accessor>
-    Vector<Cols> backsub(const FixedVector<Rows,Accessor>& v, const double condition=condition_no){
-    get_inv_diag(condition);
-    return (this->my_VT.T() * diagmult(this->inv_diag, (this->my_U.T() * v)));
-  }
-
-  template <class Accessor>
-    Vector<> backsub(const DynamicVector<Accessor>& v, const double condition=condition_no){
-    get_inv_diag(condition);
-    return (this->my_VT.T() * diagmult(this->inv_diag, (this->my_U.T() * v)));
-  }
- 
-
-  Matrix<Cols,Rows> get_pinv(const double condition = condition_no){
-    get_inv_diag(condition);
-    return diagmult(this->my_VT.T(),this->inv_diag) * this->my_U.T();
-  }
-
-
-  void get_inv_diag(const double condition){
-    for(int i=0; i<HV_SVD< Rows, Cols, (Rows<Cols?Horizontal:Vertical) >::Inter; i++){
-      if(this->my_diagonal[i] * condition <= this->my_diagonal[0]){
-	inv_diag[i]=0;
-      } else {
-	inv_diag[i]=1.0/this->my_diagonal[i];
-      }
-    }
-  }
-
- private:
-
-  Vector<HV_SVD< Rows, Cols, (Rows<Cols?Horizontal:Vertical) >::Inter> inv_diag;
-
-};
-
-
-template<>
-class SVD<-1> {
+template<int Rows=Dynamic, int Cols=Rows, typename Precision=double>
+class SVD {
 public:
-  template <class Accessor>
-  SVD(const MatrixBase<Accessor>& m) : my_orig(m),
-				       my_height(m.num_rows()),
-				       my_width(m.num_cols()),
-				       my_min_dim(my_height<my_width?my_height:my_width),
-				       my_diagonal(my_min_dim),
-				       my_square(my_min_dim,my_min_dim) {
-    int lwork=-1;
-    int info;
-    double size;
+	// this is the size of the diagonal
+	// NB works for semi-dynamic sizes because -1 < +ve ints
+	static const int Min_Dim = Rows<Cols?Rows:Cols;
+	
+	/// default constructor for Rows>0 and Cols>0
+	SVD() {}
 
-    // compute the storage requirements
-    if(is_vertical()){
-      dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,&size,&lwork,&info);
-    } else {
-      dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,&size,&lwork,&info);
-    }
-    lwork = int(size);
-    double * WORK = new double[lwork];
-    if(is_vertical()){
-      dgesvd_(const_cast<char*>("S"),const_cast<char*>("O"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_square.get_data_ptr(),&my_width,my_orig.get_data_ptr(),&my_width,WORK,&lwork,&info);
-    } else {
-      dgesvd_(const_cast<char*>("O"),const_cast<char*>("S"),&my_width,&my_height,my_orig.get_data_ptr(),&my_width,my_diagonal.get_data_ptr(),my_orig.get_data_ptr(),&my_width,my_square.get_data_ptr(),&my_height,WORK,&lwork,&info);
-    }
-    delete [] WORK;
-    if(info!=0){
-      std::cerr << "error - info was " << info << std::endl;
-    }
-  }
+	/// constructor for Rows=-1 or Cols=-1 (or both)
+	SVD(int rows, int cols)
+		: my_copy(rows,cols),
+		  my_diagonal(std::min(rows,cols)),
+		  my_square(std::min(rows,cols))
+	{}
 
-  bool is_vertical(){return (my_orig.num_rows() >= my_orig.num_cols());}
+	
+	template <int R2, int C2, typename P2, typename B2>
+	SVD(const Matrix<R2,C2,P2,B2>& m)
+		: my_copy(m),
+		  my_diagonal(std::min(m.num_rows(),m.num_cols())),
+		  my_square(std::min(m.num_rows(),m.num_cols()),std::min(m.num_rows(),m.num_cols()))
+	{
+		do_compute();
+	}
 
-  Matrix<-1,-1,RowMajor>& get_U(){if(is_vertical()){return my_orig;} else {return my_square;}}
-  Vector<-1>& get_diagonal(){return my_diagonal;}
-  Matrix<-1,-1,RowMajor>& get_VT(){if(is_vertical()){return my_square;} else {return my_orig;}}
+	template <int R2, int C2, typename P2, typename B2>
+	void compute(const Matrix<R2,C2,P2,B2>& m){
+		my_copy=m;
+		do_compute();
+	}
+		
+	void do_compute(){
+		Precision* const a = my_copy.my_data;
+		int lda = my_copy.num_cols();
+		int m = my_copy.num_cols();
+		int n = my_copy.num_rows();
+		Precision* const uorvt = my_square.my_data;
+		Precision* const s = my_diagonal.my_data;
+		int ldu;
+		int ldvt = lda;
+		int LWORK;
+		int INFO;
+		char JOBU;
+		char JOBVT;
+
+		if(is_vertical()){ // u is a
+			JOBU='O';
+			JOBVT='S';
+			ldu = lda;
+		} else { // vt is a
+			JOBU='S';
+			JOBVT='O';
+			ldu = my_square.num_cols();
+		}
+
+		double* wk;
+
+		double size;
+		LWORK = -1;
+
+		// arguments are scrambled because we use rowmajor and lapack uses colmajor
+		// thus u and vt play each other's roles.
+		dgesvd_( &JOBVT, &JOBU, &m, &n, a, &lda, s, uorvt,
+				 &ldvt, uorvt, &ldu, &size, &LWORK, &INFO);
+	
+		LWORK = (long int)(size);
+		wk = new double[LWORK];
+
+		dgesvd_( &JOBVT, &JOBU, &m, &n, a, &lda, s, uorvt,
+				 &ldvt, uorvt, &ldu, wk, &LWORK, &INFO);
+	
+		delete[] wk;
+	}
+
+	bool is_vertical(){ return (my_copy.num_rows() >= my_copy.num_cols()); }
+
+	int min_dim(){ return std::min(my_copy.num_rows(), my_copy.num_cols()); }
+
+	Matrix<Rows,Min_Dim,Precision,RowMajor>& get_U(){
+		if(is_vertical()){
+			return my_copy;
+		} else {
+			return my_square;
+		}
+	}
+
+	Vector<Min_Dim,Precision>& get_diagonal(){ return my_diagonal; }
+
+	Matrix<Min_Dim,Cols,Precision,RowMajor>& get_VT(){
+		if(is_vertical()){
+			return my_square;
+		} else {
+			return my_copy;
+		}
+	}
 
 
-  template <class Accessor>
-    Matrix<> backsub(const DynamicMatrix<Accessor>& rhs, const double condition=condition_no){
-    Vector<> inv_diag(my_min_dim);
-    get_inv_diag(inv_diag,condition);
-    return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
-  }
+	template <int Rows2, int Cols2, typename P2, typename B2>
+	Matrix<Cols,Cols2, typename Internal::MultiplyType<Precision,P2>::type >
+	backsub(const Matrix<Rows2,Cols2,P2,B2>& rhs, const Precision condition=condition_no)
+	{
+		Vector<Min_Dim> inv_diag(min_dim());
+		get_inv_diag(inv_diag,condition);
+		return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
+	}
 
-  template <int R, int C, class Accessor>
-    Matrix<R,C> backsub(const FixedMatrix<R, C, Accessor>& rhs, const double condition=condition_no){
-    Vector<> inv_diag(my_min_dim);
-    get_inv_diag(inv_diag,condition);
-    return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
-  }
+	template <int Size, typename P2, typename B2>
+	Vector<Cols, typename Internal::MultiplyType<Precision,P2>::type >
+	backsub(const Vector<Size,P2,B2>& rhs, const Precision condition=condition_no)
+	{
+		Vector<Min_Dim> inv_diag(min_dim());
+		get_inv_diag(inv_diag,condition);
+		return (get_VT().T() * diagmult(inv_diag, (get_U().T() * rhs)));
+	}
 
-  template <class Accessor>
-    Vector<> backsub(const DynamicVector<Accessor>& v, const double condition=condition_no){
-    Vector<> inv_diag(my_min_dim);
-    get_inv_diag(inv_diag,condition);
-    return (get_VT().T() * diagmult(inv_diag, (get_U().T() * v)));
-  }
+	Matrix<Cols,Rows> get_pinv(const Precision condition = condition_no){
+		Vector<Min_Dim> inv_diag(min_dim());
+		get_inv_diag(inv_diag,condition);
+		return diagmult(get_VT().T(),inv_diag) * get_U().T();
+	}
 
-  template <int Size, class Accessor>
-    Vector<Size> backsub(const FixedVector<Size, Accessor>& v, const double condition=condition_no){
-    Vector<> inv_diag(my_min_dim);
-    get_inv_diag(inv_diag,condition);
-    return (get_VT().T() * diagmult(inv_diag, (get_U().T() * v)));
-  }
+	/// calculates the product of the singular values
+	/// for square matrices this is the determinant
+	Precision determinant() {
+		Precision result = my_diagonal[0];
+		for(int i=1; i<my_diagonal.size(); i++){
+			result *= my_diagonal[i];
+		}
+		return result;
+	}
+	
+	int rank(const Precision condition = condition_no) {
+		if (my_diagonal[0] == 0) return 0;
+		int result=1;
+		for(int i=0; i<min_dim(); i++){
+			if(my_diagonal[i] * condition <= my_diagonal[0]){
+				result++;
+			}
+		}
+		return result;
+	}
 
-  Matrix<> get_pinv(const double condition = condition_no){
-    Vector<> inv_diag(my_min_dim);
-    get_inv_diag(inv_diag,condition);
-    return diagmult(get_VT().T(),inv_diag) * get_U().T();
-  }
-
-
-  void get_inv_diag(Vector<>& inv_diag, const double condition){
-    for(int i=0; i<my_min_dim; i++){
-      if(my_diagonal[i] * condition <= my_diagonal[0]){
-	inv_diag[i]=0;
-      } else {
-	inv_diag[i]=1.0/my_diagonal[i];
-      }
-    }
-  }
-
-
+	void get_inv_diag(Vector<Min_Dim>& inv_diag, const Precision condition){
+		for(int i=0; i<min_dim(); i++){
+			if(my_diagonal[i] * condition <= my_diagonal[0]){
+				inv_diag[i]=0;
+			} else {
+				inv_diag[i]=static_cast<Precision>(1)/my_diagonal[i];
+			}
+		}
+	}
 
 private:
-  Matrix<-1,-1,RowMajor> my_orig;  // matrix with the original shape
-  int my_height;
-  int my_width;
-  int my_min_dim;
-  Vector<-1> my_diagonal;
-  Matrix<-1,-1,RowMajor> my_square;   // square matrix (U or V' depending on the shape of my_orig)
+	Matrix<Rows,Cols,Precision,RowMajor> my_copy;
+	Vector<Min_Dim,Precision> my_diagonal;
+	Matrix<Min_Dim,Min_Dim,Precision,RowMajor> my_square; // square matrix (U or V' depending on the shape of my_copy)
 };
 
 
 
 
-#ifndef TOON_NO_NAMESPACE
+
+
+/// version of SVD forced to be square
+/// princiapally here to allow use in WLS
+template<int Size, typename Precision>
+struct SQSVD : public SVD<Size, Size, Precision> {
+	// forward all constructors to SVD
+	SQSVD() {}
+	SQSVD(int size) : SVD<Size,Size,Precision>(size, size) {}
+	
+	template <int R2, int C2, typename P2, typename B2>
+	SQSVD(const Matrix<R2,C2,P2,B2>& m) : SVD<Size,Size,Precision>(m) {}
+};
+
+
 }
-#endif 
-
-
-
-
-
-
 
 
 #endif
