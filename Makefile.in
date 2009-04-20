@@ -25,4 +25,4 @@ clean:
 	rm -rf html
 
 docs:
-	doxygen doc/Doxyfile
+	doxygen 

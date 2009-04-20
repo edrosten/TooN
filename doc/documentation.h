@@ -340,9 +340,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		v = unit(v);
 	@endcode
 	produces exactly the same compiler output as the hypothetical
-	<code>Normalize(v)</code> which operates in place. Consult the ChangeLog 
-	entry dated ``Wed 25 Mar, 2009 20:18:16''
-	for a further discussion of this.
+	<code>Normalize(v)</code> which operates in place (for static vectors). Consult the ChangeLog 
+	entries dated ``Wed 25 Mar, 2009 20:18:16'' and ``Wed  1 Apr, 2009 16:48:45''
+	for further discussion.
 	
 
 	\subsection sColMajor Can I have a column major matrix?
@@ -353,11 +353,21 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@endcode
 
 	\subsection sWrap I have a pointer to a bunch of data. How do I turn it in to a vector/matrix without copying?
-	To create a vector use
+	To create a vector use:
 	@code
 	double d[]={1,2,3,4};
 	Vector<4,double,Reference> v1(d);
 	Vector<Dynamic,double,Reference> v2(d,4);
+	@endcode
+	Or, a functional form can be used:
+	@code
+	double d[]={1,2,3,4};
+
+	wrapVector<4>(d);         //Returns a Vector<4>
+	wrapVector<4,double>(d);  //Returns a Vector<4>
+	
+	wrapVector(d,3);          //Return a Vector<Dynamic> of size 3
+	wrapVector<Double>(d,3);  //Return a Vector<Dynamic> of size 3
 	@endcode
 
 	To crate a matrix use
