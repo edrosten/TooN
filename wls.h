@@ -41,7 +41,7 @@ namespace TooN {
 /// Performs weighted least squares computation.
 /// @param Size The number of dimensions in the system
 /// @param Precision The numerical precision used (double, float etc)
-/// @param Decomposition The class used to invert the inverse Covariance matrix (must have two size and one precision template arguments)
+/// @param Decomposition The class used to invert the inverse Covariance matrix (must have one integer size and one typename precision template arguments) this is Cholesky by default, but could also be SQSVD
 /// @ingroup gEquations
 template <int Size=Dynamic, class Precision=double,
 		  template<int Size, class Precision> class Decomposition = Cholesky>
