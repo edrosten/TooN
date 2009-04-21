@@ -38,9 +38,9 @@
 // whether data or a reference to data should be copied.
 
 #ifdef __GNUC__
-#define ALIGN8 __attribute__ ((aligned(8)))
+#define TOON_ALIGN8 __attribute__ ((aligned(8)))
 #else
-#define ALIGN8
+#define TOON_ALIGN8
 #endif
 
 
@@ -64,7 +64,7 @@ public:
 		StackOrHeap()
 	{}
 
-	double my_data[Size] ALIGN8 ;
+	double my_data[Size] TOON_ALIGN8 ;
 };
 
 
@@ -394,4 +394,4 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 }
 
 
-#undef ALIGN8
+#undef TOON_ALIGN8
