@@ -371,7 +371,7 @@ namespace TooN {
 
 	/// Symmetrize a matrix
 	template<int Rows, int Cols, typename Precision, typename Base>
-	Symmetrize(Matrix<Rows,Cols,Precision,Base>& m){
+	void Symmetrize(Matrix<Rows,Cols,Precision,Base>& m){
 		SizeMismatch<Rows,Cols>::test(m.num_rows(), m.num_cols());
 		for(int r=0; r<m.num_rows()-1; r++){
 			for(int c=r+1; c<m.num_cols(); c++){
