@@ -41,7 +41,64 @@ static const double condition_no=1e9; // GK HACK TO GLOBAL
 
 
 
+namespace Internal{
+	template<int Rows, int Cols, bool Dynamic = (Rows == -1 || Cols == -1), bool IsVertical = (Rows >= Cols)> struct UVT
+	{
+		typedef Matrix<Dynamic> U_type;
+		typedef Matrix<Dynamic> VT_type;
 
+		static const Matrix<Dynamic>& get_U(const Matrix<Dynamic>& copy, const Matrix<Dynamic>& square)
+		{
+			if(copy.num_rows() >= copy.num_cols())
+				return copy;
+			else
+				return square;
+		}
+
+		static const Matrix<Dynamic>& get_VT(const Matrix<Dynamic>& copy, const Matrix<Dynamic>& square)
+		{
+			if(copy.num_rows() >= copy.num_cols())
+				return square;
+			else
+				return copy;
+		}
+	};
+
+	template<int Rows, int Cols> struct UVT<Rows, Cols, 0, 1>
+	{
+		static const int Min = Rows<Cols?Rows:Cols;
+
+		typedef Matrix<Rows,Cols> U_type;
+		typedef Matrix<Min,Min>  VT_type;
+
+		static const Matrix<Rows, Cols>& get_U(const Matrix<Rows,Cols>& copy, const Matrix<Min, Min>& square)
+		{
+			return copy;
+		}
+
+		static const Matrix<Min, Min>& get_VT(const Matrix<Rows, Cols>& copy, const Matrix<Min, Min>& square)
+		{
+			return square;
+		}
+	};
+
+	template<int Rows, int Cols> struct UVT<Rows, Cols, 0, 0>
+	{
+		static const int Min = Rows<Cols?Rows:Cols;
+		typedef Matrix<Min,Min>  U_type;
+		typedef Matrix<Rows,Cols> VT_type;
+
+		static const Matrix<Min, Min>& get_U(const Matrix<Rows, Cols>& copy, const Matrix<Min, Min>& square)
+		{
+			return square;
+		}
+
+		static const Matrix<Rows, Cols>& get_VT(const Matrix<Rows,Cols>& copy, const Matrix<Min, Min>& square)
+		{
+			return copy;
+		}
+	};
+}
 
 
 /**
@@ -229,28 +286,18 @@ public:
 	/// Return the U matrix from the decomposition
 	/// The size of this depends on the shape of the original matrix
 	/// it is square if the original matrix is wide or tall if the original matrix is tall
-	Matrix<Rows,Min_Dim,Precision,RowMajor>& get_U(){
-		if(is_vertical()){
-			return my_copy;
-		} else {
-			return my_square;
-		}
+	typename Internal::UVT<Rows, Cols>::U_type get_U()
+	{
+		return Internal::UVT<Rows, Cols>::get_U(my_copy, my_square);
+	}
+	
+	typename Internal::UVT<Rows, Cols>::VT_type get_VT()
+	{
+		return Internal::UVT<Rows, Cols>::get_VT(my_copy, my_square);
 	}
 
 	/// Return the singular values as a vector
 	Vector<Min_Dim,Precision>& get_diagonal(){ return my_diagonal; }
-
-	/// Return the VT matrix from the decomposition
-	/// The size of this depends on the shape of the original matrix
-	/// it is square if the original matrix is tall or wide if the original matrix is wide
-	Matrix<Min_Dim,Cols,Precision,RowMajor>& get_VT(){
-		if(is_vertical()){
-			return my_square;
-		} else {
-			return my_copy;
-		}
-	}
-
 
 	void get_inv_diag(Vector<Min_Dim>& inv_diag, const Precision condition){
 		for(int i=0; i<min_dim(); i++){
