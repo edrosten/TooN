@@ -78,11 +78,11 @@ namespace TooN {
 	// C++ overloaded functions to access single and double precision automatically //
 	//////////////////////////////////////////////////////////////////////////////////
 
-	void getrf_(int* M, int *N, float* A, int* lda, int* IPIV, int* INFO){
+	inline void getrf_(int* M, int *N, float* A, int* lda, int* IPIV, int* INFO){
 		sgetrf_(M, N, A, lda, IPIV, INFO);
 	}
 
-	void getrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO){
+	inline void getrf_(int* M, int *N, double* A, int* lda, int* IPIV, int* INFO){
 		dgetrf_(M, N, A, lda, IPIV, INFO);
 	}
 
@@ -94,57 +94,57 @@ namespace TooN {
 		dtrsm_(const_cast<char*>(SIDE), const_cast<char*>(UPLO), const_cast<char*>(TRANSA), const_cast<char*>(DIAG), M, N, alpha, A, lda, B, ldb);
 	}
 
-	void getri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO){
+	inline void getri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO){
 		dgetri_(N, A, lda, IPIV, WORK, lwork, INFO);
 	}
 
-	void getri_(int* N, float* A, int* lda, int* IPIV, float* WORK, int* lwork, int* INFO){
+	inline void getri_(int* N, float* A, int* lda, int* IPIV, float* WORK, int* lwork, int* INFO){
 		sgetri_(N, A, lda, IPIV, WORK, lwork, INFO);
 	}
 
-	void potrf_(const char * UPLO, const int* N, double* A, const int* LDA, int* INFO){
+	inline void potrf_(const char * UPLO, const int* N, double* A, const int* LDA, int* INFO){
 		dpotrf_(UPLO, N, A, LDA, INFO);
 	}
 
-	void potrf_(const char * UPLO, const int* N, float* A, const int* LDA, int* INFO){
+	inline void potrf_(const char * UPLO, const int* N, float* A, const int* LDA, int* INFO){
 		spotrf_(UPLO, N, A, LDA, INFO);
 	}
 
 	// SVD
-	void gesvd_(const char* JOBU, const char* JOBVT, int* M, int *N, double* A, int* lda,
+	inline void gesvd_(const char* JOBU, const char* JOBVT, int* M, int *N, double* A, int* lda,
 				double* S, double *U, int* ldu, double* VT, int* ldvt,
 				double* WORK, int* lwork, int* INFO){
 		dgesvd_(JOBU, JOBVT, M, N, A, lda, S, U, ldu, VT, ldvt, WORK, lwork, INFO);
 	}
 
-	void gesvd_(const char* JOBU, const char* JOBVT, int* M, int *N, float* A, int* lda,
+	inline void gesvd_(const char* JOBU, const char* JOBVT, int* M, int *N, float* A, int* lda,
 					 float* S, float *U, int* ldu, float* VT, int* ldvt,
 					 float* WORK, int* lwork, int* INFO){
 		sgesvd_(JOBU, JOBVT, M, N, A, lda, S, U, ldu, VT, ldvt, WORK, lwork, INFO);
 	}
 
 	// Cholesky solve AX=B given decomposition
-	void potrs_(const char* UPLO, const int* N, const int* NRHS, const double* A, const int* LDA, double* B, const int* LDB, int* INFO){
+	inline void potrs_(const char* UPLO, const int* N, const int* NRHS, const double* A, const int* LDA, double* B, const int* LDB, int* INFO){
 		dpotrs_(UPLO, N, NRHS, A, LDA, B, LDB, INFO);
 	}
 
-	void potrs_(const char* UPLO, const int* N, const int* NRHS, const float* A, const int* LDA, float* B, const int* LDB, int* INFO){
+	inline void potrs_(const char* UPLO, const int* N, const int* NRHS, const float* A, const int* LDA, float* B, const int* LDB, int* INFO){
 		spotrs_(UPLO, N, NRHS, A, LDA, B, LDB, INFO);
 	}
 
 	// Cholesky inverse given decomposition
-	void potri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO){
+	inline void potri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO){
 		dpotri_(UPLO, N, A, LDA, INFO);
 	}
 
-	void potri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO){
+	inline void potri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO){
 		spotri_(UPLO, N, A, LDA, INFO);
 	}
 
-	void syev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W, double* WORK, int* LWORK, int* INFO){
+	inline void syev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W, double* WORK, int* LWORK, int* INFO){
 		dsyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
 	}
-	void syev_(const char* JOBZ, const char* UPLO, int* N, float* A, int* lda, float* W, float* WORK, int* LWORK, int* INFO){
+	inline void syev_(const char* JOBZ, const char* UPLO, int* N, float* A, int* lda, float* W, float* WORK, int* LWORK, int* INFO){
 		ssyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
 	}
 
