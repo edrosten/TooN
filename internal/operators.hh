@@ -441,7 +441,7 @@ template<int R, int C, typename P1, typename B1, int Size, typename P2, typename
 Matrix<R, C, typename Internal::MultiplyType<P1,P2>::type> diagmult(const Vector<Size,P1,B1>& v,
 																 const Matrix<R,C,P2,B2>& m)
 {
-	SizeMismatch<C,Size>::test(m.num_rows(), v.size());
+	SizeMismatch<R,Size>::test(m.num_rows(), v.size());
 	return Operator<Internal::VectorMatrixDiagMultiply<Size,P1,B1,R,C,P2,B2> >(v,m);
 }
 
