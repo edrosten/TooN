@@ -489,14 +489,6 @@ struct Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Op> > {
 };
 
 template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Vector<Size, P1, B1>& v, const P2& s){
-	return Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Internal::Add> > (v,s);
-}
-template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Subtract::Return<P1,P2>::Type> operator-(const Vector<Size, P1, B1>& v, const P2& s){
-	return Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Internal::Subtract> > (v,s);
-}
-template <int Size, typename P1, typename B1, typename P2>
 Vector<Size, typename Internal::Multiply::Return<P1,P2>::Type> operator*(const Vector<Size, P1, B1>& v, const P2& s){
 	return Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Internal::Multiply> > (v,s);
 }
@@ -523,24 +515,11 @@ struct Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Op> > {
 		return rhs.size();
 	}
 };
-
-template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Add::Return<P2,P1>::Type> operator+(const P2& s, const Vector<Size, P1, B1>& v){
-	return Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Internal::Add> > (s,v);
-}
-template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Subtract::Return<P2,P1>::Type> operator-(const P2& s, const Vector<Size, P1, B1>& v){
-	return Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Internal::Subtract> > (s,v);
-}
 template <int Size, typename P1, typename B1, typename P2>
 Vector<Size, typename Internal::Multiply::Return<P2,P1>::Type> operator*(const P2& s, const Vector<Size, P1, B1>& v){
 	return Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Internal::Multiply> > (s,v);
 }
 // no left division
-// template <int Size, typename P1, typename B1, typename P2>
-// Vector<Size, typename Internal::Divide::Return<P2,P1>::Type> operator/(const P2& s, const Vector<Size, P1, B1>& v){
-// 	return Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Internal::Divide> > (s,v);
-// }
 
 
 ///////  Matrix scalar operators
@@ -569,14 +548,6 @@ struct Operator<Internal::ApplyScalarM<R,C,P1,B1,P2,Op> > {
 	}
 };
 
-template <int R, int C, typename P1, typename B1, typename P2>
-Matrix<R,C, typename Internal::Add::Return<P1,P2>::Type> operator+(const Matrix<R,C, P1, B1>& m, const P2& s){
-	return Operator<Internal::ApplyScalarM<R,C,P1,B1,P2,Internal::Add> > (m,s);
-}
-template <int R, int C, typename P1, typename B1, typename P2>
-Matrix<R,C, typename Internal::Subtract::Return<P1,P2>::Type> operator-(const Matrix<R,C, P1, B1>& m, const P2& s){
-	return Operator<Internal::ApplyScalarM<R,C,P1,B1,P2,Internal::Subtract> > (m,s);
-}
 template <int R, int C, typename P1, typename B1, typename P2>
 Matrix<R,C, typename Internal::Multiply::Return<P1,P2>::Type> operator*(const Matrix<R,C, P1, B1>& m, const P2& s){
 	return Operator<Internal::ApplyScalarM<R,C,P1,B1,P2,Internal::Multiply> > (m,s);
@@ -611,26 +582,56 @@ struct Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Op> > {
 };
 
 template <int R, int C, typename P1, typename B1, typename P2>
-Matrix<R,C, typename Internal::Add::Return<P2,P1>::Type> operator+(const P2& s, const Matrix<R,C, P1, B1>& m){
-	return Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Internal::Add> > (s,m);
-}
-template <int R, int C, typename P1, typename B1, typename P2>
-Matrix<R,C, typename Internal::Subtract::Return<P2,P1>::Type> operator-(const P2& s, const Matrix<R,C, P1, B1>& m){
-	return Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Internal::Subtract> > (s,m);
-}
-template <int R, int C, typename P1, typename B1, typename P2>
 Matrix<R,C, typename Internal::Multiply::Return<P2,P1>::Type> operator*(const P2& s, const Matrix<R,C, P1, B1>& m){
 	return Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Internal::Multiply> > (s,m);
 }
-// template <int R, int C, typename P1, typename B1, typename P2>
-// Matrix<R,C, typename Internal::Divide::Return<P2,P1>::Type> operator/(const P2& s, const Matrix<R,C, P1, B1>& m){
-// 	return Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Internal::Divide> > (s,m);
-// }
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Addition of scalars
+//
+namespace Internal{
+	template<int S, class P, class B, class Ps> class ScalarsVector;	
+	template<class P> class Scalars;	
+}
+
+template<class Precision> struct Operator<Internal::Scalars<Precision> >
+{
+	const Precision s;
+	Operator(Precision s_)
+	:s(s_){}
+};
+
+template<int S, class P, class B, class Precision> struct Operator<Internal::ScalarsVector<S,P,B,Precision> >
+{
+	const Precision s;
+	const Vector<S,P,B>& v;
+	Operator(Precision s_, const Vector<S,P,B>& v_)
+	:s(s_),v(v_){}
+
+	template<int S1, class P1, class B1>
+	void eval(Vector<S1,P1,B1>& vv) const{
+		for(int i=0; i < v.size(); i++)
+			vv[i] = s + v[i];
+	}
+};
 
 
+/*template<int S, class P, class B, class P2>
+Vector<S, typename Internal:AddType<P, P2>::type > operator+(const Vector<S,P,B>& v, const Operators<Scalar<P2> >& op)
+{
+	return Operators<Internal::ScalarsVector<S,P,B,typename Operator<Op>::Precision> >(op.s, v);
+}*/
 
+template <int Size, typename P1, typename B1, typename P2>
+Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Vector<Size, P1, B1>& v, const Operator<Internal::Scalars<P2> >& s){
+	return Operator<Internal::ScalarsVector<Size,P1,B1,P2> >(s.s, v);
+}
 
-
+template <int Size, typename P1, typename B1, typename P2>
+Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Operator<Internal::Scalars<P2> >& s, const Vector<Size, P1, B1>& v){
+	return Operator<Internal::ScalarsVector<Size,P1,B1,P2> >(s.s, v);
+}
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Stream I/O operators

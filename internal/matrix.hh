@@ -124,24 +124,6 @@ public:
 	    return *this;
 	}
 
-	Matrix& operator+=(const Precision& rhs)
-	{
-		  for(int r=0; r < num_rows(); r++)
-			  for(int c=0; c < num_cols(); c++)
-			  	(*this)[r][c] += rhs;
-
-		  return *this;
-	}
-
-	Matrix& operator-=(const Precision& rhs)
-	{
-		  for(int r=0; r < num_rows(); r++)
-			  for(int c=0; c < num_cols(); c++)
-			  	(*this)[r][c] -= rhs;
-
-		  return *this;
-	}
-
 	Matrix& operator*=(const Precision& rhs)
 	{
 		  for(int r=0; r < num_rows(); r++)

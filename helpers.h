@@ -381,5 +381,10 @@ namespace TooN {
 			}
 		}
 	}
+
+	template<class P> Operator<Internal::Scalars<P> > Scalars(const P& s)
+	{
+		return Operator<Internal::Scalars<P> > (s);
+	}
 }
 #endif

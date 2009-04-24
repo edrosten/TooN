@@ -1,4 +1,5 @@
 #include <TooN/TooN.h>
+#include <TooN/helpers.h>
 
 using namespace std;
 using namespace TooN;
@@ -22,7 +23,7 @@ int main()
 
 	make_a_copy_constructor_happen(v1);
 
-	cout << 1+(v1 + v2)+2 << endl;
+	cout << Scalars(1) + (v1 + v2)+Scalars(2) << endl;
 
 	v1.slice<0, 2>() /= 2;
 	cout << v1 << endl;

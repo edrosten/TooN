@@ -98,20 +98,6 @@ public:
 		return *this;
 	}
 
-
-	Vector& operator+=(const Precision& rhs) {
-		for(int i=0; i<size(); i++)
-			(*this)[i]+=rhs;
-		return *this;
-	}
-	
-
-	Vector& operator-=(const Precision& rhs) {
-		for(int i=0; i<size(); i++)
-			(*this)[i]-=rhs;
-		return *this;
-	}
-	
 	Vector& operator/=(const Precision& rhs) {
 		for(int i=0; i<size(); i++)
 			(*this)[i]/=rhs;
