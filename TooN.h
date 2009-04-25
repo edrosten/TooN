@@ -71,6 +71,7 @@ namespace TooN
 
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
+	template<int Size, class Precision, class Base> struct DiagonalMatrix;
 	template<typename T> class Operator;
 
 	static const int Dynamic = -1;
@@ -89,6 +90,8 @@ namespace TooN
 	#include <TooN/internal/mbase.hh>
 	#include <TooN/internal/matrix.hh>
 	#include <TooN/internal/reference.hh>
+
+    #include <TooN/internal/diagmatrix.hh>
 
 	#include <TooN/internal/make_vector.hh>
 	#include <TooN/internal/operators.hh>
