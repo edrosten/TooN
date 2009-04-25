@@ -5,18 +5,26 @@ using namespace std;
 
 int main()
 {
-	Matrix<4, 4> m = Zero;
+	Matrix<3, 4> m = Zero;
 	m[0] = makeVector(1, 2, 3, 4);
 	m[1] = makeVector(1, 1, 1, 1);
+	m[2] = makeVector(3, 2, 6, 7);	
 
-	SVD<4, 4> svdm(m);
+	cout << m << endl;
 
-	cout << svdm.get_VT().num_rows() << endl;
-	cout << svdm.get_VT().num_cols() << endl;
+	SVD<-1, -1> svdm(m);
 
-	cout << m[0] * svdm.get_VT()[2] << endl;
-	cout << m[0] * svdm.get_VT()[3] << endl;
-	cout << m[1] * svdm.get_VT()[2] << endl;
-	cout << m[1] * svdm.get_VT()[3] << endl;
+	Matrix<3,4> temp =diagmult(svdm.get_diagonal(), svdm.get_VT());
+
+	cout << svdm.get_U() * temp << endl;
+
+	Matrix<4,3> m2 = m.T();
+	SVD<-1,-1> svdm2(m2);
+
+	cout << svdm2.get_U() * diagmult(svdm2.get_diagonal(), svdm2.get_VT()) << endl;
+
+
+
+
 
 }

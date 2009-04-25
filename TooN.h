@@ -94,7 +94,7 @@ namespace TooN
 	#include <TooN/internal/make_vector.hh>
 	#include <TooN/internal/operators.hh>
 
-    #include <TooN/internal/diagmatrix.hh>
+    #include <TooN/internal/diagmatrix.h>
 
 }
 

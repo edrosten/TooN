@@ -28,6 +28,29 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+
+
+
+
+
+/**
+@class DiagonalMatrix TooN/toon.h
+A diagonal matrix
+Support is limited but diagonal matrices can be multiplied by vectors, matrices
+or diagonal matrices on either side.
+
+Diagonal matrices can be created from vectors by using the <code> as_diagonal() 
+</code> member function:
+
+@code
+Vector<3> v = makeVector(1,2,3);
+Vector<3> v2 = v.as_diagonal() * v;   // v2 = (1,4,9)
+@endcode
+
+A vector can be obtained from the diagonal matrix by using the
+<code> diagonal_slice() </code> member function.
+@ingroup gLinAlg
+ **/
 template<int Size=-1, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 class DiagonalMatrix {
 public:
