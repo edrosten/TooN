@@ -45,7 +45,7 @@ public:
 	inline DiagonalMatrix(const Operator<Op>& op)
 		: my_vector (op)
 	{
-		op.eval(*this);
+		op.eval(my_vector);
 	}
 
 	// constructor from arbitrary vector
@@ -67,3 +67,37 @@ public:
 
 	Vector<Size,Precision,Base> my_vector;
 };
+
+
+template<int S1, typename P1, typename B1, int S2, typename P2, typename B2>
+inline Vector<Internal::Sizer<S1,S2>::size, typename Internal::MultiplyType<P1,P2>::type>
+operator*(const DiagonalMatrix<S1,P1,B1>& d, const Vector<S2,P2,B2>& v){
+	return diagmult(d.my_vector,v);
+}
+
+template<int S1, typename P1, typename B1, int S2, typename P2, typename B2>
+inline Vector<Internal::Sizer<S1,S2>::size, typename Internal::MultiplyType<P1,P2>::type>
+operator*( const Vector<S1,P1,B1>& v, const DiagonalMatrix<S2,P2,B2>& d){
+	return diagmult(v,d.my_vector);
+}
+
+// perhaps not the safest way to do this as we're returning the same operator used to normally make vectors
+template<int S1, typename P1, typename B1, int S2, typename P2, typename B2>
+inline DiagonalMatrix<Internal::Sizer<S1,S2>::size, typename Internal::MultiplyType<P1,P2>::type>
+operator*( const DiagonalMatrix<S1,P1,B1>& d1, const DiagonalMatrix<S2,P2,B2>& d2){
+	SizeMismatch<S1,S2>::test(d1.my_vector.size(),d2.my_vector.size());
+	return Operator<Internal::VPairwise<Internal::Multiply,S1,P1,B1,S2,P2,B2> >(d1.my_vector,d2.my_vector);
+}
+
+template<int R, int C, int Size, typename P1, typename P2, typename B1, typename B2>
+Matrix<R, C, typename Internal::MultiplyType<P1,P2>::type>
+operator* (const Matrix<R, C, P1, B1>& m, const DiagonalMatrix<Size, P2, B2>& d){
+	return diagmult(m,d.my_vector);
+}
+
+template<int R, int C, typename P1, typename B1, int Size, typename P2, typename B2> 
+Matrix<R, C, typename Internal::MultiplyType<P1,P2>::type>
+operator* (const DiagonalMatrix<Size,P1,B1>& d, const Matrix<R,C,P2,B2>& m)
+{
+	return diagmult(d.my_vector, m);
+}
