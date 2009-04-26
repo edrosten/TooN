@@ -56,6 +56,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sFunctionVector
  - \ref sGenericCode
  - \ref sElemOps
+ - \ref sScalars
  - \ref ssExamples
  - \ref sNoResize
  - \ref sDebug
@@ -145,11 +146,10 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Assignments are performed using <code>=</code>. See also 
 		\ref sNoResize.
 
-
 		These operators apply to vectors or matrices and scalars. 
 		The operator is applied to every element with the scalar.
 		@code
-		+=, -=, *= /= +, -, *, / 
+		*=, /=, *, / 
 		@endcode
 		
 		Vector and vectors or matrices and matrices:
@@ -213,6 +213,21 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 
 		See also \ref sSlices
+
+	\subsection sScalars How do I add a scalar to every element of a vector/matrix? 
+		
+		Addition to every element is not an elementary operation in the same way
+		as multiplication by a scalar. It is supported throught the ::Scalars
+		function:
+		
+		@code
+			Vector<3> a, b;
+			...
+			b = a + Scalars(3);   // b_i = a_i + 3
+			a+=Scalars(3);        // a_i <- a_i + 3
+		@endcode
+
+		It is supported the same way on Matrix and slices.
 
 	\subsection sNoResize Why does assigning mismatched dynamic vectors fail?
 	

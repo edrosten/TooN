@@ -472,7 +472,18 @@ namespace TooN {
 			return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
 		}
 	};
-
+	
+	/**This function us used to add a scalar to every element of a vector or
+	matrix. For example:
+	@code
+		Vector<> v;
+		...
+		...
+		v += Scalars(3); //Add 3 to every element of v;
+	@endcode
+	Both + and += are supported on vectors,matrices and slices.
+	@param  s Scalar to add.
+	*/
 	template<class P> Operator<Internal::Scalars<P> > Scalars(const P& s)
 	{
 		return Operator<Internal::Scalars<P> > (s);
