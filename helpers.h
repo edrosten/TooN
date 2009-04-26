@@ -381,6 +381,97 @@ namespace TooN {
 			}
 		}
 	}
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//
+	// Addition of scalars ro vectors and matrices
+	//
+
+	namespace Internal{
+		template<int S, class P, class B, class Ps> class ScalarsVector;	
+		template<int R, int C, class P, class B, class Ps> class ScalarsMatrix;	
+		template<class P> class Scalars;	
+	}
+	
+	//Operator to construct a new vector a a vector with a scalar added to every element
+	template<int S, class P, class B, class Precision> struct Operator<Internal::ScalarsVector<S,P,B,Precision> >
+	{
+		const Precision s;
+		const Vector<S,P,B>& v;
+		Operator(Precision s_, const Vector<S,P,B>& v_)
+		:s(s_),v(v_){}
+
+		template<int S1, class P1, class B1>
+		void eval(Vector<S1,P1,B1>& vv) const{
+			for(int i=0; i < v.size(); i++)
+				vv[i] = s + v[i];
+		}
+
+		int size() const
+		{
+			return v.size();
+		}
+	};
+
+	//Operator to construct a new matrix a a matrix with a scalar added to every element
+	template<int R, int C, class P, class B, class Precision> struct Operator<Internal::ScalarsMatrix<R,C,P,B,Precision> >
+	{
+		const Precision s;
+		const Matrix<R,C,P,B>& m;
+		Operator(Precision s_, const Matrix<R,C,P,B>& m_)
+		:s(s_),m(m_){}
+		template<int R1, int C1, class P1, class B1>
+		void eval(Matrix<R1,C1,P1,B1>& mm) const{
+			for(int r=0; r < m.num_rows(); r++)
+				for(int c=0; c < m.num_cols(); c++)
+					mm[r][c] = s + m[r][c];
+		}
+
+		int num_rows() const
+		{
+			return m.num_rows();
+		}
+		int num_cols() const
+		{
+			return m.num_cols();
+		}
+	};
+
+	//Generic scalars object. Knows how to be added, knows how to deal with +=
+	template<class P> struct Operator<Internal::Scalars<P> >
+	{
+		typedef P Precision;
+		const Precision s;
+		Operator(Precision s_)
+		:s(s_){}
+
+		template <int Size, typename P1, typename B1> 
+		void plusequals(Vector<Size, P1, B1>& v) const
+		{
+			for(int i=0; i < v.size(); i++)
+				v[i] += s;
+		}
+
+		template <int Size, typename P1, typename B1> 
+		Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > add(const Vector<Size, P1, B1>& v) const
+		{
+			return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v);
+		}
+
+		template <int Rows, int Cols, typename P1, typename B1> 
+		void plusequals(Matrix<Rows,Cols, P1, B1>& m) const
+		{
+			for(int r=0; r < m.num_rows(); r++)
+				for(int c=0; c < m.num_cols(); c++)
+					m[r][c] += s;
+		}
+
+		template <int Rows, int Cols, typename P1, typename B1> 
+		Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& v) const
+		{
+			return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
+		}
+	};
 
 	template<class P> Operator<Internal::Scalars<P> > Scalars(const P& s)
 	{

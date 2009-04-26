@@ -118,6 +118,13 @@ public:
 			(*this)[i]+=rhs[i];
 		return *this;
 	}
+	
+	template<class Op>
+	Vector& operator+=(const Operator<Op>& op)
+	{
+		op.plusequals(*this);
+		return *this;
+	}		
 
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator-=(const Vector<Size2, Precision2, Base2>& rhs) {

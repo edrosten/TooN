@@ -9,8 +9,17 @@ int main()
 	cout << v + Scalars(3) << endl;
 	cout << v.slice(2,3) + Scalars(3) << endl;
 
-	Matrix<> m = Identity(4);
+	v+=Scalars(1);
+	cout << v << endl;
+	v.slice(0,3) += Scalars(3);
+	cout << v << endl;
 
+	Matrix<> m = Identity(4);
 	cout << m + Scalars(1) << endl;
 	cout << m.slice<0,0,2,3>() + Scalars(2) << endl;
+
+	m+=Scalars(1);
+	cout << m << endl;
+	m.slice<0,0,3,2>() += Scalars(2);
+	cout << m << endl;
 }

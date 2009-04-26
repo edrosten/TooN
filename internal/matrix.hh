@@ -155,6 +155,13 @@ public:
 	    return *this;
 	}
 
+	template<class Op>
+	Matrix& operator+=(const Operator<Op>& op)
+	{
+		op.plusequals(*this);
+		return *this;
+	}
+
 	template<int Rows2, int Cols2, typename Precision2, typename Base2>
 	Matrix& operator-= (const Matrix<Rows2, Cols2, Precision2, Base2>& from)
 	{
