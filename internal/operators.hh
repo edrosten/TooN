@@ -592,6 +592,7 @@ Matrix<R,C, typename Internal::Multiply::Return<P2,P1>::Type> operator*(const P2
 //
 namespace Internal{
 	template<int S, class P, class B, class Ps> class ScalarsVector;	
+	template<int R, int C, class P, class B, class Ps> class ScalarsMatrix;	
 	template<class P> class Scalars;	
 }
 
@@ -614,15 +615,37 @@ template<int S, class P, class B, class Precision> struct Operator<Internal::Sca
 		for(int i=0; i < v.size(); i++)
 			vv[i] = s + v[i];
 	}
+
+	int size() const
+	{
+		return v.size();
+	}
 };
 
-
-/*template<int S, class P, class B, class P2>
-Vector<S, typename Internal:AddType<P, P2>::type > operator+(const Vector<S,P,B>& v, const Operators<Scalar<P2> >& op)
+template<int R, int C, class P, class B, class Precision> struct Operator<Internal::ScalarsMatrix<R,C,P,B,Precision> >
 {
-	return Operators<Internal::ScalarsVector<S,P,B,typename Operator<Op>::Precision> >(op.s, v);
-}*/
+	const Precision s;
+	const Matrix<R,C,P,B>& m;
+	Operator(Precision s_, const Matrix<R,C,P,B>& m_)
+	:s(s_),m(m_){}
+	template<int R1, int C1, class P1, class B1>
+	void eval(Matrix<R1,C1,P1,B1>& mm) const{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				mm[r][c] = s + m[r][c];
+	}
 
+	int num_rows() const
+	{
+		return m.num_rows();
+	}
+	int num_cols() const
+	{
+		return m.num_cols();
+	}
+};
+
+// Vectors
 template <int Size, typename P1, typename B1, typename P2>
 Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Vector<Size, P1, B1>& v, const Operator<Internal::Scalars<P2> >& s){
 	return Operator<Internal::ScalarsVector<Size,P1,B1,P2> >(s.s, v);
@@ -631,6 +654,17 @@ Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Vector
 template <int Size, typename P1, typename B1, typename P2>
 Vector<Size, typename Internal::Add::Return<P1,P2>::Type> operator+(const Operator<Internal::Scalars<P2> >& s, const Vector<Size, P1, B1>& v){
 	return Operator<Internal::ScalarsVector<Size,P1,B1,P2> >(s.s, v);
+}
+
+//Matrices
+template <int Rows, int Cols, typename P1, typename B1, typename P2>
+Matrix<Rows, Cols, typename Internal::Add::Return<P1,P2>::Type> operator+(const Matrix<Rows, Cols, P1, B1>& m, const Operator<Internal::Scalars<P2> >& s){
+	return Operator<Internal::ScalarsMatrix<Rows, Cols,P1,B1,P2> >(s.s, m);
+}
+
+template <int Rows, int Cols, typename P1, typename B1, typename P2>
+Matrix<Rows, Cols, typename Internal::Add::Return<P1,P2>::Type> operator+(const Operator<Internal::Scalars<P2> >& s, const Matrix<Rows, Cols, P1, B1>& m){
+	return Operator<Internal::ScalarsMatrix<Rows, Cols,P1,B1,P2> >(s.s, m);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //
