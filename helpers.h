@@ -595,7 +595,7 @@ namespace TooN {
 	/**This function us used to add a scalar to every element of a vector or
 	matrix. For example:
 	@code
-		Vector<> v;
+		Vector<3> v;
 		...
 		...
 		v += Ones * 3; //Add 3 to every element of v;
