@@ -56,6 +56,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sFunctionVector
  - \ref sGenericCode
  - \ref sElemOps
+ - \ref sInitialize
  - \ref sScalars
  - \ref ssExamples
  - \ref sNoResize
@@ -214,17 +215,45 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		See also \ref sSlices
 
+	\subsection sInitialize How I initialize a vector/matrix?
+
+		Vectors and matrices start off uninitialized (filled with random garbage).
+		They can be easily filled with zeros, or ones (see also TooN::Ones):
+		@code
+			Vector<3> v = Zero;
+			Matrix<3> m = Zero;
+			Vector<>  v2 = Zero(2); //Note in they dynamic case, the size must be specified
+			Matrix<>  m2 = Zero(2,2); //Note in they dynamic case, the size must be specified
+		@endcode
+
+		Vectors can be filled with makeVector:
+		@code
+			Vector<> v = makeVector(2,3,4,5,6);
+		@endcode
+		
+		Matrices can be initialized to the identity matrix:
+		@code
+			Matrix<2> m = Idendity;
+		@endcode
+		though note that you need to specify the size in the dynamic case.
+
+		They can also be initialized with data from another source. See also \ref  sWrap.
+
+
+
+
+
 	\subsection sScalars How do I add a scalar to every element of a vector/matrix? 
 		
 		Addition to every element is not an elementary operation in the same way
-		as multiplication by a scalar. It is supported throught the ::Scalars
-		function:
+		as multiplication by a scalar. It is supported throught the ::Ones
+		object:
 		
 		@code
 			Vector<3> a, b;
 			...
-			b = a + Scalars(3);   // b_i = a_i + 3
-			a+=Scalars(3);        // a_i <- a_i + 3
+			b = a + Ones*3;       // b_i = a_i + 3
+			a+= Ones * 3;         // a_i <- a_i + 3
 		@endcode
 
 		It is supported the same way on Matrix and slices.

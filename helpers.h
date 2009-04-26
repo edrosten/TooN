@@ -391,6 +391,8 @@ namespace TooN {
 		template<int S, class P, class B, class Ps> class ScalarsVector;	
 		template<int R, int C, class P, class B, class Ps> class ScalarsMatrix;	
 		template<class P> class Scalars;	
+		template<class P> class SizedScalars;	
+		template<class P> class RCScalars;	
 	}
 	
 	//Operator to construct a new vector a a vector with a scalar added to every element
@@ -445,6 +447,18 @@ namespace TooN {
 		Operator(Precision s_)
 		:s(s_){}
 
+		////////////////////////////////////////
+		//
+		// All applications for vector
+		//
+
+		template <int Size, typename P1, typename B1> 
+		void eval(Vector<Size, P1, B1>& v) const
+		{
+			for(int i=0; i < v.size(); i++)
+				v[i] = s;
+		}
+
 		template <int Size, typename P1, typename B1> 
 		void plusequals(Vector<Size, P1, B1>& v) const
 		{
@@ -456,6 +470,20 @@ namespace TooN {
 		Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > add(const Vector<Size, P1, B1>& v) const
 		{
 			return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v);
+		}
+
+
+		////////////////////////////////////////
+		//
+		// All applications for matrix
+		//
+
+		template <int Rows, int Cols, typename P1, typename B1> 
+		void eval(Matrix<Rows,Cols, P1, B1>& m) const
+		{
+			for(int r=0; r < m.num_rows(); r++)
+				for(int c=0; c < m.num_cols(); c++)
+					m[r][c] = s;
 		}
 
 		template <int Rows, int Cols, typename P1, typename B1> 
@@ -471,22 +499,109 @@ namespace TooN {
 		{
 			return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
 		}
+
+		////////////////////////////////////////
+		//
+		// Create sized versions for initialization
+		//
+
+		Operator<Internal::SizedScalars<Precision> > operator()(int size) const
+		{
+			return Operator<Internal::SizedScalars<Precision> > (s,size);
+		}
+
+		Operator<Internal::RCScalars<Precision> > operator()(int r, int c) const
+		{
+			return Operator<Internal::RCScalars<Precision> > (s,r,c);
+		}
+	};
+
+	template<class P> struct Operator<Internal::SizedScalars<P> >: public Operator<Internal::Scalars<P> >
+	{
+		const int my_size;
+		int size() const {
+			return my_size;
+		}
+		
+		Operator(P s, int sz)
+		:Operator<Internal::Scalars<P> >(s),my_size(sz){}
+		
+		private:
+			void operator()(int);
+			void operator()(int,int);
+	};
+
+		
+
+	template<class P> struct Operator<Internal::RCScalars<P> >: public Operator<Internal::Scalars<P> >
+	{
+		const int my_rows, my_cols;
+		int num_rows() const {
+			return my_rows;
+		}
+		int num_cols() const {
+			return my_cols;
+		}
+		
+		Operator(P s, int r, int c)
+		:Operator<Internal::Scalars<P> >(s),my_rows(r),my_cols(c)
+		{}
+		
+		private:
+			void operator()(int);
+			void operator()(int,int);
 	};
 	
+	template<class Pl, class Pr> 
+	Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Pl& l, const Operator<Internal::Scalars<Pr> >& r)
+	{
+		return Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s);
+	}
+
+	
+	template<class Pl, class Pr> 
+	Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Operator<Internal::Scalars<Pl> >& l, const Pr& r)
+	{
+		return Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r);
+	}
+
+	
+	template<class Pl, class Pr> 
+	Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Pl& l, const Operator<Internal::SizedScalars<Pr> >& r)
+	{
+		return Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s, r.my_size);
+	}
+	
+	template<class Pl, class Pr> 
+	Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Operator<Internal::SizedScalars<Pl> >& l, const Pr& r)
+	{
+		return Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r, l.my_size);
+	}
+
+	
+	template<class Pl, class Pr> 
+	Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Pl& l, const Operator<Internal::RCScalars<Pr> >& r)
+	{
+		return Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s, r.my_rows, r.my_cols);
+	}
+	
+	template<class Pl, class Pr> 
+	Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > > operator*(const Operator<Internal::RCScalars<Pl> >& l, const Pr& r)
+	{
+		return Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r, l.my_rows, l.my_cols);
+	}
+
+
 	/**This function us used to add a scalar to every element of a vector or
 	matrix. For example:
 	@code
 		Vector<> v;
 		...
 		...
-		v += Scalars(3); //Add 3 to every element of v;
+		v += Ones * 3; //Add 3 to every element of v;
 	@endcode
 	Both + and += are supported on vectors,matrices and slices.
-	@param  s Scalar to add.
 	*/
-	template<class P> Operator<Internal::Scalars<P> > Scalars(const P& s)
-	{
-		return Operator<Internal::Scalars<P> > (s);
-	}
+	static const Operator<Internal::Scalars<DefaultPrecision> > Ones(1);
 }
 #endif
