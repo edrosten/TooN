@@ -399,7 +399,7 @@ operator*(const Operator<Internal::RCScalars<Pl> >& l, const Pr& r)
    Both + and += are supported on vectors,matrices and slices.
 */
 
-static Operator<Internal::Zero> Zero;
+static Operator<Internal::Zero> Zeros;
 static Operator<Internal::Identity<DefaultPrecision> > Identity;
 static const Operator<Internal::Scalars<DefaultPrecision> > Ones(1);
 
