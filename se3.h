@@ -50,7 +50,7 @@ template <typename Precision = double>
 class SE3 {
 public:
 	/// Default constructor. Initialises the the rotation to zero (the identity) and the translation to zero
-	inline SE3() : my_translation(Zero) {}
+	inline SE3() : my_translation(Zeros) {}
 
 	template <int S, typename P, typename A> 
 	SE3(const SO3<Precision> & R, const Vector<S, P, A>& T) : my_rotation(R), my_translation(T) {}
@@ -104,7 +104,7 @@ public:
 	}
 
 	static inline Matrix<4,4,Precision> generator(int i){
-		Matrix<4,4,Precision> result(Zero);
+		Matrix<4,4,Precision> result(Zeros);
 		if(i < 3){
 			result[i][3]=1;
 			return result;
@@ -118,7 +118,7 @@ public:
   template<typename Base>
   inline static Vector<4,Precision> generator_field(int i, const Vector<4, Precision, Base>& pos)
   {
-    Vector<4, Precision> result(Zero);
+    Vector<4, Precision> result(Zeros);
     if(i < 3){
       result[i]=pos[3];
       return result;

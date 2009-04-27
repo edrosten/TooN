@@ -111,7 +111,7 @@ public:
 	/// \f$3\times3\f$ matrices representing the three possible (linearised)
 	/// rotations.
 	inline static Matrix<3,3, Precision> generator(int i){
-		Matrix<3,3,Precision> result(Zero);
+		Matrix<3,3,Precision> result(Zeros);
 		result[(i+1)%3][(i+2)%3] = -1;
 		result[(i+2)%3][(i+1)%3] = 1;
 		return result;

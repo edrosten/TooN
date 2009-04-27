@@ -41,7 +41,7 @@ namespace TooN {
 template <typename Precision = double>
 class SE2 {
 public:
-	SE2() : my_translation(Zero) {}
+	SE2() : my_translation(Zeros) {}
 	template <class A> SE2(const SO2<Precision>& R, const Vector<2,Precision,A>& T) : my_rotation(R), my_translation(T) {}
 	template <int S, class P, class A> SE2(const Vector<S, P, A> & v) { *this = exp(v); }
 
@@ -67,7 +67,7 @@ public:
 	}
 
 	static inline Matrix<3,3, Precision> generator(int i) {
-		Matrix<3,3,Precision> result(Zero);
+		Matrix<3,3,Precision> result(Zeros);
 		if(i < 2){
 			result[i][2] = 1;
 			return result;

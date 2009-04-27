@@ -62,8 +62,8 @@ public:
 	/// Equates to a prior that says all the parameters are zero with \f$\sigma^2 = \frac{1}{\text{val}}\f$.
 	/// @param prior The strength of the prior
 	void clear(){
-		my_C_inv = Zero;
-		my_vector = Zero;
+		my_C_inv = Zeros;
+		my_vector = Zeros;
 	}
 
 	/// Applies a constant regularisation term. 

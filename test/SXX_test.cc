@@ -39,7 +39,7 @@ void test_so2(){
     cout << "right and left multiply with matrix\n" << l << "\n";
     cout << r * l << endl;
     cout << l * r << endl;
-    TooN::Matrix<2,3> l2(TooN::Zero);
+    TooN::Matrix<2,3> l2(TooN::Zeros);
     l2[0] = TooN::makeVector(0,1,2);
     cout << "right with rectangular matrix\n";
     cout << r * l2 << endl;
@@ -145,7 +145,7 @@ void test_so3(){
     cout << "right and left multiply with matrix\n" << l << "\n";
     cout << r * l << endl;
     cout << l * r << endl;
-    TooN::Matrix<3,6> l2(TooN::Zero);
+    TooN::Matrix<3,6> l2(TooN::Zeros);
     l2[0] = TooN::makeVector(0,1,2,3,4,5);
     cout << "right with rectangular matrix\n";
     cout << r * l2 << endl;
@@ -207,7 +207,7 @@ void test_se3(){
     cout << "right and left multiply with matrix\n" << l << "\n";
     cout << r * l << endl;
     cout << l * r << endl;
-    TooN::Matrix<4,6> l2(TooN::Zero);
+    TooN::Matrix<4,6> l2(TooN::Zeros);
     l2[0] = TooN::makeVector(0,1,2,3,4,5);
     cout << "right with rectangular matrix\n";
     cout << r * l2 << endl;

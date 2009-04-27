@@ -146,7 +146,7 @@ namespace TooN {
 		template <int R, int C, typename P, typename B>
 		inline Matrix<R, C, P> exp_taylor( const Matrix<R,C,P,B> & m ){
 			SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
-			Matrix<R,C,P> result = TooN::Zero(m.num_rows(), m.num_cols());
+			Matrix<R,C,P> result = TooN::Zeros(m.num_rows(), m.num_cols());
 			Matrix<R,C,P> f = TooN::Identity(m.num_rows());
 			P k = 1;
 			while(norm_inf((result+f)-result) > 0){

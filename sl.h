@@ -120,7 +120,7 @@ template <int N, typename Precision>
 template <int S, typename P, typename B>
 inline SL<N, Precision> SL<N, Precision>::exp( const Vector<S,P,B> & v){
 	SizeMismatch<S,dim>::test(v.size(), dim);
-	Matrix<N,N,Precision> t = Zero;
+	Matrix<N,N,Precision> t(Zeros);
 	for(int i = 0; i < dim; ++i)
 		t += generator(i) * v[i];
 	SL<N, Precision> result;
@@ -131,7 +131,7 @@ inline SL<N, Precision> SL<N, Precision>::exp( const Vector<S,P,B> & v){
 template <int N, typename Precision>
 inline Matrix<N,N,Precision> SL<N, Precision>::generator(int i){
 	assert( i > -1 && i < dim );
-	Matrix<N,N,Precision> result = Zero;
+	Matrix<N,N,Precision> result(Zeros);
 	if(i < DIAG_LIMIT) { 				// first ones are the diagonal ones
 		result(i,i) = 1;
 		result(i+1,i+1) = -1;
