@@ -38,6 +38,10 @@
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 
+#ifdef TOON_INITIALIZE_RANDOM
+#include <ctime>
+#endif
+
 namespace TooN
 {
 	
