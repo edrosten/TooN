@@ -280,12 +280,25 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	By default, everything which is checked at compile time in the static case
 	is checked at run-time in the dynamic case. In other words, slices and sizes
 	are checked at run-time if need be. These checks can be disabled by defining
-	the macros TOON_NDEBUG_SLICE and TOON_NDEBUG_SIZE respectively. Bounds are
+	the macros \c TOON_NDEBUG_SLICE and \c TOON_NDEBUG_SIZE respectively. Bounds are
 	not checked by default. Bounds checking can be enabled by defining the macro
-	TOON_CHECK_BOUNDS. None of these macros change the interface, so debugging
+	\c TOON_CHECK_BOUNDS. None of these macros change the interface, so debugging
 	code can be freely mixed with optimized code.
 
 	Errors are manifested to a call to <code>std::abort()</code>.
+
+	TooN does not initialize data in a Vector or Matrix.  For debugging purposes
+	the following macros can be defined:
+	- \c TOON_INITIALIZE_NAN Sets every element of newly defined Vectors or
+	  Matrixs to NaN, if it exists, and 0 otherwise. Your code will not compile
+	  if you have made a Vector or Matrix of a type which cannot be constructed
+	  from a number.
+	- \c TOON_INITIALIZE_VAL Sets every element of newly defined Vectors or
+	  Matrixs to the expansion of this macro.
+	- \c TOON_INITIALIZE_RANDOM Fills up newly defined Vectors and Matrixs with
+	  random bytes, to trigger non repeatable behaviour. The random number
+	  generator is automatically seeded with a granularity of 1 second. Your
+	  code will not compile if you have a Vector or Matrix of a non-POD type.
 
 	\subsection sSlices What are slices?
 
