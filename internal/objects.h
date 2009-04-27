@@ -29,12 +29,6 @@
 // the GNU General Public License.
 
 
-#ifndef TOON_INCLUDE_HELPERS_H
-#define TOON_INCLUDE_HELPERS_H
-
-#include <TooN/TooN.h>
-#include <cmath>
-
 namespace Internal{
 	// dummy structs that are used in 0-ary operators
 	struct Zero;
@@ -403,5 +397,3 @@ static Operator<Internal::Zero> Zeros;
 static Operator<Internal::Identity<DefaultPrecision> > Identity;
 static const Operator<Internal::Scalars<DefaultPrecision> > Ones(1);
 
-
-#endif
