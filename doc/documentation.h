@@ -225,10 +225,10 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vectors and matrices start off uninitialized (filled with random garbage).
 		They can be easily filled with zeros, or ones (see also TooN::Ones):
 		@code
-			Vector<3> v = Zero;
-			Matrix<3> m = Zero;
-			Vector<>  v2 = Zero(2); //Note in they dynamic case, the size must be specified
-			Matrix<>  m2 = Zero(2,2); //Note in they dynamic case, the size must be specified
+			Vector<3> v = Zeros;
+			Matrix<3> m = Zeros
+			Vector<>  v2 = Zeros(2); //Note in they dynamic case, the size must be specified
+			Matrix<>  m2 = Zeros(2,2); //Note in they dynamic case, the size must be specified
 		@endcode
 
 		Vectors can be filled with makeVector:
@@ -239,8 +239,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Matrices can be initialized to the identity matrix:
 		@code
 			Matrix<2> m = Idendity;
+			Matrix<> m2 = Identity(3);
 		@endcode
-		though note that you need to specify the size in the dynamic case.
+		note that you need to specify the size in the dynamic case.
 
 		They can also be initialized with data from another source. See also \ref  sWrap.
 
@@ -338,12 +339,37 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	Likewise for matrix.
 
 	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
-
 	
+	You use the decomposition objects (see \ref sDecompos "below"), for example to solve Ax=b:
+
+	@code
+	Matrix<3> A;
+	A[0]=makeVector(1,2,3);
+	A[1]=makeVector(2,3,4);
+	A[2]=makeVector(3,2,1);
+
+	Vector<3> b = makeVector (2,4,5);
+
+	// solve Ax=b using LU
+	LU<3> luA(A);
+	Vector<3> x1 = luA.backsub(b);
+
+	// solve Ax=b using SVD
+	SVD<3> svdA(A);
+	Vector<3> x2 = svdA.backsub(b);
+	@endcode
+	
+	Similarly for the other \ref sDecompos "decomposition objects"
+
 	\subsection sDecompos  Which decomposisions are there?
 
-		LU, SymEigen, SVD, Cholesky, gaussian_elimination, gauss_jordan
+	For general size matrices (not necessarily square) there are:
+	@link TooN::LU LU @endlink, @link TooN::SVD SVD @endlink and gauss_jordan
 
+	For square symmetric matrices there are:
+	@link TooN::SymEigen SymEigen @endlink and @link TooN::Cholesky Cholesky @endlink
+
+	If all you want to do is solve a single Ax=b then you may want gaussian_elimination
 
 	\subsection sOtherStuff What other stuff is there:
 
