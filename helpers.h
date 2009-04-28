@@ -208,5 +208,14 @@ namespace TooN {
 		}
 	}
 	
+	/// computes the trace of a square matrix
+	template<int Rows, int Cols, typename Precision, typename Base>
+	Precision trace(const Matrix<Rows, Cols, Precision, Base> & m ){
+		SizeMismatch<Rows,Cols>::test(m.num_rows(), m.num_cols());
+		Precision tr = 0;
+		for(int i = 0; i < m.num_rows(); ++i)
+			tr += m(i,i);
+		return tr;
+	}
 }
 #endif
