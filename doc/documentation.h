@@ -74,8 +74,13 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
  	\subsection sDownload Getting the code and installing
 	
-	To get the code, visit this URL:
-	http://mi.eng.cam.ac.uk/~er258/cvd/toon.html
+	To get the code from cvs use:
+
+	cvs -z3 -d:pserver:anoncvs@cvs.savannah.nongnu.org:/cvsroot/toon co TooN
+
+	Tom's home page for the library with a version of this documentation is at:
+
+	http://mi.eng.cam.ac.uk/~twd20/TooN/html/index.html
 
 	The code will work as-is, and comes with a default configuration, which
 	should work on any system.
