@@ -295,10 +295,12 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	TooN does not initialize data in a Vector or Matrix.  For debugging purposes
 	the following macros can be defined:
-	- \c TOON_INITIALIZE_NAN Sets every element of newly defined Vectors or
-	  Matrixs to NaN, if it exists, and 0 otherwise. Your code will not compile
+	- \c TOON_INITIALIZE_QNAN Sets every element of newly defined Vectors or
+	  Matrixs to quiet NaN, if it exists, and 0 otherwise. Your code will not compile
 	  if you have made a Vector or Matrix of a type which cannot be constructed
 	  from a number.
+	- \c TOON_INITIALIZE_SNAN Sets every element of newly defined Vectors or
+	  Matrixs to signalling NaN, if it exists, and 0 otherwise. 
 	- \c TOON_INITIALIZE_VAL Sets every element of newly defined Vectors or
 	  Matrixs to the expansion of this macro.
 	- \c TOON_INITIALIZE_RANDOM Fills up newly defined Vectors and Matrixs with

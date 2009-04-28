@@ -109,6 +109,18 @@ namespace TooN {
 		return result;
 	}
 
+	/// Frobenius (root of sum of squares) norm of input matrix m
+	/// computes the maximum of the sums of absolute values over rows
+	template <int R, int C, typename P, typename B>
+	P inline norm_fro( const Matrix<R,C,P,B> & m ){
+		using std::sqrt;
+		P n = 0;
+		for(int r = 0; r < m.num_rows(); ++r)
+			for(int c = 0; c < m.num_cols(); ++c)
+				n += m[r][c] * m[r][c];
+
+		return sqrt(n);
+	}
 
 	/// row sum norm of input matrix m
 	/// computes the maximum of the sums of absolute values over rows
@@ -206,6 +218,15 @@ namespace TooN {
 				m(c,r)=temp;
 			}
 		}
+	}
+
+	template<int R, int C, class P, class B> P trace(const Matrix<R,C,P,B>& m)
+	{
+		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+		P p=0;
+		for(int i=0; i < m.num_rows(); i++)
+			p+=m[i][i];
+		return p;
 	}
 	
 	/// computes the trace of a square matrix

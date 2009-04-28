@@ -20,12 +20,19 @@ namespace Internal
 		static inline void check_index(int, int){}
 	#endif
 
-	#if defined TOON_INITIALIZE_NAN
+	#if defined TOON_INITIALIZE_SNAN
 		template<class P> static void debug_initialize(P* data, int n)
 		{	
 			using std::numeric_limits;
 			for(int i=0; i < n; i++)
-				data[i] = numeric_limits<P>::signaling_NaN() 
+				data[i] = numeric_limits<P>::signaling_NaN();
+		}
+	#elif defined TOON_INITIALIZE_QNAN
+		template<class P> static void debug_initialize(P* data, int n)
+		{	
+			using std::numeric_limits;
+			for(int i=0; i < n; i++)
+				data[i] = numeric_limits<P>::quiet_NaN();
 		}
 	#elif defined TOON_INITIALIZE_VAL
 		template<class P> static void debug_initialize(P* data, int n)
