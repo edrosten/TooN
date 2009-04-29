@@ -5,7 +5,7 @@ using namespace std;
 
 int main()
 {
-	Matrix<3, 4> m = Zero;
+	Matrix<3, 4> m = Zeros;
 	m[0] = makeVector(1, 2, 3, 4);
 	m[1] = makeVector(1, 1, 1, 1);
 	m[2] = makeVector(3, 2, 6, 7);	

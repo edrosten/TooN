@@ -32,7 +32,7 @@ int main(int , char ** ){
 	cout << h * t << "\n";
 	cout << t * h << "\n";
 	
-	Matrix<3,5> m = Zero;
+	Matrix<3,5> m = Zeros;
 	m[0] = makeVector(0,1,2,3,4);
 	m[1] = makeVector(1,2,3,4,-5);
 	m[2] = makeVector(2,3,4,5,8);
