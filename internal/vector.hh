@@ -131,7 +131,9 @@ public:
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
 
-	
+	/// @name Constructors
+	//@{
+
 	/// Default constructor for vectors.  For fixed-sized vectors,
 	/// this does nothing, i.e. does not guarantee to initialise the
 	/// vector to any particular values.  For dynamically sized
@@ -151,16 +153,27 @@ public:
 	/// Vector<3,double,Reference> v(d);
 	/// @endcode
 	inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
+
+
+	/// Constructor used when constructing a dynamic vector which references
+	/// other data, e.g.
+	/// @code 
+	/// double[] d = {1,2,3};
+	/// Vector<Dynamic,double,Reference> v(d,3);
+	/// @endcode
 	inline Vector(Precision* data, int size_in) : Base::template VLayout<Size, Precision> (data, size_in) {}
 
-	// internal constructor
+	/// internal constructor
 	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing)
   : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
 	
 	using Base::template VLayout<Size, Precision>::size;
 
-	// constructors to allow return value optimisations
-	// construction from 0-ary operator
+	/// construction from Operator object
+	///
+	/// This is used to implement return value optimisation for
+	/// vectors created from the product of a matrix and a vector, or
+	/// another object like Ones
 	template <class Op>
 	inline Vector(const Operator<Op>& op)
 		: Base::template VLayout<Size, Precision> (op)
@@ -177,21 +190,40 @@ public:
 	
 	// inline Vector(const Vector&from);
 
-	// constructor from arbitrary vector
+	/// constructor from arbitrary vector
 	template<int Size2, typename Precision2, typename Base2>
 	inline Vector(const Vector<Size2,Precision2,Base2>& from):
 		Base::template VLayout<Size, Precision>(from.size()) {
 		operator=(from);
 	}
 
-	// assignment from a 0-ary operator
-	template <class Op>
-	inline Vector & operator=(const Operator<Op>& op){
-		op.eval(*this);
-		return *this;
-	}
+	/// @}
 
-	// operator = from copy
+#ifdef DOXYGEN_INCLUDE_ONLY_FOR_DOCS
+
+	/// @name Accessing elements
+	/// @{
+
+	/// access an element of the vector
+	///
+	/// can be used as an l-value ie
+	/// @code
+	/// Vector<3> v;
+	/// v[0] = 10;
+	/// @endcode
+	Precision& operator[] (int i);
+
+	/// access an element of a constant vector
+	const Precision& operator[] (int i) const;
+
+	/// @}
+
+#endif
+
+	/// @name Assignment
+	/// @{
+
+	/// operator = from copy
 	inline Vector& operator= (const Vector& from){
 		SizeMismatch<Size,Size>::test(size(), from.size());
 		const int s=size();
@@ -201,7 +233,7 @@ public:
 		return *this;
 	}
 
-	// operator =
+	/// operator = another Vector
 	template<int Size2, typename Precision2, typename Base2>
 	Vector<Size,Precision,Base >& operator= (const Vector<Size2, Precision2, Base2>& from){
 		SizeMismatch<Size,Size2>::test(size(), from.size());
@@ -212,19 +244,32 @@ public:
 		return *this;
 	}
 
+	/// assignment from an Operator object
+	template <class Op>
+	inline Vector & operator=(const Operator<Op>& op){
+		op.eval(*this);
+		return *this;
+	}
+	/// @}
+
+	/// @name Operators on the vector
+	/// @{
+
+	/// divide this vector by a constant
 	Vector& operator/=(const Precision& rhs) {
 		for(int i=0; i<size(); i++)
 			(*this)[i]/=rhs;
 		return *this;
 	}
 	
-
+	/// multiply this vector by a constant
 	Vector& operator*=(const Precision& rhs) {
 		for(int i=0; i<size(); i++)
 			(*this)[i]*=rhs;
 		return *this;
 	}
 	
+	/// add another vector onto this one
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator+=(const Vector<Size2, Precision2, Base2>& rhs) {
 		SizeMismatch<Size,Size2>::test(size(),rhs.size());
@@ -233,6 +278,13 @@ public:
 		return *this;
 	}
 	
+	/// add an Operator object onto this vector
+	///
+	/// this is used to handle cases such as:
+	/// @code
+	/// Vector<3> v;
+	/// v+=Ones
+	/// @endcode
 	template<class Op>
 	Vector& operator+=(const Operator<Op>& op)
 	{
@@ -240,6 +292,7 @@ public:
 		return *this;
 	}		
 
+	/// subtract another vector from this one
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator-=(const Vector<Size2, Precision2, Base2>& rhs) {
 		SizeMismatch<Size,Size2>::test(size(),rhs.size());
@@ -248,10 +301,112 @@ public:
 		return *this;
 	}
 
+	/// @}
+
+	/// @name Misc
+	/// @{
+
+	/// return me as a non const reference - useful for temporaries
 	Vector& ref()
 	{
 		return *this;
 	}
+
+#ifdef DOXYGEN_INCLUDE_ONLY_FOR_DOCS
+
+	/// What is the size of this vector?
+	int size() const;
+
+	/// @}
+
+	/// @name Reshaping, sub-vectors and matrices
+	//@{
+	/**
+	   Convert this vector into a 1-by-Size matrix, i.e. a matrix which has this
+	   vector as its only row.
+	   @code
+	   Vector<3> a = makeVector(1,2,3);
+	   Matrix<1,3> m = a.as_row();  // now m = [1 2 3]
+	   @endcode
+	*/
+	Matrix<1, Size, Precision> as_row();
+  
+	/**
+	   Convert this vector into a Size-by-1 matrix, i.e. a matrix which has this
+	   vector as its only column.
+	   @code
+	   Vector<3> a = makeVector(1,2,3);
+	   Matrix<3,1> m = a.as_col();   // now m = [1 2 3]'
+	   @endcode
+	*/
+	Matrix<Size, 1, Precision> as_col();
+  
+	/**
+	   Convert this vector into a Diagonal Size-by-Size matrix, i.e. a matrix which is
+	   zero everywhere except on the diagonal and the diagonal contains the values from this vector
+	   @code
+	   Vector<3> v = makeVector(1,2,3);
+	   Vector<3> v2 = makeVector(2,3,4);
+	   Vector<3> v3 = v.as_diagonal() * v2; // now v3 = (2,6,12)
+	   @endcode
+	*/
+	DiagonalMatrix<Size,Precision> as_diagonal();
+
+	/**
+	   Extract a sub-vector. The vector extracted will be begin at element Start
+	   and will contain the next Length elements.
+	   @code
+	   Vector<5> a = makeVector(1,2,3,4,5);
+	   Extract the three elements starting from element 2
+	   Vector<3> b = a.slice<2,3>();  /// b = [3 4 5]
+	   @endcode
+	*/
+	template<Start, Length>
+	const Vector<Length,Precision>& slice() const;
+  
+	/**
+	   Extract a sub-vector. The vector extracted will be begin at element Start
+	   and will contain the next Length elements. This version can be used as an
+	   l-value as well as an r-value
+	   @code
+	   Vector<5> a = makeVector(1,2,3,4,5);
+	   Vector<2> b = makeVector(8,9);
+	   // replace the two elements starting from element 1 with b
+	   a.slice<1, 2>() = b;       /// now a = [1 8 9 4 5]
+	   @endcode
+	*/
+	template<Start, Length>
+	Vector<Length,Precision>& slice();
+  
+	/**
+	   Extract a sub-vector with runtime parameters.
+	   The vector extracted will be begin at element start and will contain the next
+	   length elements.
+	   @code
+	   Vector<5> a = makeVector(1,2,3,4,5);
+	   Extract the three elements starting from element 2
+	   Vector<3> b = a.slice(2,3);  /// b = [3 4 5]
+	   @endcode
+	*/
+	template<Start, Length>
+	const Vector<Length,Precision>& slice() const;
+  
+	/**
+	   Extract a sub-vector with runtime parameters, which can be used as an
+	   l-value.
+	   The vector extracted will be begin at element start and will contain the next
+	   length elements.
+	   @code
+	   Vector<5> a = makeVector(1,2,3,4,5);
+	   Extract the three elements starting from element 2
+	   a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
+	   @endcode
+	*/
+	template<Start, Length,Precision>
+	const Vector<Length>& slice() const;
+	//@}
+
+#endif
 
 };
 
