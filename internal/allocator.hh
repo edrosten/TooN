@@ -43,6 +43,7 @@
 #define TOON_ALIGN8
 #endif
 
+namespace TooN {
 
 namespace Internal
 {
@@ -404,9 +405,7 @@ template<int S> struct ColStrideHolder: public StrideHolder<S>
 	{}
 };
 
-
-
-
+}
 
 }
 
