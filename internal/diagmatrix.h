@@ -30,7 +30,7 @@
 
 
 
-
+namespace TooN {
 
 
 /**
@@ -124,4 +124,6 @@ Matrix<R, C, typename Internal::MultiplyType<P1,P2>::type>
 operator* (const DiagonalMatrix<Size,P1,B1>& d, const Matrix<R,C,P2,B2>& m)
 {
 	return diagmult(d.my_vector, m);
+}
+
 }

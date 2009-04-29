@@ -28,6 +28,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 namespace Internal{
 template<int Size, class Precision, int Stride, class Mem> struct GenericVBase;
 
@@ -169,5 +171,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	}
 
 };
+
+}
 
 }

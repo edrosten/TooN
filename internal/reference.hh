@@ -28,6 +28,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Helper classes for matrices constructed as references to foreign data
@@ -86,3 +88,5 @@ template<class Precision> inline Vector<Dynamic, Precision, Reference> wrapVecto
 template<class Precision> inline const Vector<Dynamic, Precision, Reference> wrapVector(const Precision* data, int size) { return Vector<Dynamic, Precision, Reference>(const_cast<Precision*>(data), size); }
 template<int Size, class Precision> inline Vector<Size,    Precision, Reference> wrapVector(Precision* data)                 { return Vector<Size,    Precision, Reference>(data); }
 template<int Size, class Precision> inline const Vector<Size,    Precision, Reference> wrapVector(const Precision* data)           { return Vector<Size,    Precision, Reference>(const_cast<Precision*>(data)); }
+
+}

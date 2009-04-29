@@ -28,6 +28,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 //             Type  and size computation for scalar operations used in this file
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -656,4 +658,6 @@ std::istream& operator >> (std::istream& is, Matrix<Rows, Cols, Precision, Base>
 		}
 	}
 	return is;
+}
+
 }

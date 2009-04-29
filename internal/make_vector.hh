@@ -1,4 +1,5 @@
 //Mechanically generate code. Do not edit.
+namespace TooN {
 //modify make_make_vector.awk and run make internal/make_vector.hh
 inline Vector<1> makeVector(double x1){
   Vector<1> vals;
@@ -1169,4 +1170,5 @@ template<typename Precision> inline Vector<30, Precision> makeVector(const Preci
   vals[28] = x29;
   vals[29] = x30;
   return vals;
+}
 }

@@ -28,6 +28,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 namespace Internal
 {
 // As usual, a positive integer means static and -1 means dynamic.
@@ -219,4 +221,5 @@ struct ColMajor
 	};
 };
 
+}
 

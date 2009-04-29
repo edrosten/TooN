@@ -1,6 +1,7 @@
 BEGIN{
 	N=30
 	print "//Mechanically generate code. Do not edit."
+	print "namespace TooN {"
 	print "//modify make_make_vector.awk and run make internal/make_vector.hh"
 	for(i=1; i <= N; i++)
 	{
@@ -30,5 +31,5 @@ BEGIN{
 		print "  return vals;"
 		print "}"
 	}
-
+	print "}"
 }

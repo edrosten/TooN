@@ -28,6 +28,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 // class to generate compile time error
 // general case which doesn't exist
 template<int Size1, int Size2>
@@ -98,3 +100,5 @@ struct SizeMismatch
 		#endif
 	}
 };
+
+}

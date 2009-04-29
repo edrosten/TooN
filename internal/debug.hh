@@ -1,3 +1,5 @@
+namespace TooN {
+
 namespace Internal
 {
 
@@ -94,5 +96,7 @@ namespace Internal
 		}
 	#endif
 	
+
+}
 
 }

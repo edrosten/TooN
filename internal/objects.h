@@ -28,6 +28,7 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
 
 namespace Internal{
 	// dummy structs that are used in 0-ary operators
@@ -397,3 +398,4 @@ static Operator<Internal::Zero> Zeros;
 static Operator<Internal::Identity<DefaultPrecision> > Identity;
 static const Operator<Internal::Scalars<DefaultPrecision> > Ones(1);
 
+}

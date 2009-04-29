@@ -27,6 +27,8 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
+namespace TooN {
+
 namespace Internal
 {
 	template<bool StaticBad> 
@@ -86,5 +88,7 @@ namespace Internal
 	#endif
 
 
+
+}
 
 }
