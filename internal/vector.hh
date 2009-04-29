@@ -402,8 +402,8 @@ public:
 	   a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
 	   @endcode
 	*/
-	template<Start, Length,Precision>
-	const Vector<Length>& slice() const;
+	template<Start, Length>
+	const Vector<Length,Precision>& slice() const;
 	//@}
 
 #endif
