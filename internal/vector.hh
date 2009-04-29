@@ -28,20 +28,134 @@
 // invalidate any other reasons why the executable file might be covered by
 // the GNU General Public License.
 
-template<int Size=-1, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
+
+
+namespace TooN {
+
+
+/**
+@class TooN::Vector vector.hh TooN/toon.h
+A vector. 
+Support is provided for all the usual vector operations: 
+- elements can be accessed using the familiar [] notation with the index starting at 0
+- they can be added or subtracted
+- they can be printed or loaded from streams
+- they can be multiplied (on either side) or divided by a scalar on the right:
+- the vector dot product can be computed
+- subvectors can be extracted using the templated slice() member function
+- the vector cross product can be computed for statically sized 3-vectors
+
+See individual member function documentation for examples of usage.
+
+
+\par Statically- and dynamically-sized vectors
+
+The library provides classes for both statically- and
+dynamically-sized vectors. If you know what dimension of vector you're
+going to use (e.g. 3 to represent a point in 3D space), it's more
+efficient to statically sized vectors. The size of static vectors is
+determined at compile time; that of dynamically-sized vectors at
+run-time.
+
+To create a 3-dimensional vector, use:
+@code
+Vector<3> v;
+@endcode
+
+and to create a vector of some other dimensionality just replace 3
+with the positive integer of your choice, or some expression which the
+compiler can evaluate to an integer at compile time.
+
+The preferred way of initialising a vector is to use makeVector. The
+%makeVector function constructs a static vector initialised to the
+size and the contents of the comma-separated list of argments.  The
+%makeVector vectors are real Vectors and so can be used anywhere where
+a vector is needed, not just in initialisations. For example
+
+@code
+// Create a vector initialised to [1 2 3];
+Vector<3> v = makeVector(1, 2, 3);
+// Calculate the dot product with the vector [4 0 6]
+double dot = v * makeVector(4, 0, 6);
+@endcode
+
+Because the %make_Vector syntax creates actual vectors, compile-time
+checking is done to ensure that all vectors defined in this way have
+the correct number of elements.
+
+\par Dynamically-sized vectors
+
+To create a dynamically sized vector, use:
+@code
+Vector<> v(size);
+@endcode
+where size is an integer which will be evaluated at run time.
+
+Vector<> is actually a synonym for Vector<Dynamic> which is Vector<-1>
+being a template specialisation of Vector<N> with a special
+implementation that allows the size to be determined at runtime.
+
+
+\par Row vectors and column vectors
+
+This library makes no distinction between row vectors and column
+vectors. Vectors that appear on the left of a multiplication are
+treated as row vectors while those that appear on the right are
+treated as column vectors (thus <code>v1*v2</code> means the dot
+product). This means that sometimes you have to be careful to include
+prarentheses since it is possible to write obscure stuff like
+
+@code
+Vector<4> v4 = v1 * v2 * v3;
+@endcode
+
+which in the absence of any extra parentheses means 'compute the dot
+product between <code>v1</code> and <code>v2</code> and then multiply
+<code>v3</code> by this scalar and assign to <code>v4</code>'.
+
+If the row-column distinction is important, then vectors can be turned
+into matrices with one row or column by using as_row() or as_col():
+
+@code
+double d[3] = {1,2,3};
+Vector<3> v(d);
+Matrix<3,3> M = v.as_col() * v.as_row(); // creates a symmetric rank 1 matrix from v 
+@endcode
+
+@ingroup gLinAlg
+**/
+template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 class Vector : public Base::template VLayout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
+
+	
+	/// Default constructor for vectors.  For fixed-sized vectors,
+	/// this does nothing, i.e. does not guarantee to initialise the
+	/// vector to any particular values.  For dynamically sized
+	/// vectors, this sets the vector to have a length of 0 which
+	/// renders the vector useless because vectors can't be resized
 	inline Vector(){}
+
+	/// Constructor for dynamically-size vectors.  This can also be
+	/// used for statically sized vectors in which case the argument
+	/// is ignored.  The values of the vector are uninitialised
 	inline Vector(int size_in) : Base::template VLayout<Size, Precision>(size_in) {}
 
+	/// Constructor used when constructing a vector which references
+	/// other data, e.g.
+	/// @code 
+	/// double[] d = {1,2,3};
+	/// Vector<3,double,Reference> v(d);
+	/// @endcode
 	inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
 	inline Vector(Precision* data, int size_in) : Base::template VLayout<Size, Precision> (data, size_in) {}
 
 	// internal constructor
-	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing) : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
+	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing)
+  : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
 	
 	using Base::template VLayout<Size, Precision>::size;
 
@@ -140,3 +254,5 @@ public:
 	}
 
 };
+
+}
