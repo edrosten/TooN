@@ -385,7 +385,7 @@ public:
 	   @code
 	   Vector<5> a = makeVector(1,2,3,4,5);
 	   Extract the three elements starting from element 2
-	   Vector<3> b = a.slice(2,3);  /// b = [3 4 5]
+	   Vector<> b = a.slice(2,3);  /// b = [3 4 5]
 	   @endcode
 	*/
 	template<Start, Length>
@@ -403,7 +403,7 @@ public:
 	   @endcode
 	*/
 	template<Start, Length>
-	const Vector<Length,Precision>& slice() const;
+	Vector<Length,Precision>& slice();
 	//@}
 
 #endif
