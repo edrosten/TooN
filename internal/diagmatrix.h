@@ -36,6 +36,7 @@
 /**
 @class DiagonalMatrix TooN/toon.h
 A diagonal matrix
+
 Support is limited but diagonal matrices can be multiplied by vectors, matrices
 or diagonal matrices on either side.
 
@@ -51,7 +52,7 @@ A vector can be obtained from the diagonal matrix by using the
 <code> diagonal_slice() </code> member function.
 @ingroup gLinAlg
  **/
-template<int Size=-1, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
+template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 class DiagonalMatrix {
 public:
 	inline DiagonalMatrix() {}
