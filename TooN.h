@@ -42,21 +42,19 @@
 #include <ctime>
 #endif
 
-namespace TooN
-{
-	
+namespace TooN {
 
-	#ifdef TOON_TEST_INTERNALS
-		namespace Internal
-		{
-			struct BadIndex{};
-			struct SliceError{};
-			struct StaticSliceError{};
-			struct SizeMismatch{};
-			struct StaticSizeMismatch{};
+#ifdef TOON_TEST_INTERNALS
+	namespace Internal
+	{
+		struct BadIndex{};
+		struct SliceError{};
+		struct StaticSliceError{};
+		struct SizeMismatch{};
+		struct StaticSizeMismatch{};
 
-		}
-	#endif
+	}
+#endif
 	
 	//Is the number a field? ie, *, -, *, / defined.
 	//Specialize this to make TooN work properly with new types
@@ -77,31 +75,30 @@ namespace TooN
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	template<int Size, class Precision, class Base> struct DiagonalMatrix;
 	template<typename T> class Operator;
-
+	
 	static const int Dynamic = -1;
 
 	typedef double DefaultPrecision;
-
-	#include <TooN/internal/allocator.hh>
-
-	#include <TooN/internal/size_mismatch.hh>
-	#include <TooN/internal/slice_error.hh>
-	#include <TooN/internal/debug.hh>
-
-	#include <TooN/internal/vbase.hh>
-	#include <TooN/internal/vector.hh>
-	
-	#include <TooN/internal/mbase.hh>
-	#include <TooN/internal/matrix.hh>
-	#include <TooN/internal/reference.hh>
-
-	#include <TooN/internal/make_vector.hh>
-	#include <TooN/internal/operators.hh>
-	
-    #include <TooN/internal/objects.h>
-
-    #include <TooN/internal/diagmatrix.h>
-
 }
+
+#include <TooN/internal/allocator.hh>
+
+#include <TooN/internal/size_mismatch.hh>
+#include <TooN/internal/slice_error.hh>
+#include <TooN/internal/debug.hh>
+
+#include <TooN/internal/vbase.hh>
+#include <TooN/internal/vector.hh>
+	
+#include <TooN/internal/mbase.hh>
+#include <TooN/internal/matrix.hh>
+#include <TooN/internal/reference.hh>
+
+#include <TooN/internal/make_vector.hh>
+#include <TooN/internal/operators.hh>
+	
+#include <TooN/internal/objects.h>
+
+#include <TooN/internal/diagmatrix.h>
 
 #endif
