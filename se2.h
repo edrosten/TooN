@@ -38,34 +38,67 @@
 
 namespace TooN {
 
+/// Represent a two-dimensional Euclidean transformation (a rotation and a translation). 
+/// This can be represented by a \f$2\times 3\f$ matrix operating on a homogeneous co-ordinate, 
+/// so that a vector \f$\underline{x}\f$ is transformed to a new location \f$\underline{x}'\f$
+/// by
+/// \f[\begin{aligned}\underline{x}' &= E\times\underline{x}\\ \begin{bmatrix}x'\\y'\end{bmatrix} &= \begin{pmatrix}r_{11} & r_{12} & t_1\\r_{21} & r_{22} & t_2\end{pmatrix}\begin{bmatrix}x\\y\\1\end{bmatrix}\end{aligned}\f]
+/// 
+/// This transformation is a member of the Special Euclidean Lie group SE2. These can be parameterised with
+/// three numbers (in the space of the Lie Algebra). In this class, the first two parameters are a
+/// translation vector while the third is the amount of rotation in the plane as for SO2.
+/// @ingroup gTransforms
 template <typename Precision = double>
 class SE2 {
 public:
+	/// Default constructor. Initialises the the rotation to zero (the identity) and the translation to zero
 	SE2() : my_translation(Zeros) {}
 	template <class A> SE2(const SO2<Precision>& R, const Vector<2,Precision,A>& T) : my_rotation(R), my_translation(T) {}
 	template <int S, class P, class A> SE2(const Vector<S, P, A> & v) { *this = exp(v); }
 
+	/// Returns the rotation part of the transformation as a SO2
 	SO2<Precision> & get_rotation(){return my_rotation;}
+	/// @overload
 	const SO2<Precision> & get_rotation() const {return my_rotation;}
+	/// Returns the translation part of the transformation as a Vector
 	Vector<2, Precision> & get_translation() {return my_translation;}
+	/// @overload
 	const Vector<2, Precision> & get_translation() const {return my_translation;}
 
+	/// Exponentiate a Vector in the Lie Algebra to generate a new SE2.
+	/// See the Detailed Description for details of this vector.
+	/// @param vect The Vector to exponentiate
 	template <int S, typename P, typename A>
 	static inline SE2 exp(const Vector<S,P, A>& vect);
+	
+	/// Take the logarithm of the matrix, generating the corresponding vector in the Lie Algebra.
+	/// See the Detailed Description for details of this vector.
 	static inline Vector<3, Precision> ln(const SE2& se2);
+	/// @overload
 	Vector<3, Precision> ln() const { return SE2::ln(*this); }
 
+	/// compute the inverse of the transformation
 	SE2 inverse() const {
 		const SO2<Precision> & rinv = my_rotation.inverse();
 		return SE2(rinv, -(rinv*my_translation));
 	};
 
+	/// Right-multiply by another SE2 (concatenate the two transformations)
+	/// @param rhs The multipier
 	inline SE2 operator *(const SE2& rhs) const { return SE2(my_rotation*rhs.my_rotation, my_translation + my_rotation*rhs.my_translation); }
+
+	/// Self right-multiply by another SE2 (concatenate the two transformations)
+	/// @param rhs The multipier
 	inline SE2& operator *=(const SE2& rhs) { 
 		*this = *this * rhs; 
 		return *this; 
 	}
 
+	/// returns the generators for the Lie group. These are a set of matrices that
+	/// form a basis for the vector space of the Lie algebra.
+	/// @item 0 is translation in x
+	/// @item 1 is translation in y
+	/// @item 2 is rotation in the plane
 	static inline Matrix<3,3, Precision> generator(int i) {
 		Matrix<3,3,Precision> result(Zeros);
 		if(i < 2){
@@ -104,7 +137,8 @@ private:
 	Vector<2, Precision> my_translation;
 };
 
-// operator ostream& <<
+/// Write an SE2 to a stream 
+/// @relates SE2
 template <class Precision>
 inline std::ostream& operator<<(std::ostream& os, const SE2<Precision> & rhs){
 	for(int i=0; i<2; i++)
@@ -112,7 +146,8 @@ inline std::ostream& operator<<(std::ostream& os, const SE2<Precision> & rhs){
 	return os;
 }
 
-// operator istream& >>
+/// Read an SE2 from a stream 
+/// @relates SE2
 template <class Precision>
 inline std::istream& operator>>(std::istream& is, SE2<Precision>& rhs){
 	for(int i=0; i<2; i++)
@@ -149,11 +184,15 @@ struct Operator<Internal::SE2VMult<S,P,PV,A> > {
 	int size() const { return 3; }
 };
 
+/// Right-multiply with a Vector<3>
+/// @relates SE2
 template<int S, typename P, typename PV, typename A>
 inline Vector<3, typename Internal::MultiplyType<P,PV>::type> operator*(const SE2<P> & lhs, const Vector<S,PV,A>& rhs){
 	return Vector<3, typename Internal::MultiplyType<P,PV>::type>(Operator<Internal::SE2VMult<S,P,PV,A> >(lhs,rhs));
 }
 
+/// Right-multiply with a Vector<2> (special case, extended to be a homogeneous vector)
+/// @relates SE2
 template <typename P, typename PV, typename A>
 inline Vector<2, typename Internal::MultiplyType<P,PV>::type> operator*(const SE2<P>& lhs, const Vector<2,PV,A>& rhs){
 	return lhs.get_translation() + lhs.get_rotation() * rhs;
@@ -186,6 +225,8 @@ struct Operator<Internal::VSE2Mult<S,P,PV,A> > {
 	int size() const { return 3; }
 };
 
+/// Left-multiply with a Vector<3>
+/// @relates SE2
 template<int S, typename P, typename PV, typename A>
 inline Vector<3, typename Internal::MultiplyType<PV,P>::type> operator*(const Vector<S,PV,A>& lhs, const SE2<P> & rhs){
 	return Vector<3, typename Internal::MultiplyType<PV,P>::type>(Operator<Internal::VSE2Mult<S, P,PV,A> >(lhs,rhs));
@@ -218,6 +259,8 @@ struct Operator<Internal::SE2MMult<R, Cols, PM, A, P> > {
 	int num_rows() const { return 3; }
 };
 
+/// Right-multiply with a Matrix<3>
+/// @relates SE2
 template <int R, int Cols, typename PM, typename A, typename P> 
 inline Matrix<3,Cols, typename Internal::MultiplyType<P,PM>::type> operator*(const SE2<P> & lhs, const Matrix<R,Cols,PM, A>& rhs){
 	return Matrix<3,Cols,typename Internal::MultiplyType<P,PM>::type>(Operator<Internal::SE2MMult<R, Cols, PM, A, P> >(lhs,rhs));
@@ -250,6 +293,8 @@ struct Operator<Internal::MSE2Mult<Rows, C, PM, A, P> > {
 	int num_rows() const { return lhs.num_rows(); }
 };
 
+/// Left-multiply with a Matrix<3>
+/// @relates SE2
 template <int Rows, int C, typename PM, typename A, typename P> 
 inline Matrix<Rows,3, typename Internal::MultiplyType<PM,P>::type> operator*(const Matrix<Rows,C,PM, A>& lhs, const SE2<P> & rhs ){
 	return Matrix<Rows,3,typename Internal::MultiplyType<PM,P>::type>(Operator<Internal::MSE2Mult<Rows, C, PM, A, P> >(lhs,rhs));
@@ -321,6 +366,9 @@ inline Vector<3, Precision> SE2<Precision>::ln(const SE2<Precision> & se2) {
 	return result;
 }
 
+/// Multiply a SO2 with and SE2
+/// @relates SE2
+/// @relates SO2
 template <typename Precision>
 inline SE2<Precision> operator*(const SO2<Precision> & lhs, const SE2<Precision>& rhs){
 	return SE2<Precision>( lhs*rhs.get_rotation(), lhs*rhs.get_translation());

@@ -280,14 +280,14 @@ Vector<3, typename Internal::MultiplyType<PV, P>::type> operator*(const Vector<S
 	return lhs * rhs.get_matrix();
 }
 
-/// Multiply two SO3 matrices
+/// Right-multiply by a matrix
 /// @relates SO3
 template<int R, int C, typename P, typename PM, typename A> inline
 Matrix<3, C, typename Internal::MultiplyType<P, PM>::type> operator*(const SO3<P>& lhs, const Matrix<R, C, PM, A>& rhs){
 	return lhs.get_matrix() * rhs;
 }
 
-/// Multiply two SO3 matrices
+/// Left-multiply by a matrix
 /// @relates SO3
 template<int R, int C, typename P, typename PM, typename A> inline
 Matrix<R, 3, typename Internal::MultiplyType<PM, P>::type> operator*(const Matrix<R, C, PM, A>& lhs, const SO3<P>& rhs){
