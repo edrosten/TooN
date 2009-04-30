@@ -40,6 +40,7 @@ namespace Internal{
 
 	template<int S, class P, class B, class Ps> class ScalarsVector;	
 	template<int R, int C, class P, class B, class Ps> class ScalarsMatrix;	
+	template<int R, int C, class P, class B, class Ps> class AddIdentity;	
 	template<class P> class Scalars;	
 	template<class P> class SizedScalars;	
 	template<class P> class RCScalars;
@@ -110,6 +111,32 @@ inline Operator<Internal::RCZero> Operator<Internal::Zero>::operator()(int r, in
 // Identity
 //////////////
 
+//Operator to construct a new matrix with idendity added 
+template<int R, int C, class P, class B, class Precision> struct Operator<Internal::AddIdentity<R,C,P,B,Precision> >
+{
+	const Precision s;
+	const Matrix<R,C,P,B>& m;
+	Operator(Precision s_, const Matrix<R,C,P,B>& m_)
+		:s(s_),m(m_){}
+	template<int R1, int C1, class P1, class B1>
+	void eval(Matrix<R1,C1,P1,B1>& mm) const{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				mm[r][c] = m[r][c];
+		for(int i=0; i < m.num_rows(); i++)
+				mm[i][i] += s;
+	}
+
+	int num_rows() const
+	{
+		return m.num_rows();
+	}
+	int num_cols() const
+	{
+		return m.num_cols();
+	}
+};
+
 
 template<class Precision> struct Operator<Internal::Identity<Precision> >;
 
@@ -132,8 +159,9 @@ template<class Precision> struct Operator<Internal::SizedIdentity<Precision> >
 	}
 };
 
-template<class Precision> struct Operator<Internal::Identity<Precision> > {
-
+template<class Pr> struct Operator<Internal::Identity<Pr> > {
+	
+	typedef Pr Precision;
 	const Precision val;
 	Operator(const Precision& v=1)
 		:val(v)
@@ -152,6 +180,20 @@ template<class Precision> struct Operator<Internal::Identity<Precision> > {
 		for(int r=0; r < m.num_rows(); r++) {
 			m(r,r) = val;
 		}
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m);
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > subtract(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(-val, m);
 	}
 
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
@@ -247,6 +289,11 @@ template<class P> struct Operator<Internal::Scalars<P> >
 		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v);
 	}
 
+	template <int Size, typename P1, typename B1> 
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > subtract(const Vector<Size, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(-s, v);
+	}
 
 	////////////////////////////////////////
 	//
@@ -275,6 +322,12 @@ template<class P> struct Operator<Internal::Scalars<P> >
 		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
 	}
 
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > subtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(-s, v);
+	}
 	////////////////////////////////////////
 	//
 	// Create sized versions for initialization
@@ -365,10 +418,10 @@ operator*(const Operator<Op<Pl> >& l, const Pr&  r)
 }
 
 template<template<class> class Op, class Pl, class Pr> 
-Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+Operator<Op<typename Internal::DivideType<Pl, Pr>::type > >
 operator/(const Operator<Op<Pl> >& l, const Pr&  r)
 {
-	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(1/r); 
+	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(static_cast<typename Internal::DivideType<Pl,Pr>::type>(1)/r); 
 }
 /**This function us used to add a scalar to every element of a vector or
    matrix. For example:

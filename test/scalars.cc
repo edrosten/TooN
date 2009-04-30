@@ -19,7 +19,7 @@ int main()
 
 	Matrix<> m = 3*Ones(4,4) * 2;
 	cout << m << endl;
-	cout << m.slice<0,0,2,3>() + 2*Ones << endl;
+	cout << m.slice<0,0,2,3>() - 2*Ones << endl;
 
 	m+= Ones;
 	cout << m << endl;
