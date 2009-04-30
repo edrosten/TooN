@@ -165,6 +165,13 @@ void test_so3(){
     istringstream is("0 -1 0 1 0 0 0 0 1");
     is >> r;
     cout << r << endl;
+
+    cout << "test rotation constructor\n";
+    TooN::Vector<3> a = TooN::makeVector(1,0,0), b = TooN::makeVector(0,1,1);
+    TooN::SO3<> rr(a,b);
+    cout << "a " << a << " to b " << b << " is\n" << rr << endl;
+    cout << "R * a " << rr * a << endl;
+    cout << "a " << a << " to itself is\n" << TooN::SO3<>(a,a) << endl;
 }
 
 void test_se3(){

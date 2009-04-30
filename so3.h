@@ -64,6 +64,30 @@ public:
 	template <int R, int C, typename P, typename A>
 	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
 	
+	/// creates an SO3 as a rotation that takes Vector a into the direction of Vector b
+	/// with the rotation axis along a ^ b. If |a ^ b| == 0, it creates the identity rotation.
+	/// @param a source Vector
+	/// @param b target Vector
+	template <int S1, int S2, typename P1, typename P2, typename A1, typename A2>
+	SO3(const Vector<S1, P1, A1> & a, const Vector<S2, P2, A2> & b ){
+		SizeMismatch<3,S1>::test(3, a.size());
+		SizeMismatch<3,S2>::test(3, b.size());
+		Vector<3, Precision> n = a ^ b;
+		if(norm_sq(n) == 0) {
+			my_matrix = Identity;
+			return;
+		}
+		n = unit(n);
+		Matrix<3> R1;
+		R1.T()[0] = unit(a);
+		R1.T()[1] = n;
+		R1.T()[2] = n ^ R1.T()[0];
+		my_matrix.T()[0] = unit(b);
+		my_matrix.T()[1] = n;
+		my_matrix.T()[2] = n ^ my_matrix.T()[0];
+		my_matrix = my_matrix * R1.T();
+	}
+	
 	/// Assigment operator from a general matrix. This also calls coerce()
 	/// to make sure that the matrix is a valid rotation matrix.
 	template <int R, int C, typename P, typename A>
