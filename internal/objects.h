@@ -116,15 +116,20 @@ template<class Precision> struct Operator<Internal::Identity<Precision> >;
 template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > 
 	: public  Operator<Internal::Identity<Precision> > {
 
-	const Precision val;
+	using Operator<Internal::Identity<Precision> >::val;
 	const int my_size;
 
 	Operator(int s, const Precision& v=1)
-		:my_size(s),val(v)
+		:Operator<Internal::Identity<Precision> > (v), my_size(s)
 	{}
 
 	int num_rows() const {return my_size;}
 	int num_cols() const {return my_size;}
+
+	template<class Pout, class Pmult> Operator<Internal::SizedIdentity<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::SizedIdentity<Pout> >(my_size, val*m);
+	}
 };
 
 template<class Precision> struct Operator<Internal::Identity<Precision> > {
@@ -152,27 +157,12 @@ template<class Precision> struct Operator<Internal::Identity<Precision> > {
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
 		return Operator<Internal::SizedIdentity<Precision> >(s);
 	}
+
+	template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::Identity<Pout> >(val*m);
+	}
 };
-	
-template<class P1, class P2> Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const P1& p, const Operator<Internal::Identity<P2> >& i)
-{
-	return Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> >(p * i.val);
-}
-
-template<class P1, class P2> Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const Operator<Internal::Identity<P2> >& i, const P1&p)
-{
-	return Operator<Internal::Identity<typename Internal::MultiplyType<P1, P2>::type> >(p * i.val);
-}
-
-template<class P1, class P2> Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const P1& p, const Operator<Internal::SizedIdentity<P2> >& i)
-{
-	return Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> >(i.my_size, p * i.val);
-}
-
-template<class P1, class P2> Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> > operator*(const Operator<Internal::SizedIdentity<P2> >& i, const P1&p)
-{
-	return Operator<Internal::SizedIdentity<typename Internal::MultiplyType<P1, P2>::type> >(i.my_size, p * i.val);
-}
 	
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -299,10 +289,16 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	{
 		return Operator<Internal::RCScalars<Precision> > (s,r,c);
 	}
+
+	template<class Pout, class Pmult> Operator<Internal::Scalars<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::Scalars<Pout> >(s*m);
+	}
 };
 
 template<class P> struct Operator<Internal::SizedScalars<P> >: public Operator<Internal::Scalars<P> >
 {
+	using Operator<Internal::Scalars<P> >::s;
 	const int my_size;
 	int size() const {
 		return my_size;
@@ -311,6 +307,11 @@ template<class P> struct Operator<Internal::SizedScalars<P> >: public Operator<I
 	Operator(P s, int sz)
 		:Operator<Internal::Scalars<P> >(s),my_size(sz){}
 		
+	template<class Pout, class Pmult> Operator<Internal::SizedScalars<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::SizedScalars<Pout> >(s*m, my_size);
+	}
+
 private:
 	void operator()(int);
 	void operator()(int,int);
@@ -320,6 +321,7 @@ private:
 
 template<class P> struct Operator<Internal::RCScalars<P> >: public Operator<Internal::Scalars<P> >
 {
+	using Operator<Internal::Scalars<P> >::s;
 	const int my_rows, my_cols;
 	int num_rows() const {
 		return my_rows;
@@ -332,57 +334,42 @@ template<class P> struct Operator<Internal::RCScalars<P> >: public Operator<Inte
 		:Operator<Internal::Scalars<P> >(s),my_rows(r),my_cols(c)
 	{}
 		
+	template<class Pout, class Pmult> Operator<Internal::RCScalars<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::RCScalars<Pout> >(s*m, my_rows, my_cols);
+	}
+
 private:
 	void operator()(int);
 	void operator()(int,int);
 };
-	
-template<class Pl, class Pr> 
-Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Pl& l, const Operator<Internal::Scalars<Pr> >& r)
-{
-	return Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s);
-}
-
-	
-template<class Pl, class Pr> 
-Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Operator<Internal::Scalars<Pl> >& l, const Pr& r)
-{
-	return Operator<Internal::Scalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r);
-}
-
-	
-template<class Pl, class Pr> 
-Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Pl& l, const Operator<Internal::SizedScalars<Pr> >& r)
-{
-	return Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s, r.my_size);
-}
-	
-template<class Pl, class Pr> 
-Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Operator<Internal::SizedScalars<Pl> >& l, const Pr& r)
-{
-	return Operator<Internal::SizedScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r, l.my_size);
-}
-
-	
-template<class Pl, class Pr> 
-Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Pl& l, const Operator<Internal::RCScalars<Pr> >& r)
-{
-	return Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l * r.s, r.my_rows, r.my_cols);
-}
-	
-template<class Pl, class Pr> 
-Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >
-operator*(const Operator<Internal::RCScalars<Pl> >& l, const Pr& r)
-{
-	return Operator<Internal::RCScalars<typename Internal::MultiplyType<Pl, Pr>::type > >(l.s * r, l.my_rows, l.my_cols);
-}
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// How to scale scalable operators
+//
+	
+template<template<class> class Op, class Pl, class Pr> 
+Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+operator*(const Pl& l, const Operator<Op<Pr> >& r)
+{
+	return r.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(l); 
+}
+
+template<template<class> class Op, class Pl, class Pr> 
+Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+operator*(const Operator<Op<Pl> >& l, const Pr&  r)
+{
+	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(r); 
+}
+
+template<template<class> class Op, class Pl, class Pr> 
+Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+operator/(const Operator<Op<Pl> >& l, const Pr&  r)
+{
+	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(1/r); 
+}
 /**This function us used to add a scalar to every element of a vector or
    matrix. For example:
    @code
