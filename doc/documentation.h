@@ -78,9 +78,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	cvs -z3 -d:pserver:anoncvs@cvs.savannah.nongnu.org:/cvsroot/toon co TooN
 
-	Tom's home page for the library with a version of this documentation is at:
+	The home page for the library with a version of this documentation is at:
 
-	http://mi.eng.cam.ac.uk/~twd20/TooN/html/index.html
+	http://mi.eng.cam.ac.uk/~er258/cvd/toon.html
 
 	The code will work as-is, and comes with a default configuration, which
 	should work on any system.
@@ -701,7 +701,6 @@ iterate function. This allows different sub algorithms (such as termination
 conditions) to be substituted in if need be.
 
 @defgroup gTooN Main parts of TooN
-
 
 @defgroup gInternal TooN internals
 */

@@ -292,6 +292,13 @@ public:
 		return *this;
 	}		
 
+	template<class Op>
+	Vector& operator-=(const Operator<Op>& op)
+	{
+		op.minusequals(*this);
+		return *this;
+	}		
+
 	/// subtract another vector from this one
 	template<int Size2, class Precision2, class Base2>
 	Vector& operator-=(const Vector<Size2, Precision2, Base2>& rhs) {

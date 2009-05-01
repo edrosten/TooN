@@ -1,6 +1,5 @@
 use BLAS 
 more complete helpers.h
-fix up SVD, SymEigen
-fix up wls_cholesky, irls?
-fix up downhill_simplex?
+Half dynamic slice?
+fix irls?
 iterators

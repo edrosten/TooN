@@ -55,6 +55,29 @@ template<int RowStride, int ColStride> struct Slice
 };
 
 
+template<int Rows, int Cols, bool D = (Rows == Dynamic || Cols == Dynamic)>
+struct DiagSize
+{
+	static const int size = Dynamic;
+};
+template<int Rows, int Cols>
+struct DiagSize<Rows, Cols, 0>
+{
+	static const int size = (Rows<Cols?Rows:Cols);
+};
+
+template<int Rs, int Cs, bool D = (Rs == Dynamic || Cs == Dynamic)>
+struct DiagStride
+{
+	static const int stride = Dynamic;
+};
+template<int Rs, int Cs>
+struct DiagStride<Rs, Cs, 0>
+{
+	static const int stride = Rs + Cs;
+};
+
+
 template<int Rows, int Cols, class Precision, int RowStride, int ColStride, class Mem> struct GenericMBase
 	: public Mem, 
 	RowStrideHolder<RowStride>,
@@ -169,12 +192,17 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	const Matrix<Cols, Rows, Precision, Slice<SliceColStride,SliceRowStride> > T() const{
 		return Matrix<Cols, Rows, Precision, Slice<SliceColStride,SliceRowStride> >(const_cast<Precision*>(my_data), num_cols(), num_rows(), colstride(), rowstride(), Slicing());
 	}
+
+	static const int DiagSize = Internal::DiagSize<Rows, Cols>::size;
+	static const int DiagStride = Internal::DiagStride<SliceRowStride, SliceColStride>::stride;
+
+	Vector<DiagSize, Precision, SliceVBase<DiagStride> > diagonal_slice()
+	{
+		return Vector<DiagSize, Precision, SliceVBase<DiagStride> >(my_data, std::min(num_cols(), num_rows()), rowstride() + colstride(), Slicing());
+	}
 };
 
 }
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //

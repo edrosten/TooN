@@ -204,6 +204,8 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	{
 		return Operator<Internal::Identity<Pout> >(val*m);
 	}
+
+
 };
 	
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,6 +319,14 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
+	void minusequals(Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				m[r][c] -= s;
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
 	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& v) const
 	{
 		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
@@ -423,6 +433,15 @@ operator/(const Operator<Op<Pl> >& l, const Pr&  r)
 {
 	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(static_cast<typename Internal::DivideType<Pl,Pr>::type>(1)/r); 
 }
+
+
+template<class Op, class P>
+Operator<Op> operator-(const Operator<Op>& o)
+{
+	return o.scalar(-1);
+}
+
+
 /**This function us used to add a scalar to every element of a vector or
    matrix. For example:
    @code
