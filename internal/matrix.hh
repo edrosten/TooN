@@ -184,6 +184,33 @@ public:
 	    return *this;
 	}
 
+  	template<int Rows2, int Cols2, typename Precision2, typename Base2>
+	bool operator== (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
+	{
+		SizeMismatch<Rows, Rows2>::test(num_rows(), rhs.num_rows());
+		SizeMismatch<Cols, Cols2>::test(num_cols(), rhs.num_cols());
+
+	    for(int r=0; r < num_rows(); r++)
+	  	  for(int c=0; c < num_cols(); c++)
+		    if((*this)[r][c] != rhs[r][c])
+		      return 0;
+	    return 1;
+	}
+
+  	template<int Rows2, int Cols2, typename Precision2, typename Base2>
+	bool operator!= (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
+	{
+		SizeMismatch<Rows, Rows2>::test(num_rows(), rhs.num_rows());
+		SizeMismatch<Cols, Cols2>::test(num_cols(), rhs.num_cols());
+
+	    for(int r=0; r < num_rows(); r++)
+	  	  for(int c=0; c < num_cols(); c++)
+		    if((*this)[r][c] != rhs[r][c])
+		      return 1;
+	    return 0;
+	}
+
+
 	Matrix& ref()
 	{
 		return *this;
