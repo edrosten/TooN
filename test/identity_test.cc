@@ -22,4 +22,10 @@ int main()
 
 	cout << q << endl;
 	cout << q - 3*Identity/4 << endl;
+
+	Matrix<3> p = Ones * 2;
+
+	cout <<  Identity - p << endl;
+
+
 }

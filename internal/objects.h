@@ -116,13 +116,19 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 {
 	const Precision s;
 	const Matrix<R,C,P,B>& m;
-	Operator(Precision s_, const Matrix<R,C,P,B>& m_)
-		:s(s_),m(m_){}
+	bool invert_m;
+
+	Operator(Precision s_, const Matrix<R,C,P,B>& m_, bool b)
+		:s(s_),m(m_),invert_m(b){}
 	template<int R1, int C1, class P1, class B1>
 	void eval(Matrix<R1,C1,P1,B1>& mm) const{
 		for(int r=0; r < m.num_rows(); r++)
 			for(int c=0; c < m.num_cols(); c++)
-				mm[r][c] = m[r][c];
+				if(invert_m)
+					mm[r][c] = -m[r][c];
+				else
+					mm[r][c] = m[r][c];
+
 		for(int i=0; i < m.num_rows(); i++)
 				mm[i][i] += s;
 	}
@@ -186,15 +192,23 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& m) const
 	{
 		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
-		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m);
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m, 0);
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
-	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > subtract(const Matrix<Rows,Cols, P1, B1>& m) const
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > rsubtract(const Matrix<Rows,Cols, P1, B1>& m) const
 	{
 		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
-		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(-val, m);
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(-val, m, 0);
 	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > lsubtract(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m, 1);
+	}
+
 
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
 		return Operator<Internal::SizedIdentity<Precision> >(s);
@@ -219,13 +233,17 @@ template<int S, class P, class B, class Precision> struct Operator<Internal::Sca
 {
 	const Precision s;
 	const Vector<S,P,B>& v;
-	Operator(Precision s_, const Vector<S,P,B>& v_)
-		:s(s_),v(v_){}
+	const bool invert_v;
+	Operator(Precision s_, const Vector<S,P,B>& v_, bool inv)
+		:s(s_),v(v_),invert_v(inv){}
 
 	template<int S1, class P1, class B1>
 	void eval(Vector<S1,P1,B1>& vv) const{
 		for(int i=0; i < v.size(); i++)
-			vv[i] = s + v[i];
+			if(invert_v)
+				vv[i] = s - v[i];
+			else
+				vv[i] = s + v[i];
 	}
 
 	int size() const
@@ -239,13 +257,17 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 {
 	const Precision s;
 	const Matrix<R,C,P,B>& m;
-	Operator(Precision s_, const Matrix<R,C,P,B>& m_)
-		:s(s_),m(m_){}
+	const bool invert_m;
+	Operator(Precision s_, const Matrix<R,C,P,B>& m_, bool inv)
+		:s(s_),m(m_),invert_m(inv){}
 	template<int R1, int C1, class P1, class B1>
 	void eval(Matrix<R1,C1,P1,B1>& mm) const{
 		for(int r=0; r < m.num_rows(); r++)
 			for(int c=0; c < m.num_cols(); c++)
-				mm[r][c] = s + m[r][c];
+				if(invert_m)
+					mm[r][c] = s - m[r][c];
+				else
+					mm[r][c] = s + m[r][c];
 	}
 
 	int num_rows() const
@@ -288,13 +310,19 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	template <int Size, typename P1, typename B1> 
 	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > add(const Vector<Size, P1, B1>& v) const
 	{
-		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v);
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v, 0);
 	}
 
 	template <int Size, typename P1, typename B1> 
-	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > subtract(const Vector<Size, P1, B1>& v) const
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > rsubtract(const Vector<Size, P1, B1>& v) const
 	{
-		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(-s, v);
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(-s, v, 0);
+	}
+
+	template <int Size, typename P1, typename B1> 
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > lsubtract(const Vector<Size, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(s, v, 1);
 	}
 
 	////////////////////////////////////////
@@ -329,14 +357,20 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	template <int Rows, int Cols, typename P1, typename B1> 
 	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& v) const
 	{
-		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v);
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v, 0);
 	}
 
 
 	template <int Rows, int Cols, typename P1, typename B1> 
-	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > subtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > rsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
 	{
-		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(-s, v);
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(-s, v, 0);
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > lsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(s, v, 1);
 	}
 	////////////////////////////////////////
 	//

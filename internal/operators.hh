@@ -617,22 +617,22 @@ Matrix<Rows, Cols, typename Internal::Add::Return<typename Operator<Op>::Precisi
 
 template <int Size, typename P1, typename B1, typename Op>
 Vector<Size, typename Internal::Subtract::Return<P1,typename Operator<Op>::Precision>::Type> operator-(const Vector<Size, P1, B1>& v, const Operator<Op>& op){
-	return op.subtract(v);
+	return op.rsubtract(v);
 }
 
 template <int Size, typename P1, typename B1, typename Op>
 Vector<Size, typename Internal::Subtract::Return<typename Operator<Op>::Precision, P1>::Type> operator-(const Operator<Op>& op, const Vector<Size, P1, B1>& v){
-	return op.subtract(v);
+	return op.lsubtract(v);
 }
 
 template <int Rows, int Cols, typename P1, typename B1, typename Op>
 Matrix<Rows, Cols, typename Internal::Subtract::Return<P1,typename Operator<Op>::Precision>::Type> operator-(const Matrix<Rows, Cols, P1, B1>& m, const Operator<Op>& op){
-	return op.subtract(m);
+	return op.rsubtract(m);
 }
 
 template <int Rows, int Cols, typename P1, typename B1, typename Op>
 Matrix<Rows, Cols, typename Internal::Subtract::Return<typename Operator<Op>::Precision,P1>::Type> operator-(const Operator<Op>& op, const Matrix<Rows, Cols, P1, B1>& m){
-	return op.subtract(m);
+	return op.lsubtract(m);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //

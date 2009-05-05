@@ -25,4 +25,9 @@ int main()
 	cout << m << endl;
 	m.slice<0,0,3,2>() += Ones*2;
 	cout << m << endl;
+
+
+	Matrix<3> p = Identity;
+	cout << p - Ones << endl;
+	cout << Ones - p << endl;
 }
