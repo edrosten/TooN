@@ -125,7 +125,7 @@ Matrix<3,3> M = v.as_col() * v.as_row(); // creates a symmetric rank 1 matrix fr
 @ingroup gLinAlg
 **/
 template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
-class Vector : public Base::template VLayout<Size, Precision> {
+struct Vector : public Base::template VLayout<Size, Precision> {
 public:
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them

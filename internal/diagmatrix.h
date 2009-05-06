@@ -53,7 +53,7 @@ A vector can be obtained from the diagonal matrix by using the
 @ingroup gLinAlg
  **/
 template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
-class DiagonalMatrix {
+struct DiagonalMatrix {
 public:
 	inline DiagonalMatrix() {}
 	inline DiagonalMatrix(int size_in) : my_vector(size_in) {}

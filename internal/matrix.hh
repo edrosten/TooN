@@ -31,7 +31,7 @@
 namespace TooN {
 
 template <int Rows=-1, int Cols=Rows, class Precision=DefaultPrecision, class Layout = RowMajor>
-class Matrix : public Layout::template MLayout<Rows, Cols, Precision>
+struct Matrix : public Layout::template MLayout<Rows, Cols, Precision>
 {
 public:
 

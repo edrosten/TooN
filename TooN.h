@@ -74,7 +74,7 @@ namespace TooN {
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	template<int Size, class Precision, class Base> struct DiagonalMatrix;
-	template<typename T> class Operator;
+	template<typename T> struct Operator;
 	
 	static const int Dynamic = -1;
 

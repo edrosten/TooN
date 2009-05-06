@@ -144,27 +144,6 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 };
 
 
-template<class Precision> struct Operator<Internal::Identity<Precision> >;
-
-template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > 
-	: public  Operator<Internal::Identity<Precision> > {
-
-	using Operator<Internal::Identity<Precision> >::val;
-	const int my_size;
-
-	Operator(int s, const Precision& v=1)
-		:Operator<Internal::Identity<Precision> > (v), my_size(s)
-	{}
-
-	int num_rows() const {return my_size;}
-	int num_cols() const {return my_size;}
-
-	template<class Pout, class Pmult> Operator<Internal::SizedIdentity<Pout> > scale_me(const Pmult& m) const
-	{
-		return Operator<Internal::SizedIdentity<Pout> >(my_size, val*m);
-	}
-};
-
 template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	
 	typedef Pr Precision;
@@ -222,6 +201,25 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 
 };
 	
+
+template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > 
+	: public  Operator<Internal::Identity<Precision> > {
+
+	using Operator<Internal::Identity<Precision> >::val;
+	const int my_size;
+
+	Operator(int s, const Precision& v=1)
+		:Operator<Internal::Identity<Precision> > (v), my_size(s)
+	{}
+
+	int num_rows() const {return my_size;}
+	int num_cols() const {return my_size;}
+
+	template<class Pout, class Pmult> Operator<Internal::SizedIdentity<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::SizedIdentity<Pout> >(my_size, val*m);
+	}
+};
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Addition of scalars to vectors and matrices

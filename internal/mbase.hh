@@ -36,7 +36,7 @@ namespace Internal
 // The new case is that for strides, -2 means that the stride is 
 // the same as num_cols/num_rows, which must be dynamically sized.
 
-template<int, int, class, int, int, class> class GenericMBase;
+template<int, int, class, int, int, class> struct GenericMBase;
 
 ////////////////////////////////////////////////////////////////////////////////
 //Closure used to acquire strides
