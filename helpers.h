@@ -229,5 +229,78 @@ namespace TooN {
 			tr += m(i,i);
 		return tr;
 	}
+
+
+	namespace Internal
+	{
+		template<int S, class P, class B, class Func> class VectorUnary;
+		template<int R, int C, class P, class B, class Func> class MatrixUnary;
+		template<class P> struct Exp{P apply(const P& v) const { using std::exp; return exp(v);}};
+		template<class P> struct Log{P apply(const P& v) const { using std::exp; return log(v);}};
+	};
+
+	template<int S, class P, class B, class Func> struct Operator<Internal::VectorUnary<S, P, B, Func> >
+	{
+		const Vector<S, P, B>& v;
+		const Func& f;
+		Operator(const Vector<S, P, B>& v_, const Func& f_)
+		:v(v_),f(f_){}
+		
+
+		int size() const { return v.size(); }
+
+		template<int S_, class P_>
+		void eval(Vector<S_, P_>& r) const
+		{
+			for(int i=0; i < r.size(); i++)
+				r[i] = f.apply(v[i]);
+		}
+	};
+
+	template<int R, int C, class P, class B, class Func> struct Operator<Internal::MatrixUnary<R, C, P, B, Func> >
+	{
+		const Matrix<R, C, P, B>& m;
+		const Func& f;
+		Operator(const Matrix<R, C, P, B>& m_, const Func& f_)
+		:m(m_),f(f_){}
+		
+		int num_rows() const { return m.num_rows(); }
+		int num_cols() const { return m.num_cols(); }
+
+		template<int R_, int C_, class P_>
+		void eval(Matrix<R_, C_, P_>& ret) const
+		{
+			for(int r=0; r < m.num_rows(); r++)
+				for(int c=0; c < m.num_cols(); c++)
+					ret(r,c) = f.apply(m(r,c));
+		}
+	};
+
+	
+	template<int S, class P, class B>
+	Vector<S, P> e_exp(const Vector<S, P, B>& v)
+	{
+		return Operator<Internal::VectorUnary<S, P, B, Internal::Exp<P> > >(v, Internal::Exp<P> ());
+	}
+
+	template<int S, class P, class B>
+	Vector<S, P> e_log(const Vector<S, P, B>& v)
+	{
+		return Operator<Internal::VectorUnary<S, P, B, Internal::Log<P> > >(v, Internal::Log<P> ());
+	}
+	
+	template<int R, int C, class P, class B>
+	Matrix<R, C, P> e_exp(const Matrix<R, C, P, B>& m)
+	{
+		return Operator<Internal::MatrixUnary<R, C, P, B, Internal::Exp<P> > >(m, Internal::Exp<P> ());
+	}
+
+	template<int R, int C, class P, class B>
+	Matrix<R, C, P> e_log(const Matrix<R, C, P, B>& m)
+	{
+		return Operator<Internal::MatrixUnary<R, C, P, B, Internal::Log<P> > >(m, Internal::Log<P> ());
+	}
+
+
 }
 #endif
