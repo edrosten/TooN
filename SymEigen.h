@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <cmath>
 #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
@@ -75,6 +76,7 @@ template <> struct ComputeSymEigen<2> {
 		double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
 		double disc = trace*trace - 4 * det;
 		assert(disc>=0);
+        using std::sqrt;
 		double root_disc = sqrt(disc);
 		ev[0] = 0.5 * (trace - root_disc);
 		ev[1] = 0.5 * (trace + root_disc);
