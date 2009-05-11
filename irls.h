@@ -35,94 +35,100 @@
 #include <cassert>
 #include <cmath>
 
-#ifndef TOON_NO_NAMESPACE
 namespace TooN {
-#endif
 
-/// Robust reweighting (type I) for IRLS.
-/// A reweighting class with \f$w(x)=\frac{1}{\sigma + |x|}\f$.
-/// This structure can be passed as the second template argument in IRLS.
-/// @ingroup gEquations
-struct RobustI {
-  double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
-  inline double reweight(double x) {return 1/(sd_inlier+fabs(x));}  ///< Returns \f$w(x)\f$.
-  inline double true_scale(double x) {return reweight(x) - fabs(x)*reweight(x)*reweight(x);}  ///< Returns \f$w(x) + xw'(x)\f$.
-  inline double objective(double x) {return fabs(x) + sd_inlier*log(sd_inlier*reweight(x));}  ///< Returns \f$\int xw(x)dx\f$.
-};
+	/// Robust reweighting (type I) for IRLS.
+	/// A reweighting class with \f$w(x)=\frac{1}{\sigma + |x|}\f$.
+	/// This structure can be passed as the second template argument in IRLS.
+	/// @ingroup gEquations
+	template<typename Precision>
+	struct RobustI {
+		double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
+		inline Precision reweight(Precision x) {return 1/(sd_inlier+fabs(x));}  ///< Returns \f$w(x)\f$.
+		inline Precision true_scale(Precision x) {return reweight(x) - fabs(x)*reweight(x)*reweight(x);}  ///< Returns \f$w(x) + xw'(x)\f$.
+		inline Precision objective(Precision x) {return fabs(x) + sd_inlier*log(sd_inlier*reweight(x));}  ///< Returns \f$\int xw(x)dx\f$.
+	};
 
-/// Robust reweighting (type II) for IRLS.
-/// A reweighting class with \f$w(x)=\frac{1}{\sigma + x^2}\f$.
-/// This structure can be passed as the second template argument in IRLS.
-/// @ingroup gEquations
-struct RobustII {
-  double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
-  inline double reweight(double d){return 1/(sd_inlier+d*d);} ///< Returns \f$w(x)\f$.
-  inline double true_scale(double d){return d - 2*d*reweight(d);} ///< Returns \f$w(x) + xw'(x)\f$.
-  inline double objective(double d){return 0.5 * log(1 + d*d/sd_inlier);} ///< Returns \f$\int xw(x)dx\f$.
-};
+	/// Robust reweighting (type II) for IRLS.
+	/// A reweighting class with \f$w(x)=\frac{1}{\sigma + x^2}\f$.
+	/// This structure can be passed as the second template argument in IRLS.
+	/// @ingroup gEquations
+	template<typename Precision>
+	struct RobustII {
+		Precision sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
+		inline Precision reweight(Precision d){return 1/(sd_inlier+d*d);} ///< Returns \f$w(x)\f$.
+		inline Precision true_scale(Precision d){return d - 2*d*reweight(d);} ///< Returns \f$w(x) + xw'(x)\f$.
+		inline Precision objective(Precision d){return 0.5 * log(1 + d*d/sd_inlier);} ///< Returns \f$\int xw(x)dx\f$.
+	};
 
-/// A reweighting class representing no reweighting in IRLS.
-/// \f$w(x)=1\f$
-/// This structure can be passed as the second template argument in IRLS.
-/// @ingroup gEquations
-struct ILinear {
-  inline double reweight(double d){return 1;} ///< Returns \f$w(x)\f$.
-  inline double true_scale(double d){return 1;} ///< Returns \f$w(x) + xw'(x)\f$.
-  inline double objective(double d){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
-};
-
-
-/// Performs iterative reweighted least squares.
-/// @param Size the size
-/// @param Reweight The reweighting functor. This structure must provide reweight(), 
-/// true-scale() and objective() methods. Existing examples are  Robust I, Robust II and ILinear.
-/// @ingroup gEquations
-template <int Size, class Reweight>
-class IRLS
-  : public Reweight,
-    public WLS<Size>
-{
-public:
-  IRLS(){Identity(my_true_C_inv,0);my_residual=0;}
-
-  inline void add_df(double d, const Vector<Size>& f) {
-    double scale = Reweight::reweight(d);
-    double ts = Reweight::true_scale(d);
-    my_residual += Reweight::objective(d);
-
-    WLS<Size>::add_df(d,f,scale);
-
-    for(int i=0; i<Size; i++){
-      for(int j=0; j<Size; j++){
-	my_true_C_inv[i][j]+=f[i]*f[j]*ts;
-      }
-    }
-  }
-
-  void operator += (const IRLS& meas){
-    WLS<Size>::operator+=(meas);
-    my_true_C_inv += meas.my_true_C_inv;
-  }
+	/// A reweighting class representing no reweighting in IRLS.
+	/// \f$w(x)=1\f$
+	/// This structure can be passed as the second template argument in IRLS.
+	/// @ingroup gEquations
+	template<typename Precision>
+	struct ILinear {
+		inline Precision reweight(Precision d){return 1;} ///< Returns \f$w(x)\f$.
+		inline Precision true_scale(Precision d){return 1;} ///< Returns \f$w(x) + xw'(x)\f$.
+		inline Precision objective(Precision d){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
+	};
 
 
-  Matrix<Size,Size,RowMajor>& get_true_C_inv() {return my_true_C_inv;}
-  const Matrix<Size,Size,RowMajor>& get_true_C_inv()const {return my_true_C_inv;}
+	/// Performs iterative reweighted least squares.
+	/// @param Size the size
+	/// @param Reweight The reweighting functor. This structure must provide reweight(), 
+	/// true-scale() and objective() methods. Existing examples are  Robust I, Robust II and ILinear.
+	/// @ingroup gEquations
+	template <int Size, typename Precision, template <typename Precision> class Reweight>
+	class IRLS
+		: public Reweight<Precision>,
+		  public WLS<Size,Precision>
+	{
+	public:
+		IRLS(int size=Size):
+			WLS<Size,Precision>(size),
+			my_true_C_inv(Zeros(size))
+		{
+			my_residual=0;
+		}
+		
+		template<int Size2, typename Precision2, typename Base2>
+		inline void add_mJ(Precision m, const Vector<Size2,Precision2,Base2>& J) {
+			SizeMismatch<Size,Size2>::test(my_true_C_inv.num_rows(), J.size());
 
-  double get_residual() {return my_residual;}
+			Precision scale = Reweight<Precision>::reweight(m);
+			Precision ts = Reweight<Precision>::true_scale(m);
+			my_residual += Reweight<Precision>::objective(m);
 
-private:
+			WLS<Size>::add_mJ(m,J,scale);
 
-  double my_residual;
+			Vector<Size,Precision> scaledm(m*ts);
 
-  Matrix<Size,Size,RowMajor> my_true_C_inv;
+			my_true_C_inv += scaledm.as_col() * scaledm.as_row();
 
-  // comment out to allow bitwise copying
-  IRLS( IRLS& copyof );
-  int operator = ( IRLS& copyof );
-};
+		}
 
-#ifndef TOON_NO_NAMESPACE
+		void operator += (const IRLS& meas){
+			WLS<Size>::operator+=(meas);
+			my_true_C_inv += meas.my_true_C_inv;
+		}
+
+
+		Matrix<Size,Size,Precision>& get_true_C_inv() {return my_true_C_inv;}
+		const Matrix<Size,Size,Precision>& get_true_C_inv()const {return my_true_C_inv;}
+
+		Precision get_residual() {return my_residual;}
+
+	private:
+
+		Precision my_residual;
+
+		Matrix<Size,Size,Precision> my_true_C_inv;
+
+		// comment out to allow bitwise copying
+		IRLS( IRLS& copyof );
+		int operator = ( IRLS& copyof );
+	};
+
 }
-#endif
 
 #endif
