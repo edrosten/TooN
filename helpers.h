@@ -235,5 +235,29 @@ namespace TooN {
 		return tr;
 	}
 
+	/// creates an returns a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
+	/// @param vec the 3 vector input
+	/// @return the 3x3 matrix to set to the cross product matrix
+	template<int Size, class P, class B> inline TooN::Matrix<3, 3, P> cross_product_matrix(const Vector<Size, P, B>& vec)
+	{
+		SizeMismatch<Size,3>::test(vec.size(), 3);
+
+		TooN::Matrix<3> result;
+
+		result(0,0) = 0; 
+		result(0,1) = -vec[2]; 
+		result(0,2) = vec[1];
+		result(1,0) = vec[2]; 
+		result(1,1) = 0; 
+		result(1,2) = -vec[0];
+		result(2,0) = -vec[1]; 
+		result(2,1) = vec[0]; 
+		result(2,2) = 0;
+
+		return result;
+	}
+
+
+
 }
 #endif
