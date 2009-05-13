@@ -305,6 +305,13 @@ template<class P> struct Operator<Internal::Scalars<P> >
 			v[i] += s;
 	}
 
+	template <int Size, typename P1, typename B1>
+	void minusequals(Vector<Size, P1, B1>& v) const
+	{
+		for(int i=0; i < v.size(); ++i)
+			v[i] -= s;
+	}
+
 	template <int Size, typename P1, typename B1> 
 	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > add(const Vector<Size, P1, B1>& v) const
 	{
