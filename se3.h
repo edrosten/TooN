@@ -57,6 +57,9 @@ public:
 	template <int S, typename P, typename A>
 	SE3(const Vector<S, P, A> & v) { *this = exp(v); }
 
+	template <class IP, int S, typename P, typename A> 
+	SE3(const SO3<Precision> & R, const Vector<S, P, A>& T) : my_rotation(Identity), my_translation(T) {}
+
 	/// Returns the rotation part of the transformation as a SO3
 	inline SO3<Precision>& get_rotation(){return my_rotation;}
 	/// @overload
