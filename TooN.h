@@ -37,6 +37,7 @@
 #include <new>
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
+#include <TooN/internal/deprecated.hh>
 
 #ifdef TOON_INITIALIZE_RANDOM
 #include <ctime>

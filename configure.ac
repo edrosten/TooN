@@ -39,6 +39,16 @@ then
 	AC_DEFINE(TOON_TYPEOF_BOOST, 1)
 fi
 
+AC_MSG_CHECKING([for __attribute__((deprecated))])
+AC_COMPILE_IFELSE([
+__attribute__((deprecated)) void foo(){}
+int main()
+{
+	foo();
+}
+], [ AC_MSG_RESULT(yes);AC_DEFINE(TOON_DEPRECATED_GCC,1 )], AC_MSG_RESULT(no))
+
+
 
 cat<<FOO
 
