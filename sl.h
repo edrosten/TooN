@@ -69,7 +69,7 @@ public:
 
 	/// copy constructor from a matrix, coerces matrix to be of determinant = 1
 	template <int R, int C, typename P, typename A>
-	SL(Matrix<R,C,P,A>& M) : my_matrix(M) { coerce(); }
+	SL(const Matrix<R,C,P,A>& M) : my_matrix(M) { coerce(); }
 
 	/// returns the represented matrix
 	const Matrix<N,N,Precision> & get_matrix() const { return my_matrix; }
@@ -100,7 +100,8 @@ private:
 		using std::abs;
 		Precision det = LU<N>(my_matrix).determinant();
 		assert(abs(det) > 0);
-		my_matrix /= det;
+        using std::pow;
+		my_matrix /= pow(det, 1.0/N);
 	}
 
 	/// these constants indicate which parts of the parameter vector 
