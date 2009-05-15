@@ -32,6 +32,7 @@
 #define TOON_INC_GAUSS_JORDAN_H
 
 #include <utility>
+#include <cmath>
 #include <TooN/TooN.h>
 
 namespace TooN
@@ -63,10 +64,11 @@ template<int R, int C, class Precision, class Base> void gauss_jordan(Matrix<R, 
 		//and swap the indirection element. This holds for both pointer indirection
 		//and using a permutation vector over rows.
 		{
+		  using std::abs;
 			int pivotpos = col;
 			double pivotval = abs(m[pivotpos][col]);
 			for(int p=col+1; p <m.num_rows(); p++)
-				if(abs(m[p][col]) > pivotval)
+			  if(abs(m[p][col]) > pivotval)
 				{
 					pivotpos = p;
 					pivotval = abs(m[pivotpos][col]);
