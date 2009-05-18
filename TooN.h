@@ -102,4 +102,6 @@ namespace TooN {
 
 #include <TooN/internal/diagmatrix.h>
 
+#include <TooN/helpers.h>
+
 #endif
