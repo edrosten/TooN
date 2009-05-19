@@ -34,7 +34,7 @@
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 #include <TooN/LU.h>
-
+#include <cassert>
 namespace TooN {
 
 template <int N, typename P> class SL;
