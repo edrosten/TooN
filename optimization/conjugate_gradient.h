@@ -187,16 +187,36 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	: size(start.size()),
 	  g(size),h(size),old_g(size),old_h(size),x(start),old_x(size)
 	{
-		using std::numeric_limits;
+		init(start, func(start), deriv(start));
+	}	
 
+	///Initialize the ConjugateGradient class with sensible values.
+	///@param start Starting point, \e x
+	///@param func  Function \e f  to compute \f$f(x)\f$
+	///@param deriv  \f$\nabla f(x)\f$
+	template<class Func> ConjugateGradient(const Vector<Size>& start, const Func& func, const Vector<Size>& deriv)
+	: size(start.size()),
+	  g(size),h(size),old_g(size),old_h(size),x(start),old_x(size)
+	{
+		init(start, func(start), deriv);
+	}	
+
+	///Initialize the ConjugateGradient class with sensible values. Used internally.
+	///@param start Starting point, \e x
+	///@param func  \f$f(x)\f$
+	///@param deriv  \f$\nabla f(x)\f$
+	void init(const Vector<Size>& start, const Precision& func, const Vector<Size>& deriv)
+	{
+
+		using std::numeric_limits;
 		x = start;
 
 		//Start with the conjugate direction aligned with
 		//the gradient
-		g = deriv(x);
+		g = deriv;
 		h = g;
 
-		y = func(x);
+		y = func;
 		old_y = y;
 
 		tolerance = sqrt(numeric_limits<Precision>::epsilon());
