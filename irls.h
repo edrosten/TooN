@@ -118,6 +118,12 @@ namespace TooN {
 
 		Precision get_residual() {return my_residual;}
 
+		void clear(){
+			WLS<Size,Precision>::clear();
+			my_residual=0;
+			my_true_C_inv = Zeros;
+		}
+
 	private:
 
 		Precision my_residual;
