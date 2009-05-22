@@ -166,6 +166,14 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 			m(r,r) = val;
 		}
 	}
+	
+	template<int Rows, int Cols, typename P, typename B>
+	void plusequals(Matrix<Rows, Cols, P, B>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		for(int i=0; i < m.num_rows(); i++)
+			m[i][i] += val;
+	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
 	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& m) const
