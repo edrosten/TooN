@@ -1,16 +1,24 @@
 clear all 
 out={};
+symmetric=1
 
-for S=2:5
+for S=5:5
 	T = num2str(S);
 
 	m=sym(zeros(S,S));
 	for r=1:S
 		for c=1:S
-			v = [ 'A' num2str(r-1) num2str(c-1) ];
+			if r >= c | symmetric == 0
+				v = [ 'A' num2str(r-1) num2str(c-1) ];
+			else
+				v = [ 'A' num2str(c-1) num2str(r-1) ];
+			end
 			m(r, c) = sym(v);
 		end
 	end
+
+	m
+	pause
 
 	inverse =simplify(inv(m) * det(m));
 	idet = ccode(det(m));
