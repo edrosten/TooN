@@ -100,9 +100,15 @@ public:
 	/// @param weight The inverse variance of the measurement (default = 1)
 	template<class B2>
 	inline void add_mJ(Precision m, const Vector<Size, Precision, B2>& J, Precision weight = 1) {
-		Vector<Size,Precision> Jw = J*weight;
-		my_C_inv += Jw.as_col() * J.as_row();
-		my_vector+= m*Jw;
+		
+		//Upper right triangle only, for speed
+		for(int r=0; r < my_C_inv.num_rows(); r++)
+		{
+			double Jw = weight * J[r];
+			my_vector[r] += m * Jw;
+			for(int c=r; c < my_C_inv.num_rows(); c++)
+				my_C_inv[r][c] += Jw * J[c];
+		}
 	}
 
 	/// Add multiple measurements at once (much more efficiently)
@@ -123,6 +129,12 @@ public:
 	/// Process all the measurements and compute the weighted least squares set of parameter values
 	/// stores the result internally which can then be accessed by calling get_mu()
 	void compute(){
+	
+		//Copy the upper right triangle to the empty lower-left.
+		for(int r=1; r < my_C_inv.num_rows(); r++)
+			for(int c=0; c < r; c++)
+				my_C_inv[r][c] = my_C_inv[c][r];
+
 		my_decomposition.compute(my_C_inv);
 		my_mu=my_decomposition.backsub(my_vector);
 	}
@@ -147,7 +159,7 @@ public:
 
 
 private:
-	Matrix<Size,Size,Precision> my_C_inv;
+	Matrix<Size,Size,Precision> my_C_inv, my_C_inv2;
 	Vector<Size,Precision> my_vector;
 	Decomposition<Size,Precision> my_decomposition;
 	Vector<Size,Precision> my_mu;
