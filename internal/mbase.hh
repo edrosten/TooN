@@ -139,6 +139,14 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 		return my_data[r*rowstride() + c*colstride()];
 	}
 
+	Precision& operator[](const std::pair<int, int>& index) {
+		return (*this)(index.first, index.second);
+	}
+
+	const Precision& operator[](const std::pair<int, int>& index) const {
+		return (*this)(index.first, index.second);
+	}
+
 	// this is the type of vector obtained by [ ]
 	typedef Vector<Cols, Precision, SliceVBase<SliceColStride> > Vec;
 	

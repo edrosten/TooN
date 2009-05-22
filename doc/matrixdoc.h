@@ -174,6 +174,14 @@ are  mismatched.
   @endcode
   */
   const double& operator() (int r, int c) const;
+
+  /**
+  Access an element from the matrix.
+  @param row_col <code>row_col.first</code> holds the row, <code>row_col.second</code> holds the column.
+  */
+  const double& operator[](const std::pair<int,int>& row_col) const;
+  ///@overload
+  double& operator[](const std::pair<int,int>& row_col);
   
   /**
   Access an element from the matrix.
