@@ -3,58 +3,9 @@
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 #include <algorithm>
-#include <vector>
-#include <math.h>
 
 namespace TooN
 {
-
-template<int D> struct DSBase
-{
-	typedef Vector<D> Vec;
-	typedef Vector<D+1> Values;
-	typedef std::vector<Vector<D> > Simplex;
-
-	static const int Dim = D;
-
-
-	DSBase(int) { };
-
-	void resize_simplex(Simplex&s) {
-		s.resize(Dim+1);
-	}
-	void resize_values(Values&) {}
-	void resize_vector(Vec&) {}
-
-};
-
-template<> struct DSBase<-1>
-{
-	typedef Vector<> Vec;
-	typedef Vector<> Values;
-	typedef std::vector<Vector<> > Simplex;
-	int Dim;
-
-	DSBase(int d)
-	{
-		Dim = d;
-	};
-
-	void resize_simplex(Simplex& s)
-	{
-		s.resize(Dim+1, Vector<>(Dim));
-	}
-
-	void resize_values(Values& v)
-	{
-		v.resize(Dim+1);
-	}
-
-	void resize_vector(Vec& v)
-	{
-		v.resize(Dim);
-	}
-};
 
 /** This is an implementation of the Downhill Simplex (Nelder & Mead, 1965)
     algorithm. This particular instance will minimize a given function.
@@ -85,36 +36,43 @@ template<> struct DSBase<-1>
 	
 	Example usage:
 	@code
-	#include <utility>
-	#include <TooN/optimization/downhill_simplex.h>
-	using namespace std;
-	using namespace TooN;
+#include <TooN/optimization/downhill_simplex.h>
+using namespace std;
+using namespace TooN;
 
-	template<class C> double length(const C& v)
-	{
-        return sqrt(v*v);
-	}
+template<class C> double length(const C& v)
+{
+	return sqrt(v*v);
+}
 
-	template<class C> double simplex_size(const C& s)
-	{
-		return abs(length(s.get_simplex()[s.get_best()] - s.get_simplex()[s.get_worst()]) / length( s.get_simplex()[s.get_best()]));
-	}
+double sq(double x)
+{
+	return x*x;
+}
 
-	double Rosenbrock(Vector<2>& v)
-	{
-			return sq(1 - v[0]) + 100 * sq(v[1] - sq(v[0]));
-	}
+template<class C> double simplex_size(const C& s)
+{
+	return abs(length(s.get_simplex()[s.get_best()] - s.get_simplex()[s.get_worst()]) / length( s.get_simplex()[s.get_best()]));
+}
 
-	int main()
-	{
-			Vector<2> starting_point = (make_Vector, -1, 1);
+double Rosenbrock(const Vector<2>& v)
+{
+		return sq(1 - v[0]) + 100 * sq(v[1] - sq(v[0]));
+}
 
-			DownhillSimplex<2> dh_fixed(RosenbrockF, starting_point, 1);
-			while(simplex_size(dh_fixed) > 0.0000001)
-					dh_fixed.iterate(RosenbrockF);
+int main()
+{
+		Vector<2> starting_point = makeVector( -1, 1);
 
-			cout << dh_fixed.get_simplex()[dh_fixed.get_best()] << endl;
-	}
+		DownhillSimplex<2> dh_fixed(Rosenbrock, starting_point, 1);
+		while(simplex_size(dh_fixed) > 0.0000001)
+		{
+				dh_fixed.iterate(Rosenbrock);
+		}
+
+		cout << dh_fixed.get_simplex()[dh_fixed.get_best()] << endl;
+}
+
 	@endcode
 
 
@@ -124,13 +82,11 @@ template<> struct DSBase<-1>
 
 
 **/
-template<int N=-1> class DownhillSimplex: public DSBase<N>
+template<int N=-1> class DownhillSimplex
 {
-	typedef typename DSBase<N>::Vec Vec;
-	typedef typename DSBase<N>::Values Values;
-	typedef typename DSBase<N>::Simplex Simplex;
-
-	using DSBase<N>::Dim;
+	static const int Vertices = (N==-1?-1:N+1);
+	typedef Matrix<Vertices, N> Simplex;
+	typedef Vector<Vertices> Values;
 
 	public:
 		/// Initialize the DownhillSimplex class. The simplex is automatically
@@ -141,16 +97,13 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 		///@param c          Origin of the initial simplex. The dimension of this vector
 		///                  is used to determine the dimension of the run-time sized version.
 		///@param spread     Size of the initial simplex.
-		template<class Function> DownhillSimplex(const Function& func, const Vec& c, double spread=1)
-		:DSBase<N>(c.size())
+		template<class Function> DownhillSimplex(const Function& func, const Vector<N>& c, double spread=1)
+		:simplex(c.size()+1, c.size()),values(c.size())
 		{
-			resize_simplex(simplex);
-			resize_values(values);
-
-			for(int i=0; i < Dim+1; i++)
+			for(int i=0; i < simplex.num_rows(); i++)
 				simplex[i] = c;
 
-			for(int i=0; i < Dim; i++)
+			for(int i=0; i < simplex.num_cols(); i++)
 				simplex[i][i] += spread;
 
 			alpha = 1.0;
@@ -158,7 +111,7 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 			gamma = 0.5;
 			sigma = 0.5;
 
-			for(int i=0; i < Dim+1; i++)
+			for(int i=0; i < values.size(); i++)
 				values[i] = func(simplex[i]);
 		}
 
@@ -177,13 +130,13 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 		///Get the index of the best vertex
 		int get_best() const 
 		{
-			return min_element(values.begin(), values.end()) - values.begin();
+			return min_element(&values[0], &values[0] + values.size()) - &values[0];
 		}
 		
 		///Get the index of the worst vertex
 		int get_worst() const 
 		{
-			return max_element(values.begin(), values.end()) - values.begin();
+			return max_element(&values[0], &values[0] + values.size()) - &values[0];
 		}
 
 		///Perform one iteration of the downhill Simplex algorithm
@@ -198,12 +151,10 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 			int worst = get_worst();
 			double second_worst_val=-HUGE_VAL, bestval = HUGE_VAL, worst_val = values[worst];
 			int best=0;
-			Vec x0;
-			resize_vector(x0);
-			Zero(x0);
+			Vector<N> x0 = Zeros(simplex.num_cols());
 
 
-			for(int i=0; i < Dim+1; i++)
+			for(int i=0; i < simplex.num_rows(); i++)
 			{
 				if(values[i] < bestval)
 				{
@@ -220,17 +171,17 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 					x0 += simplex[i];
 				}
 			}
-			x0 *= 1.0 / Dim;
+			x0 *= 1.0 / simplex.num_cols();
 
 
 			//Reflect the worst point about the centroid.
-			Vec xr = (1 + alpha) * x0 - alpha * simplex[worst];
+			Vector<N> xr = (1 + alpha) * x0 - alpha * simplex[worst];
 			double fr = func(xr);
 
 			if(fr < bestval)
 			{
 				//If the new point is better than the smallest, then try expanding the simplex.
-				Vec xe = rho * xr + (1-rho) * x0;
+				Vector<N> xe = rho * xr + (1-rho) * x0;
 				double fe = func(xe);
 
 				//Keep whichever is best
@@ -263,7 +214,7 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 			//a bit.
 			if(fr < worst_val)
 			{
-				Vec xc = (1 + gamma) * x0 - gamma * simplex[worst];
+				Vector<N> xc = (1 + gamma) * x0 - gamma * simplex[worst];
 				double fc = func(xc);
 
 				//If this helped, use it
@@ -277,7 +228,7 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 			
 			//Otherwise, fr is worse than the worst point, or the fc was worse
 			//than fr. So shrink the whole simplex around the best point.
-			for(int i=0; i < Dim+1; i++)
+			for(int i=0; i < simplex.num_rows(); i++)
 				if(i != best)
 				{
 					simplex[i] = simplex[best] + sigma * (simplex[i] - simplex[best]);
@@ -296,7 +247,7 @@ template<int N=-1> class DownhillSimplex: public DSBase<N>
 		Simplex simplex;
 
 		//Function values for each vertex
-		Values  values;
+		Values values;
 
 
 };
