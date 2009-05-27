@@ -100,19 +100,41 @@ template<int N=-1> class DownhillSimplex
 		template<class Function> DownhillSimplex(const Function& func, const Vector<N>& c, double spread=1)
 		:simplex(c.size()+1, c.size()),values(c.size())
 		{
+			alpha = 1.0;
+			rho = 2.0;
+			gamma = 0.5;
+			sigma = 0.5;
+
+			restart(func, c, spread);
+
+		}
+		
+		/// This function sets up the simplex around, with one point at \e c and the remaining
+		/// points are made by moving by \e spread along each axis aligned unit vector.
+		///
+		///@param func       Functor to minimize.
+		///@param c          \e c corner point of the simplex
+		///@param spread     \e spread simplex size
+		template<class Function> restart(const Function& func, const Vector<N>& c, double spread)
+		{
 			for(int i=0; i < simplex.num_rows(); i++)
 				simplex[i] = c;
 
 			for(int i=0; i < simplex.num_cols(); i++)
 				simplex[i][i] += spread;
 
-			alpha = 1.0;
-			rho = 2.0;
-			gamma = 0.5;
-			sigma = 0.5;
-
 			for(int i=0; i < values.size(); i++)
 				values[i] = func(simplex[i]);
+		}
+		
+		
+		/// This function resets the simplex around the best current point.
+		///
+		///@param func       Functor to minimize.
+		///@param spread     simplex size
+		template<class Function> restart(const Function& func, double spread)
+		{
+			restart(func, simplex[get_best()], spread);
 		}
 
 		///Return the simplex
