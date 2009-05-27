@@ -82,11 +82,11 @@ int main()
 
 
 **/
-template<int N=-1> class DownhillSimplex
+template<int N=-1, typename Precision=double> class DownhillSimplex
 {
 	static const int Vertices = (N==-1?-1:N+1);
-	typedef Matrix<Vertices, N> Simplex;
-	typedef Vector<Vertices> Values;
+	typedef Matrix<Vertices, N, Precision> Simplex;
+	typedef Vector<Vertices, Precision> Values;
 
 	public:
 		/// Initialize the DownhillSimplex class. The simplex is automatically
@@ -97,7 +97,7 @@ template<int N=-1> class DownhillSimplex
 		///@param c          Origin of the initial simplex. The dimension of this vector
 		///                  is used to determine the dimension of the run-time sized version.
 		///@param spread     Size of the initial simplex.
-		template<class Function> DownhillSimplex(const Function& func, const Vector<N>& c, double spread=1)
+		template<class Function> DownhillSimplex(const Function& func, const Vector<N>& c, Precision spread=1)
 		:simplex(c.size()+1, c.size()),values(c.size())
 		{
 			alpha = 1.0;
@@ -115,7 +115,7 @@ template<int N=-1> class DownhillSimplex
 		///@param func       Functor to minimize.
 		///@param c          \e c corner point of the simplex
 		///@param spread     \e spread simplex size
-		template<class Function> void restart(const Function& func, const Vector<N>& c, double spread)
+		template<class Function> void restart(const Function& func, const Vector<N>& c, Precision spread)
 		{
 			for(int i=0; i < simplex.num_rows(); i++)
 				simplex[i] = c;
@@ -132,7 +132,7 @@ template<int N=-1> class DownhillSimplex
 		///
 		///@param func       Functor to minimize.
 		///@param spread     simplex size
-		template<class Function> void restart(const Function& func, double spread)
+		template<class Function> void restart(const Function& func, Precision spread)
 		{
 			restart(func, simplex[get_best()], spread);
 		}
@@ -171,7 +171,7 @@ template<int N=-1> class DownhillSimplex
 			// - The best point
 			// - The centroid of all the points but the worst
 			int worst = get_worst();
-			double second_worst_val=-HUGE_VAL, bestval = HUGE_VAL, worst_val = values[worst];
+			Precision second_worst_val=-HUGE_VAL, bestval = HUGE_VAL, worst_val = values[worst];
 			int best=0;
 			Vector<N> x0 = Zeros(simplex.num_cols());
 
@@ -198,13 +198,13 @@ template<int N=-1> class DownhillSimplex
 
 			//Reflect the worst point about the centroid.
 			Vector<N> xr = (1 + alpha) * x0 - alpha * simplex[worst];
-			double fr = func(xr);
+			Precision fr = func(xr);
 
 			if(fr < bestval)
 			{
 				//If the new point is better than the smallest, then try expanding the simplex.
 				Vector<N> xe = rho * xr + (1-rho) * x0;
-				double fe = func(xe);
+				Precision fe = func(xe);
 
 				//Keep whichever is best
 				if(fe < fr)
@@ -237,7 +237,7 @@ template<int N=-1> class DownhillSimplex
 			if(fr < worst_val)
 			{
 				Vector<N> xc = (1 + gamma) * x0 - gamma * simplex[worst];
-				double fc = func(xc);
+				Precision fc = func(xc);
 
 				//If this helped, use it
 				if(fc <= fr)
@@ -262,8 +262,9 @@ template<int N=-1> class DownhillSimplex
 
 
 
+		Precision alpha, rho, gamma, sigma;
+
 	private:
-		float alpha, rho, gamma, sigma;
 
 		//Each row is a simplex vertex
 		Simplex simplex;
