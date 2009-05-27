@@ -115,7 +115,7 @@ template<int N=-1> class DownhillSimplex
 		///@param func       Functor to minimize.
 		///@param c          \e c corner point of the simplex
 		///@param spread     \e spread simplex size
-		template<class Function> restart(const Function& func, const Vector<N>& c, double spread)
+		template<class Function> void restart(const Function& func, const Vector<N>& c, double spread)
 		{
 			for(int i=0; i < simplex.num_rows(); i++)
 				simplex[i] = c;
@@ -132,7 +132,7 @@ template<int N=-1> class DownhillSimplex
 		///
 		///@param func       Functor to minimize.
 		///@param spread     simplex size
-		template<class Function> restart(const Function& func, double spread)
+		template<class Function> void restart(const Function& func, double spread)
 		{
 			restart(func, simplex[get_best()], spread);
 		}
