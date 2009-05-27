@@ -3,6 +3,7 @@
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 #include <algorithm>
+#include <cstdlib>
 
 namespace TooN
 {
@@ -40,19 +41,9 @@ namespace TooN
 using namespace std;
 using namespace TooN;
 
-template<class C> double length(const C& v)
-{
-	return sqrt(v*v);
-}
-
 double sq(double x)
 {
 	return x*x;
-}
-
-template<class C> double simplex_size(const C& s)
-{
-	return abs(length(s.get_simplex()[s.get_best()] - s.get_simplex()[s.get_worst()]) / length( s.get_simplex()[s.get_best()]));
 }
 
 double Rosenbrock(const Vector<2>& v)
@@ -65,11 +56,12 @@ int main()
 		Vector<2> starting_point = makeVector( -1, 1);
 
 		DownhillSimplex<2> dh_fixed(Rosenbrock, starting_point, 1);
-		while(simplex_size(dh_fixed) > 0.0000001)
-		{
-				dh_fixed.iterate(Rosenbrock);
-		}
 
+		while(dh_fixed.iterate(Rosenbrock))
+		{
+			cout << dh.get_values()[dh.get_best()] << endl;
+		}
+		
 		cout << dh_fixed.get_simplex()[dh_fixed.get_best()] << endl;
 }
 
@@ -105,8 +97,10 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 			gamma = 0.5;
 			sigma = 0.5;
 
-			restart(func, c, spread);
+			epsilon = sqrt(numeric_limits<Precision>::epsilon());
+			zero_epsilon = 1e-20;
 
+			restart(func, c, spread);
 		}
 		
 		/// This function sets up the simplex around, with one point at \e c and the remaining
@@ -127,6 +121,21 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 				values[i] = func(simplex[i]);
 		}
 		
+		///Check to see it iteration should stop. You probably do not want to use
+		///this function. See iterate() instead. This function updates nothing.
+		///The termination criterion is that the simplex span (distancve between
+		///the best and worst vertices) is small compared to the scale or 
+		///small overall.
+		bool finished()
+		{
+			Precision span =  norm(simplex[get_best()] - simplex[get_worst()]);
+			Precision scale = norm(simplex[get_best()]);
+
+			if(span/scale < epsilon || span < zero_epsilon)
+				return 1;
+			else 
+				return 0;
+		}
 		
 		/// This function resets the simplex around the best current point.
 		///
@@ -163,7 +172,7 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 
 		///Perform one iteration of the downhill Simplex algorithm
 		///@param func Functor to minimize
-		template<class Function> void iterate(const Function& func)
+		template<class Function> void find_next_point(const Function& func)
 		{
 			//Find various things:
 			// - The worst point
@@ -258,11 +267,21 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 				}
 		}
 
+		///Perform one iteration of the downhill Simplex algorithm, and return the result
+		///of not DownhillSimplex::finished.
+		///@param func Functor to minimize
+		template<class Function> bool iterate(const Function& func)
+		{
+			find_next_point(func);
+			return !finished();
+		}
 
-
-
-
-		Precision alpha, rho, gamma, sigma;
+		Precision alpha; ///< Reflected size. Defaults to 1.
+		Precision rho;   ///< Expansion ratio. Defaults to 2.
+		Precision gamma; ///< Contraction ratio. Defaults to .5.
+		Precision sigma; ///< Shrink ratio. Defaults to .5.
+		Precision epsilon;  ///< Tolerance used to determine if the optimization is complete. Defaults to square root of machine precision.
+		Precision zero_epsilon; ///< Additive term in tolerance to prevent excessive iterations if \f$x_\mathrm{optimal} = 0\f$. Known as \c ZEPS in numerical recipies. Defaults to 1e-20
 
 	private:
 
