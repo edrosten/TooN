@@ -76,10 +76,102 @@ namespace TooN {
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	template<int Size, class Precision, class Base> struct DiagonalMatrix;
-	template<typename T> struct Operator;
-	
-	static const int Dynamic = -1;
 
+	#ifdef DOXYGEN_INCLUDE_ONLY_FOR_DOCS
+		///This is a struct used heavily in TooN.
+		///
+		///They have two main uses. The first use is in construction and is completely hidden.
+		///For an expression such as a+b, the return value of operator+ will be constructed in
+		///place in the return statement, to prevent excessive copying and calls to new/delete.
+		///
+		///The other use is much more visible and is for objects such as TooN::Zeros and TooN::Idendity .
+		///
+		///The features allowed (construction, addition, etc) depend on the members present. 
+		///For simplicity, general arguments are given below. If members are non-general, then the 
+		///operators will simply not be applicable to all vectors or matrices.
+		///@ingroup gInternal
+		template<typename T> struct Operator{
+			///@name Members used by Vector
+			///@{
+			///This must be provided in order to construct vectors.
+			int size() const;
+
+			///This function must be present for construction and assignment
+			///of vectors to work.
+			template<int Size, class Precision, class Base>
+			void eval(Vector<Size, Precision, Base>& v) const;
+
+			///This must be present for vector += operator
+			template <int Size, typename P1, typename B1> 
+			void plusequals(Vector<Size, P1, B1>& v) const;
+
+			///This must be present for vector -= operator
+			template <int Size, typename P1, typename B1>
+			void minusequals(Vector<Size, P1, B1>& v) const;
+
+			///This function must be present for vector + operator
+			///and operator + vector
+			template <int Size, typename P1, typename B1> 
+			Operator<T> add(const Vector<Size, P1, B1>& v) const;
+
+			///This function must be present for vector - operator
+			template <int Size, typename P1, typename B1> 
+			Operator<T> rsubtract(const Vector<Size, P1, B1>& v) const;
+
+			///This function must be present for operator - vector
+			template <int Size, typename P1, typename B1> 
+			Operator<T> lsubtract(const Vector<Size, P1, B1>& v) const;
+
+			///@}
+
+			///@name Members used by Matrix
+			///@{
+
+			///This along with num_cols() must be present in order to construct matrices.
+			///The return value will be ignored for static rows.
+			int num_rows() const; 
+			///This along with num_rows() must be present in order to construct matrices.
+			///The return value will be ignored for static columns.
+			int num_cols() const;
+			
+			///This function must be present for construction and assignment
+			///of matrices to work.
+			template<int R, int C, class P, class B>
+			void eval(Matrix<R,C,P,B>& m) const; 
+
+			///This function must be present for matrix + operator
+			///and operator + matrix
+			template <int Rows, int Cols, typename P1, typename B1> 
+			Operator<T> add(const Matrix<Rows,Cols, P1, B1>& m) const;
+
+
+			///This function must be present for matrix - operator
+			template <int Rows, int Cols, typename P1, typename B1> 
+			Operator<T> rsubtract(const Matrix<Rows,Cols, P1, B1>& m) const;
+
+			///This function must be present for operator - matrix
+			template <int Rows, int Cols, typename P1, typename B1> 
+			Operator<T> lsubtract(const Matrix<Rows,Cols, P1, B1>& m) const;
+
+			///This must be present for matrix += operator
+			template <int Rows, int Cols, typename P1, typename B1> 
+			void plusequals(Matrix<Rows,Cols, P1, B1>& m) const;
+
+			///This must be present for matrix -= operator
+			template <int Rows, int Cols, typename P1, typename B1> 
+			void minusequals(Matrix<Rows,Cols, P1, B1>& m) const;
+
+			///@}
+		}
+
+	#else
+		template<typename T> struct Operator;
+	#endif
+	
+	///Template size value used to indicate dynamically sized vectors and matrices.
+	static const int Dynamic = -1;
+	
+	///All TooN classes default to using this precision for computations and storage.
 	typedef double DefaultPrecision;
 }
 

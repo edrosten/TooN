@@ -34,7 +34,7 @@ namespace TooN {
 
 
 /**
-@class DiagonalMatrix TooN/toon.h
+@class DiagonalMatrix 
 A diagonal matrix
 
 Support is limited but diagonal matrices can be multiplied by vectors, matrices
@@ -55,6 +55,9 @@ A vector can be obtained from the diagonal matrix by using the
 template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 struct DiagonalMatrix {
 public:
+	///@name Constructors
+	///@{
+	
 	inline DiagonalMatrix() {}
 	inline DiagonalMatrix(int size_in) : my_vector(size_in) {}
 	inline DiagonalMatrix(Precision* data) : my_vector(data) {}
@@ -62,16 +65,16 @@ public:
 	inline DiagonalMatrix(Precision* data_in, int size_in, int stride_in, Internal::Slicing)
 		: my_vector(data_in, size_in, stride_in, Internal::Slicing() ) {}
 
-
 	// constructors to allow return value optimisations
 	// construction from 0-ary operator
+	///my_vector constructed from a TooN::Operator 
 	template <class Op>
 	inline DiagonalMatrix(const Operator<Op>& op)
 		: my_vector (op)
 	{
 		op.eval(my_vector);
 	}
-
+	
 	// constructor from arbitrary vector
 	template<int Size2, typename Precision2, typename Base2>
 	inline DiagonalMatrix(const Vector<Size2,Precision2,Base2>& from)
@@ -79,16 +82,21 @@ public:
 	{
 		my_vector=from;
 	}
+	///@}
 
 
+
+	///Index the leading elements on the diagonal 
 	Precision& operator[](int i){return my_vector[i];}
+	///Index the leading elements on the diagonal 
 	const Precision& operator[](int i) const {return my_vector[i];}
-
+	
+	///Return the leading diagonal as a vector.
 	typename Vector<Size, Precision, Base>::as_slice_type diagonal_slice() {
 		return my_vector.as_slice();
 	}
-
-
+	
+	///The vector used to hold the leading diagonal.
 	Vector<Size,Precision,Base> my_vector;
 };
 

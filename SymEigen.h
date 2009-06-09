@@ -39,10 +39,18 @@
 
 namespace TooN {
 
+///Default condition number for SymEigen::backsub, SymEigen::get_pinv and SymEigen::get_inv_diag
 static const double symeigen_condition_no=1e9;
 
+///Helper struct for computing eigensystems, to allow for specialization on
+///2x2 matrices.
+///@ingroup gInternal
 template <int Size> struct ComputeSymEigen {
-
+	
+	///Compute an eigensystem.
+	///@param m Input matrix (assumed to be symmetric)
+	///@param evectors Eigen vector output
+	///@param evalues Eigen values output
 	template<typename P, typename B>
 	static inline void compute(const Matrix<Size,Size,P, B>& m, Matrix<Size,Size,P> & evectors, Vector<Size, P>& evalues) {
 		evectors = m;
@@ -193,6 +201,9 @@ public:
 	/// They are returned in order of the size of the corresponding eigenvalue, i.e.
 	/// the vector with the largest eigenvalue is first.
 	Matrix<Size,Size,Precision>& get_evectors() {return my_evectors;}
+
+	/**\overload
+	*/
 	const Matrix<Size,Size,Precision>& get_evectors() const {return my_evectors;}
 
 
@@ -200,6 +211,8 @@ public:
 	/// The eigenvalues are listed in order, from the largest to the smallest.
 	/// These are also the diagonal values of the matrix \f$\Lambda\f$. 
 	Vector<Size, Precision>& get_evalues() {return my_evalues;}
+	/**\overload
+	*/
 	const Vector<Size, Precision>& get_evalues() const {return my_evalues;}
 	
 	/// Is the matrix positive definite?

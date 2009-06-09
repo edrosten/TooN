@@ -173,7 +173,8 @@ class LU {
 	/// diagonal and above parts of the matrix are U and the below-diagonal part, plus a unit diagonal, 
 	/// are L.
 	const Matrix<Size,Size,Precision>& get_lu()const {return my_lu;}
-
+	
+	private:
 	inline int get_sign() const {
 		int result=1;
 		for(int i=0; i<my_lu.num_rows()-1; i++){
@@ -183,6 +184,7 @@ class LU {
 		}
 		return result;
 	}
+	public:
 
 	/// Calculate the determinant of the matrix
 	inline Precision determinant() const {

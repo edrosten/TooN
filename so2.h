@@ -54,9 +54,11 @@ class SO2 {
 public:
 	/// Default constructor. Initialises the matrix to the identity (no rotation)
 	SO2() : my_matrix(Identity) {} 
-  
+ 	
+	/// Construct from a rotation matrix.
 	SO2(const Matrix<2,2,Precision>& rhs) {  *this = rhs; }
-
+	
+	/// Construct from an angle.
 	SO2(const Precision l) { *this = exp(l); }
   
 	/// Assigment operator from a general matrix. This also calls coerce()

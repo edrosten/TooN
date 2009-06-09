@@ -296,7 +296,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	///- old_g
 	///- h
 	///- old_h
-	///@param The derivatives of the function at \e x
+	///@param grad The derivatives of the function at \e x
 	void update_vectors_PR(const Vector<Size>& grad)
 	{
 		//Update the position, gradient and conjugate directions

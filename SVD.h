@@ -86,11 +86,12 @@ SVD<> (= SVD<-1>) can be used to create an SVD whose size is determined at run-t
 **/
 template<int Rows=Dynamic, int Cols=Rows, typename Precision=DefaultPrecision>
 class SVD {
-public:
 	// this is the size of the diagonal
 	// NB works for semi-dynamic sizes because -1 < +ve ints
 	static const int Min_Dim = Rows<Cols?Rows:Cols;
 	
+public:
+
 	/// default constructor for Rows>0 and Cols>0
 	SVD() {}
 
@@ -118,7 +119,8 @@ public:
 		my_copy=m;
 		do_compute();
 	}
-		
+	
+	private:
 	void do_compute(){
 		Precision* const a = my_copy.my_data;
 		int lda = my_copy.num_cols();
@@ -161,13 +163,14 @@ public:
 	
 		delete[] wk;
 	}
-
+	
 	bool is_vertical(){ 
 		return (my_copy.num_rows() >= my_copy.num_cols()); 
 	}
 
 	int min_dim(){ return std::min(my_copy.num_rows(), my_copy.num_cols()); }
-
+	
+	public:
 
 	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix. 
 	/// For a matrix \f$A\f$, this calculates \f$M^{\dagger}A\f$ by back substitution 
@@ -257,7 +260,11 @@ public:
 		}
 	}
 
-
+	///Return the pesudo-inverse diagonal. The reciprocal of the diagonal elements
+	///is returned if the elements are well scaled with respect to the largest element,
+	///otherwise 0 is returned.
+	///@param inv_diag Vector in which to return the inverse diagonal.
+	///@param condition Elements must be larger than this factor times the largest diagonal element to be considered well scaled. 
 	void get_inv_diag(Vector<Min_Dim>& inv_diag, const Precision condition){
 		for(int i=0; i<min_dim(); i++){
 			if(my_diagonal[i] * condition <= my_diagonal[0]){
@@ -284,12 +291,15 @@ private:
 /// @ingroup gDecomps
 template<int Size, typename Precision>
 struct SQSVD : public SVD<Size, Size, Precision> {
-	// forward all constructors to SVD
+	///All constructors are forwarded to SVD in a straightforward manner.
+	///@name Constructors
+	///@{
 	SQSVD() {}
 	SQSVD(int size) : SVD<Size,Size,Precision>(size, size) {}
 	
 	template <int R2, int C2, typename P2, typename B2>
 	SQSVD(const Matrix<R2,C2,P2,B2>& m) : SVD<Size,Size,Precision>(m) {}
+	///@}
 };
 
 

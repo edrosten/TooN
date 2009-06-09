@@ -37,6 +37,9 @@
 
 namespace TooN {
 	///@ingroup gEquations
+	///Return the solution for \f$Ax = b\f$, given \f$A\f$ and \f$b\f$
+	///@param A \f$A\f$
+	///@param b \f$b\f$
     template<int N, typename Precision>
 	inline Vector<N, Precision> gaussian_elimination (Matrix<N,N,Precision> A, Vector<N, Precision> b) {
 		using std::swap;
@@ -95,6 +98,9 @@ namespace TooN {
 	};
 
 	///@ingroup gEquations
+	///Return the solution for \f$Ax = b\f$, given \f$A\f$ and \f$b\f$
+	///@param A \f$A\f$
+	///@param b \f$b\f$
     template<int R1, int C1, int R2, int C2, typename Precision>
 	inline Matrix<Internal::Size3<R1, C1, R2>::s, C2, Precision> gaussian_elimination (Matrix<R1,C1,Precision> A, Matrix<R2, C2, Precision> b) {
 		using std::swap;

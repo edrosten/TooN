@@ -98,20 +98,30 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 		}
 };
 
-
+///This allocator object sets aside memory for a statically sized object. It will
+///put all the data on the stack if there are less then TooN::max_bytes_on_stack of
+///data, otherwise it will use new/delete.
+///@ingroup gInternal
 template<int Size, class Precision> class StaticSizedAllocator: public StackOrHeap<Size, Precision, (sizeof(Precision)*Size>max_bytes_on_stack) >
 {
 };
 
+
+///Allocate memory for a Vector.
+///@ingroup gInternal
 template<int Size, class Precision> struct VectorAlloc : public StaticSizedAllocator<Size, Precision> {
 	
+	///Default constructor (only for statically sized vectors)
 	VectorAlloc() { }
-	
+
+	///Construction from a size (required by damic vectors, ignored otherwise).
 	VectorAlloc(int /*s*/) { }
 
+	///Construction from an Operator. See Operator::size().
 	template<class Op>
 	VectorAlloc(const Operator<Op>&) {}
-
+	
+	///Return the size of the vector.
 	int size() const {
 		return Size;
 	}
@@ -195,6 +205,9 @@ template<class Precision> struct VectorSlice<-1, Precision>
 //
 // A class similar to StrideHolder, but to hold the size information for matrices.
 
+///This struct holds a size is the size is dynamic,
+///or simply recorcs the number in the type system if
+///the size is static.
 template<int s> struct SizeHolder
 {
 	//Constructors ignore superfluous arguments
@@ -218,6 +231,10 @@ template<> struct SizeHolder<-1>
 };
 
 
+
+///This struct holds the number of rows, only allocating space if
+///necessary.
+///@ingroup gInternal
 template<int S> struct RowSizeHolder: private SizeHolder<S>
 {
 	RowSizeHolder(int i)
@@ -233,6 +250,9 @@ template<int S> struct RowSizeHolder: private SizeHolder<S>
 };
 
 
+///This struct holds the number of columns, only allocating space if
+///necessary.
+///@ingroup gInternal
 template<int S> struct ColSizeHolder: private SizeHolder<S>
 {
 	ColSizeHolder(int i)

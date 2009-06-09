@@ -96,9 +96,9 @@ public:
 
 	/// returns the generators for the Lie group. These are a set of matrices that
 	/// form a basis for the vector space of the Lie algebra.
-	/// @item 0 is translation in x
-	/// @item 1 is translation in y
-	/// @item 2 is rotation in the plane
+	/// - 0 is translation in x
+	/// - 1 is translation in y
+	/// - 2 is rotation in the plane
 	static inline Matrix<3,3, Precision> generator(int i) {
 		Matrix<3,3,Precision> result(Zeros);
 		if(i < 2){

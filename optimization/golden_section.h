@@ -19,7 +19,7 @@ namespace TooN
 	/// @param c The most positive point along the line.
 	/// @param func The functor to minimize
 	/// @param maxiterations  Maximum number of iterations
-	/// @param tolerance Tolerance at which the search should be stopped.
+	/// @param tol Tolerance at which the search should be stopped.
 	/// @return The minima position is returned as the first element of the vector,
 	///         and the minimal value as the second element.
 	/// @ingroup gOptimize
@@ -98,7 +98,7 @@ namespace TooN
 	/// @param c The most positive point along the line.
 	/// @param func The functor to minimize
 	/// @param maxiterations  Maximum number of iterations
-	/// @param tolerance Tolerance at which the search should be stopped.
+	/// @param tol Tolerance at which the search should be stopped.
 	/// @return The minima position is returned as the first element of the vector,
 	///         and the minimal value as the second element.
 	/// @ingroup gOptimize

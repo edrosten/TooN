@@ -42,31 +42,44 @@
 
 namespace TooN {
 
-
+	///\deprecated
+	///@ingroup gLinAlg
 	template<int Size, class Precision, class Base> TOON_DEPRECATED void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
 	{
 		for(int i=0; i < v.size(); i++)
 			v[i]= p;
 	}
 
+	///\deprecated
+	///@ingroup gLinAlg
 	template<int Rows, int Cols, class Precision, class Base> TOON_DEPRECATED void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
 	{
 		for(int i=0; i < m.num_rows(); i++)
 			for(int j=0; j < m.num_cols(); j++)
 				m[i][j] = p;
 	}
-
+	
+	///Compute the \f$L_2\f$ norm of \e v
+	///@param v \e v
+	///@ingroup gLinAlg
 	template<int Size, class Precision, class Base> inline Precision norm(const Vector<Size, Precision, Base>& v)
 	{
 		using std::sqrt;
 		return sqrt(v*v);
 	}
 
+	///Compute the \f$L_2^2\f$ norm of \e v
+	///@param v \e v
+	///@ingroup gLinAlg
 	template<int Size, class Precision, class Base> inline Precision norm_sq(const Vector<Size, Precision, Base>& v)
 	{
 		return v*v;
 	}
 
+
+	///Compute a the unit vector \f$\hat{v}\f$.
+	///@param v \e v
+	///@ingroup gLinAlg
 	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
 	{
 		using std::sqrt;
@@ -86,20 +99,31 @@ namespace TooN {
 	}
 	
 	//This overload is required to operate on non-slice vectors
-	///@overload
+	/**
+		\overload
+	*/  
 	template<int Size, class Precision> inline void normalize(Vector<Size, Precision> & v)
 	{
 		normalize(v.as_slice());
 	}
 
+	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i-1}] / v_i \f$
+	///@param v \e v
+	///@ingroup gLinAlg
 	template<int Size, typename Precision, typename Base> inline Vector<Size-1, Precision> project( const Vector<Size, Precision, Base> & v){
 		return v.template slice<0,Size-1>() / v[Size-1];
 	}
 	
+	/**
+	  \overload
+	*/
 	template<typename Precision, typename Base> inline Vector<-1, Precision> project( const Vector<-1, Precision, Base> & v){
 		return v.slice(0,v.size()-1) / v[v.size()-1];
 	}
 	
+	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i}, 1]\f$
+	///@param v \e v
+	///@ingroup gLinAlg
 	template<int Size, typename Precision, typename Base> inline Vector<Size+1, Precision> unproject( const Vector<Size, Precision, Base> & v){
 		Vector<Size+1, Precision> result;
 		result.template slice<0,Size>() = v;
@@ -107,6 +131,9 @@ namespace TooN {
 		return result;
 	}
 	
+	/**
+	  \overload
+	*/
 	template<typename Precision, typename Base> inline Vector<-1, Precision> unproject( const Vector<-1, Precision, Base> & v){
 		Vector<-1, Precision> result(v.size()+1);
 		result.slice(0,v.size()) = v;
@@ -114,7 +141,9 @@ namespace TooN {
 		return result;
 	}
 
-	/// Frobenius (root of sum of squares) norm of input matrix m
+	/// Frobenius (root of sum of squares) norm of input matrix \e m
+	///@param m \e m
+	///@ingroup gLinAlg
 	template <int R, int C, typename P, typename B>
 	P inline norm_fro( const Matrix<R,C,P,B> & m ){
 		using std::sqrt;
@@ -126,8 +155,9 @@ namespace TooN {
 		return sqrt(n);
 	}
 
-	/// row sum norm of input matrix m
+	/// \e L<sub>&#8734;</sub> (row sum) norm of input matrix m
 	/// computes the maximum of the sums of absolute values over rows
+	///@ingroup gLinAlg
 	template <int R, int C, typename P, typename B>
 	P inline norm_inf( const Matrix<R,C,P,B> & m ){
 		using std::abs;
@@ -142,8 +172,9 @@ namespace TooN {
 		return n;
 	}
 	
-	/// col sum norm of input matrix m
+	/// \e L<sub>1</sub> (col sum) norm of input matrix m
 	/// computes the maximum of the sums of absolute values over columns
+	///@ingroup gLinAlg
 	template <int R, int C, typename P, typename B>
 	P inline norm_1( const Matrix<R,C,P,B> & m ){
 		using std::abs;
@@ -179,6 +210,7 @@ namespace TooN {
 	/// squaring again.
 	/// @param m input matrix, must be square
 	/// @return result matrix of the same size/type as input
+	/// @ingroup gLinAlg
 	template <int R, int C, typename P, typename B>
 	inline Matrix<R, C, P> exp( const Matrix<R,C,P,B> & m ){
 		using std::max;
@@ -192,6 +224,7 @@ namespace TooN {
 	}
 	
 	/// Returns true if every element is finite
+	///@ingroup gLinAlg
 	template<int S, class P, class B> bool isfinite(const Vector<S, P, B>& v)
 	{ 
 		using std::isfinite;
@@ -202,6 +235,7 @@ namespace TooN {
 	}
 
 	/// Returns true if any element is NaN
+	///@ingroup gLinAlg
 	template<int S, class P, class B> bool isnan(const Vector<S, P, B>& v)
 	{ 
 		using std::isnan;
@@ -211,7 +245,10 @@ namespace TooN {
 		return 0;
 	}
 
-	/// Symmetrize a matrix
+	/// Symmetrize a matrix 
+	///@param m \e m
+	///@return \f$ \frac{m + m^{\mathsf T}}{2} \f$
+	///@ingroup gLinAlg
 	template<int Rows, int Cols, typename Precision, typename Base>
 	void Symmetrize(Matrix<Rows,Cols,Precision,Base>& m){
 		SizeMismatch<Rows,Cols>::test(m.num_rows(), m.num_cols());
@@ -226,6 +263,7 @@ namespace TooN {
 
 	
 	/// computes the trace of a square matrix
+	///@ingroup gLinAlg
 	template<int Rows, int Cols, typename Precision, typename Base>
 	Precision trace(const Matrix<Rows, Cols, Precision, Base> & m ){
 		SizeMismatch<Rows,Cols>::test(m.num_rows(), m.num_cols());
@@ -238,6 +276,7 @@ namespace TooN {
 	/// creates an returns a cross product matrix M from a 3 vector v, such that for all vectors w, the following holds: v ^ w = M * w
 	/// @param vec the 3 vector input
 	/// @return the 3x3 matrix to set to the cross product matrix
+	///@ingroup gLinAlg
 	template<int Size, class P, class B> inline TooN::Matrix<3, 3, P> cross_product_matrix(const Vector<Size, P, B>& vec)
 	{
 		SizeMismatch<Size,3>::test(vec.size(), 3);

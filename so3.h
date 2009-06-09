@@ -58,9 +58,11 @@ public:
 	/// Default constructor. Initialises the matrix to the identity (no rotation)
 	SO3() : my_matrix(Identity) {}
 	
+	/// Construct from the axis of rotation (and angle given by the magnitude).
 	template <int S, typename P, typename A>
 	SO3(const Vector<S, P, A> & v) { *this = exp(v); }
 	
+	/// Construct from a rotation matrix.
 	template <int R, int C, typename P, typename A>
 	SO3(const Matrix<R,C,P,A>& rhs) { *this = rhs; }
 	

@@ -91,7 +91,8 @@ public:
 		my_cholesky=m;
 		do_compute();
 	}
-
+	
+	private:
 	void do_compute() {
 		int size=my_cholesky.num_rows();
 		for(int col=0; col<size; col++){
@@ -116,6 +117,7 @@ public:
 			}
 		}
 	}
+	public:
 
 	/// Compute x = A^-1*v
     /// Run time is O(N^2)
@@ -152,7 +154,8 @@ public:
 		return result;
 	}
 
-	///@overload
+	/**overload
+	*/
 	template<int Size2, int C2, class P2, class B2>
 	Matrix<Size, C2, Precision> backsub (const Matrix<Size2, C2, P2, B2>& m) {
 		int size=my_cholesky.num_rows();
@@ -193,7 +196,8 @@ public:
 		Matrix<Size,Size,Precision>I(Identity(my_cholesky.num_rows()));
 		return backsub(I);
 	}
-
+	
+	///Compute the determinant.
 	Precision determinant(){
 		Precision answer=my_cholesky(0,0);
 		for(int i=1; i<my_cholesky.num_rows(); i++){

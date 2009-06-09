@@ -38,7 +38,7 @@
 
 namespace TooN {
 
-/// Performs weighted least squares computation.
+/// Performs Gauss-Newton weighted least squares computation.
 /// @param Size The number of dimensions in the system
 /// @param Precision The numerical precision used (double, float etc)
 /// @param Decomposition The class used to invert the inverse Covariance matrix (must have one integer size and one typename precision template arguments) this is Cholesky by default, but could also be SQSVD
@@ -59,8 +59,6 @@ public:
 	}
 
 	/// Clear all the measurements and apply a constant regularisation term. 
-	/// Equates to a prior that says all the parameters are zero with \f$\sigma^2 = \frac{1}{\text{val}}\f$.
-	/// @param prior The strength of the prior
 	void clear(){
 		my_C_inv = Zeros;
 		my_vector = Zeros;
@@ -112,7 +110,6 @@ public:
 	}
 
 	/// Add multiple measurements at once (much more efficiently)
-	/// @param N The number of measurements
 	/// @param m The measurements to add
 	/// @param J The Jacobian matrix \f$\frac{\partial\text{m}_i}{\partial\text{param}_j}\f$
 	/// @param invcov The inverse covariance of the measurement values
@@ -150,12 +147,12 @@ public:
 	Matrix<Size,Size,Precision>& get_C_inv() {return my_C_inv;}
 	/// Returns the inverse covariance matrix
 	const Matrix<Size,Size,Precision>& get_C_inv() const {return my_C_inv;}
-	Vector<Size,Precision>& get_mu(){return my_mu;}
-	const Vector<Size,Precision>& get_mu() const {return my_mu;}
-	Vector<Size,Precision>& get_vector(){return my_vector;}
-	const Vector<Size,Precision>& get_vector() const {return my_vector;}
-	Decomposition<Size,Precision>& get_decomposition(){return my_decomposition;}
-	const Decomposition<Size,Precision>& get_decomposition() const {return my_decomposition;}
+	Vector<Size,Precision>& get_mu(){return my_mu;}  ///<Returns the update. With no prior, this is the result of \f$J^\dagger e\f$.
+	const Vector<Size,Precision>& get_mu() const {return my_mu;} ///<Returns the update. With no prior, this is the result of \f$J^\dagger e\f$.
+	Vector<Size,Precision>& get_vector(){return my_vector;} ///<Returns the  vector \f$J^{\mathsf T} e\f$
+	const Vector<Size,Precision>& get_vector() const {return my_vector;} ///<Returns the  vector \f$J^{\mathsf T} e\f$
+	Decomposition<Size,Precision>& get_decomposition(){return my_decomposition;} ///< Return the decomposition object used to compute \f$(J^{\mathsf T}  J + P)^{-1}\f$
+	const Decomposition<Size,Precision>& get_decomposition() const {return my_decomposition;} ///< Return the decomposition object used to compute \f$(J^{\mathsf T}  J + P)^{-1}\f$
 
 
 private:

@@ -24,7 +24,7 @@
 \section sIntro Introduction
 
 The %TooN library is a set of C++ header files which provide basic numerics facilities:
-	- @link TooN::Vector Vectors@endlink and @link TooN::Matrix matrices@endlink
+	- @link TooN::Vector Vectors@endlink, @link TooN::Matrix matrices@endlink and @link gLinAlg etc @endlink
 	- @link gDecomps Matrix decompositions@endlink
 	- @link gOptimize Function optimization@endlink
 	- @link gTransforms Parameterized matrices (eg transformations)@endlink 
@@ -216,6 +216,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector.slice<>(start, end);                            //Dynamic slice
 		Matrix.slice<RowStart, ColStart, NumRows, NumCols>();  //Static slice
 		Matrix.slice<>(rowstart, colstart, numrows, numcols);  //Dynamic slice
+		Matrix.diagonal_slice();                               //Get the leading diagonal as a vector.
 		@endcode
 
 		See also \ref sSlices
@@ -366,19 +367,20 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	\subsection sDecompos  Which decomposisions are there?
 
 	For general size matrices (not necessarily square) there are:
-	@link TooN::LU LU @endlink, @link TooN::SVD SVD @endlink and gauss_jordan
+	@link TooN::LU LU @endlink, @link TooN::SVD SVD @endlink and gauss_jordan()
 
 	For square symmetric matrices there are:
 	@link TooN::SymEigen SymEigen @endlink and @link TooN::Cholesky Cholesky @endlink
 
-	If all you want to do is solve a single Ax=b then you may want gaussian_elimination
+	If all you want to do is solve a single Ax=b then you may want gaussian_elimination()
 
 	\subsection sOtherStuff What other stuff is there:
-
-		Optimization: WLS, IRLS, downhill_simplex, SO2, SE2, SO3, SE3
-
+	
+	Look at the @link modules modules @endlink.
 
 	\subsection sHandyFuncs What handy functions are there (normalize, identity, fill, etc...)?
+
+	See @link gLinAlg here @endlink.
 
 
 	\subsection sNoInplace Why don't functions work in place?
@@ -408,21 +410,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@endcode
 	to get func to accept the slice.
 
-	Alternatively, you can observe that only TooN objects with the default base
-	class own the data. All other sorts are references, so copying them only
-	copies the reference, and the referred data is the same. You could therefore
-	write a function to forward on TooN objects with the default base:
-
-	@code
-		template<class Base> void func(Vector<3, double, Base> v); //This will operate in-place only on slices
-
-		void func(Vector<3>& v) //This will catch any non-slices and forward them on.
-		{
-			func(v.as_slice());
-		}
-	@endcode
-
-	However, please consider writing functions that do not modify structures in
+	You may also wish to consider writing functions that do not modify structures in
 	place. The \c unit function of TooN computes a unit vector given an input
 	vector. In the following context, the code:
 	@code
@@ -699,8 +687,6 @@ The following classes perform multidimensional function minimization:
 The mode of operation is to set up a mutable class, then repeatedly call an
 iterate function. This allows different sub algorithms (such as termination
 conditions) to be substituted in if need be.
-
-@defgroup gTooN Main parts of TooN
 
 @defgroup gInternal TooN internals
 */
