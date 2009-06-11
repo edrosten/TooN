@@ -223,12 +223,16 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m, 1);
 	}
 
+	///@}
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::Identity<Q> > Type;
+	};
+
 	template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::Identity<Pout> >(val*m);
 	}
-
-	///@}
 
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
 		return Operator<Internal::SizedIdentity<Precision> >(s);
@@ -253,6 +257,11 @@ template<class Precision> struct Operator<Internal::SizedIdentity<Precision> >
 	int num_rows() const {return my_size;}
 	int num_cols() const {return my_size;}
 	///@}
+
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::SizedIdentity<Q> > Type;
+	};
 
 	template<class Pout, class Pmult> Operator<Internal::SizedIdentity<Pout> > scale_me(const Pmult& m) const
 	{
@@ -446,6 +455,11 @@ template<class P> struct Operator<Internal::Scalars<P> >
 		return Operator<Internal::RCScalars<Precision> > (s,r,c);
 	}
 
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::Scalars<Q> > Type;
+	};
+
 	template<class Pout, class Pmult> Operator<Internal::Scalars<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::Scalars<Pout> >(s*m);
@@ -474,6 +488,10 @@ template<class P> struct Operator<Internal::SizedScalars<P> >: public Operator<I
 	}
 	///@}
 
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::SizedScalars<Q> > Type;
+	};
 private:
 	void operator()(int);
 	void operator()(int,int);
@@ -501,6 +519,11 @@ template<class P> struct Operator<Internal::RCScalars<P> >: public Operator<Inte
 		:Operator<Internal::Scalars<P> >(s),my_rows(r),my_cols(c)
 	{}
 		
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::RCScalars<Q> > Type;
+	};
+
 	template<class Pout, class Pmult> Operator<Internal::RCScalars<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::RCScalars<Pout> >(s*m, my_rows, my_cols);
@@ -517,26 +540,33 @@ private:
 //
 // How to scale scalable operators
 //
+
+template<class OpIn, class Pl, class Pr, class Binary>
+struct ScaleMapper
+{
+	typedef typename Binary::template Return<Pl,Pr>::Type Res;
+	typedef typename Operator<OpIn>::template ScaleType<Res>::Type Op;
+};
 	
 template<template<class> class Op, class Pl, class Pr> 
-Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+typename ScaleMapper<Op<Pr>, Pl, Pr, Internal::Multiply>::Op
 operator*(const Pl& l, const Operator<Op<Pr> >& r)
 {
 	return r.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(l); 
 }
 
 template<template<class> class Op, class Pl, class Pr> 
-Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
+typename ScaleMapper<Op<Pl>, Pl, Pr, Internal::Multiply>::Op
 operator*(const Operator<Op<Pl> >& l, const Pr&  r)
 {
 	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(r); 
 }
 
 template<template<class> class Op, class Pl, class Pr> 
-Operator<Op<typename Internal::DivideType<Pl, Pr>::type > >
+typename ScaleMapper<Op<Pl>, Pl, Pr, Internal::Divide>::Op
 operator/(const Operator<Op<Pl> >& l, const Pr&  r)
 {
-	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(static_cast<typename Internal::DivideType<Pl,Pr>::type>(1)/r); 
+	return l.template scale_me<typename Internal::DivideType<Pl, Pr>::type, Pl>(static_cast<typename Internal::DivideType<Pl,Pr>::type>(1)/r); 
 }
 
 
