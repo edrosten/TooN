@@ -27,5 +27,6 @@ int main()
 
 	cout <<  Identity - p << endl;
 
-
+	Matrix<3> g = -Identity * 2;
+	cout << g << endl;
 }

@@ -646,10 +646,11 @@ operator/(const Operator<Op<Pl> >& l, const Pr&  r)
 }
 
 
-template<class Op>
-Operator<Op> operator-(const Operator<Op>& o)
+template<template<class> class Op, class P>
+typename Operator<Op<P> >::template ScaleType<P>::Type
+operator-(const Operator<Op<P> >& o)
 {
-	return o.template scale_me<typename Operator<Op>::Precision>(-1);
+	return o.template scale_me<P>(-1);
 }
 
 
