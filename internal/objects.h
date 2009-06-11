@@ -36,6 +36,7 @@ namespace Internal{
 	struct SizedZero;
 	struct RCZero;
 	template<class P> struct Identity;
+	template<class P> struct ScaledIdentity;
 	template<class P> struct SizedIdentity;
 
 	template<int S, class P, class B, class Ps> class ScalarsVector;	
@@ -169,11 +170,11 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 
 ///Object whioch behaves like an Identity matrix. See TooN::Identity.
 ///@ingroup gInternal
-template<class Pr> struct Operator<Internal::Identity<Pr> > {
+template<class Pr> struct Operator<Internal::ScaledIdentity<Pr> > {
 	
 	typedef Pr Precision;
 	const Precision val;
-	Operator(const Precision& v=1)
+	Operator(const Precision& v)
 		:val(v)
 	{}
 	///@name Operator members
@@ -226,30 +227,27 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	///@}
 	template<class Q> struct ScaleType
 	{
-		typedef Operator<Internal::Identity<Q> > Type;
+		typedef Operator<Internal::ScaledIdentity<Q> > Type;
 	};
 
-	template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
+	template<class Pout, class Pmult> Operator<Internal::ScaledIdentity<Pout> > scale_me(const Pmult& m) const
 	{
-		return Operator<Internal::Identity<Pout> >(val*m);
+		return Operator<Internal::ScaledIdentity<Pout> >(val*m);
 	}
 
-	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
-		return Operator<Internal::SizedIdentity<Precision> >(s);
-	}
 };
 	
 ///A variant of Identity which holds a size, allowing
 ///dynamic matrices to be constructed
 ///@ingroup gInternal
 template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > 
-	: public  Operator<Internal::Identity<Precision> > {
+	: public  Operator<Internal::ScaledIdentity<Precision> > {
 
-	using Operator<Internal::Identity<Precision> >::val;
+	using Operator<Internal::ScaledIdentity<Precision> >::val;
 	const int my_size;
 
-	Operator(int s, const Precision& v=1)
-		:Operator<Internal::Identity<Precision> > (v), my_size(s)
+	Operator(int s, const Precision& v)
+		:Operator<Internal::ScaledIdentity<Precision> > (v), my_size(s)
 	{}
 
 	///@name Operator members
@@ -268,6 +266,84 @@ template<class Precision> struct Operator<Internal::SizedIdentity<Precision> >
 		return Operator<Internal::SizedIdentity<Pout> >(my_size, val*m);
 	}
 };
+
+///Object whioch behaves like an Identity matrix. See TooN::Identity.
+///This is different from ScaledIdentity primarily because it is a 
+///trivial struct. This is very important since there is a global instance.
+///If it was non trivial, then you get nasty bugs which are hard to find due
+///to the random order of initialization of non-trivial global structs.
+//
+//A precision is required to make it behave like all other scalable operators.
+//
+///@ingroup gInternal
+template<class Pr> struct Operator<Internal::Identity<Pr> > {
+	
+	typedef Pr Precision;
+	Operator()
+	{}
+	///@name Operator members
+	///@{
+	
+	template<int R, int C, class P, class B>
+	void eval(Matrix<R,C,P,B>& m) const {
+		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+		
+		for(int r=0; r<m.num_rows(); r++){
+			for(int c=0; c<m.num_cols(); c++){
+				m(r,c)=0;
+			}
+		}
+		
+		for(int r=0; r < m.num_rows(); r++) {
+			m(r,r) = 1;
+		}
+	}
+	
+	template<int Rows, int Cols, typename P, typename B>
+	void plusequals(Matrix<Rows, Cols, P, B>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		for(int i=0; i < m.num_rows(); i++)
+			m[i][i] += 1;
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(1, m, 0);
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > rsubtract(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(-1, m, 0);
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> > lsubtract(const Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
+		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(1, m, 1);
+	}
+
+	///@}
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::ScaledIdentity<Q> > Type;
+	};
+
+	template<class Pout, class Pmult> Operator<Internal::ScaledIdentity<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::ScaledIdentity<Pout> >(m);
+	}
+
+	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
+		return Operator<Internal::SizedIdentity<Precision> >(s, 1);
+	}
+};
+	
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Addition of scalars to vectors and matrices
