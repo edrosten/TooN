@@ -44,6 +44,47 @@ namespace Internal{
 	template<class P> class Scalars;	
 	template<class P> class SizedScalars;	
 	template<class P> class RCScalars;
+
+	struct One{
+		//Generic cast to anything
+		template<class C> operator C() const
+		{
+			return 1;
+		}
+	};
+	template<class Rhs> Rhs operator*(One, const Rhs& v){return v;}
+	template<class Lhs> Lhs operator*(const Lhs& v, One){return v;}
+	template<class Rhs> Rhs operator+(One, const Rhs& v){return 1+v;}
+	template<class Lhs> Lhs operator+(const Lhs& v, One){return v+1;}
+	template<class Rhs> Rhs operator-(One, const Rhs& v){return 1-v;}
+	template<class Lhs> Lhs operator-(const Lhs& v, One){return v-1;}
+	int operator-(const One&)
+	{
+		return -1;
+	}
+
+	template<class C> struct NegType
+	{
+		typedef C Type;
+	};
+
+	template<> struct NegType<One>
+	{
+		typedef int Type;
+	};
+
+	//One can be converted in to anything, so the resulting type is
+	//a field if the other type is a field.
+	template<class Rhs> struct Field<One, Rhs>
+	{
+		static const int is = IsField<Rhs>::value;
+	};
+
+	template<class Lhs> struct Field<Lhs, One>
+	{
+		static const int is = IsField<Lhs>::value;
+	};
+
 }
 
 ////////////////////
@@ -153,7 +194,7 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 					mm[r][c] = m[r][c];
 
 		for(int i=0; i < m.num_rows(); i++)
-				mm[i][i] += s;
+				mm[i][i] += (P)s;
 	}
 
 	int num_rows() const
@@ -167,13 +208,13 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 	///@}
 };
 
-///Object whioch behaves like an Identity matrix. See TooN::Identity.
+///Object which behaves like an Identity matrix. See TooN::Identity.
 ///@ingroup gInternal
 template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	
 	typedef Pr Precision;
 	const Precision val;
-	Operator(const Precision& v=1)
+	Operator(const Precision& v)
 		:val(v)
 	{}
 	///@name Operator members
@@ -190,7 +231,7 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 		}
 		
 		for(int r=0; r < m.num_rows(); r++) {
-			m(r,r) = val;
+			m(r,r) = (P)val;
 		}
 	}
 	
@@ -199,7 +240,7 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	{
 		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
 		for(int i=0; i < m.num_rows(); i++)
-			m[i][i] += val;
+			m[i][i] += (P)val;
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
@@ -231,7 +272,7 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	///@}
 
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
-		return Operator<Internal::SizedIdentity<Precision> >(s);
+		return Operator<Internal::SizedIdentity<Precision> >(s, val);
 	}
 };
 	
@@ -244,7 +285,7 @@ template<class Precision> struct Operator<Internal::SizedIdentity<Precision> >
 	using Operator<Internal::Identity<Precision> >::val;
 	const int my_size;
 
-	Operator(int s, const Precision& v=1)
+	Operator(int s, const Precision& v)
 		:Operator<Internal::Identity<Precision> > (v), my_size(s)
 	{}
 
@@ -334,7 +375,7 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	const Precision s;
 	//Default argument in constructor, otherwise Doxygen mis-parses
 	//a static object with a constructor as a function.
-	Operator(Precision s_=1)
+	Operator(Precision s_)
 		:s(s_){}
 
 	////////////////////////////////////////
@@ -348,21 +389,21 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	void eval(Vector<Size, P1, B1>& v) const
 	{
 		for(int i=0; i < v.size(); i++)
-			v[i] = s;
+			v[i] = (P1)s;
 	}
 
 	template <int Size, typename P1, typename B1> 
 	void plusequals(Vector<Size, P1, B1>& v) const
 	{
 		for(int i=0; i < v.size(); i++)
-			v[i] += s;
+			v[i] += (P1)s;
 	}
 
 	template <int Size, typename P1, typename B1>
 	void minusequals(Vector<Size, P1, B1>& v) const
 	{
 		for(int i=0; i < v.size(); ++i)
-			v[i] -= s;
+			v[i] -= (P1)s;
 	}
 
 	template <int Size, typename P1, typename B1> 
@@ -401,7 +442,7 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	{
 		for(int r=0; r < m.num_rows(); r++)
 			for(int c=0; c < m.num_cols(); c++)
-				m[r][c] += s;
+				m[r][c] += (P1)s;
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
@@ -409,7 +450,7 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	{
 		for(int r=0; r < m.num_rows(); r++)
 			for(int c=0; c < m.num_cols(); c++)
-				m[r][c] -= s;
+				m[r][c] -= (P1)s;
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
@@ -420,9 +461,9 @@ template<class P> struct Operator<Internal::Scalars<P> >
 
 
 	template <int Rows, int Cols, typename P1, typename B1> 
-	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > rsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,typename Internal::NegType<P>::Type> > rsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
 	{
-		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(-s, v, 0);
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,typename Internal::NegType<P>::Type > >(-s, v, 0);
 	}
 
 	template <int Rows, int Cols, typename P1, typename B1> 
@@ -529,7 +570,7 @@ template<template<class> class Op, class Pl, class Pr>
 Operator<Op<typename Internal::MultiplyType<Pl, Pr>::type > >
 operator*(const Operator<Op<Pl> >& l, const Pr&  r)
 {
-	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type, Pl>(r); 
+	return l.template scale_me<typename Internal::MultiplyType<Pl, Pr>::type>(r); 
 }
 
 template<template<class> class Op, class Pl, class Pr> 
@@ -546,6 +587,12 @@ Operator<Op> operator-(const Operator<Op>& o)
 	return o.template scale_me<typename Operator<Op>::Precision>(-1);
 }
 
+//Special case for negating One
+template<template<class>class Op>
+Operator<Op<DefaultPrecision> > operator-(const Operator<Op<Internal::One> >& o)
+{
+	return o.template scale_me<DefaultPrecision>(-1);
+}
 
 /**This function is used to add a scalar to every element of a vector or
    matrix. For example:
@@ -566,7 +613,7 @@ Operator<Op> operator-(const Operator<Op>& o)
    @endcode
    @ingroup gLinAlg
 */
-static const Operator<Internal::Scalars<DefaultPrecision> > Ones;
+static const Operator<Internal::Scalars<Internal::One> > Ones = Internal::One();
 
 
 /**This function is used to initialize vectors and matrices to zero.
@@ -601,6 +648,6 @@ static Operator<Internal::Zero> Zeros;
    @ingroup gLinAlg
 */
 
-static Operator<Internal::Identity<DefaultPrecision> > Identity;
+static Operator<Internal::Identity<Internal::One> > Identity = Internal::One();
 
 }
