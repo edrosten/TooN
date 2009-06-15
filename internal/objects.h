@@ -42,6 +42,7 @@ namespace Internal{
 	template<int S, class P, class B, class Ps> class ScalarsVector;	
 	template<int R, int C, class P, class B, class Ps> class ScalarsMatrix;	
 	template<int R, int C, class P, class B, class Ps> class AddIdentity;	
+	template<class P> class Ones;	
 	template<class P> class Scalars;	
 	template<class P> class SizedScalars;	
 	template<class P> class RCScalars;
@@ -410,6 +411,141 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 	///@}
 };
 
+///This is different from Scalars primarily because it is a 
+///trivial struct. This is very important since there is a global instance.
+///If it was non trivial, then you get nasty bugs which are hard to find due
+///to the random order of initialization of non-trivial global structs.
+//
+//A precision is required to make it behave like all other scalable operators.
+///@ingroup gInternal
+template<class P> struct Operator<Internal::Ones<P> >
+{
+	typedef P Precision;
+	//Default argument in constructor, otherwise Doxygen mis-parses
+	//a static object with a constructor as a function.
+	Operator()
+	{}
+
+	////////////////////////////////////////
+	//
+	// All applications for vector
+	//
+	///@name Operator members
+	///@{
+
+	template <int Size, typename P1, typename B1> 
+	void eval(Vector<Size, P1, B1>& v) const
+	{
+		for(int i=0; i < v.size(); i++)
+			v[i] = 1;
+	}
+
+	template <int Size, typename P1, typename B1> 
+	void plusequals(Vector<Size, P1, B1>& v) const
+	{
+		for(int i=0; i < v.size(); i++)
+			v[i] += 1;
+	}
+
+	template <int Size, typename P1, typename B1>
+	void minusequals(Vector<Size, P1, B1>& v) const
+	{
+		for(int i=0; i < v.size(); ++i)
+			v[i] -= 1;
+	}
+
+	template <int Size, typename P1, typename B1> 
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > add(const Vector<Size, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(1, v, 0);
+	}
+
+	template <int Size, typename P1, typename B1> 
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > rsubtract(const Vector<Size, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(-1, v, 0);
+	}
+
+	template <int Size, typename P1, typename B1> 
+	Operator<Internal::ScalarsVector<Size,P1,B1,Precision> > lsubtract(const Vector<Size, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsVector<Size,P1,B1,Precision> >(1, v, 1);
+	}
+
+	////////////////////////////////////////
+	//
+	// All applications for matrix
+	//
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	void eval(Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				m[r][c] = 1;
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	void plusequals(Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				m[r][c] += 1;
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	void minusequals(Matrix<Rows,Cols, P1, B1>& m) const
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			for(int c=0; c < m.num_cols(); c++)
+				m[r][c] -= 1;
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > add(const Matrix<Rows,Cols, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(1, v, 0);
+	}
+
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > rsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(-1, v, 0);
+	}
+
+	template <int Rows, int Cols, typename P1, typename B1> 
+	Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> > lsubtract(const Matrix<Rows,Cols, P1, B1>& v) const
+	{
+		return Operator<Internal::ScalarsMatrix<Rows,Cols,P1,B1,Precision> >(1, v, 1);
+	}
+	///@}
+	////////////////////////////////////////
+	//
+	// Create sized versions for initialization
+	//
+
+	Operator<Internal::SizedScalars<Precision> > operator()(int size) const
+	{
+		return Operator<Internal::SizedScalars<Precision> > (1,size);
+	}
+
+	Operator<Internal::RCScalars<Precision> > operator()(int r, int c) const
+	{
+		return Operator<Internal::RCScalars<Precision> > (1,r,c);
+	}
+
+	template<class Q> struct ScaleType
+	{
+		typedef Operator<Internal::Scalars<Q> > Type;
+	};
+
+	template<class Pout, class Pmult> Operator<Internal::Scalars<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::Scalars<Pout> >(m);
+	}
+};
+
 ///Generic scalars object. Knows how to be added, knows how to deal with += and so on.
 ///See TooN::Ones
 ///@ingroup gInternal
@@ -419,7 +555,7 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	const Precision s;
 	//Default argument in constructor, otherwise Doxygen mis-parses
 	//a static object with a constructor as a function.
-	Operator(Precision s_=1)
+	Operator(Precision s_)
 		:s(s_){}
 
 	////////////////////////////////////////
@@ -673,7 +809,7 @@ operator-(const Operator<Op<P> >& o)
    @endcode
    @ingroup gLinAlg
 */
-static const Operator<Internal::Scalars<DefaultPrecision> > Ones;
+static const Operator<Internal::Ones<DefaultPrecision> > Ones;
 
 
 /**This function is used to initialize vectors and matrices to zero.
