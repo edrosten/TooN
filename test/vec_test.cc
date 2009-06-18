@@ -150,6 +150,48 @@ template<class C> void test_index_(int func_lineno, C v)
 
 
 
+#define test_comma(...) test_comma_(__LINE__, __VA_ARGS__)
+template<class C> void test_comma_(int func_lineno)
+{
+	TRY{
+		Vector<4> v;
+		Fill(v) = 1,2,3,4;
+	}
+	EXPECT(NoError);
+
+	TRY{
+		Vector<4> v(4);
+		Fill(v) = 1,2,3,4;
+	}
+	EXPECT(NoError);
+
+	TRY{
+		Vector<4> v;
+		Fill(v) = 1,2,3,4,5;
+	}
+	EXPECT(StaticVectorOverfill);
+
+	TRY{
+		Vector<> v(4);
+		Fill(v) = 1,2,3,4,5;
+	}
+	EXPECT(VectorOverfill);
+
+	TRY{
+		Vector<4> v;
+		Fill(v) = 1,2,3;
+	}
+	EXPECT(Underfill);
+
+	TRY{
+		Vector<> v(4);
+		Fill(v) = 1,2,3;
+	}
+	EXPECT(Underfill);
+}
+
+
+
 int main()
 {
 	test_static_static_slices(Vector<2>());

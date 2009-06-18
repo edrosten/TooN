@@ -244,6 +244,19 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 		note that you need to specify the size in the dynamic case.
 
+		A less general, but visually more pleasing syntax can also be used:
+		@code
+			Vector<5> v;
+			Fill(v) v = 1,2,3,4,5; 
+
+			Matrix<3,3> m;
+			Fill(m) = 1, 2, 3, 
+			          4, 5, 6, 
+					  7, 8, 9;
+		@endcode
+		Note that underfilling is a run-time check, since it can not be detected
+		at compile time.
+
 		They can also be initialized with data from another source. See also \ref  sWrap.
 
 
@@ -285,12 +298,24 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	\subsection sDebug What debugging options are there?
 
 	By default, everything which is checked at compile time in the static case
-	is checked at run-time in the dynamic case. In other words, slices and sizes
-	are checked at run-time if need be. These checks can be disabled by defining
-	the macros \c TOON_NDEBUG_SLICE and \c TOON_NDEBUG_SIZE respectively. Bounds are
+	is checked at run-time in the dynamic case (with some additions). Checks can
+	be disabled with various macros. Note that the optimizer will usually
+	remove run-time checks on static objects if the test passes.
+	- Slices
+		- Disable with \c TOON_NDEBUG_SLICE
+	- Sizes
+		- Disable with \c TOON_NDEBUG_SIZE
+	- overfilling using Fill 
+		- Disable with \c TOON_NDEBUG_FILL
+	- underfilling using Fill (run-time check)
+		- Disable with \c TOON_NDEBUG_FILL
+	
+	Bounds are
 	not checked by default. Bounds checking can be enabled by defining the macro
 	\c TOON_CHECK_BOUNDS. None of these macros change the interface, so debugging
 	code can be freely mixed with optimized code.
+
+
 
 	Errors are manifested to a call to <code>std::abort()</code>.
 
