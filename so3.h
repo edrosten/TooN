@@ -184,6 +184,16 @@ inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 	rhs.coerce();
 }
 
+///Compute a rotation exponential using the Rodrigues Formula.
+///The rotation axis is given by \f$\vec{w}\f$, and the rotation angle must
+///be computed using \f$ \theta = |\vec{w}|\f$. This is provided as a separate
+///function primarily to allow fast and rough matrix exponentials using fast 
+///and rough approximations to \e A \nd \e B.
+///
+///@param w Vector about which to rotate.
+///@param A \f$\frac{\sin \theta}{\theta}
+///@param B \f$\frac{1 - \cos \theta}{\theta^2}
+///@relates SO3
 template <typename Precision, typename VA, typename MA>
 inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
 	{
@@ -228,7 +238,8 @@ inline SO3<Precision> SO3<Precision>::exp(const Vector<S,Precision,VA>& w){
 	const Precision theta_sq = w*w;
 	const Precision theta = sqrt(theta_sq);
 	Precision A, B;
-	
+	//Use a Taylor series expansion near zero. This is required for
+	//accuracy, since sin t / t and (1-cos t)/t^2 are both 0/0.
 	if (theta_sq < 1e-8) {
 		A = 1.0 - one_6th * theta_sq;
 		B = 0.5;
