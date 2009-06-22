@@ -141,6 +141,29 @@ namespace TooN {
 		return result;
 	}
 
+	/**
+	  \overload
+	*/
+	template<int R, int C, typename Precision, typename Base> inline Matrix<R-1, C, Precision> project( const Matrix<R,C, Precision, Base> & m){
+       Matrix<R-1, C, Precision> result = m.template slice<0,0,R-1,C>();
+       for( int c = 0; c < C; ++c ) {
+           result.slice(0,c,R-1,1) /= m[R-1][c];
+       }
+       return result;
+   }
+
+	/**
+	  \overload
+	*/
+   template<int R, int C, typename Precision, typename Base> inline Matrix<R+1, C, Precision> unproject( const Matrix<R, C, Precision, Base> & m){
+       Matrix<R+1, C, Precision> result;
+       result.template slice<0,0,R,C>() = m;
+	   result[R] = Ones;
+       return result;
+   }
+
+
+
 	/// Frobenius (root of sum of squares) norm of input matrix \e m
 	///@param m \e m
 	///@ingroup gLinAlg
