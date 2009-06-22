@@ -52,8 +52,8 @@ It can be used as follows to solve the \f$M\underline{x} = \underline{c}\f$ prob
   // construct M
   Matrix<3> M;
   M[0] = makeVector(1,2,3);
-  M[1] = makeVector(4,5,6);
-  M[2] = makeVector(7,8,9);
+  M[1] = makeVector(3,2,1);
+  M[2] = makeVector(1,0,1);
   // construct c
   Vector<3> c = makeVector(2,3,4);
   // create the LU decomposition of M

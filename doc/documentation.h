@@ -373,10 +373,10 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@code
 	Matrix<3> A;
 	A[0]=makeVector(1,2,3);
-	A[1]=makeVector(2,3,4);
-	A[2]=makeVector(3,2,1);
+	A[1]=makeVector(3,2,1);
+	A[2]=makeVector(1,0,1);
 
-	Vector<3> b = makeVector (2,4,5);
+	Vector<3> b = makeVector (2,3,4);
 
 	// solve Ax=b using LU
 	LU<3> luA(A);
