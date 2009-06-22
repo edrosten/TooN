@@ -49,15 +49,17 @@ where \f$L\f$ is a lower-diagonal matrix with unit diagonal and \f$U\f$ is an
 upper-diagonal matrix. The library only supports the decomposition of square matrices.
 It can be used as follows to solve the \f$M\underline{x} = \underline{c}\f$ problem as follows:
 @code
-// construct M
-double d1[][] = {{1,2,3},{4,5,6},{7,8,10}};
-Matrix<3> M(d1);
-// construct c
-Vector<3> c = 2,3,4;
-// create the LU decomposition of M
-LU<3> luM(M);
-// compute x = M^-1 * c
-Vector<3> x = luM.backsub(c);
+  // construct M
+  Matrix<3> M;
+  M[0] = makeVector(1,2,3);
+  M[1] = makeVector(4,5,6);
+  M[2] = makeVector(7,8,9);
+  // construct c
+  Vector<3> c = makeVector(2,3,4);
+  // create the LU decomposition of M
+  LU<3> luM(M);
+  // compute x = M^-1 * c
+  Vector<3> x = luM.backsub(c);
 @endcode
 The convention LU<> (=LU<-1>) is used to create an LU decomposition whose size is 
 determined at runtime.
