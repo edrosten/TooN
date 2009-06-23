@@ -138,7 +138,7 @@ int main()
 {
 	ConjugateGradient<2> cg(makeVector(0,0), Rosenbrock, RosenbrockDerivatives);
 
-	while(!cg.iterate(Rosenbrock, RosenbrockDerivatives))
+	while(cg.iterate(Rosenbrock, RosenbrockDerivatives))
 		cout << "y_" << iteration << " = " << cg.y << endl;
 
 	cout << "Optimal value: " << cg.y << endl;
