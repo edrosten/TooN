@@ -4,7 +4,20 @@ AC_LANG(C++)
 AC_PROG_CXX
 
 typeof=check
+AC_ARG_ENABLE(lapack, [AS_HELP_STRING([--enable-lapack],[Use LAPACK where optional])], [lapack=$enableval])
 AC_ARG_ENABLE(typeof, [AS_HELP_STRING([--enable-typeof=X],[Force typeof to be decltype, __typeof__, typeof, boost or none])], [typeof=$enableval])
+
+
+if test "$lapack" == "" 
+then
+	AC_CHECK_LIB(lapack, dgesvd_, [lapack=yes], [lapack=no])
+fi
+
+if test "$lapack" != "no" 
+then
+	AC_DEFINE(TOON_USE_LAPACK, 1)
+fi
+
 
 define(TYPEOF_TEST,[
 	if test "$typeof" == check

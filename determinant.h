@@ -32,6 +32,11 @@ namespace TooN
 	};
 
 
+	/** Compute the determinant using Gaussian elimination.
+		@param A The matrix to find the determinant of.
+		@returns determinant.
+		@ingroup gLinAlg
+	*/
 	template<int R, int C, typename Precision, typename Base>
 	Precision determinant_gaussian_elimination(const Matrix<R, C, Precision, Base>& A_)
 	{
@@ -93,24 +98,36 @@ namespace TooN
 			return determinant/divisor;
 	}
 	
-	#ifdef TOON_DETERMINANT_LAPACK
-		template<int R, int C, class P, class B>
-		P determinant_LU(const Matrix<R, C, P, B>& A)
-		{
-			TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
-			LU<Internal::Square<R,C>::Size, P> lu(A);
-			return lu.determinant();
-		}
-	#endif
+	/** Compute the determinant using TooN::LU.
+		@param A The matrix to find the determinant of.
+		@returns determinant.
+		@ingroup gLinAlg
+	*/
+	template<int R, int C, class P, class B>
+	P determinant_LU(const Matrix<R, C, P, B>& A)
+	{
+		TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
+		LU<Internal::Square<R,C>::Size, P> lu(A);
+		return lu.determinant();
+	}
 
+	/** 
+		Compute the determinant of a matrix using an appropriate method. The
+		obvious method is used for 2x2, otherwise
+		determinant_gaussian_elimination() or determinant_LU() is used depending
+		on the value of \c TOON_DETERMINANT_LAPACK.  See also \ref sConfigLapack.
+		@param A The matrix to find the determinant of.
+		@returns determinant.
+		@ingroup gLinAlg
+	*/
 	template<int R, int C, class P, class B>
 	P determinant(const Matrix<R, C, P, B>& A)
 	{
 		TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
 		if(A.num_rows() == 2)
 			return A[0][0]*A[1][1] - A[1][0]*A[0][1];
-		#ifdef TOON_DETERMINANT_LAPACK
-			else if(A.num_rows() > TOON_DETERMINANT_LAPACK)
+		#if defined TOON_DETERMINANT_LAPACK && TOON_DETERMINANT_LAPACK != -1
+			else if(A.num_rows() >= TOON_DETERMINANT_LAPACK)
 				return determinant_LU(A);
 		#endif
 		else

@@ -44,7 +44,11 @@
 #include <ctime>
 #endif
 
-#define TOON_DETERMINANT_LAPACK 30
+#ifdef TOON_USE_LAPACK
+	#ifndef TOON_DETERMINANT_LAPACK
+		#define TOON_DETERMINANT_LAPACK 30
+	#endif
+#endif
 
 namespace TooN {
 

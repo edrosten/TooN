@@ -89,6 +89,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	TooN to the correct place.  Note there is no code to be compiled, but the
 	configure script performs some basic checks.
 
+	On non-unix systems, e.g. Windows and embedded systems, you may wish to 
+	configure the library manually. See \ref sManualConfiguration.
+
 	\subsection sStart Getting started
 
 		To begin, just in include the right file:
@@ -673,6 +676,47 @@ class Vector: public Base::template VLayout<Size, Precision> {
 @endcode
 
 then take a look at the source code ... 
+
+
+\section sManualConfiguration Manual configuration.
+	
+Configuration is controlled by <code>internal/config.hh</code>. If this file is empty
+then the default configuration will be used and TooN will work. There are several options.
+
+\subsection stypeof Typeof
+
+TooN needs a mechanism to determine the type of the result of an expression. One of the following
+macros can be defined to control the behaviour:
+- \c TOON_TYPEOF_DECLTYPE
+  - Use the C++0x decltype operator.
+- \c TOON_TYPEOF_TYPEOF
+  - Use GCC's \c typeof extension. Only works with GCC and will fail with -pedantic
+- \c TOON_TYPEOF___TYPEOF__
+  - Use GCC's \c __typeof__ extension. Only works with GCC and will work with -pedantic
+- \c TOON_TYPEOF_BOOST
+  - Use the \link http://www.boost.org/doc/html/typeof.html Boost.Typeof\endlink system.
+    This will work with Visual Studio if Boost is installed.
+- \c TOON_TYPEOF_BUILTIN
+  - The default option (does not need to be defined)
+  - Only works for the standard builtin integral types and <code>std::complex<float></code> and <code>std::complex<double></code>.
+
+\subsection sConfigLapack Functions using LAPACK
+
+Some functions use internal implementations for small sizes and may switch over
+to LAPACK for larger sizes. In all cases, an equivalent method is used in terms
+of accuracy (eg Gaussian elimination versus LU decomposition). If the following 
+macro is defined:
+- \c TOON_USE_LAPACK
+then LAPACK will be used for large systems, where optional.
+The individual functions are:
+- TooN::determinant is controlled by \c TOON_DETERMINANT_LAPACK
+  -  If the macro is undefined as or defined as -1, then LAPACK will never be
+	 used. Otherwise it indicated which the size at which LAPACK should be 
+	 used.
+
+Note that these macros do not affect classes that are currently only wrappers
+around LAPACK.
+
 **/
 
 ///////////////////////////////////////////////////////
