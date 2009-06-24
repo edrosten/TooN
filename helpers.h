@@ -319,7 +319,90 @@ namespace TooN {
 		return result;
 	}
 
+    
+    template<int Size, typename Precision, typename Base, const Precision& (*pFunc)(Precision,Precision)> inline Precision accumulate( const Vector<Size, Precision, Base> & v )  {
+        if( v.size() == 0 ) {
+            return 0; // What should we return, exception?
+        }
+        Precision val = v[0];
+		for( int ii = 1; ii < v.size(); ii++ ) {
+            val = pFunc( val, v[ii] );
+        }
+        return val;
+	}
 
+    template<int R, int C, typename Precision, typename Base, const Precision& (*pFunc)(Precision,Precision)> inline Precision accumulate( const Matrix<R, C, Precision, Base> & m )  {
+        if( m.num_rows() == 0 || m.num_cols() == 0) {
+            return 0; // What should we return, exception?
+        }
+		Precision val = m[0][0];
+        for(int r=0; r<m.num_rows(); r++){
+			for(int c=0; c<m.num_cols(); c++){
+				val = pFunc( val, m[r][c] );
+			}
+		}
+        return val;
+	}
 
+    template<int R, int C, typename Precision, typename Base, const Precision& (*pFunc)(Precision,Precision)> inline Vector<R, Precision> accumulate_horizontal( const Matrix<R, C, Precision, Base> & m) {
+        if( m.num_cols() == 0 || m.num_rows() == 0 ) {
+            return 0; // What should we return, exception?
+        }
+        Vector<> result( m.num_rows() );
+        for(int r=0; r<m.num_rows(); r++){
+            Precision val_row = m[r][0];
+            for(int c=1; c<m.num_cols(); c++){
+                val_row = pFunc( val_row, m[r][c] );
+            }
+            result[r] = val_row;
+        }
+        return result;
+    }
+
+    template<int R, int C, typename Precision, typename Base, const Precision& (*pFunc)(Precision,Precision)> inline Vector<C, Precision> accumulate_vertical( const Matrix<R, C, Precision, Base> & m) {
+        if( m.num_cols() == 0 || m.num_rows() == 0 ) {
+            return 0; // What should we return, exception?
+        }
+        Vector<> result( m.num_cols() );
+        for(int c=0; c<m.num_cols(); c++){
+            Precision val_col = m[0][c];
+            for(int r=1; r<m.num_rows(); r++){
+                val_col = pFunc( val_col, m[r][c] );
+            }
+            result[c] = val_col;
+        }
+        return result;
+    }
+
+    template<typename Precision> const Precision& non_const_min( Precision a, Precision b ) {
+        return std::min( a, b );
+    }
+    template<typename Precision> const Precision& non_const_max( Precision a, Precision b ) {
+        return std::max( a, b );
+    }
+    template<int Size, typename Precision, typename Base> inline Precision min( const Vector<Size, Precision, Base> & v) {
+        return accumulate<Size,Precision,Base,non_const_min>( v );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Precision min( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate<R,C,Precision,Base,non_const_min>( m );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Vector<C, Precision> min_vertical( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate_vertical<R,C,Precision,Base,non_const_min>( m );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Vector<R, Precision> min_horizontal( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate_horizontal<R,C,Precision,Base,non_const_min>( m );
+    }
+    template<int Size, typename Precision, typename Base> inline Precision max( const Vector<Size, Precision, Base> & v) {
+        return accumulate<Size,Precision,Base,non_const_max>( v );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Precision max( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate<R,C,Precision,Base,non_const_max>( m );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Vector<C, Precision> max_vertical( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate_vertical<R,C,Precision,Base,non_const_max>( m );
+    }
+    template<int R, int C, typename Precision, typename Base> inline Vector<R, Precision> max_horizontal( const Matrix<R, C, Precision, Base> & m) {
+        return accumulate_horizontal<R,C,Precision,Base,non_const_max>( m );
+    }
 }
 #endif
