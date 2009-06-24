@@ -44,6 +44,8 @@
 #include <ctime>
 #endif
 
+#define TOON_DETERMINANT_LAPACK 30
+
 namespace TooN {
 
 #ifdef TOON_TEST_INTERNALS
