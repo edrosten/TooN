@@ -5,7 +5,6 @@
 #include <cstdlib>
 
 namespace TooN{
-
 	namespace Internal{
 
 
@@ -44,10 +43,12 @@ namespace TooN{
 	///@param a_val The value of the function at zero.
 	///@param func Function to bracket
 	///@param initial_lambda Initial stepsize
+	///@param zeps Minimum bracket size.
 	///@return <code>m[i][0]</code> contains the values of \f$x\f$ for the bracket, in increasing order,
-	///        and <code>m[i][1]</code> contains the corresponding values of \f$f(x)\f$.
+	///        and <code>m[i][1]</code> contains the corresponding values of \f$f(x)\f$. If the bracket 
+	///        drops below the minimum bracket size, all zeros are returned.
 	///@ingroup gOptimize
-	template<typename Precision, typename Func> Matrix<3,2,Precision> bracket_minimum_forward(Precision a_val, const Func& func, Precision initial_lambda=1)
+	template<typename Precision, typename Func> Matrix<3,2,Precision> bracket_minimum_forward(Precision a_val, const Func& func, Precision initial_lambda, Precision zeps)
 	{
 		//Get a, b, c to  bracket a minimum along a line
 		Precision a, b, c, b_val, c_val;
@@ -93,6 +94,8 @@ namespace TooN{
 
 				if(b_val < a_val)// we have a bracket
 					break;
+				else if(lambda < zeps)
+					return Zeros;
 				else //Contract the bracket
 				{
 					c = b;
@@ -177,6 +180,8 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	Precision linesearch_epsilon; ///< Additive term in tolerance to prevent excessive iterations if \f$x_\mathrm{optimal} = 0\f$. Known as \c ZEPS in numerical recipies. Defaults to 1e-20
 	int linesearch_max_iterations;  ///< Maximum number of iterations in the linesearch. Defaults to 100.
 
+	Precision bracket_epsilon; ///<Minimum size for initial minima bracketing. Below this, it is assumed that the system has converged. Defaults to 1e-20.
+
 	int iterations; ///< Number of iterations performed
 
 	///Initialize the ConjugateGradient class with sensible values.
@@ -229,6 +234,8 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		linesearch_epsilon = 1e-20;
 		linesearch_max_iterations=100;
 
+		bracket_epsilon=1e-20;
+
 		iterations=0;
 	}
 
@@ -243,16 +250,17 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	/// - old_y
 	/// - iterations
 	/// Note that the conjugate direction and gradient are not updated.
+	/// If bracket_minimum_forward detects a local maximum, then essentially a zero
+	/// sized step is taken.
 	/// @param func Functor returning the function value at a given point.
 	template<class Func> void find_next_point(const Func& func)
 	{
 		Internal::LineSearch<Size, Precision, Func> line(x, -h, func);
 
 		//Always search in the conjugate direction (h)
-
 		//First bracket a minimum.
-		Matrix<3,2,Precision> bracket = Internal::bracket_minimum_forward(y, line, bracket_initial_lambda);
-
+		Matrix<3,2,Precision> bracket = Internal::bracket_minimum_forward(y, line, bracket_initial_lambda, bracket_epsilon);
+		
 		double a = bracket[0][0];
 		double b = bracket[1][0];
 		double c = bracket[2][0];
@@ -260,6 +268,14 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		double a_val = bracket[0][1];
 		double b_val = bracket[1][1];
 		double c_val = bracket[2][1];
+
+		old_y = y;
+		old_x = x;
+		iterations++;
+		
+		//Local maximum achieved!
+		if(a==0 && b== 0 && c == 0)
+			return;
 
 		//We should have a bracket here
 		assert(a < b && b < c);
@@ -272,13 +288,8 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		assert(m[1] <= b_val);
 
 		//Update the current position and value
-		old_y = y;
-		old_x = x;
-
 		x -= m[0] * h;
 		y = m[1];
-
-		iterations++;
 	}
 
 	///Check to see it iteration should stop. You probably do not want to use
