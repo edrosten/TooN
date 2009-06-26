@@ -320,10 +320,9 @@ namespace TooN {
 	}
 
     namespace Internal {
-
         template<int Size, typename Precision, typename Base, typename Func, typename Ret> inline Ret accumulate( const Vector<Size, Precision, Base> & v, Func func )  {
             if( v.size() == 0 ) {
-                return 0; // What should we return, exception?
+                return func.null(); // What should we return, exception?
             }
             func.initialise( v[0], 0 );
             for( int ii = 1; ii < v.size(); ii++ ) {
@@ -334,7 +333,7 @@ namespace TooN {
 
         template<int R, int C, typename Precision, typename Base, typename Func, typename Ret> inline Ret accumulate( const Matrix<R, C, Precision, Base> & m, Func func )  {
             if( m.num_rows() == 0 || m.num_cols() == 0) {
-                return 0; // What should we return, exception?
+                return func.null(); // What should we return, exception?
             }
             func.initialise( m[0][0], 0, 0 );
             for(int r=0; r<m.num_rows(); r++){
@@ -344,7 +343,7 @@ namespace TooN {
             }
             return func.ret();
         }
-        template<int R, int C, typename Precision, typename Base, typename Func, typename Ret> inline Ret& accumulate_horizontal( const Matrix<R, C, Precision, Base> & m, Func func ) {
+        template<int R, int C, typename Precision, typename Base, typename Func, typename Ret> inline Ret accumulate_horizontal( const Matrix<R, C, Precision, Base> & m, Func func ) {
             if( m.num_cols() == 0 || m.num_rows() == 0 ) {
                 func.null(); // What should we return, exception?
             }
@@ -356,7 +355,7 @@ namespace TooN {
             }
             return func.ret();
         }
-        template<int R, int C, typename Precision, typename Base, typename Func, typename Ret> inline Ret& accumulate_vertical( const Matrix<R, C, Precision, Base> & m, Func func ) {
+        template<int R, int C, typename Precision, typename Base, typename Func, typename Ret> inline Ret accumulate_vertical( const Matrix<R, C, Precision, Base> & m, Func func ) {
             if( m.num_cols() == 0 || m.num_rows() == 0 ) {
                 func.null(); // What should we return, exception?
             }
@@ -369,25 +368,13 @@ namespace TooN {
             return func.ret();
         }        
 
-        template<class Precision>
-        class comp_less {
-        public:
-            bool operator()( Precision A, Precision B ) {
-                return A < B;
-            }
-        };
-        template<class Precision>
-        class comp_greater {
-        public:
-            bool operator()( Precision A, Precision B ) {
-                return A > B;
-            }
-        };
-
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_functor_vector {
             Precision bestVal;
         public:
+            Precision null() {
+                return 0;
+            }
             void initialise( Precision initialVal, int nIndex ) {
                 bestVal = initialVal;
             }
@@ -396,14 +383,37 @@ namespace TooN {
                     bestVal = curVal;
                 }
             }
-            Precision ret() {
-                return bestVal;
+            Precision ret() { return bestVal; }            
+        };
+        template<typename Precision, typename ComparisonFunctor>
+        class accumulate_element_functor_vector {
+            Precision bestVal;
+            int nBestIndex;
+        public:
+            std::pair<Precision,int> null() {
+                return std::pair<Precision,int>( 0, 0 );
+            }
+            void initialise( Precision initialVal, int nIndex ) {
+                bestVal = initialVal;
+                nBestIndex = nIndex;
+            }
+            void operator()( Precision curVal, int nIndex ) {
+                if( ComparisonFunctor()( curVal, bestVal ) ) {
+                    bestVal = curVal;
+                    nBestIndex = nIndex;
+                }
+            }
+            std::pair<Precision,int> ret() {
+                return std::pair<Precision,int>( bestVal, nBestIndex );
             }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_functor_matrix {
             Precision bestVal;
         public:
+            Precision null() {
+                return 0;
+            }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal = initialVal;
             }
@@ -412,19 +422,44 @@ namespace TooN {
                     bestVal = curVal;
                 }
             }
-            Precision ret() {
-                return bestVal;
+            Precision ret() { return bestVal; }            
+        };
+        template<typename Precision, typename ComparisonFunctor>
+        class accumulate_element_functor_matrix {
+            Precision bestVal;
+            int nBestRow;
+            int nBestCol;
+        public:
+            std::pair<Precision,std::pair<int,int> > null() {
+                return std::pair<Precision,std::pair<int,int> >( 0, std::pair<int,int>( 0, 0 ) );
+            }
+            void initialise( Precision initialVal, int nRow, int nCol ) {
+                bestVal = initialVal;
+                nBestRow = nRow;
+                nBestCol = nCol;
+            }
+            void operator()( Precision curVal, int nRow, int nCol ) {
+                if( ComparisonFunctor()( curVal, bestVal ) ) {
+                    bestVal = curVal;
+                    nBestRow = nRow;
+                    nBestCol = nCol;
+                }
+            }
+            std::pair<Precision,std::pair<int,int> > ret() {
+                return std::pair<Precision,std::pair<int,int> >( bestVal, 
+                                                                 std::pair<int,int>( nBestRow, nBestCol ) );
             }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_vertical_functor {
             Vector<>& bestVal;
         public:
+            accumulate_vertical_functor() :
+                bestVal( *(new Vector<>( 0 )) ) {}
             accumulate_vertical_functor( int nNumCols ) :
-                bestVal( *(new Vector<>( nNumCols )) )
-            {}
+                bestVal( *(new Vector<>( nNumCols )) ) {}
             Vector<>& null() {
-                return bestVal;
+                return ret();
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal[nCol] = initialVal;
@@ -434,17 +469,46 @@ namespace TooN {
                     bestVal[nCol] = curVal;
                 }
             }
-            Vector<>& ret() {
-                return bestVal;
+            Vector<>& ret() { return bestVal; }            
+        };
+        template<typename Precision, typename ComparisonFunctor>
+        class accumulate_element_vertical_functor {
+            Vector<>& bestVal;
+            Vector<>& bestIndices;
+        public:
+            accumulate_element_vertical_functor() :
+                bestVal( *(new Vector<>( 0 )) ),
+                bestIndices( *(new Vector<>( 0 )) )
+            {}
+            accumulate_element_vertical_functor( int nNumCols ) :
+                bestVal( *(new Vector<>( nNumCols )) ),
+                bestIndices( *(new Vector<>( nNumCols )) )
+            {}
+            std::pair<Vector<>&,Vector<>&> null() {
+                return ret();
+            }
+            void initialise( Precision initialVal, int nRow, int nCol ) {
+                bestVal[nCol] = initialVal;
+                bestIndices[nCol] = nRow;
+            }
+            void operator()( Precision curVal, int nRow, int nCol ) {
+                if( ComparisonFunctor()( curVal, bestVal[nCol] ) ) {
+                    bestVal[nCol] = curVal;
+                    bestIndices[nCol] = nRow;
+                }
+            }
+            std::pair<Vector<>&,Vector<>&> ret() {
+                return std::pair<Vector<>&,Vector<>&>( bestVal, bestIndices );
             }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_horizontal_functor {
             Vector<>& bestVal;
-        public:
+        public: 
+            accumulate_horizontal_functor() :
+                bestVal( *(new Vector<>( 0 )) ) {}
             accumulate_horizontal_functor( int nNumRows ) :
-                bestVal( *(new Vector<>( nNumRows )) )
-            {}
+                bestVal( *(new Vector<>( nNumRows )) ) {}
             Vector<>& null() {
                 return bestVal;
             }
@@ -456,81 +520,197 @@ namespace TooN {
                     bestVal[nRow] = curVal;
                 }
             }
-            Vector<>& ret() {
-                return bestVal;
-            }            
+            Vector<>& ret() { return bestVal; }            
         };
-
-        template<typename Precision, typename Index, typename ComparisonFunctor>
-        class accumulate_element_functor {
-            Precision bestVal;
-            Index bestIndex;
+        template<typename Precision, typename ComparisonFunctor>
+        class accumulate_element_horizontal_functor {
+            Vector<>& bestVal;
+            Vector<>& bestIndices;
         public:
-            void initialise( Precision initialVal, Index index ) {
-                bestVal = initialVal;
-                bestIndex = index;
+            accumulate_element_horizontal_functor() :
+                bestVal( *(new Vector<>( 0 )) ),
+                bestIndices( *(new Vector<>( 0 )) ) {}
+            accumulate_element_horizontal_functor( int nNumRows ) :
+                bestVal( *(new Vector<>( nNumRows )) ),
+                bestIndices( *(new Vector<>( nNumRows )) ) {}
+            std::pair<Vector<>&,Vector<>&> null() {
+                return ret();
             }
-            void operator()( Precision curVal, Index index ) {
-                if( ComparisonFunctor()( bestVal, curVal ) ) {
-                    bestVal = curVal;
-                    bestIndex = index;
+            void initialise( Precision initialVal, int nRow, int nCol ) {
+                bestVal[nRow] = initialVal;
+                bestIndices[nRow] = nCol;
+            }
+            void operator()( Precision curVal, int nRow, int nCol ) {
+                if( ComparisonFunctor()( curVal, bestVal[nRow] ) ) {
+                    bestVal[nRow] = curVal;
+                    bestIndices[nRow] = nCol;
                 }
             }
-            std::pair<Precision,Index> ret() {
-                return std::pair<Precision,Index>( bestVal, bestIndex );
+            std::pair<Vector<>&,Vector<>&> ret() {
+                return std::pair<Vector<>&,Vector<>&>( bestVal, bestIndices );
             }            
         };
     }
 
+	/// Finds the minimal value of a vector.
+	/// @param v a vector
+	/// @return the smallest value of v
     template<int Size, typename Precision, typename Base> inline Precision min( const Vector<Size, Precision, Base>& v) {
-        typedef Internal::accumulate_functor_vector<Precision, Internal::comp_less<Precision> > vector_accumulate_functor;
+        typedef Internal::accumulate_functor_vector<Precision, std::less<Precision> > vector_accumulate_functor;
         vector_accumulate_functor min_functor_inst;
         return Internal::accumulate<Size,Precision,Base,
             vector_accumulate_functor, Precision >( v, min_functor_inst ); 
     }
+	/// Finds the largest value of a vector.
+	/// @param v a vector
+	/// @return the largest value of v
     template<int Size, typename Precision, typename Base> inline Precision max( const Vector<Size, Precision, Base>& v) {
-        typedef Internal::accumulate_functor_vector<Precision, Internal::comp_greater<Precision> > vector_accumulate_functor;
+        typedef Internal::accumulate_functor_vector<Precision, std::greater<Precision> > vector_accumulate_functor;
         vector_accumulate_functor max_functor_inst;
         return Internal::accumulate<Size,Precision,Base,
             vector_accumulate_functor, Precision >( v, max_functor_inst ); 
     }
-
+	/// Finds the smallest value of a matrix.
+	/// @param m a matrix
+	/// @return the smallest value of m
     template<int R, int C, typename Precision, typename Base> inline Precision min( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_functor_matrix<Precision, Internal::comp_less<Precision> > matrix_accumulate_functor;
+        typedef Internal::accumulate_functor_matrix<Precision, std::less<Precision> > matrix_accumulate_functor;
         matrix_accumulate_functor min_functor_inst;
         return Internal::accumulate<R,C,Precision,Base,
             matrix_accumulate_functor, Precision>( m, min_functor_inst );
     }
-
+	/// Finds the largest value of a matrix.
+	/// @param m a matrix
+	/// @return the largest value of m
     template<int R, int C, typename Precision, typename Base> inline Precision max( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_functor_matrix<Precision, Internal::comp_greater<Precision> > matrix_accumulate_functor;
+        typedef Internal::accumulate_functor_matrix<Precision, std::greater<Precision> > matrix_accumulate_functor;
         matrix_accumulate_functor max_functor_inst;
         return Internal::accumulate<R,C,Precision,Base,
             matrix_accumulate_functor, Precision>( m, max_functor_inst );
     }
+	/// Finds the smallest values of each column of a matrix.
+	/// @param m a matrix
+	/// @return a vector of size C
     template<int R, int C, typename Precision, typename Base> inline Vector<>& min_vertical( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_vertical_functor<Precision,Internal::comp_less<Precision> > matrix_accumulate_vertical_functor;
+        typedef Internal::accumulate_vertical_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
         matrix_accumulate_vertical_functor min_functor_inst( m.num_cols() );
         return Internal::accumulate_vertical<R,C,Precision,Base,
-            matrix_accumulate_vertical_functor, Vector<> >( m, min_functor_inst );
+            matrix_accumulate_vertical_functor, Vector<>& >( m, min_functor_inst );
     }
+	/// Finds the largest values of each column of a matrix.
+	/// @param m a matrix
+	/// @return a vector of size C
     template<int R, int C, typename Precision, typename Base> inline Vector<>& max_vertical( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_vertical_functor<Precision,Internal::comp_greater<Precision> > matrix_accumulate_vertical_functor;
+        typedef Internal::accumulate_vertical_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
         matrix_accumulate_vertical_functor max_functor_inst( m.num_cols() );
         return Internal::accumulate_vertical<R,C,Precision,Base,
-            matrix_accumulate_vertical_functor, Vector<> >( m, max_functor_inst );
+            matrix_accumulate_vertical_functor, Vector<>& >( m, max_functor_inst );
     }
+	/// Finds the smallest values of each row of a matrix.
+	/// @param m a matrix
+	/// @return a vector of size R
     template<int R, int C, typename Precision, typename Base> inline Vector<>& min_horizontal( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_horizontal_functor<Precision,Internal::comp_less<Precision> > matrix_accumulate_horizontal_functor;
+        typedef Internal::accumulate_horizontal_functor<Precision,std::less<Precision> > matrix_accumulate_horizontal_functor;
         matrix_accumulate_horizontal_functor min_functor_inst( m.num_rows() );
         return Internal::accumulate_horizontal<R,C,Precision,Base,
-            matrix_accumulate_horizontal_functor, Vector<> >( m, min_functor_inst );
+            matrix_accumulate_horizontal_functor, Vector<>& >( m, min_functor_inst );
     }
+	/// Finds the largest values of each row of a matrix.
+	/// @param m a matrix
+	/// @return a vector of size R
     template<int R, int C, typename Precision, typename Base> inline Vector<>& max_horizontal( const Matrix<R, C, Precision, Base> & m) {
-        typedef Internal::accumulate_horizontal_functor<Precision,Internal::comp_greater<Precision> > matrix_accumulate_horizontal_functor;
+        typedef Internal::accumulate_horizontal_functor<Precision,std::greater<Precision> > matrix_accumulate_horizontal_functor;
         matrix_accumulate_horizontal_functor max_functor_inst( m.num_rows() );
         return Internal::accumulate_horizontal<R,C,Precision,Base,
-            matrix_accumulate_horizontal_functor, Vector<> >( m, max_functor_inst );
+            matrix_accumulate_horizontal_functor, Vector<>& >( m, max_functor_inst );
+    }
+	/// Finds the smallest value of a vector and its index.
+	/// @param v a vector
+	/// @return a pair containing the smallest value and its index
+    template<int Size, typename Precision, typename Base> inline std::pair<Precision,int> min_element( const Vector<Size, Precision, Base>& v) {
+        typedef Internal::accumulate_element_functor_vector<Precision, std::less<Precision> > vector_accumulate_functor;
+        vector_accumulate_functor min_functor_inst;
+        return Internal::accumulate<Size,Precision,Base,
+            vector_accumulate_functor, std::pair<Precision,int> >( v, min_functor_inst ); 
+    }
+	/// Finds the largest value of a vector and its index.
+	/// @param v a vector
+	/// @return a pair containing the largest value and its index
+    template<int Size, typename Precision, typename Base> inline std::pair<Precision,int> max_element( const Vector<Size, Precision, Base>& v) {
+        typedef Internal::accumulate_element_functor_vector<Precision, std::greater<Precision> > vector_accumulate_functor;
+        vector_accumulate_functor max_functor_inst;
+        return Internal::accumulate<Size,Precision,Base,
+            vector_accumulate_functor, std::pair<Precision,int> >( v, max_functor_inst ); 
+    }    
+	/// Finds the smallest value of a matrix and its row and column.
+	/// @param m a matrix
+	/// @return a pair containing the smallest value and a pair
+	/// containing its row and column
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Precision,std::pair<int,int> > min_element( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_functor_matrix<Precision, std::less<Precision> > matrix_accumulate_functor;
+        typedef std::pair<Precision,std::pair<int,int> > Ret;
+        matrix_accumulate_functor min_functor_inst;
+        return Internal::accumulate<R,C,Precision,Base,
+            matrix_accumulate_functor, Ret>( m, min_functor_inst );
+    }
+	/// Finds the largest value of a matrix and its row and column.
+	/// @param m a matrix
+	/// @return a pair containing the largest value and a pair
+	/// containing its row and column
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Precision,std::pair<int,int> > max_element( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_functor_matrix<Precision, std::greater<Precision> > matrix_accumulate_functor;
+        typedef std::pair<Precision,std::pair<int,int> > Ret;
+        matrix_accumulate_functor max_functor_inst;
+        return Internal::accumulate<R,C,Precision,Base,
+            matrix_accumulate_functor, Ret>( m, max_functor_inst );
+    }	
+    /// Finds the smallest values of each column of a matrix and their
+	/// indices.
+	/// @param m a matrix
+	/// @return a pair of vectors of size C containg the values and
+	/// their indices
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<>&,Vector<>&> min_element_vertical( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_vertical_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
+        typedef std::pair<Vector<>&,Vector<>&> Ret;
+        matrix_accumulate_vertical_functor min_functor_inst( m.num_cols() );
+        return Internal::accumulate_vertical<R,C,Precision,Base,
+            matrix_accumulate_vertical_functor, Ret >( m, min_functor_inst );
+    }
+    /// Finds the largest values of each column of a matrix and their
+	/// indices.
+	/// @param m a matrix
+	/// @return a pair of vectors of size C containg the values and
+	/// their indices
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<>&,Vector<>&> max_element_vertical( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_vertical_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
+        typedef std::pair<Vector<>&,Vector<>&> Ret;
+        matrix_accumulate_vertical_functor min_functor_inst( m.num_cols() );
+        return Internal::accumulate_vertical<R,C,Precision,Base,
+            matrix_accumulate_vertical_functor, Ret >( m, min_functor_inst );
+    }
+    /// Finds the smallest values of each row of a matrix and their
+	/// indices.
+	/// @param m a matrix
+	/// @return a pair of vectors of size R containg the values and
+	/// their indices
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<>&,Vector<>&> min_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_horizontal_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
+        typedef std::pair<Vector<>&,Vector<>&> Ret;
+        matrix_accumulate_vertical_functor min_functor_inst( m.num_rows() );
+        return Internal::accumulate_horizontal<R,C,Precision,Base,
+            matrix_accumulate_vertical_functor, Ret >( m, min_functor_inst );
+    }
+    /// Finds the largest values of each row of a matrix and their
+	/// indices.
+	/// @param m a matrix
+	/// @return a pair of vectors of size R containg the values and
+	/// their indices
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<>&,Vector<>&> max_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
+        typedef Internal::accumulate_element_horizontal_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
+        typedef std::pair<Vector<>&,Vector<>&> Ret;
+        matrix_accumulate_vertical_functor min_functor_inst( m.num_rows() );
+        return Internal::accumulate_horizontal<R,C,Precision,Base,
+            matrix_accumulate_vertical_functor, Ret >( m, min_functor_inst );
     }
 }
 #endif
