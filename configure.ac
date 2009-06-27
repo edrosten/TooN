@@ -34,8 +34,8 @@ define(TYPEOF_TEST,[
 ])
 
 TYPEOF_TEST(decltype, decltype)
-TYPEOF_TEST(typeof, typeof)
 TYPEOF_TEST(__typeof__, __typeof__)
+TYPEOF_TEST(typeof, typeof)
 TYPEOF_TEST(boost, BOOST_TYPEOF, [#include<boost/typeof/typeof.hpp>])
 
 if test "$typeof" == typeof
