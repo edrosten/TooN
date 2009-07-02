@@ -185,6 +185,7 @@ namespace TooN {
 	typedef double DefaultPrecision;
 }
 
+#include <TooN/internal/dchecktest.hh>
 #include <TooN/internal/allocator.hh>
 
 #include <TooN/internal/size_mismatch.hh>
