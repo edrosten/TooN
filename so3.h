@@ -159,7 +159,11 @@ public:
 	/// \f$ M \f$, the adjoint \f$Adj()\f$ obeys
 	/// \f$ e^{\text{Adj}(v)} = Me^{v}M^{-1} \f$
 	template <int S, typename A>
-	inline Vector<3, Precision> adjoint(Vector<3, Precision, A> vect) const { return *this * vect; }
+	inline Vector<3, Precision> adjoint(const Vector<S, Precision, A>& vect) const 
+	{ 
+		SizeMismatch<3, S>::test(3, vect.size());
+		return *this * vect; 
+	}
 	
 private:
 	struct Invert {};
