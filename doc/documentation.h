@@ -216,9 +216,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Slicing:
 		@code
 		Vector.slice<Start, End>();                            //Static slice
-		Vector.slice<>(start, end);                            //Dynamic slice
+		Vector.slice(start, end);                              //Dynamic slice
 		Matrix.slice<RowStart, ColStart, NumRows, NumCols>();  //Static slice
-		Matrix.slice<>(rowstart, colstart, numrows, numcols);  //Dynamic slice
+		Matrix.slice(rowstart, colstart, numrows, numcols);    //Dynamic slice
 		Matrix.diagonal_slice();                               //Get the leading diagonal as a vector.
 		@endcode
 
