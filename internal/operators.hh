@@ -37,6 +37,9 @@ namespace TooN {
 namespace Internal {
 
 	//Automatic type deduction of return types
+	///@internal
+	///This function offers to return a value of type C. This function
+	///is not implemented anywhere, the result is used for type deduction.
 	template<class C> C gettype();
 
 	template<class L, class R> struct Field

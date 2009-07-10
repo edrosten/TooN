@@ -57,12 +57,12 @@ namespace Internal{
 			return 1;
 		}
 	};
-	template<class Rhs> Rhs operator*(One, const Rhs& v){return v;}
-	template<class Lhs> Lhs operator*(const Lhs& v, One){return v;}
-	template<class Rhs> Rhs operator+(One, const Rhs& v){return 1+v;}
-	template<class Lhs> Lhs operator+(const Lhs& v, One){return v+1;}
-	template<class Rhs> Rhs operator-(One, const Rhs& v){return 1-v;}
-	template<class Lhs> Lhs operator-(const Lhs& v, One){return v-1;}
+	template<class Rhs> Rhs operator*(One, const Rhs& v){return v;}   ///<Multiplies One by something.
+	template<class Lhs> Lhs operator*(const Lhs& v, One){return v;}   ///<Multiplies something by One
+	template<class Rhs> Rhs operator+(One, const Rhs& v){return 1+v;} ///<Adds something to One
+	template<class Lhs> Lhs operator+(const Lhs& v, One){return v+1;} ///<Adds One to something
+	template<class Rhs> Rhs operator-(One, const Rhs& v){return 1-v;} ///<Subtracts something from One
+	template<class Lhs> Lhs operator-(const Lhs& v, One){return v-1;} ///<Subtracts One from something.
 	inline int operator-(const One&)
 	{
 		return -1;

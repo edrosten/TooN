@@ -226,6 +226,9 @@ namespace TooN {
 	}
 
 	namespace Internal {
+		///@internal
+		///@brief Exponentiate a matrix using a the Taylor series
+		///This will not work if the norm of the matrix is too large.
 		template <int R, int C, typename P, typename B>
 		inline Matrix<R, C, P> exp_taylor( const Matrix<R,C,P,B> & m ){
 			TooN::SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());

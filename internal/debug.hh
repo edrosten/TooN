@@ -19,6 +19,9 @@ namespace Internal
 			}
 		}
 	#else
+		///@internal
+		///Function used to check bounds.
+		///By default it does nothing. See \ref sDebug.
 		static inline void check_index(int, int){}
 	#endif
 
@@ -91,6 +94,9 @@ namespace Internal
 			}
 		}
 	#else
+		///@internal
+		///@brief This function is called on any uninitialized data. By default, no action is taken. 
+		///See \ref sDebug
 		template<class P> static void debug_initialize(P*, int)
 		{
 		}
