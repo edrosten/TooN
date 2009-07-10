@@ -141,7 +141,7 @@ Overfill is detected at compile time if possible, underfill
 is detected at run-time. The checks can not be optimized out
 for dynamic vectors, so define \c TOON_NDEBUG_FILL to prevent
 the checks from being used.
-@param m Matrix to fill
+@param v Vector to fill
 @ingroup gLinAlg
 */
 template<int Size, class Precision, class Base> Internal::VectorStartFill<Size, Precision, Base> Fill(Vector<Size, Precision, Base>& v)

@@ -44,10 +44,14 @@ namespace Internal{
 	template<class P> class Scalars;	
 	template<class P> class SizedScalars;	
 	template<class P> class RCScalars;
-
+	
+	///@internal
+	///@brief This class represents 1 and only in all its forms.
+	///@ingroup gInternal
 	struct One{
-		One(){}
-		//Generic cast to anything
+
+		One(){} ///<This constructor does nothing. This allows const One to be declared with no initializer.
+		///Generic cast to anything
 		template<class C> operator C() const
 		{
 			return 1;
@@ -63,26 +67,44 @@ namespace Internal{
 	{
 		return -1;
 	}
-
+	
+	///@internal
+	///@brief For an instance \e i of type C, what is the type of \e -i?
+	///Usually the answer is that is it the same type.
+	///@ingroup gInternal
 	template<class C> struct NegType
 	{
-		typedef C Type;
+		typedef C Type; ///<The type of -C
 	};
 
+	/**@internal
+	   @brief The type of -One
+	   @ingroup gInternal
+	*/
 	template<> struct NegType<One>
 	{
+		///One really repersents 1. Therefore -One is not the same type
+		///as One.
 		typedef int Type;
 	};
 
-	//One can be converted in to anything, so the resulting type is
-	//a field if the other type is a field.
+	///@internal
+	///@brief Does One behave as a field with respect to Rhs?
+	///@ingroup gInternal
 	template<class Rhs> struct Field<One, Rhs>
 	{
+		///One can be converted in to anything, so the resulting type is
+		///a field if the other type is a field.
 		static const int is = IsField<Rhs>::value;
 	};
 
+	///@internal
+	///@brief Does One behave as a field with respect to Lhs?
+	///@ingroup gInternal
 	template<class Lhs> struct Field<Lhs, One>
 	{
+		///One can be converted in to anything, so the resulting type is
+		///a field if the other type is a field.
 		static const int is = IsField<Lhs>::value;
 	};
 
@@ -98,7 +120,8 @@ template<> struct Operator<Internal::SizedZero>;
 template<> struct Operator<Internal::RCZero>;
 
 
-///Object which behaves like a block of zeros. See TooN::Zeros.
+///@internal
+///@brief Object which behaves like a block of zeros. See TooN::Zeros.
 ///@ingroup gInternal
 template<> struct Operator<Internal::Zero> {
 	///@name Operator members
@@ -127,33 +150,34 @@ template<> struct Operator<Internal::Zero> {
 	
 };
 
-///Variant of the Zeros object which holds two sizes for
-///constructing dynamic matrices.
+///@internal
+///@brief Variant of the Zeros object which holds two sizes for constructing dynamic matrices.
 ///@ingroup gInternal
 template<> struct Operator<Internal::RCZero> : public Operator<Internal::Zero> {
+
+	///@name Operator members determining the size.
+	///@{
 	Operator(int r, int c) : my_rows(r), my_cols(c) {}
 
 	const int my_rows;
 	const int my_cols;
 	
-	///@name Operator members
-	///@{
 	int num_rows() const {return my_rows;}
 	int num_cols() const {return my_cols;}
 	///@}
 };
 
-///Variant of the Zeros object which holds a size for
-///constructing dynamic vectors.
+///@internal
+///@brief Variant of the Zeros object which holds a size for constructing dynamic vectors.
 ///@ingroup gInternal
 template<> struct Operator<Internal::SizedZero> : public Operator<Internal::Zero> {
 
+	///@name Operator members determining the size for vectors and square matrices.
+	///@{
 	Operator(int s)	: my_size(s) {}
 		
 	const int my_size;
 	
-	///@name Operator members
-	///@{
 	int size() const {return my_size;}
 	int num_rows() const {return my_size;}
 	int num_cols() const {return my_size;}
@@ -173,18 +197,23 @@ inline Operator<Internal::RCZero> Operator<Internal::Zero>::operator()(int r, in
 // Identity
 //////////////
 
-///Operator to construct a new matrix with idendity added 
+///@internal
+///@brief Operator to construct a new matrix with idendity added 
 ///@ingroup gInternal
 template<int R, int C, class P, class B, class Precision> struct Operator<Internal::AddIdentity<R,C,P,B,Precision> >
 {
-	const Precision s;
-	const Matrix<R,C,P,B>& m;
-	bool invert_m;
-
-	///@name Operator members
+	const Precision s;   ///<Scale of the identity matrix
+	const Matrix<R,C,P,B>& m; ///<matrix to which the identity should be added
+	bool invert_m; ///<Whether the identity should be added to + or - m
+	
+	///@name Construction
 	///@{
 	Operator(Precision s_, const Matrix<R,C,P,B>& m_, bool b)
 		:s(s_),m(m_),invert_m(b){}
+	///@}
+
+	///@name Operator members
+	///@{
 	template<int R1, int C1, class P1, class B1>
 	void eval(Matrix<R1,C1,P1,B1>& mm) const{
 		for(int r=0; r < m.num_rows(); r++)
@@ -197,7 +226,10 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 		for(int i=0; i < m.num_rows(); i++)
 				mm[i][i] += (P)s;
 	}
+	///@}
 
+	///@name Sized operator members
+	///@{
 	int num_rows() const
 	{
 		return m.num_rows();
@@ -209,21 +241,36 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 	///@}
 };
 
-///Object which behaves like an Identity matrix. See TooN::Identity.
+///@internal
+///@brief Object which behaves like an Identity matrix. See TooN::Identity.
 ///@ingroup gInternal
 template<class Pr> struct Operator<Internal::Identity<Pr> > {
 	
+	///@name Scalable operators members
+	///@{
+
 	typedef Pr Precision;
+	template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
+	{
+		return Operator<Internal::Identity<Pout> >(val*m);
+	}
+	///}
+	
+	///<Scale of the identity matrix.
 	const Precision val;
+
+	///@name Construction
+	///@{
 	Operator(const Precision& v)
 		:val(v)
 	{}
 
 	Operator()
 	{}
+	///}
+
 	///@name Operator members
 	///@{
-	
 	template<int R, int C, class P, class B>
 	void eval(Matrix<R,C,P,B>& m) const {
 		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
@@ -267,42 +314,45 @@ template<class Pr> struct Operator<Internal::Identity<Pr> > {
 		SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());
 		return Operator<Internal::AddIdentity<Rows,Cols,P1,B1,Precision> >(val, m, 1);
 	}
-
-	template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
-	{
-		return Operator<Internal::Identity<Pout> >(val*m);
-	}
-
 	///@}
-
+	
+	///@name Sizeable operator members
+	///@{
 	Operator<Internal::SizedIdentity<Precision> > operator()(int s){
 		return Operator<Internal::SizedIdentity<Precision> >(s, val);
 	}
+	///@}
 };
 	
-///A variant of Identity which holds a size, allowing
-///dynamic matrices to be constructed
+///@internal
+///@brief A variant of Identity which holds a size, allowing dynamic matrices to be constructed
 ///@ingroup gInternal
 template<class Precision> struct Operator<Internal::SizedIdentity<Precision> > 
 	: public  Operator<Internal::Identity<Precision> > {
 
 	using Operator<Internal::Identity<Precision> >::val;
-	const int my_size;
-
+	
+	///@name Constructors
+	///@{
 	Operator(int s, const Precision& v)
 		:Operator<Internal::Identity<Precision> > (v), my_size(s)
 	{}
+	///@}
 
-	///@name Operator members
+	///@name Sized operator members
 	///@{
+	const int my_size;
 	int num_rows() const {return my_size;}
 	int num_cols() const {return my_size;}
 	///@}
 
+	///@name Scalable operator members
+	///@{
 	template<class Pout, class Pmult> Operator<Internal::SizedIdentity<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::SizedIdentity<Pout> >(my_size, val*m);
 	}
+	///@}
 };
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -310,15 +360,20 @@ template<class Precision> struct Operator<Internal::SizedIdentity<Precision> >
 //
 
 	
-///Operator to construct a new vector a a vector with a scalar added to every element
+///@internal
+///@brief Operator to construct a new vector a a vector with a scalar added to every element
 ///@ingroup gInternal
 template<int S, class P, class B, class Precision> struct Operator<Internal::ScalarsVector<S,P,B,Precision> >
 {
-	const Precision s;
-	const Vector<S,P,B>& v;
-	const bool invert_v;
+	const Precision s;      ///<Scalar to add
+	const Vector<S,P,B>& v; ///<Vector to be added to.
+	const bool invert_v;    ///<Whether to use + or - \c v
+
+	///@name Constructors
+	///@{
 	Operator(Precision s_, const Vector<S,P,B>& v_, bool inv)
 		:s(s_),v(v_),invert_v(inv){}
+	///@}
 
 	///@name Operator members
 	///@{
@@ -330,7 +385,10 @@ template<int S, class P, class B, class Precision> struct Operator<Internal::Sca
 			else
 				vv[i] = s + v[i];
 	}
+	///@}
 
+	///@name Sized operator members
+	///@{
 	int size() const
 	{
 		return v.size();
@@ -338,13 +396,14 @@ template<int S, class P, class B, class Precision> struct Operator<Internal::Sca
 	///@}
 };
 
-///Operator to construct a new matrix a a matrix with a scalar added to every element
+///@internal
+///@brief Operator to construct a new matrix a a matrix with a scalar added to every element
 ///@ingroup gInternal
 template<int R, int C, class P, class B, class Precision> struct Operator<Internal::ScalarsMatrix<R,C,P,B,Precision> >
 {
-	const Precision s;
-	const Matrix<R,C,P,B>& m;
-	const bool invert_m;
+	const Precision s;        ///<Scalar to add
+	const Matrix<R,C,P,B>& m; ///<Vector to be added to.
+	const bool invert_m;      ///<Whether to use + or - \c m
 	///@name Operator members
 	///@{
 	Operator(Precision s_, const Matrix<R,C,P,B>& m_, bool inv)
@@ -358,7 +417,10 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 				else
 					mm[r][c] = s + m[r][c];
 	}
+	///@}
 
+	///@name Sized operator members
+	///@{
 	int num_rows() const
 	{
 		return m.num_rows();
@@ -370,20 +432,27 @@ template<int R, int C, class P, class B, class Precision> struct Operator<Intern
 	///@}
 };
 
-///Generic scalars object. Knows how to be added, knows how to deal with += and so on.
+///@internal
+///@brief Generic scalars object. Knows how to be added, knows how to deal with += and so on.
 ///See TooN::Ones
 ///@ingroup gInternal
 template<class P> struct Operator<Internal::Scalars<P> >
-{
+{	
+	///@name Scalable operator members
+	///@{
 	typedef P Precision;
-	const Precision s;
-	//Default argument in constructor, otherwise Doxygen mis-parses
-	//a static object with a constructor as a function.
+	///@}
+
+	const Precision s; ///<Value of the scalar being represented.  
+	
+	///@name Constructors
+	///@{
 	Operator(Precision s_)
 		:s(s_){}
 
 	Operator()
 	{}
+	///@}
 
 	////////////////////////////////////////
 	//
@@ -484,6 +553,9 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	// Create sized versions for initialization
 	//
 
+	///@name Sizeable operators members
+	///@{
+
 	Operator<Internal::SizedScalars<Precision> > operator()(int size) const
 	{
 		return Operator<Internal::SizedScalars<Precision> > (s,size);
@@ -493,29 +565,45 @@ template<class P> struct Operator<Internal::Scalars<P> >
 	{
 		return Operator<Internal::RCScalars<Precision> > (s,r,c);
 	}
+	///@}
 
+	///@name Scalable operator members
+	///@{
 	template<class Pout, class Pmult> Operator<Internal::Scalars<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::Scalars<Pout> >(s*m);
 	}
+	///@}
 };
 
-///Variant of the Operator<Internal::Scalars> object which holds a size
-///to construct dynamic vectors.
+///@internal
+///@brief Variant of the Operator<Internal::Scalars> object which holds a size to construct dynamic vectors or square matrices.
 ///@ingroup gInternal 
 template<class P> struct Operator<Internal::SizedScalars<P> >: public Operator<Internal::Scalars<P> >
 {
 	using Operator<Internal::Scalars<P> >::s;
-	const int my_size;
-	///@name Operator members
+	///@name Sized operator members
 	///@{
+	const int my_size;
 	int size() const {
 		return my_size;
 	}
-		
+	int num_rows() const {
+		return my_size;
+	}
+	int num_cols() const {
+		return my_size;
+	}
+	///@}
+
+	///@name Constructors
+	///@{
 	Operator(P s, int sz)
 		:Operator<Internal::Scalars<P> >(s),my_size(sz){}
+	///@}
 		
+	///@name Scalable operator members
+	///@{
 	template<class Pout, class Pmult> Operator<Internal::SizedScalars<Pout> > scale_me(const Pmult& m) const
 	{
 		return Operator<Internal::SizedScalars<Pout> >(s*m, my_size);
@@ -528,8 +616,8 @@ private:
 };
 
 		
-///Variant of Scalars (see TooN::Ones) which holds two 
-///sizes to constructo dynamic matrices.
+///@internal
+///@brief Variant of Scalars (see TooN::Ones) which holds two sizes to construct dynamic matrices.
 ///@ingroup gInternal
 template<class P> struct Operator<Internal::RCScalars<P> >: public Operator<Internal::Scalars<P> >
 {

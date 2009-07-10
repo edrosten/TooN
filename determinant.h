@@ -8,32 +8,54 @@ namespace TooN
 {
 	namespace Internal
 	{
+		///@internal
+		///@brief  Provides the static size for a square matrix. 
+		///In
+		///the general case, if R != C, then the matrix is not
+		///square and so no size is provided. A compile error results.
+		///@ingroup gInternal
 		template<int R, int C> struct Square
 		{
 		};
+		
 
+		///@internal
+		///@brief Provides the static size for a square matrix where both dimensions are the same.
+		///@ingroup gInternal
 		template<int R> struct Square<R, R>
 		{
-			static const int Size = R;
+			static const int Size = R; ///<The size
 		};
-
+		
+		///@internal
+		///@brief Provides the static size for a square matrix where one dimension is static. 
+		///The size must be equal to the size of the static dimension.
+		///@ingroup gInternal
 		template<int R> struct Square<R, Dynamic>
 		{
-			static const int Size = R;
+			static const int Size = R; ///<The size
 		};
+		///@internal
+		///@brief Provides the static size for a square matrix where one dimension is static. 
+		///The size must be equal to the size of the static dimension.
+		///@ingroup gInternal
 		template<int C> struct Square<Dynamic, C>
 		{
-			static const int Size = C;
+			static const int Size = C; ///<The size
 		};
+		///@internal
+		///@brief Provides the static size for a square matrix where both dimensions are dynamic.
+		///The size must be Dynamic.
+		///@ingroup gInternal
 		template<> struct Square<Dynamic, Dynamic>
 		{
-			static const int Size = Dynamic;
+			static const int Size = Dynamic; ///<The size
 		};
 	};
 
 
 	/** Compute the determinant using Gaussian elimination.
-		@param A The matrix to find the determinant of.
+		@param A_ The matrix to find the determinant of.
 		@returns determinant.
 		@ingroup gLinAlg
 	*/

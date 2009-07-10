@@ -98,7 +98,9 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 		}
 };
 
-///This allocator object sets aside memory for a statically sized object. It will
+///@internal
+///@brief This allocator object sets aside memory for a statically sized object. 
+///It will
 ///put all the data on the stack if there are less then TooN::max_bytes_on_stack of
 ///data, otherwise it will use new/delete.
 ///@ingroup gInternal
@@ -107,7 +109,8 @@ template<int Size, class Precision> class StaticSizedAllocator: public StackOrHe
 };
 
 
-///Allocate memory for a Vector.
+///@internal
+///@brief Allocate memory for a Vector.
 ///@ingroup gInternal
 template<int Size, class Precision> struct VectorAlloc : public StaticSizedAllocator<Size, Precision> {
 	
@@ -205,26 +208,37 @@ template<class Precision> struct VectorSlice<-1, Precision>
 //
 // A class similar to StrideHolder, but to hold the size information for matrices.
 
+///@internal
+///@brief This struct holds a size using no data for static sizes.
 ///This struct holds a size is the size is dynamic,
 ///or simply recorcs the number in the type system if
 ///the size is static.
+///@ingroup gInternal
 template<int s> struct SizeHolder
 {
 	//Constructors ignore superfluous arguments
-	SizeHolder(){}
-	SizeHolder(int){}
+	SizeHolder(){}    ///<Default constrution
+	SizeHolder(int){} ///<Construct from an int and discard it.
 
+	///Simply return the statcally known size
 	int size() const{
 		return s;
 	}
 };
 
+///@internal
+///@brief This struct holds a size integer for dynamic sizes.
+///@ingroup gInternal
 template<> struct SizeHolder<-1>
 {
+	///@name Construction
+	///@{
 	SizeHolder(int s)
 	:my_size(s){}
+	///@}
 
-	const int my_size;
+	const int my_size; ///<The size
+	///Return the size
 	int size() const {
 		return my_size;
 	}
@@ -232,38 +246,54 @@ template<> struct SizeHolder<-1>
 
 
 
+///@internal
 ///This struct holds the number of rows, only allocating space if
 ///necessary.
 ///@ingroup gInternal
 template<int S> struct RowSizeHolder: private SizeHolder<S>
 {
+	///Construct from an int to provide a run time size if
+	///necessary. 
+	///@param i The size, which is discarded for the static case.
 	RowSizeHolder(int i)
 	:SizeHolder<S>(i){}
 
 	RowSizeHolder()
 	{}
-
+	
+	///Construct from an Operator, taking the size from the operator.
+	///The size is only used in the dynamic case.
+	///@param op Operator from which to determine the size.
 	template<typename Op>
 	RowSizeHolder(const Operator<Op>& op) : SizeHolder<S>(op.num_rows()) {}
-
+	
+	///Return the number of rows.
 	int num_rows() const {return SizeHolder<S>::size();}
 };
 
 
+///@internal
 ///This struct holds the number of columns, only allocating space if
 ///necessary.
 ///@ingroup gInternal
 template<int S> struct ColSizeHolder: private SizeHolder<S>
 {
+	///Construct from an int to provide a run time size if
+	///necessary. 
+	///@param i The size, which is discarded for the static case.
 	ColSizeHolder(int i)
 	:SizeHolder<S>(i){}
 
 	ColSizeHolder()
 	{}
 
+	///Construct from an Operator, taking the size from the operator.
+	///The size is only used in the dynamic case.
+	///@param op Operator from which to determine the size.
 	template<typename Op>
 	ColSizeHolder(const Operator<Op>& op) : SizeHolder<S>(op.num_cols()) {}
 
+	///Return the number of columns.
 	int num_cols() const {return SizeHolder<S>::size();}	
 };
 

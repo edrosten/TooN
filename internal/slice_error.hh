@@ -33,10 +33,17 @@ namespace Internal
 {
 	template<bool StaticBad> 
 	struct BadSlice;
-
+	
+	///@internal
+	///A static slice is OK.
+	///This class is used after it has been determined that a slice is OK.
+	///It does nothing except provide a callable function. By contrast, 
+	///if the slice is not OK, then the class is not specified and the function
+	///is therefore not callable, and a compile error results.
+	///@ingroup gInternal
 	template<> 
 	struct BadSlice<0>{
-		static void check(){}
+		static void check(){} ///<This function does nothing: it merely exists.
 	};
 
 	template<int Size, int Start, int Length> 

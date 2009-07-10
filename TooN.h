@@ -50,6 +50,7 @@
 	#endif
 #endif
 
+///Everything lives inside this namespace
 namespace TooN {
 
 #ifdef TOON_TEST_INTERNALS
@@ -68,27 +69,39 @@ namespace TooN {
 	}
 #endif
 	
-	//Is the number a field? ie, *, -, *, / defined.
-	//Specialize this to make TooN work properly with new types
 	using std::numeric_limits;
+	///Is a number a field? ie, *, -, *, / defined.
+	///Specialize this to make TooN work properly with new types.
+	///@ingroup gLinAlg
 	template<class C> struct IsField
 	{
-		static const int value = numeric_limits<C>::is_specialized;
+		static const int value = numeric_limits<C>::is_specialized; ///<Is C a field?
 	};
 	
+	///@internal
+	///@brief The namaespace holding all the internal code.
 	namespace Internal
 	{
+		///@internal
+		///@brief Maximum number of bytes to be allocated on the stack.
+		///new is used above this number.
 		static const unsigned int max_bytes_on_stack=1000;
+		///@internal
+	 	///@brief A tag used to indicate that a slice is being constructed.
+		///@ingroup gInternal
 		struct Slicing{};
 		template<int RowStride, int ColStride> struct Slice;
+		template<int Size, typename Precision, int Stride, typename Mem> struct GenericVBase;
 	}
 
 	template<int Size, class Precision, class Base> struct Vector;
 	template<int Rows, int Cols, class Precision, class Base> struct Matrix;
 	template<int Size, class Precision, class Base> struct DiagonalMatrix;
 
+
 	#ifdef DOXYGEN_INCLUDE_ONLY_FOR_DOCS
-		///This is a struct used heavily in TooN.
+		///@internal
+		///@brief This is a struct used heavily in TooN internals.
 		///
 		///They have two main uses. The first use is in construction and is completely hidden.
 		///For an expression such as a+b, the return value of operator+ will be constructed in
@@ -99,12 +112,34 @@ namespace TooN {
 		///The features allowed (construction, addition, etc) depend on the members present. 
 		///For simplicity, general arguments are given below. If members are non-general, then the 
 		///operators will simply not be applicable to all vectors or matrices.
+		///
+		///Operators belong to any of a number of categories depending on the members they provide.
+		///The categories are:
+		///
+		/// - Sized operators
+		///   - These know their own size and provide. 
+		///     The sizes are used only in construction of dynamic vectors or
+		///     matrices.
+		/// - Sizeable operators
+		///   - Sizeable operators are able to generate a sized operator of the same sort.
+		/// - Scalable operators
+		///   - These can be multiplied and divided by scalars.
+		///
 		///@ingroup gInternal
 		template<typename T> struct Operator{
+			///@name Members in the category ``sized operators''
+			///@{
+
+			///This must be provided in order to construct dynamic vectors.
+			int size() const;
+			///This along with num_cols() must be present in order to construct matrices.
+			int num_rows() const; 
+			///This along with num_rows() must be present in order to construct matrices.
+			int num_cols() const;
+			///@}
+			
 			///@name Members used by Vector
 			///@{
-			///This must be provided in order to construct vectors.
-			int size() const;
 
 			///This function must be present for construction and assignment
 			///of vectors to work.
@@ -136,14 +171,6 @@ namespace TooN {
 
 			///@name Members used by Matrix
 			///@{
-
-			///This along with num_cols() must be present in order to construct matrices.
-			///The return value will be ignored for static rows.
-			int num_rows() const; 
-			///This along with num_rows() must be present in order to construct matrices.
-			///The return value will be ignored for static columns.
-			int num_cols() const;
-			
 			///This function must be present for construction and assignment
 			///of matrices to work.
 			template<int R, int C, class P, class B>
@@ -170,10 +197,32 @@ namespace TooN {
 			///This must be present for matrix -= operator
 			template <int Rows, int Cols, typename P1, typename B1> 
 			void minusequals(Matrix<Rows,Cols, P1, B1>& m) const;
-
 			///@}
-		}
 
+
+			///@name Members in the category ``sizeable oberators''
+			///@{
+
+			///Create an operator that knows its size.
+			///Suitable for vectors and square matrices.
+			Operator<T> operator()(int size) const;
+			
+			///Create an operator that knows its size, suitable for matrices.
+			Operator<T> operator()(int num_rows, int num_cols) const;
+			///@}
+			
+			///@name Members in the category ``scalable operators''
+			///@{
+			typedef T Precision; ///<Precision of the operator's scale.
+			
+			///Scale the operator by a scalar and return a new opeator.
+			template<class Pout, class Pmult> Operator<Internal::Identity<Pout> > scale_me(const Pmult& m) const
+			{
+				return Operator<Internal::Identity<Pout> >(val*m);
+			}
+			///@}
+
+		};
 	#else
 		template<typename T> struct Operator;
 	#endif

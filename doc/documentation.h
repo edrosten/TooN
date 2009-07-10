@@ -757,5 +757,7 @@ The mode of operation is to set up a mutable class, then repeatedly call an
 iterate function. This allows different sub algorithms (such as termination
 conditions) to be substituted in if need be.
 
+@internal
 @defgroup gInternal TooN internals
+
 */

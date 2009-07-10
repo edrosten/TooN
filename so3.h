@@ -192,11 +192,12 @@ inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 ///The rotation axis is given by \f$\vec{w}\f$, and the rotation angle must
 ///be computed using \f$ \theta = |\vec{w}|\f$. This is provided as a separate
 ///function primarily to allow fast and rough matrix exponentials using fast 
-///and rough approximations to \e A \nd \e B.
+///and rough approximations to \e A and \e B.
 ///
 ///@param w Vector about which to rotate.
-///@param A \f$\frac{\sin \theta}{\theta}
-///@param B \f$\frac{1 - \cos \theta}{\theta^2}
+///@param A \f$\frac{\sin \theta}{\theta}\f$
+///@param B \f$\frac{1 - \cos \theta}{\theta^2}\f$
+///@param R Matrix to hold the return value.
 ///@relates SO3
 template <typename Precision, typename VA, typename MA>
 inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
@@ -229,6 +230,8 @@ inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision 
 	}
 }
 
+///Perform the exponential of the matrix \f$ \sum_i w_iG_i\f$
+///@param w Weightings of the generator matrices.
 template <typename Precision>
 template<int S, typename VA>
 inline SO3<Precision> SO3<Precision>::exp(const Vector<S,Precision,VA>& w){
