@@ -59,7 +59,7 @@ namespace Internal{
 	template<class Lhs> Lhs operator+(const Lhs& v, One){return v+1;}
 	template<class Rhs> Rhs operator-(One, const Rhs& v){return 1-v;}
 	template<class Lhs> Lhs operator-(const Lhs& v, One){return v-1;}
-	int operator-(const One&)
+	inline int operator-(const One&)
 	{
 		return -1;
 	}
@@ -658,3 +658,4 @@ static Operator<Internal::Zero> Zeros;
 static Operator<Internal::Identity<Internal::One> > Identity;
 
 }
+
