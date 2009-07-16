@@ -43,6 +43,7 @@ namespace TooN {
 	/// @ingroup gEquations
 	template<typename Precision>
 	struct RobustI {
+		void set_sd(Precision x){ sd_inlier = x;} ///<Set the noise standard deviation.
 		double sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
 		inline Precision reweight(Precision x) {return 1/(sd_inlier+fabs(x));}  ///< Returns \f$w(x)\f$.
 		inline Precision true_scale(Precision x) {return reweight(x) - fabs(x)*reweight(x)*reweight(x);}  ///< Returns \f$w(x) + xw'(x)\f$.
@@ -55,7 +56,8 @@ namespace TooN {
 	/// @ingroup gEquations
 	template<typename Precision>
 	struct RobustII {
-		Precision sd_inlier; ///< The inlier standard deviation, \f$\sigma\f$.
+		void set_sd(Precision x){ sd_inlier = x*x;} ///<Set the noise standard deviation.
+		Precision sd_inlier; ///< The inlier standard deviation squared, \f$\sigma\f$.
 		inline Precision reweight(Precision d){return 1/(sd_inlier+d*d);} ///< Returns \f$w(x)\f$.
 		inline Precision true_scale(Precision d){return d - 2*d*reweight(d);} ///< Returns \f$w(x) + xw'(x)\f$.
 		inline Precision objective(Precision d){return 0.5 * log(1 + d*d/sd_inlier);} ///< Returns \f$\int xw(x)dx\f$.
@@ -67,11 +69,34 @@ namespace TooN {
 	/// @ingroup gEquations
 	template<typename Precision>
 	struct ILinear {
+		void set_sd(Precision){} ///<Set the noise standard deviation (does nothing).
 		inline Precision reweight(Precision d){return 1;} ///< Returns \f$w(x)\f$.
 		inline Precision true_scale(Precision d){return 1;} ///< Returns \f$w(x) + xw'(x)\f$.
 		inline Precision objective(Precision d){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
 	};
+	
+	///A reweighting class where the objective function tends to a 
+	///fixed value, rather than infinity. Note that this is not therefore
+	///a proper distribution since its integral is not finite. It is considerably
+	///more efficient than RobustI and II, since log() is not used.
+	/// @ingroup gEquations
+	template<typename Precision>
+	struct RobustIII {
 
+		void set_sd(Precision x){ sd_inlier = x*x;} ///<Set the noise standard deviation.
+		T sd_inlier; ///< Inlier standard deviation squared.
+		/// Returns \f$w(x)\f$.
+		T reweight(T x) const
+		{
+			double d = (1 + x*x/sd_inlier);
+			return 1/(d*d);
+		}	
+		///< Returns \f$\int xw(x)dx\f$.
+		T objective(T x) const 
+		{
+			return x*x / (2*(1 + x*x/sd_inlier));
+		}
+	};
 
 	/// Performs iterative reweighted least squares.
 	/// @param Size the size
