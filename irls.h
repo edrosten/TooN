@@ -84,15 +84,15 @@ namespace TooN {
 	struct RobustIII {
 
 		void set_sd(Precision x){ sd_inlier = x*x;} ///<Set the noise standard deviation.
-		T sd_inlier; ///< Inlier standard deviation squared.
+		Precision sd_inlier; ///< Inlier standard deviation squared.
 		/// Returns \f$w(x)\f$.
-		T reweight(T x) const
+		Precision reweight(Precision x) const
 		{
 			double d = (1 + x*x/sd_inlier);
 			return 1/(d*d);
 		}	
 		///< Returns \f$\int xw(x)dx\f$.
-		T objective(T x) const 
+		Precision objective(Precision x) const 
 		{
 			return x*x / (2*(1 + x*x/sd_inlier));
 		}
