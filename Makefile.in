@@ -7,7 +7,12 @@ datarootdir = @datarootdir@
 
 hdr = $(DESTDIR)/$(includedir)/TooN
 
+
+.PHONY: all
+
 all:
+	@echo There is nothing to be compiled in TooN.
+	@echo It is now ready to be installed.
 
 install:
 	mkdir -p $(hdr)
