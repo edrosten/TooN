@@ -208,7 +208,7 @@ public:
 
 
 	/// Returns the eigenvalues of the matrix.
-	/// The eigenvalues are listed in order, from the largest to the smallest.
+	/// The eigenvalues are listed in order, from the smallest to the largest.
 	/// These are also the diagonal values of the matrix \f$\Lambda\f$. 
 	Vector<Size, Precision>& get_evalues() {return my_evalues;}
 	/**\overload
