@@ -723,7 +723,7 @@ around LAPACK.
 // Modules classifying classes and functions
 
 /// @defgroup gLinAlg Linear Algebra
-/// %Vector and matrix classes, and helpers.
+/// \link TooN::Vector Vector\endlink  and \link TooN::Matrix Matrix \endlink classes, and helpers.
 
 /// @defgroup gDecomps Matrix decompositions
 /// Classes to perform matrix decompositions, used to solve 

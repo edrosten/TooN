@@ -309,12 +309,16 @@ public:
 		Matrix<2,3> m(d);
 		double e = m(1,2);     // now e = 6.0;
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		const double& operator() (int r, int c) const;
 
 		/**
 		Access an element from the matrix.
 		@param row_col <code>row_col.first</code> holds the row, <code>row_col.second</code> holds the column.
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		const double& operator[](const std::pair<int,int>& row_col) const;
 		/**
@@ -332,6 +336,8 @@ public:
 		m(1,2) = 8;     // now d = [1 2 3]
 					  //         [4 5 8]
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		double& operator() (int r, int c);
 
@@ -348,6 +354,8 @@ public:
 		Vector<3> v = m[1];       // now v = [4 5 6];
 		Vector<2> v2 = m.T()[0];  // now v2 = [1 4];
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		const Vector& operator[] (int r) const;
 
@@ -366,18 +374,20 @@ public:
 		m.T()[1] = v; // now m = [0 8 0]
 					//         [4 9 6]
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		Vector& operator[] (int r);
 
 		/// How many rows does this matrix have?
+		/// @internal
+		/// This method is not defined by Matrix: it is inherited.
 		int num_rows() const;
 
 		/// How many columns does this matrix have?
+		/// @internal
+		/// This method is not defined by Matrix: it is inherited.
 		int num_cols() const;
-
-		/// What is the memory layout of this matrix?
-		{RowMajor, ColMajor} layout const;
-		//@}
 
 		/// @name Transpose and sub-matrices
 		//@{
@@ -393,6 +403,8 @@ public:
 		m.T()[1] = v; // now m = [0 8 0]
 					//         [4 9 6]
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		const Matrix<Cols, Rows>& T() const;
 
@@ -412,6 +424,8 @@ public:
 		general, it is not  necessary to say <code>M=M.T()</code>, since you can use
 		M.T() for free whenever you need the transpose, but if you do need to, you
 		have to use the Tranpose() function defined in <code>helpers.h</code>.
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		Matrix<Cols, Rows>& T();
 
@@ -425,6 +439,8 @@ public:
 		Matrix<2> b = m.slice<0,0,2,2>();  // b = [1 2]
 										  //     [4 5]
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		template<Rstart, Cstart, Rsize, Csize>
 		const Matrix<Rsize, Csize>& slice() const;
@@ -439,6 +455,8 @@ public:
 		Zero(m.slice<0,2,2,1>());  // b = [1 2 0]
 								  //     [4 5 0]
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		template<Rstart, Cstart, Rsize, Csize>
 		Matrix<Rsize, Csize>& slice();
@@ -452,6 +470,8 @@ public:
 		Extract the top-left 2x2 matrix
 		Matrix<2> b = m.slice(0,0,2,2);
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		const Matrix<>& slice(int rstart, int cstart, int rsize, int csize) const;
 
@@ -463,6 +483,8 @@ public:
 		Matrix<> m(3,3);
 		Zero(m.slice(0,0,2,2));
 		@endcode
+		@internal
+		This method is not defined by Matrix: it is inherited.
 		*/
 		Matrix<>& slice(int rstart, int cstart, int rsize, int csize);
 

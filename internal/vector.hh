@@ -211,9 +211,14 @@ public:
 	/// Vector<3> v;
 	/// v[0] = 10;
 	/// @endcode
+	///
+	/// @internal
+	/// This method is not defined by Vector: it is inherited.
 	Precision& operator[] (int i);
 
-	/// access an element of a constant vector
+	/**
+		@overload
+	*/
 	const Precision& operator[] (int i) const;
 
 	/// @}
@@ -360,6 +365,8 @@ public:
 	   Vector<3> a = makeVector(1,2,3);
 	   Matrix<1,3> m = a.as_row();  // now m = [1 2 3]
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	Matrix<1, Size, Precision> as_row();
   
@@ -370,6 +377,8 @@ public:
 	   Vector<3> a = makeVector(1,2,3);
 	   Matrix<3,1> m = a.as_col();   // now m = [1 2 3]'
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	Matrix<Size, 1, Precision> as_col();
   
@@ -381,6 +390,8 @@ public:
 	   Vector<3> v2 = makeVector(2,3,4);
 	   Vector<3> v3 = v.as_diagonal() * v2; // now v3 = (2,6,12)
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	DiagonalMatrix<Size,Precision> as_diagonal();
 
@@ -392,6 +403,8 @@ public:
 	   Extract the three elements starting from element 2
 	   Vector<3> b = a.slice<2,3>();  /// b = [3 4 5]
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	template<Start, Length>
 	const Vector<Length,Precision>& slice() const;
@@ -406,6 +419,8 @@ public:
 	   // replace the two elements starting from element 1 with b
 	   a.slice<1, 2>() = b;       /// now a = [1 8 9 4 5]
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	template<Start, Length>
 	Vector<Length,Precision>& slice();
@@ -419,6 +434,8 @@ public:
 	   Extract the three elements starting from element 2
 	   Vector<> b = a.slice(2,3);  /// b = [3 4 5]
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	template<Start, Length>
 	const Vector<Length,Precision>& slice() const;
@@ -433,6 +450,8 @@ public:
 	   Extract the three elements starting from element 2
 	   a.slice(2,3)[0] = 17;  /// a -> [1 2 17 4 5]
 	   @endcode
+	   @internal
+	   This method is not defined by Vector: it is inherited.
 	*/
 	template<Start, Length>
 	Vector<Length,Precision>& slice();

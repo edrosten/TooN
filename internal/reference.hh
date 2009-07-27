@@ -89,7 +89,11 @@ template<class Precision>           inline const Vector<Dynamic, Precision, Refe
 template<int Size, class Precision> inline       Vector<Size,    Precision, Reference> wrapVector(Precision* data)                 { return Vector<Size,    Precision, Reference>(data); }
 template<int Size, class Precision> inline const Vector<Size,    Precision, Reference> wrapVector(const Precision* data)           { return Vector<Size,    Precision, Reference>(const_cast<Precision*>(data)); }
 
-
+///Wrap external data as a \link TooN::Matrix Matrix \endlink
+///As usual, if template sizes are provided, then the run-time size is only
+///used if the template size is not Dynamic.
+///@ingroup gLinAlg
+///@{
 //Fully static matrices, ie no size parameters
 template<int Rows, int Cols>                  inline       Matrix<Rows, Cols,       double,    Reference::RowMajor> wrapMatrix(double*    data)                     { return Matrix<Rows, Cols, double, Reference::RowMajor>(data);}
 template<int Rows, int Cols>                  inline const Matrix<Rows, Cols,       double,    Reference::RowMajor> wrapMatrix(const double*    data)                     { return Matrix<Rows, Cols, double, Reference::RowMajor>(const_cast<double*>(data));}
@@ -105,4 +109,5 @@ template<int Rows, int Cols, class Precision> inline const Matrix<Rows, Cols,   
                                               inline const Matrix<Dynamic, Dynamic, double,    Reference::RowMajor> wrapMatrix(const double*    data, int rows, int cols) { return Matrix<Dynamic, Dynamic, double, Reference::RowMajor>(const_cast<double*>(data), rows, cols);}
 template<class Precision>                     inline       Matrix<Dynamic, Dynamic, Precision, Reference::RowMajor> wrapMatrix(Precision* data, int rows, int cols) { return Matrix<Dynamic, Dynamic, Precision, Reference::RowMajor>(data, rows, cols);}
 template<class Precision>                     inline const Matrix<Dynamic, Dynamic, Precision, Reference::RowMajor> wrapMatrix(const Precision* data, int rows, int cols) { return Matrix<Dynamic, Dynamic, Precision, Reference::RowMajor>(const_cast<Precision*>(data), rows, cols);}
+///@}
 }

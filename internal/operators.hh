@@ -41,9 +41,14 @@ namespace Internal {
 	///This function offers to return a value of type C. This function
 	///is not implemented anywhere, the result is used for type deduction.
 	template<class C> C gettype();
-
+	
+	///@internal
+	///Determine if two classes are in the same field. For the purposes of
+	///%TooN \c float and \c int are in the same field, since operator
+	///+,-,*,/ are defined for any combination of \c float and \c int.
 	template<class L, class R> struct Field
-	{
+	{	
+		///<Set to 1 if the two classes are in the same field.
 		static const int is = IsField<L>::value && IsField<R>::value;
 	};
 

@@ -70,8 +70,10 @@ namespace TooN {
 #endif
 	
 	using std::numeric_limits;
-	///Is a number a field? ie, *, -, *, / defined.
+	///Is a number a field? ie, +, -, *, / defined.
 	///Specialize this to make TooN work properly with new types.
+	///@internal
+	///Internal::Field determines if two classes are in the same field.
 	///@ingroup gLinAlg
 	template<class C> struct IsField
 	{

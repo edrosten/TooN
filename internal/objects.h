@@ -63,6 +63,8 @@ namespace Internal{
 	template<class Lhs> Lhs operator+(const Lhs& v, One){return v+1;} ///<Adds One to something
 	template<class Rhs> Rhs operator-(One, const Rhs& v){return 1-v;} ///<Subtracts something from One
 	template<class Lhs> Lhs operator-(const Lhs& v, One){return v-1;} ///<Subtracts One from something.
+
+	///Returns negative One.
 	inline int operator-(const One&)
 	{
 		return -1;
