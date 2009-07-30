@@ -471,14 +471,16 @@ namespace TooN {
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_vertical_functor {
-            Vector<Dynamic,Precision>& bestVal;
+            Vector<Dynamic,Precision>* bestVal;
         public:
-            accumulate_vertical_functor() :
-                bestVal( *(new Vector<Dynamic,Precision>( 0 )) ) {}
-            accumulate_vertical_functor( int nNumCols ) :
-                bestVal( *(new Vector<Dynamic,Precision>( nNumCols )) ) {}
-            Vector<Dynamic,Precision>& null() {
-                return ret();
+            accumulate_vertical_functor() {
+                bestVal = NULL;
+            }
+            accumulate_vertical_functor( int nNumCols ) {
+                bestVal = new Vector<Dynamic,Precision>( nNumCols );
+            }
+            Vector<Dynamic,Precision> null() {
+                return Vector<Dynamic,Precision>();
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal[nCol] = initialVal;
@@ -488,23 +490,30 @@ namespace TooN {
                     bestVal[nCol] = curVal;
                 }
             }
-            Vector<Dynamic,Precision>& ret() { return bestVal; }            
+            Vector<Dynamic,Precision> ret() {
+                if( bestVal == NULL ) {
+                    return null();
+                }
+                Vector<Dynamic,Precision> vRet = *bestVal; 
+                delete bestVal;
+                return vRet;
+            }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_element_vertical_functor {
-            Vector<Dynamic,Precision>& bestVal;
-            Vector<Dynamic,Precision>& bestIndices;
+            Vector<Dynamic,Precision>* bestVal;
+            Vector<Dynamic,Precision>* bestIndices;
         public:
-            accumulate_element_vertical_functor() :
-                bestVal( *(new Vector<Dynamic,Precision>( 0 )) ),
-                bestIndices( *(new Vector<Dynamic,Precision>( 0 )) )
-            {}
-            accumulate_element_vertical_functor( int nNumCols ) :
-                bestVal( *(new Vector<Dynamic,Precision>( nNumCols )) ),
-                bestIndices( *(new Vector<Dynamic,Precision>( nNumCols )) )
-            {}
-            std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&> null() {
-                return ret();
+            accumulate_element_vertical_functor() {
+                bestVal = NULL;
+                bestIndices = NULL;
+            }
+            accumulate_element_vertical_functor( int nNumCols ) {
+                bestVal = new Vector<Dynamic,Precision>( nNumCols );
+                bestIndices = new Vector<Dynamic,Precision>( nNumCols );
+            }
+            std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > null() {
+                return std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> >();
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal[nCol] = initialVal;
@@ -516,20 +525,29 @@ namespace TooN {
                     bestIndices[nCol] = nRow;
                 }
             }
-            std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&> ret() {
-                return std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&>( bestVal, bestIndices );
+            std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > ret() {
+                if( bestVal == NULL ) {
+                    retrurn null();
+                }
+                std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > vRet = 
+                    std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > (*bestVal, *bestIndices );
+                delete bestVal; bestVal = NULL;
+                delete bestIndices; bestIndices = NULL;
+                return vRet;
             }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_horizontal_functor {
-            Vector<Dynamic,Precision>& bestVal;
+            Vector<Dynamic,Precision>* bestVal;
         public: 
-            accumulate_horizontal_functor() :
-                bestVal( *(new Vector<Dynamic,Precision>( 0 )) ) {}
-            accumulate_horizontal_functor( int nNumRows ) :
-                bestVal( *(new Vector<Dynamic,Precision>( nNumRows )) ) {}
-            Vector<Dynamic,Precision>& null() {
-                return bestVal;
+            accumulate_horizontal_functor() {
+                bestVal = NULL;
+            }
+            accumulate_horizontal_functor( int nNumRows ) {
+                bestVal = new Vector<Dynamic,Precision>( nNumRows );
+            }
+            Vector<Dynamic,Precision> null() {
+                return Vector<Dynamic,Precision>();
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal[nRow] = initialVal;
@@ -539,21 +557,30 @@ namespace TooN {
                     bestVal[nRow] = curVal;
                 }
             }
-            Vector<Dynamic,Precision>& ret() { return bestVal; }            
+            Vector<Dynamic,Precision> ret() { 
+                if( bestVal == NULL ) {
+                    return null();
+                }
+                Vector<Dynamic,Precision> vRet = *bestVal;
+                delete bestVal; bestVal = NULL;
+                return vRet; 
+            }            
         };
         template<typename Precision, typename ComparisonFunctor>
         class accumulate_element_horizontal_functor {
-            Vector<Dynamic,Precision>& bestVal;
-            Vector<Dynamic,Precision>& bestIndices;
+            Vector<Dynamic,Precision>* bestVal;
+            Vector<Dynamic,Precision>* bestIndices;
         public:
-            accumulate_element_horizontal_functor() :
-                bestVal( *(new Vector<Dynamic,Precision>( 0 )) ),
-                bestIndices( *(new Vector<Dynamic,Precision>( 0 )) ) {}
-            accumulate_element_horizontal_functor( int nNumRows ) :
-                bestVal( *(new Vector<Dynamic,Precision>( nNumRows )) ),
-                bestIndices( *(new Vector<Dynamic,Precision>( nNumRows )) ) {}
-            std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&> null() {
-                return ret();
+            accumulate_element_horizontal_functor() {
+                bestVal = NULL;
+                bestIndices = NULL;
+            }
+            accumulate_element_horizontal_functor( int nNumRows ) {
+                bestVal = new Vector<Dynamic,Precision>( nNumRows );
+                bestIndices = new Vector<Dynamic,Precision>( nNumRows );
+            }
+            std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > null() {
+                return std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> >();
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
                 bestVal[nRow] = initialVal;
@@ -565,8 +592,15 @@ namespace TooN {
                     bestIndices[nRow] = nCol;
                 }
             }
-            std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&> ret() {
-                return std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&>( bestVal, bestIndices );
+            std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > ret() {
+                if( bestVal == NULL ) {
+                    return null();
+                }
+                std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > vRet = 
+                    std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision>>( *bestVal, *bestIndices );
+                delete bestVal; bestVal = NULL;
+                delete bestIndices; bestIndices = NULL;
+                return vRet;
             }            
         };
     }
@@ -606,34 +640,34 @@ namespace TooN {
 	/// Finds the smallest values of each column of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size C
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision>& min_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_vertical_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
         return Internal::accumulate_vertical<R,C,Precision,Base,
-            matrix_accumulate_vertical_functor, Vector<Dynamic,Precision>& >( m );
+            matrix_accumulate_vertical_functor, Vector<Dynamic,Precision> >( m );
     }
 	/// Finds the largest values of each column of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size C
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision>& max_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_vertical_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
         return Internal::accumulate_vertical<R,C,Precision,Base,
-            matrix_accumulate_vertical_functor, Vector<Dynamic,Precision>& >( m );
+            matrix_accumulate_vertical_functor, Vector<Dynamic,Precision> >( m );
     }
 	/// Finds the smallest values of each row of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size R
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision>& min_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_horizontal_functor<Precision,std::less<Precision> > matrix_accumulate_horizontal_functor;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
-            matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision>& >( m );
+            matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision> >( m );
     }
 	/// Finds the largest values of each row of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size R
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision>& max_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_horizontal_functor<Precision,std::greater<Precision> > matrix_accumulate_horizontal_functor;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
-            matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision>& >( m );
+            matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision> >( m );
     }
 	/// Finds the smallest value of a vector and its index.
 	/// @param v a vector
@@ -676,9 +710,9 @@ namespace TooN {
 	/// @param m a matrix
 	/// @return a pair of vectors of size C containg the values and
 	/// their indices
-    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<Dynamic,Precision>&,Vector<Dynamic,Precision>&> min_element_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > min_element_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_element_vertical_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
-        typedef std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> Ret;
+        typedef std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > Ret;
         return Internal::accumulate_vertical<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Ret >( m );
     }
@@ -687,9 +721,9 @@ namespace TooN {
 	/// @param m a matrix
 	/// @return a pair of vectors of size C containg the values and
 	/// their indices
-    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> max_element_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > max_element_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_element_vertical_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
-        typedef std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> Ret;
+        typedef std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > Ret;
         return Internal::accumulate_vertical<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Ret >( m );
     }
@@ -698,9 +732,9 @@ namespace TooN {
 	/// @param m a matrix
 	/// @return a pair of vectors of size R containg the values and
 	/// their indices
-    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> min_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > min_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_element_horizontal_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
-        typedef std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> Ret;
+        typedef std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > Ret;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Ret >( m );
     }
@@ -709,9 +743,9 @@ namespace TooN {
 	/// @param m a matrix
 	/// @return a pair of vectors of size R containg the values and
 	/// their indices
-    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> max_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > max_element_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_element_horizontal_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
-        typedef std::pair<Vector< Dynamic, Precision >&,Vector< Dynamic, Precision >&> Ret;
+        typedef std::pair<Vector< Dynamic, Precision >,Vector< Dynamic, Precision > > Ret;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Ret >( m );
     }
