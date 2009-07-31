@@ -483,11 +483,11 @@ namespace TooN {
                 return Vector<Dynamic,Precision>( 0 );
             }
             void initialise( Precision initialVal, int, int nCol ) {
-                bestVal[nCol] = initialVal;
+                (*bestVal)[nCol] = initialVal;
             }
             void operator()( Precision curVal, int, int nCol ) {
                 if( ComparisonFunctor()( curVal, (*bestVal)[nCol] ) ) {
-                    bestVal[nCol] = curVal;
+                    (*bestVal)[nCol] = curVal;
                 }
             }
             Vector<Dynamic,Precision> ret() {
@@ -517,13 +517,13 @@ namespace TooN {
                 return std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> >( vEmpty, vEmpty );
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
-                bestVal[nCol] = initialVal;
-                bestIndices[nCol] = nRow;
+                (*bestVal)[nCol] = initialVal;
+                (*bestIndices)[nCol] = nRow;
             }
             void operator()( Precision curVal, int nRow, int nCol ) {
                 if( ComparisonFunctor()( curVal, (*bestVal)[nCol] ) ) {
-                    bestVal[nCol] = curVal;
-                    bestIndices[nCol] = nRow;
+                    (*bestVal)[nCol] = curVal;
+                    (*bestIndices)[nCol] = nRow;
                 }
             }
             std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > ret() {
@@ -551,11 +551,11 @@ namespace TooN {
                 return Vector<Dynamic,Precision>( 0 );
             }
             void initialise( Precision initialVal, int nRow, int ) {
-                bestVal[nRow] = initialVal;
+                (*bestVal)[nRow] = initialVal;
             }
             void operator()( Precision curVal, int nRow, int ) {
                 if( ComparisonFunctor()( curVal, (*bestVal)[nRow] ) ) {
-                    bestVal[nRow] = curVal;
+                    (*bestVal)[nRow] = curVal;
                 }
             }
             Vector<Dynamic,Precision> ret() { 
@@ -585,13 +585,13 @@ namespace TooN {
                 return std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> >( vEmpty, vEmpty );
             }
             void initialise( Precision initialVal, int nRow, int nCol ) {
-                bestVal[nRow] = initialVal;
-                bestIndices[nRow] = nCol;
+                (*bestVal)[nRow] = initialVal;
+                (*bestIndices)[nRow] = nCol;
             }
             void operator()( Precision curVal, int nRow, int nCol ) {
                 if( ComparisonFunctor()( curVal, (*bestVal)[nRow] ) ) {
-                    bestVal[nRow] = curVal;
-                    bestIndices[nRow] = nCol;
+                    (*bestVal)[nRow] = curVal;
+                    (*bestIndices)[nRow] = nCol;
                 }
             }
             std::pair<Vector<Dynamic,Precision>,Vector<Dynamic,Precision> > ret() {
