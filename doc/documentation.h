@@ -247,10 +247,15 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 		note that you need to specify the size in the dynamic case.
 
+		Matrices can be filled from data in row-major order:
+		@code
+			Matrix<3> m = data(1, 2, 3, 4, 5, 6, 7, 8, 9);
+		@endcode
+
 		A less general, but visually more pleasing syntax can also be used:
 		@code
 			Vector<5> v;
-			Fill(v) v = 1,2,3,4,5; 
+			Fill(v) = 1,2,3,4,5; 
 
 			Matrix<3,3> m;
 			Fill(m) = 1, 2, 3, 

@@ -260,6 +260,9 @@ namespace TooN {
 
 #include <TooN/internal/diagmatrix.h>
 
+#include <TooN/internal/data.hh>
+#include <TooN/internal/data_functions.hh>
+
 #include <TooN/helpers.h>
 
 #endif
