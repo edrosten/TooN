@@ -39,71 +39,87 @@
 
 namespace TooN {
 
-///Default condition number for SymEigen::backsub, SymEigen::get_pinv and SymEigen::get_inv_diag
-static const double symeigen_condition_no=1e9;
 
-///Helper struct for computing eigensystems, to allow for specialization on
-///2x2 matrices.
-///@ingroup gInternal
-template <int Size> struct ComputeSymEigen {
+namespace Internal{
+	///Default condition number for SymEigen::backsub, SymEigen::get_pinv and SymEigen::get_inv_diag
+	static const double symeigen_condition_no=1e9;
 	
-	///Compute an eigensystem.
-	///@param m Input matrix (assumed to be symmetric)
-	///@param evectors Eigen vector output
-	///@param evalues Eigen values output
-	template<typename P, typename B>
-	static inline void compute(const Matrix<Size,Size,P, B>& m, Matrix<Size,Size,P> & evectors, Vector<Size, P>& evalues) {
-		evectors = m;
-		int N = evalues.size();
-		int lda = evalues.size();
-		int info;
-		int lwork=-1;
-		P size;
-
-		// find out how much space fortran needs
-		syev_((char*)"V",(char*)"U",&N,&evectors[0][0],&lda,&evalues[0], &size,&lwork,&info);
-		lwork = int(size);
-		Vector<Dynamic, P> WORK(lwork);
-
-		// now compute the decomposition
-		syev_((char*)"V",(char*)"U",&N,&evectors[0][0],&lda,&evalues[0], &WORK[0],&lwork,&info);
-
-		if(info!=0){
-			std::cerr << "In SymEigen<"<<Size<<">: " << info 
-					<< " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
-					<< "M = " << m << std::endl;
-		}
-	}
-};
-
-template <> struct ComputeSymEigen<2> {
-
-	template<typename P, typename B>
-	static inline void compute(const Matrix<2,2,P,B>& m, Matrix<2,2,P>& eig, Vector<2, P>& ev) {
-		double trace = m[0][0] + m[1][1];
-		double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
-		double disc = trace*trace - 4 * det;
-		assert(disc>=0);
-        using std::sqrt;
-		double root_disc = sqrt(disc);
-		ev[0] = 0.5 * (trace - root_disc);
-		ev[1] = 0.5 * (trace + root_disc);
-		double a = m[0][0] - ev[0];
-		double b = m[0][1];
-		double magsq = a*a + b*b;
-		if (magsq == 0) {
-			eig[0][0] = 1.0;
-			eig[0][1] = 0;
-		} else {
-			eig[0][0] = -b;
-			eig[0][1] = a;
-			eig[0] *= 1.0/sqrt(magsq);
-		}
-		eig[1][0] = -eig[0][1];
-		eig[1][1] = eig[0][0];
-	}
-};
+	///@internal
+	///@brief Compute eigensystems for sizes > 2
+	///Helper struct for computing eigensystems, to allow for specialization on
+	///2x2 matrices.
+	///@ingroup gInternal
+	template <int Size> struct ComputeSymEigen {
 		
+		///@internal
+		///Compute an eigensystem.
+		///@param m Input matrix (assumed to be symmetric)
+		///@param evectors Eigen vector output
+		///@param evalues Eigen values output
+		template<typename P, typename B>
+		static inline void compute(const Matrix<Size,Size,P, B>& m, Matrix<Size,Size,P> & evectors, Vector<Size, P>& evalues) {
+			evectors = m;
+			int N = evalues.size();
+			int lda = evalues.size();
+			int info;
+			int lwork=-1;
+			P size;
+
+			// find out how much space fortran needs
+			syev_((char*)"V",(char*)"U",&N,&evectors[0][0],&lda,&evalues[0], &size,&lwork,&info);
+			lwork = int(size);
+			Vector<Dynamic, P> WORK(lwork);
+
+			// now compute the decomposition
+			syev_((char*)"V",(char*)"U",&N,&evectors[0][0],&lda,&evalues[0], &WORK[0],&lwork,&info);
+
+			if(info!=0){
+				std::cerr << "In SymEigen<"<<Size<<">: " << info 
+						<< " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
+						<< "M = " << m << std::endl;
+			}
+		}
+	};
+
+	///@internal
+	///@brief Compute 2x2 eigensystems 
+	///Helper struct for computing eigensystems, specialized on 2x2 matrices.
+	///@ingroup gInternal
+	template <> struct ComputeSymEigen<2> {
+
+		///@internal
+		///Compute an eigensystem.
+		///@param m Input matrix (assumed to be symmetric)
+		///@param eig Eigen vector output
+		///@param ev Eigen values output
+		template<typename P, typename B>
+		static inline void compute(const Matrix<2,2,P,B>& m, Matrix<2,2,P>& eig, Vector<2, P>& ev) {
+			double trace = m[0][0] + m[1][1];
+			double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+			double disc = trace*trace - 4 * det;
+			assert(disc>=0);
+			using std::sqrt;
+			double root_disc = sqrt(disc);
+			ev[0] = 0.5 * (trace - root_disc);
+			ev[1] = 0.5 * (trace + root_disc);
+			double a = m[0][0] - ev[0];
+			double b = m[0][1];
+			double magsq = a*a + b*b;
+			if (magsq == 0) {
+				eig[0][0] = 1.0;
+				eig[0][1] = 0;
+			} else {
+				eig[0][0] = -b;
+				eig[0][1] = a;
+				eig[0] *= 1.0/sqrt(magsq);
+			}
+			eig[1][0] = -eig[0][1];
+			eig[1][1] = eig[0][0];
+		}
+	};
+
+};
+
 /**
 Performs eigen decomposition of a matrix.
 Real symmetric (and hence square matrices) can be decomposed into
@@ -146,7 +162,7 @@ public:
 	inline void compute(const Matrix<R,C,Precision,B>& m){
 		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
 		SizeMismatch<R, Size>::test(m.num_rows(), my_evectors.num_rows());
-		ComputeSymEigen<Size>::compute(m, my_evectors, my_evalues);
+		Internal::ComputeSymEigen<Size>::compute(m, my_evectors, my_evalues);
 	}
 
 	/// Calculate result of multiplying the (pseudo-)inverse of M by a vector. 
