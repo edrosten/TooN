@@ -120,29 +120,39 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return my_data[i * stride()];
 	}
 
+	//Completely generic Vector slice operations below:
+	template<int Start, int Length> 
+	Vector<Length, Precision, SliceVBase<Stride> > slice(int start, int length){
+		Internal::CheckSlice<Size, Start, Length>::check(size(), start, length);	
+		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
+	}
 
 	template<int Start, int Length> 
-	Vector<Length, Precision, SliceVBase<Stride> > slice(){
-		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride()*Start, Length, stride(), Slicing());
+	const Vector<Length, Precision, SliceVBase<Stride> > slice(int start, int length) const{
+		Internal::CheckSlice<Size, Start, Length>::check(size(), start, length);	
+		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
 	}
 
-	template<int Start, int Length> 
-	const Vector<Length, Precision, SliceVBase<Stride> > slice() const {
-		Internal::CheckStaticSlice<Size, Start, Length>::check(size());
-		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*Start), Length, stride(), Slicing());
+	//Special case slice operations
+	template<int Start, int Length> Vector<Length, Precision, SliceVBase<Stride> > slice(){
+		Internal::CheckSlice<Size, Start, Length>::check();
+		return slice<Start, Length>(Start, Length);
 	}
 
-	Vector<-1, Precision, SliceVBase<Stride> > slice(int start, int length){
-		Internal::CheckDynamicSlice::check(size(), start, length);
-		return Vector<-1, Precision, SliceVBase<Stride> >(my_data + stride()*start, length, stride(), Slicing());
+	template<int Start, int Length> const Vector<Length, Precision, SliceVBase<Stride> > slice() const {
+		Internal::CheckSlice<Size, Start, Length>::check();
+		return slice<Start, Length>(Start, Length);
 	}
 
-	const Vector<-1, Precision, SliceVBase<Stride> > slice(int start, int length) const {
-		Internal::CheckDynamicSlice::check(size(), start, length);
-		return Vector<-1, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data + stride()*start), length, stride(), Slicing());
+	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int start, int length){
+		return slice<Dynamic, Dynamic>(start, length);
 	}
 
+	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int start, int length) const{
+		return slice<Dynamic, Dynamic>(start, length);
+	}
+	
+	//Other slices below
 	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
 		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, size(), 1, stride(), Slicing());
 	}

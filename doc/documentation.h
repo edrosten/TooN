@@ -309,9 +309,13 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	is checked at run-time in the dynamic case (with some additions). Checks can
 	be disabled with various macros. Note that the optimizer will usually
 	remove run-time checks on static objects if the test passes.
+	- Static/Dynamic mismatch
+		- Statically determined functions accept and ignore dynamically specified
+		  sizes. Nevertheless, it is an error if they do not match.
+		- Disable with \c TOON_NDEBUG_MISMATCH
 	- Slices
 		- Disable with \c TOON_NDEBUG_SLICE
-	- Sizes
+	- Size checks (for assignment)
 		- Disable with \c TOON_NDEBUG_SIZE
 	- overfilling using Fill 
 		- Disable with \c TOON_NDEBUG_FILL

@@ -23,7 +23,7 @@ int main()
 
 	make_a_copy_constructor_happen(v1);
 
-	cout << Scalars(1) + (v1 + v2)+Scalars(2) << endl;
+	cout << Ones + (v1 + v2)+2*Ones << endl;
 
 	v1.slice<0, 2>() /= 2;
 	cout << v1 << endl;
