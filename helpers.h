@@ -86,27 +86,15 @@ namespace TooN {
 		return v * (1/sqrt(v*v));
 	}
 	
-	//Note because of the overload later, this function will ONLY receive sliced vectors. Therefore
-	//a copy can be made, which is still a slice, so operating on the copy operates on the original
-	//data.
 	///Normalize a vector in place
 	///@param v Vector to normalize
 	///@ingroup gLinAlg
-	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base> v)
+	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base>& v)
 	{
 		using std::sqrt;
 		v /= sqrt(v*v);
 	}
 	
-	//This overload is required to operate on non-slice vectors
-	/**
-		\overload
-	*/  
-	template<int Size, class Precision> inline void normalize(Vector<Size, Precision> & v)
-	{
-		normalize(v.as_slice());
-	}
-
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i-1}] / v_i \f$
 	///@param v \e v
 	///@ingroup gLinAlg
