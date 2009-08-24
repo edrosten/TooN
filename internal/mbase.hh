@@ -160,39 +160,63 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 		return Vec(const_cast<Precision*>(my_data + rowstride()* r), num_cols(), colstride(), Slicing());
 	}
 
+	
+	//Generic matrix slicing
+	template<int Rstart, int Cstart, int Rlength, int Clength>
+	Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl){
+		Internal::CheckSlice<Rows, Rstart, Rlength>::check(num_rows(), rs, rl);
+		Internal::CheckSlice<Cols, Cstart, Clength>::check(num_cols(), cs, cl);
 
+		//Always pass the size and stride as a run-time parameter. It will be ignored
+		//by SliceHolder (above) if it is statically determined.
+		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(
+		       my_data+rowstride()*(Rstart==Dynamic?rs:Rstart) + colstride()*(Cstart==Dynamic?cs:Cstart), 
+			   Rlength==Dynamic?rl:Rlength, 
+			   Clength==Dynamic?cl:Clength, 
+			   rowstride(), colstride(), Slicing());
+	}
 
+	template<int Rstart, int Cstart, int Rlength, int Clength>
+	const Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl) const{
+		Internal::CheckSlice<Rows, Rstart, Rlength>::check(num_rows(), rs, rl);
+		Internal::CheckSlice<Cols, Cstart, Clength>::check(num_cols(), cs, cl);
+
+		//Always pass the size and stride as a run-time parameter. It will be ignored
+		//by SliceHolder (above) if it is statically determined.
+		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(
+		       const_cast<Precision*>(my_data)+rowstride()*(Rstart==Dynamic?rs:Rstart) + colstride()*(Cstart==Dynamic?cs:Cstart), 
+			   Rlength==Dynamic?rl:Rlength, 
+			   Clength==Dynamic?cl:Clength, 
+			   rowstride(), colstride(), Slicing());
+	}
+
+	//Special cases of slicing
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice()
 	{
-		//Always pass the size and stride as a run-time parameter. It will be ignored
-		//by SliceHolder (above) if it is statically determined.
-		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
-		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(my_data+rowstride()*Rstart + colstride()*Cstart, Rlength, Clength, rowstride(), colstride(), Slicing());
+		//Extra checking in the static case
+		Internal::CheckSlice<Rows, Rstart, Rlength>::check();
+		Internal::CheckSlice<Cols, Cstart, Clength>::check();
+		return slice<Rstart, Cstart, Rlength, Clength>(Rstart, Cstart, Rlength, Clength);
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
 	const Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice() const
 	{
-		Internal::CheckStaticSlice<Rows, Rstart, Rlength>::check(num_rows());
-		Internal::CheckStaticSlice<Cols, Cstart, Clength>::check(num_cols());
-		return Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> >(const_cast<Precision*>(my_data+rowstride()*Rstart + colstride()*Cstart), Rlength, Clength, rowstride(), colstride(), Slicing());
+		Internal::CheckSlice<Rows, Rstart, Rlength>::check();
+		Internal::CheckSlice<Cols, Cstart, Clength>::check();
+		return slice<Rstart, Cstart, Rlength, Clength>(Rstart, Cstart, Rlength, Clength);
 	}
 
 	Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl){
-		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
-		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
-		return Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> >(my_data+rowstride()*rs +colstride()*cs, rl, cl, rowstride(), colstride(), Slicing());
+		return slice<Dynamic, Dynamic, Dynamic, Dynamic>(rs, cs, rl, cl);
 	}
 
 	const Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl) const {
-		Internal::CheckDynamicSlice::check(num_rows(), rs, rl);
-		Internal::CheckDynamicSlice::check(num_cols(), cs, cl);
-		return Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> >(const_cast<Precision*>(my_data+rowstride()*rs +colstride()*cs), rl, cl, rowstride(), colstride(), Slicing());
+		return slice<Dynamic, Dynamic, Dynamic, Dynamic>(rs, cs, rl, cl);
 	}
 
-
+	//Other slice related functions.
 	Matrix<Cols, Rows, Precision, Slice<SliceColStride,SliceRowStride> > T(){
 		return Matrix<Cols, Rows, Precision, Slice<SliceColStride,SliceRowStride> >(my_data, num_cols(), num_rows(), colstride(), rowstride(), Slicing());
 	}
