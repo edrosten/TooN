@@ -165,20 +165,20 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	
 	#define TOON_INTERNAL_MAKE_END(X)\
 	template<int Start, KnownEndMarker<X>(*End)()> \
-	Vector<(Size==Dynamic?Dynamic:Size-Start-X), Precision, SliceVBase<Stride> > slice(){\
+	Vector<(Size==Dynamic?Dynamic:Size-Start+X), Precision, SliceVBase<Stride> > slice(){\
 		return sliceend<Start, X>();\
 	}
 	
 	TOON_INTERNAL_MAKE_END(0);
-	TOON_INTERNAL_MAKE_END(1);
-	TOON_INTERNAL_MAKE_END(2);
-	TOON_INTERNAL_MAKE_END(3);
-	TOON_INTERNAL_MAKE_END(4);
-	TOON_INTERNAL_MAKE_END(5);
-	TOON_INTERNAL_MAKE_END(6);
-	TOON_INTERNAL_MAKE_END(7);
-	TOON_INTERNAL_MAKE_END(8);
-	TOON_INTERNAL_MAKE_END(9);
+	TOON_INTERNAL_MAKE_END(-1);
+	TOON_INTERNAL_MAKE_END(-2);
+	TOON_INTERNAL_MAKE_END(-3);
+	TOON_INTERNAL_MAKE_END(-4);
+	TOON_INTERNAL_MAKE_END(-5);
+	TOON_INTERNAL_MAKE_END(-6);
+	TOON_INTERNAL_MAKE_END(-7);
+	TOON_INTERNAL_MAKE_END(-8);
+	TOON_INTERNAL_MAKE_END(-9);
 
 	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::EndMarker e)
 	{		
