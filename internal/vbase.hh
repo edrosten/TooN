@@ -130,7 +130,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	template<int Start, int Length> 
 	const Vector<Length, Precision, SliceVBase<Stride> > slice(int start, int length) const{
 		Internal::CheckSlice<Size, Start, Length>::check(size(), start, length);	
-		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data) + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
 	}
 
 	//Special case slice operations
