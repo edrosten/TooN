@@ -32,6 +32,8 @@
 
 #include <TooN/TooN.h>
 #include <cmath>
+#include <vector>
+#include <algorithm>
 
 namespace TooN
 {
@@ -116,7 +118,9 @@ namespace TooN
       get_inv_diag(inv_diag,condition);
       return diagmult(get_V(),inv_diag) * get_U().T();
     }
-    
+
+    // Reorder the components so the singular values are in descending order
+    void reorder();
     
   protected:
     void Bidiagonalize();
@@ -484,5 +488,30 @@ namespace TooN
     return nMin;
   }
 
+  template<int M, int N, class Precision, bool WANT_U, bool WANT_V>
+  void GR_SVD<M,N,Precision,WANT_U,WANT_V>::reorder()
+  {
+    Matrix<M, N, Precision> mU_copy = mU;
+    Matrix<N, N, Precision> mV_copy = mV;
+    
+    std::vector<std::pair<Precision, unsigned int> > vSort;
+    vSort.reserve(N);
+    for(unsigned int i=0; i<N; ++i)
+      vSort.push_back(std::make_pair(-vDiagonal[i], i));
+    std::sort(vSort.begin(), vSort.end());
+    for(unsigned int i=0; i<N; ++i)
+      mU.T()[i] = mU_copy.T()[vSort[i].second];
+    for(unsigned int i=0; i<N; ++i)
+      mV.T()[i] = mV_copy.T()[vSort[i].second];
+    for(unsigned int i=0; i<N; ++i)
+      vDiagonal[i] = -vSort[i].first;
+  }
+
 }
 #endif
+
+
+
+
+
+
