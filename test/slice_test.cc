@@ -23,5 +23,9 @@ int main()
 	cout << u.slice(2, 3) << endl << endl;
 	
 	cout << project(v) << endl;
-	
+
+	cout << v.slice<1, End<0> >() << endl;	
+	cout << v.slice<1, End<-1> >() << endl;	
+	cout << v.slice(2, End()) << endl;	
+	cout << v.slice(2, End(-1)) << endl;	
 }

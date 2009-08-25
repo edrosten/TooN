@@ -228,9 +228,35 @@ namespace TooN {
 	#else
 		template<typename T> struct Operator;
 	#endif
-	
+
 	///Template size value used to indicate dynamically sized vectors and matrices.
 	static const int Dynamic = -1;
+
+	namespace Internal
+	{
+		template<int I> struct KnownEndMarker
+		{
+			static const int End=I;
+		};
+
+		struct EndMarker
+		{
+			int e;
+		};
+	};
+
+	template<int I> Internal::KnownEndMarker<I> End();
+
+	inline Internal::EndMarker End()
+	{
+		Internal::EndMarker end = {0};
+		return end;
+	}
+	inline Internal::EndMarker End(int e)
+	{
+		Internal::EndMarker end = {e};
+		return end;
+	}
 	
 	///All TooN classes default to using this precision for computations and storage.
 	typedef double DefaultPrecision;

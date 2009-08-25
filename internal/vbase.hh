@@ -133,6 +133,8 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data) + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
 	}
 
+	
+
 	//Special case slice operations
 	template<int Start, int Length> Vector<Length, Precision, SliceVBase<Stride> > slice(){
 		Internal::CheckSlice<Size, Start, Length>::check();
@@ -152,6 +154,37 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return slice<Dynamic, Dynamic>(start, length);
 	}
 	
+	//Vector slice with End
+	//eg:
+	//.slice<1, End<> >()
+	template<int Start, int End> 
+	Vector<(Size==Dynamic?Dynamic:Size-Start+End), Precision, SliceVBase<Stride> > sliceend(){
+		static const int Len = (Size==Dynamic?Dynamic:Size-Start+End);
+		return slice<Start, Len>();
+	}
+	
+	#define TOON_INTERNAL_MAKE_END(X)\
+	template<int Start, KnownEndMarker<X>(*End)()> \
+	Vector<(Size==Dynamic?Dynamic:Size-Start-X), Precision, SliceVBase<Stride> > slice(){\
+		return sliceend<Start, X>();\
+	}
+	
+	TOON_INTERNAL_MAKE_END(0);
+	TOON_INTERNAL_MAKE_END(1);
+	TOON_INTERNAL_MAKE_END(2);
+	TOON_INTERNAL_MAKE_END(3);
+	TOON_INTERNAL_MAKE_END(4);
+	TOON_INTERNAL_MAKE_END(5);
+	TOON_INTERNAL_MAKE_END(6);
+	TOON_INTERNAL_MAKE_END(7);
+	TOON_INTERNAL_MAKE_END(8);
+	TOON_INTERNAL_MAKE_END(9);
+
+	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::EndMarker e)
+	{		
+		return slice(i, size()-i+e.e);
+	}		
+
 	//Other slices below
 	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
 		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, size(), 1, stride(), Slicing());
