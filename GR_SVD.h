@@ -69,6 +69,7 @@ namespace TooN
     
     Precision get_largest_singular_value();
     Precision get_smallest_singular_value();
+    int get_smallest_singular_value_index();
     
     ///Return the pesudo-inverse diagonal. The reciprocal of the diagonal elements
     ///is returned if the elements are well scaled with respect to the largest element,
@@ -468,6 +469,20 @@ namespace TooN
     return d;
   }
 
+  template<int M, int N, class Precision, bool WANT_U, bool WANT_V>
+  int GR_SVD<M,N,Precision,WANT_U,WANT_V>::get_smallest_singular_value_index()
+  {
+    using std::min;
+    int nMin=0;
+    Precision d = vDiagonal[0];
+    for(int i=1; i<N; ++i) 
+      if(vDiagonal[i] < d)
+	{
+	  d = vDiagonal[i];
+	  nMin = i;
+	}
+    return nMin;
+  }
 
 }
 #endif
