@@ -153,36 +153,64 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int start, int length) const{
 		return slice<Dynamic, Dynamic>(start, length);
 	}
-	
-	//Vector slice with End
-	//eg:
-	//.slice<1, End<> >()
-	template<int Start, int End> 
-	Vector<(Size==Dynamic?Dynamic:Size-Start+End), Precision, SliceVBase<Stride> > sliceend(){
-		static const int Len = (Size==Dynamic?Dynamic:Size-Start+End);
-		return slice<Start, Len>();
-	}
-	
+		
+	//Static slicing with End
 	#define TOON_INTERNAL_MAKE_END(X)\
-	template<int Start, KnownEndMarker<X>(*End)()> \
-	Vector<(Size==Dynamic?Dynamic:Size-Start+X), Precision, SliceVBase<Stride> > slice(){\
-		return sliceend<Start, X>();\
+	template<int Start, StaticEndMarker<(X)>(*End)()> \
+	Vector<(Size==Dynamic?Dynamic:Size-Start+(X)), Precision, SliceVBase<Stride> > slice(){\
+		static const int Len = (Size==Dynamic?Dynamic:Size-Start+(X));\
+		return slice<Start, Len>(Start, size() - Start + (X));\
 	}
 	
-	TOON_INTERNAL_MAKE_END(0);
-	TOON_INTERNAL_MAKE_END(-1);
-	TOON_INTERNAL_MAKE_END(-2);
-	TOON_INTERNAL_MAKE_END(-3);
-	TOON_INTERNAL_MAKE_END(-4);
-	TOON_INTERNAL_MAKE_END(-5);
-	TOON_INTERNAL_MAKE_END(-6);
-	TOON_INTERNAL_MAKE_END(-7);
-	TOON_INTERNAL_MAKE_END(-8);
-	TOON_INTERNAL_MAKE_END(-9);
+	#define TOON_INTERNAL_MAKE_END_99(D0)\
+	TOON_INTERNAL_MAKE_END(D0##0);\
+	TOON_INTERNAL_MAKE_END(D0##1);\
+	TOON_INTERNAL_MAKE_END(D0##2);\
+	TOON_INTERNAL_MAKE_END(D0##3);\
+	TOON_INTERNAL_MAKE_END(D0##4);\
+	TOON_INTERNAL_MAKE_END(D0##5);\
+	TOON_INTERNAL_MAKE_END(D0##6);\
+	TOON_INTERNAL_MAKE_END(D0##7);\
+	TOON_INTERNAL_MAKE_END(D0##8);\
+	TOON_INTERNAL_MAKE_END(D0##9);\
+	TOON_INTERNAL_MAKE_END(D0##A);\
+	TOON_INTERNAL_MAKE_END(D0##B);\
+	TOON_INTERNAL_MAKE_END(D0##C);\
+	TOON_INTERNAL_MAKE_END(D0##D);\
+	TOON_INTERNAL_MAKE_END(D0##E);\
+	TOON_INTERNAL_MAKE_END(D0##F);\
 
-	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::EndMarker e)
+	TOON_INTERNAL_MAKE_END_99(-0x0);
+	TOON_INTERNAL_MAKE_END_99(-0x1);
+	TOON_INTERNAL_MAKE_END_99(-0x2);
+	TOON_INTERNAL_MAKE_END_99(-0x3);
+	TOON_INTERNAL_MAKE_END_99(-0x4);
+	TOON_INTERNAL_MAKE_END_99(-0x5);
+	TOON_INTERNAL_MAKE_END_99(-0x6);
+	TOON_INTERNAL_MAKE_END_99(-0x7);
+	TOON_INTERNAL_MAKE_END_99(-0x8);
+	TOON_INTERNAL_MAKE_END_99(-0x9);
+	TOON_INTERNAL_MAKE_END_99(-0x9);
+	TOON_INTERNAL_MAKE_END_99(-0xA);
+	TOON_INTERNAL_MAKE_END_99(-0xB);
+	TOON_INTERNAL_MAKE_END_99(-0xC);
+	TOON_INTERNAL_MAKE_END_99(-0xD);
+	TOON_INTERNAL_MAKE_END_99(-0xE);
+	TOON_INTERNAL_MAKE_END_99(-0xF);
+
+	#undef TOON_INTERNAL_MAKE_END
+	#undef TOON_INTERNAL_MAKE_END99
+
+	//Dynamic slicing with End
+	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker e)
 	{		
 		return slice(i, size()-i+e.e);
+	}		
+
+	//Alternate form of dynamic slicing with End:
+	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker(*)())
+	{		
+		return slice(i, size()-i);
 	}		
 
 	//Other slices below

@@ -234,28 +234,62 @@ namespace TooN {
 
 	namespace Internal
 	{
-		template<int I> struct KnownEndMarker
+		///@internal
+		///@brief Used to mark slice to some offset before the end of a vector.
+		///The offset is known at compile time.
+		///@ingroup gInternal
+		template<int I> struct StaticEndMarker
 		{
 			static const int End=I;
 		};
 
-		struct EndMarker
+		///@internal
+		///@brief Used to mark slice to some offset before the end of a vector.
+		///The offset is known at run time.
+		///@ingroup gInternal
+		struct DynamicEndMarker
 		{
+			DynamicEndMarker(int e_)
+			:e(e_){}
 			int e;
 		};
 	};
+	
+	///Used for slicing relative to the end, rather than with a known size.
+	///For example:
+	///@code
+	///    Vector<3> v = makeVector(6,5,4,3,2);
+	///    v.slice<1,  End<0> >(); //5 4 3 2 
+	///    v.slice<0, End<-1> >(); //6 5 4 3
+	///@endcode
+	///See also ``\ref sElemOps''.
+	///@ingroup gLinAlg
+	template<int I> Internal::StaticEndMarker<I> End();
 
-	template<int I> Internal::KnownEndMarker<I> End();
-
-	inline Internal::EndMarker End()
+	///Used for slicing relative to the end, rather than with a known size.
+	///For example:
+	///@code
+	///    Vector<> v = makeVector(6,5,4,3,2);
+	///    v.slice(1, End); //5 4 3 2 
+	///@endcode
+	///See also ``\ref sElemOps''.
+	///@ingroup gLinAlg
+	inline Internal::DynamicEndMarker End()
 	{
-		Internal::EndMarker end = {0};
-		return end;
+		return 0;
 	}
-	inline Internal::EndMarker End(int e)
+
+	///Used for slicing relative to the end, rather than with a known size.
+	///For example:
+	///@code
+	///    Vector<> v = makeVector(6,5,4,3,2);
+	///    v.slice(1, End(-1)); //5 4 3 
+	///@endcode
+	///See also ``\ref sElemOps''.
+	///@ingroup gLinAlg
+	inline Internal::DynamicEndMarker End(int e)
 	{
-		Internal::EndMarker end = {e};
-		return end;
+		return e;
 	}
 	
 	///All TooN classes default to using this precision for computations and storage.

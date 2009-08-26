@@ -25,7 +25,15 @@ int main()
 	cout << project(v) << endl;
 
 	cout << v.slice<1, End<0> >() << endl;	
+	cout << u.slice<1, End<0> >() << endl;	
 	cout << v.slice<1, End<-1> >() << endl;	
-	cout << v.slice(2, End()) << endl;	
-	cout << v.slice(2, End(-1)) << endl;	
+	cout << u.slice<1, End<-1> >() << endl;	
+	cout << v.slice(2, End) << endl;	
+	cout << u.slice(2, End) << endl;	
+	cout << v.slice(2, End(-1)) << endl << endl;	
+	cout << u.slice(2, End(-1)) << endl << endl;	
+
+	Vector<356> w = Zeros;
+
+	cout << w.slice<100,End<-255> >() << endl;
 }

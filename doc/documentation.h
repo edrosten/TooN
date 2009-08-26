@@ -213,7 +213,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector.as_col() //vector as a Nx1 matrix
 		@endcode
 
-		Slicing:
+		Slicing with a start position and size:
+		
 		@code
 		Vector.slice<Start, End>();                            //Static slice
 		Vector.slice(start, end);                              //Dynamic slice
@@ -221,6 +222,29 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Matrix.slice(rowstart, colstart, numrows, numcols);    //Dynamic slice
 		Matrix.diagonal_slice();                               //Get the leading diagonal as a vector.
 		@endcode
+		
+		Like other features of TooN, mixed static/dynamic slicing is allowed.
+		For example:
+
+		@code
+		Vector.slice<Dynamic, 2>(3, 2);   //Slice starting at index 3, of length 2.
+		@endcode
+
+		Slicing can also be perferformed relative to the end of a vector.
+		WARNING:
+		 - NOT YET IMPLEMENTED FOR MATRIX
+		 - EXPERIMANTAL: MAY BE SUBJECT TO CHANGE
+		 - STATIC SLICES ONLY GO UP TO <code>End<-99></code>
+
+		@code
+		Vector<6> v;
+		v.slice<1, End<0> >();    //Equivalent to v.slice<1, 5>
+		v.slice<2, End<-1> >();   //Equivalent to v.slice<2, 3>
+
+		v.slice(1, End);          //Equivalent to v.slice(1, 5);
+		v.slice(3, End(-2));      //Equivalent to v.slice(3, 2);
+		@endcode
+
 
 		See also \ref sSlices
 
