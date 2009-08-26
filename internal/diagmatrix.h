@@ -95,6 +95,11 @@ public:
 	typename Vector<Size, Precision, Base>::as_slice_type diagonal_slice() {
 		return my_vector.as_slice();
 	}
+
+	///Return the leading diagonal as a vector.
+	const typename Vector<Size, Precision, Base>::as_slice_type diagonal_slice() const {
+		return my_vector.as_slice();
+	}
 	
 	///The vector used to hold the leading diagonal.
 	Vector<Size,Precision,Base> my_vector;

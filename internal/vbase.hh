@@ -238,6 +238,10 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (my_data, size(), stride(), Slicing());
 	}
 
+	const DiagonalMatrix<Size,Precision, SliceVBase<Stride> > as_diagonal() const {
+		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (my_data, size(), stride(), Slicing());
+	}
+
 };
 
 }
