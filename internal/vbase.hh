@@ -160,6 +160,11 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	Vector<(Size==Dynamic?Dynamic:Size-Start+(X)), Precision, SliceVBase<Stride> > slice(){\
 		static const int Len = (Size==Dynamic?Dynamic:Size-Start+(X));\
 		return slice<Start, Len>(Start, size() - Start + (X));\
+	}\
+	template<int Start, StaticEndMarker<(X)>(*End)()> \
+	const Vector<(Size==Dynamic?Dynamic:Size-Start+(X)), Precision, SliceVBase<Stride> > slice() const {\
+		static const int Len = (Size==Dynamic?Dynamic:Size-Start+(X));\
+		return slice<Start, Len>(Start, size() - Start + (X));\
 	}
 	
 	#define TOON_INTERNAL_MAKE_END_99(D0)\
@@ -194,8 +199,18 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return slice(i, size()-i+e.e);
 	}		
 
+	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker e) const
+	{		
+		return slice(i, size()-i+e.e);
+	}		
+
 	//Alternate form of dynamic slicing with End:
 	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker(*)())
+	{		
+		return slice(i, size()-i);
+	}		
+
+	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker(*)()) const
 	{		
 		return slice(i, size()-i);
 	}		

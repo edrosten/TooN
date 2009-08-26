@@ -98,37 +98,21 @@ namespace TooN {
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i-1}] / v_i \f$
 	///@param v \e v
 	///@ingroup gLinAlg
-	template<int Size, typename Precision, typename Base> inline Vector<Size-1, Precision> project( const Vector<Size, Precision, Base> & v){
-		return v.template slice<0,Size-1>() / v[Size-1];
+	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size-1), Precision> project( const Vector<Size, Precision, Base> & v){
+		return v.template slice<0, End<-1> >() / v[v.size() - 1];
 	}
 	
-	/**
-	  \overload
-	*/
-	template<typename Precision, typename Base> inline Vector<-1, Precision> project( const Vector<-1, Precision, Base> & v){
-		return v.slice(0,v.size()-1) / v[v.size()-1];
-	}
-	
+	//This should probably be done with an operator to prevent an extra new[] for dynamic vectors.
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i}, 1]\f$
 	///@param v \e v
 	///@ingroup gLinAlg
-	template<int Size, typename Precision, typename Base> inline Vector<Size+1, Precision> unproject( const Vector<Size, Precision, Base> & v){
-		Vector<Size+1, Precision> result;
-		result.template slice<0,Size>() = v;
-		result[Size] = 1;
-		return result;
-	}
-	
-	/**
-       \overload
-	*/
-	template<typename Precision, typename Base> inline Vector<-1, Precision> unproject( const Vector<-1, Precision, Base> & v){
-		Vector<-1, Precision> result(v.size()+1);
-		result.slice(0,v.size()) = v;
+	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size+1), Precision> unproject( const Vector<Size, Precision, Base> & v){
+		Vector<(Size==Dynamic?Dynamic:Size+1), Precision> result(v.size()+1);
+		result.template slice<0,End<-1> >() = v;
 		result[v.size()] = 1;
 		return result;
 	}
-
+	
 	/**
        \overload
 	*/

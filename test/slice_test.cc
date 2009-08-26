@@ -23,6 +23,11 @@ int main()
 	cout << u.slice(2, 3) << endl << endl;
 	
 	cout << project(v) << endl;
+	cout << project(u) << endl;
+	cout << project(v.slice<1,End<0> >()) << endl;
+	cout << project(u.slice<1,End<0> >()) << endl;
+	cout << unproject(v) << endl;
+	cout << unproject(u) << endl;
 
 	cout << v.slice<1, End<0> >() << endl;	
 	cout << u.slice<1, End<0> >() << endl;	
