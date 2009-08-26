@@ -216,8 +216,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Slicing with a start position and size:
 		
 		@code
-		Vector.slice<Start, End>();                            //Static slice
-		Vector.slice(start, end);                              //Dynamic slice
+		Vector.slice<Start, Length>();                         //Static slice
+		Vector.slice(start, length);                           //Dynamic slice
 		Matrix.slice<RowStart, ColStart, NumRows, NumCols>();  //Static slice
 		Matrix.slice(rowstart, colstart, numrows, numcols);    //Dynamic slice
 		Matrix.diagonal_slice();                               //Get the leading diagonal as a vector.
@@ -231,6 +231,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 
 		Slicing can also be perferformed relative to the end of a vector.
+
 		WARNING:
 		 - NOT YET IMPLEMENTED FOR MATRIX
 		 - EXPERIMANTAL: MAY BE SUBJECT TO CHANGE
