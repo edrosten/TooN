@@ -231,7 +231,9 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	Matrix<Size, 1, Precision, Slice<Stride,1> > as_col(){
 		return Matrix<Size, 1, Precision, Slice<Stride,1> >(my_data, size(), 1, stride(), 1, Slicing());
 	}
-	
+
+	typedef Vector<Size, Precision, SliceVBase<Stride> > as_slice_type;
+
 	DiagonalMatrix<Size,Precision, SliceVBase<Stride> > as_diagonal() {
 		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (my_data, size(), stride(), Slicing());
 	}
