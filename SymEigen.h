@@ -150,6 +150,13 @@ template <int Size=Dynamic, typename Precision = double>
 class SymEigen {
 public:
 	inline SymEigen(){}
+
+        /// Initialise this eigen decomposition but do no immediately
+        /// perform a decomposition.
+        ///
+        /// @param m The size of the matrix to perform the eigen decomposition on.
+        inline SymEigen(int m) : my_evectors(m,m), my_evalues(m) {}
+
 	/// Construct the eigen decomposition of a matrix. This initialises the class, and
 	/// performs the decomposition immediately.
 	template<int R, int C, typename B>
@@ -171,7 +178,7 @@ public:
 	/// See the SVD detailed description for a description of condition variables.
 	template <int S, typename P, typename B>
 	Vector<Size, Precision> backsub(const Vector<S,P,B>& rhs) const {
-		return (my_evectors.T() * diagmult(get_inv_diag(symeigen_condition_no),(my_evectors * rhs)));
+		return (my_evectors.T() * diagmult(get_inv_diag(Internal::symeigen_condition_no),(my_evectors * rhs)));
 	}
 
 	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix. 
@@ -180,7 +187,7 @@ public:
 	/// See the SVD detailed description for a description of condition variables.
 	template <int R, int C, typename P, typename B>
 	Matrix<Size,C, Precision> backsub(const Matrix<R,C,P,B>& rhs) const {
-		return (my_evectors.T() * diagmult(get_inv_diag(symeigen_condition_no),(my_evectors * rhs)));
+		return (my_evectors.T() * diagmult(get_inv_diag(Internal::symeigen_condition_no),(my_evectors * rhs)));
 	}
 
 	/// Calculate (pseudo-)inverse of the matrix. This is not usually needed: 
@@ -188,7 +195,7 @@ public:
 	/// one of the backsub() functions, which will be faster.
 	/// See the SVD detailed description for a description of the pseudo-inverse 
 	/// and condition variables.
-	Matrix<Size, Size, Precision> get_pinv(const double condition=symeigen_condition_no) const {
+	Matrix<Size, Size, Precision> get_pinv(const double condition=Internal::symeigen_condition_no) const {
 		return my_evectors.T() * diagmult(get_inv_diag(condition),my_evectors);
 	}
 
