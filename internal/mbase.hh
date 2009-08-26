@@ -132,18 +132,26 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	using Mem::num_rows;
 
 	Precision& operator()(int r, int c){
+		Internal::check_index(num_rows(), r);
+		Internal::check_index(num_cols(), c);
 		return my_data[r*rowstride() + c*colstride()];
 	}
 
 	const Precision& operator()(int r, int c) const {
+		Internal::check_index(num_rows(), r);
+		Internal::check_index(num_cols(), c);
 		return my_data[r*rowstride() + c*colstride()];
 	}
 
 	Precision& operator[](const std::pair<int, int>& index) {
+		Internal::check_index(num_rows(), index.first);
+		Internal::check_index(num_cols(), index.second);
 		return (*this)(index.first, index.second);
 	}
 
 	const Precision& operator[](const std::pair<int, int>& index) const {
+		Internal::check_index(num_rows(), index.first);
+		Internal::check_index(num_cols(), index.second);
 		return (*this)(index.first, index.second);
 	}
 
