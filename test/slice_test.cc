@@ -33,7 +33,7 @@ int main()
 	cout << v.slice(2, End(-1)) << endl << endl;	
 	cout << u.slice(2, End(-1)) << endl << endl;	
 
-	Vector<356> w = Zeros;
+	Vector<200> w = Zeros;
 
-	cout << w.slice<100,End<-255> >() << endl;
+	cout << w.slice<100,End<-99> >() << endl;
 }
