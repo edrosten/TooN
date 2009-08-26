@@ -112,6 +112,7 @@ namespace TooN
       return (get_V() * diagmult(inv_diag, (get_U().T() * rhs)));
     }
 
+    /// Get the pseudo-inverse \f$M^{\dagger}\f$
     Matrix<N,M,Precision> get_pinv(const Precision condition=1e9)
     {
       Vector<N,Precision> inv_diag(N);
@@ -119,7 +120,7 @@ namespace TooN
       return diagmult(get_V(),inv_diag) * get_U().T();
     }
 
-    // Reorder the components so the singular values are in descending order
+    /// Reorder the components so the singular values are in descending order
     void reorder();
     
   protected:
@@ -491,20 +492,25 @@ namespace TooN
   template<int M, int N, class Precision, bool WANT_U, bool WANT_V>
   void GR_SVD<M,N,Precision,WANT_U,WANT_V>::reorder()
   {
-    Matrix<M, N, Precision> mU_copy = mU;
-    Matrix<N, N, Precision> mV_copy = mV;
-    
     std::vector<std::pair<Precision, unsigned int> > vSort;
     vSort.reserve(N);
     for(unsigned int i=0; i<N; ++i)
       vSort.push_back(std::make_pair(-vDiagonal[i], i));
     std::sort(vSort.begin(), vSort.end());
     for(unsigned int i=0; i<N; ++i)
-      mU.T()[i] = mU_copy.T()[vSort[i].second];
-    for(unsigned int i=0; i<N; ++i)
-      mV.T()[i] = mV_copy.T()[vSort[i].second];
-    for(unsigned int i=0; i<N; ++i)
       vDiagonal[i] = -vSort[i].first;
+    if(WANT_U)
+      {
+	Matrix<M, N, Precision> mU_copy = mU;
+	for(unsigned int i=0; i<N; ++i)
+	  mU.T()[i] = mU_copy.T()[vSort[i].second];
+      }
+    if(WANT_V)
+      {
+	Matrix<N, N, Precision> mV_copy = mV;
+	for(unsigned int i=0; i<N; ++i)
+	  mV.T()[i] = mV_copy.T()[vSort[i].second];
+      }
   }
 
 }
