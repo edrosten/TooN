@@ -19,6 +19,7 @@ install:
 	cp *.h $(hdr)
 	cp -r optimization $(hdr)/
 	cp -r internal $(hdr)/
+	cp -r derivatives $(hdr)/
 
 internal/data_functions.hh:  make_data_functions.awk
 	awk -f make_data_functions.awk > $@

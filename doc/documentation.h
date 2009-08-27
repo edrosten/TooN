@@ -29,6 +29,7 @@ The %TooN library is a set of C++ header files which provide basic numerics faci
 	- @link gOptimize Function optimization@endlink
 	- @link gTransforms Parameterized matrices (eg transformations)@endlink 
 	- @link gEquations linear equations@endlink
+	- @link gFunctions Functions (eg numerical derivatives) @endlink
 
 It provides classes for statically- (known at compile time) and dynamically-
 (unknown at compile time) sized vectors and matrices and it delegates advanced
@@ -770,7 +771,10 @@ around LAPACK.
 /// @defgroup gEquations Linear equation solvers
 /// Classes to solve linear equations.
 
+/// @defgroup gFunctions Evaluation of functions.
+/// Evaluation of useful functions.
 /** 
+
 @defgroup gOptimize Function optimization
 
 Classes and functions to perform function optimization.
