@@ -156,7 +156,7 @@ namespace TooN{
 				using std::abs;
 
 				//Make the step size be on the scale of the value.
-				double h = hh * max(abs(v[i]) * 1e-5, 1e-3);
+				double h = hh * max(abs(v[i]) * 1e-3, 1e-3);
 
 				x[i] = v[i] - h;
 				double f1 = f(x);
