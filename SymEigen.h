@@ -265,6 +265,18 @@ public:
 		return det;
 	}
 
+	/// Calculate the square root M=sqrt(A) of a matrix, which is
+	/// the matrix M such that M.T*M=sqrt(A).
+	Matrix<Size, Size, Precision> get_sqrtm () const {
+		Vector<Size, Precision> Dsqrt(my_evalues.size());
+		// In the future, maybe throw an exception if an
+		// eigenvalue is negative?
+		for (int i = 0; i < my_evalues.size(); ++i) {
+			Dsqrt[i] = std::sqrt(my_evalues[i]);
+		}
+		return my_evectors.T() * diagmult(Dsqrt, my_evectors);
+	}
+
 private:
 	// eigen vectors laid out row-wise so evectors[i] is the ith evector
 	Matrix<Size,Size,Precision> my_evectors;
