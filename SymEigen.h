@@ -270,8 +270,8 @@ public:
 		return det;
 	}
 
-	/// Calculate the square root M=sqrt(A) of a matrix, which is
-	/// the matrix M such that M.T*M=A.
+	/// Calculate the square root of a matrix which is a matrix M
+	/// such that M.T*M=A.
 	Matrix<Size, Size, Precision> get_sqrtm () const {
 		Vector<Size, Precision> diag_sqrt(my_evalues.size());
 		// In the future, maybe throw an exception if an
@@ -282,8 +282,8 @@ public:
 		return my_evectors.T() * diagmult(diag_sqrt, my_evectors);
 	}
 
-	/// Calculate the square root M=isqrt(A) of a matrix, which is
-	/// the matrix M such that M.T*M=A^-1.
+	/// Calculate the inverse square root of a matrix which is a
+	/// matrix M such that M.T*M=A^-1.
         ///
         /// Any square-rooted eigenvalues which are too small are set
         /// to zero (see the SVD detailed description for a
