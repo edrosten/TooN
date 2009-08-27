@@ -129,15 +129,20 @@ are the eigenvectors of \f$M\f$ and \f$\Lambda\f$ is a diagonal matrix whose ent
 are the eigenvalues of \f$M\f$. These quantities are often of use directly, and can
 be obtained as follows:
 @code
-// construct M
-double d1[][] = {{1,2,3},{2,5,6},{3,6,7}};
-Matrix<3> M(d1);
+Matrix<3> M(3,3);
+M[0]=makeVector(4,0,2);
+M[1]=makeVector(0,5,3);
+M[2]=makeVector(2,3,6);
 // create the eigen decomposition of M
 SymEigen<3> eigM(M);
 // print the smallest eigenvalue
 cout << eigM.get_evalues()[0] << endl;
 // print the associated eigenvector
 cout << eigM.get_evectors()[0] << endl;
+// print the square root of the matrix.
+cout << eigM.get_sqrtm() << endl;
+// print the square root of the matrix squared.
+cout << eigM.get_sqrtm().T() * eigM.get_sqrtm() << endl;
 @endcode
 
 This decomposition is very similar to the SVD (q.v.), and can be used to solve
@@ -266,7 +271,7 @@ public:
 	}
 
 	/// Calculate the square root M=sqrt(A) of a matrix, which is
-	/// the matrix M such that M.T*M=sqrt(A).
+	/// the matrix M such that M.T*M=A.
 	Matrix<Size, Size, Precision> get_sqrtm () const {
 		Vector<Size, Precision> Dsqrt(my_evalues.size());
 		// In the future, maybe throw an exception if an
