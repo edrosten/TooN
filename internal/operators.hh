@@ -62,15 +62,10 @@ namespace Internal {
 	template<class L, class R, int F = Field<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
 	template<class L, class R, int F = Field<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
 
-	template<class L, class R> struct unable_to_add_numbers;
-	template<class L, class R> struct unable_to_multiply_numbers;
-	template<class L, class R> struct unable_to_subtract_numbers;
-	template<class L, class R> struct unable_to_divide_numbers;
-	
-	template<class L, class R> struct AddType<L, R, 0>         { typedef unable_to_add_numbers<L,R> type;};
-	template<class L, class R> struct SubtractType<L, R, 0>    { typedef unable_to_subtract_numbers<L,R> type;};
-	template<class L, class R> struct MultiplyType<L, R, 0>    { typedef unable_to_multiply_numbers<L,R> type;};
-	template<class L, class R> struct DivideType<L, R, 0>      { typedef unable_to_divide_numbers<L,R> type;};
+	template<class L, class R> struct AddType<L, R, 0>         { typedef void type;};
+	template<class L, class R> struct SubtractType<L, R, 0>    { typedef void type;};
+	template<class L, class R> struct MultiplyType<L, R, 0>    { typedef void type;};
+	template<class L, class R> struct DivideType<L, R, 0>      { typedef void type;};
 
 
 	//Mini operators for passing to Pairwise, etc
