@@ -273,13 +273,37 @@ public:
 	/// Calculate the square root M=sqrt(A) of a matrix, which is
 	/// the matrix M such that M.T*M=A.
 	Matrix<Size, Size, Precision> get_sqrtm () const {
-		Vector<Size, Precision> Dsqrt(my_evalues.size());
+		Vector<Size, Precision> diag_sqrt(my_evalues.size());
 		// In the future, maybe throw an exception if an
 		// eigenvalue is negative?
 		for (int i = 0; i < my_evalues.size(); ++i) {
-			Dsqrt[i] = std::sqrt(my_evalues[i]);
+			diag_sqrt[i] = std::sqrt(my_evalues[i]);
 		}
-		return my_evectors.T() * diagmult(Dsqrt, my_evectors);
+		return my_evectors.T() * diagmult(diag_sqrt, my_evectors);
+	}
+
+	/// Calculate the square root M=isqrt(A) of a matrix, which is
+	/// the matrix M such that M.T*M=A^-1.
+        ///
+        /// Any square-rooted eigenvalues which are too small are set
+        /// to zero (see the SVD detailed description for a
+        /// description of the condition variables).
+	Matrix<Size, Size, Precision> get_isqrtm (const double condition=Internal::symeigen_condition_no) const {
+		Vector<Size, Precision> diag_isqrt(my_evalues.size());
+
+		// Because sqrt is a monotonic-preserving transformation,
+		Precision max_diag = -my_evalues[0] > my_evalues[my_evalues.size()-1] ? (-std::sqrt(my_evalues[0])):(std::sqrt(my_evalues[my_evalues.size()-1]));
+		// In the future, maybe throw an exception if an
+		// eigenvalue is negative?
+		for (int i = 0; i < my_evalues.size(); ++i) {
+			diag_isqrt[i] = std::sqrt(my_evalues[i]);
+			if(fabs(diag_isqrt[i]) * condition > max_diag) {
+				diag_isqrt[i] = 1/diag_isqrt[i];
+			} else {
+				diag_isqrt[i] = 0;
+			}
+		}
+		return my_evectors.T() * diagmult(diag_isqrt, my_evectors);
 	}
 
 private:
