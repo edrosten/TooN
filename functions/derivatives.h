@@ -2,7 +2,6 @@
 #define TOON_INCLUDE_DERIVATIVES_NUMERICAL_H
 
 #include <TooN/TooN.h>
-#include <TooN/LU.h>
 #include <vector>
 #include <cmath>
 
