@@ -129,20 +129,37 @@ are the eigenvectors of \f$M\f$ and \f$\Lambda\f$ is a diagonal matrix whose ent
 are the eigenvalues of \f$M\f$. These quantities are often of use directly, and can
 be obtained as follows:
 @code
+// construct M
 Matrix<3> M(3,3);
 M[0]=makeVector(4,0,2);
 M[1]=makeVector(0,5,3);
 M[2]=makeVector(2,3,6);
+ 
 // create the eigen decomposition of M
 SymEigen<3> eigM(M);
+cout << "A=" << M << endl;
+cout << "(E,v)=eig(A)" << endl;
 // print the smallest eigenvalue
-cout << eigM.get_evalues()[0] << endl;
+cout << "v[0]=" << eigM.get_evalues()[0] << endl;
 // print the associated eigenvector
-cout << eigM.get_evectors()[0] << endl;
+cout << "E[0]=" << eigM.get_evectors()[0] << endl;
+@endcode
+
+Further, provided the eigenvalues are nonnegative, the square root of
+a matrix and its inverse can also be obtained,
+@code
 // print the square root of the matrix.
-cout << eigM.get_sqrtm() << endl;
+cout << "R=sqrtm(A)=" << eigM.get_sqrtm() << endl;
 // print the square root of the matrix squared.
-cout << eigM.get_sqrtm().T() * eigM.get_sqrtm() << endl;
+cout << "(should equal A), R^T*R="
+     << eigM.get_sqrtm().T() * eigM.get_sqrtm() << endl;
+// print the inverse of the matrix.
+cout << "A^-1=" << eigM.get_pinv() << endl;
+// print the inverse square root of the matrix.
+cout << "C=isqrtm(A)=" << eigM.get_isqrtm() << endl;
+// print the inverse square root of the matrix squared.
+cout << "(should equal A^-1), C^T*C="
+     << eigM.get_isqrtm().T() * eigM.get_isqrtm() << endl;
 @endcode
 
 This decomposition is very similar to the SVD (q.v.), and can be used to solve
