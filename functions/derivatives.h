@@ -137,14 +137,14 @@ namespace TooN{
 		///@internal
 		///@brief Functor wrapper for computing finite differences along an axis.
 		///@ingroup gInternal
-		template<class Functor, class  Precision, int Size, class Base> struct Difference
+		template<class Functor, class  Precision, int Size, class Base> struct CentralDifferenceGradient
 		{
 			const Vector<Size, Precision, Base>& v; ///< Point about which to compute differences
 			Vector<Size, Precision> x;      ///< Local copy of v
 			const Functor&  f;                      ///< Functor to evaluate
 			int i;                                  ///< Index to difference along
 
-			Difference(const Vector<Size, Precision, Base>& v_, const Functor& f_)
+			CentralDifferenceGradient(const Vector<Size, Precision, Base>& v_, const Functor& f_)
 			:v(v_),x(v),f(f_),i(0)
 			{}
 			
@@ -165,6 +165,87 @@ namespace TooN{
 
 				double d =  (f2 - f1) / (2*h);
 				return d;
+			}
+		};
+
+		///@internal
+		///@brief Functor wrapper for computing finite difference second derivatives along an axis.
+		///@ingroup gInternal
+		template<class Functor, class  Precision, int Size, class Base> struct CentralDifferenceSecond
+		{
+			const Vector<Size, Precision, Base>& v; ///< Point about which to compute differences
+			Vector<Size, Precision> x;              ///< Local copy of v
+			const Functor&  f;                      ///< Functor to evaluate
+			int i;                                  ///< Index to difference along
+			const Precision central;                ///<Central point.
+
+			CentralDifferenceSecond(const Vector<Size, Precision, Base>& v_, const Functor& f_)
+			:v(v_),x(v),f(f_),i(0),central(f(x))
+			{}
+			
+			///Compute central difference.
+			Precision operator()(Precision hh) 
+			{
+				using std::max;
+				using std::abs;
+
+				//Make the step size be on the scale of the value.
+				double h = hh * max(abs(v[i]) * 1e-3, 1e-3);
+
+				x[i] = v[i] - h;
+				double f1 = f(x);
+
+				x[i] = v[i] + h;
+				double f2 = f(x);
+				x[i] = v[i];
+
+				double d =  (f2 - 2*central + f1) / (h*h);
+				return d;
+			}
+		};
+
+		///@internal
+		///@brief Functor wrapper for computing finite difference cross derivatives along a pair of axes.
+		///@ingroup gInternal
+		template<class Functor, class  Precision, int Size, class Base> struct CentralCrossDifferenceSecond
+		{
+			const Vector<Size, Precision, Base>& v; ///< Point about which to compute differences
+			Vector<Size, Precision> x;              ///< Local copy of v
+			const Functor&  f;                      ///< Functor to evaluate
+			int i;                                  ///< Index to difference along
+			int j;                                  ///< Index to difference along
+
+			CentralCrossDifferenceSecond(const Vector<Size, Precision, Base>& v_, const Functor& f_)
+			:v(v_),x(v),f(f_),i(0),j(0)
+			{}
+			
+			///Compute central difference.
+			Precision operator()(Precision hh) 
+			{
+				using std::max;
+				using std::abs;
+
+				//Make the step size be on the scale of the value.
+				double h = hh * max(abs(v[i]) * 1e-3, 1e-3);
+
+				x[i] = v[i] + h;
+				x[j] = v[j] + h;
+				double a = f(x);
+
+				x[i] = v[i] - h;
+				x[j] = v[j] + h;
+				double b = f(x);
+
+				x[i] = v[i] + h;
+				x[j] = v[j] - h;
+				double c = f(x);
+
+
+				x[i] = v[i] - h;
+				x[j] = v[j] - h;
+				double d = f(x);
+
+				return (a-b-c+d) / (4*h*h);
 			}
 		};
 
@@ -247,12 +328,12 @@ namespace TooN{
 		using namespace Internal;
 		Vector<S> grad(x.size());
 
-		Difference<F, P, S, B> d(x, f);
+		CentralDifferenceGradient<F, P, S, B> d(x, f);
 
 		for(int i=0; i < x.size(); i++)
 		{
 			d.i = i;
-			grad[i] = extrapolate_to_zero<Difference<F, P, S, B>, P>(d).first;
+			grad[i] = extrapolate_to_zero<CentralDifferenceGradient<F, P, S, B>, P>(d).first;
 		}
 
 		return grad;
@@ -271,17 +352,95 @@ namespace TooN{
 		using namespace Internal;
 		Matrix<S,2> g(x.size(), 2);
 
-		Difference<F, P, S, B> d(x, f);
+		CentralDifferenceGradient<F, P, S, B> d(x, f);
 
 		for(int i=0; i < x.size(); i++)
 		{
 			d.i = i;
-			pair<double, double> r= extrapolate_to_zero<Difference<F, P, S, B>, P>(d);
+			pair<double, double> r= extrapolate_to_zero<CentralDifferenceGradient<F, P, S, B>, P>(d);
 			g[i][0] = r.first;
 			g[i][1] = r.second;
 		}
 
 		return g;
+	}
+
+	
+	///Compute the numerical Hessian using central differences and Ridder's method:
+	///\f[
+	/// \frac{\partial^2 f}{\partial x^2} \approx \frac{f(x-h) - 2f(x) + f(x+h)}{h^2}
+	///\f]
+	///\f[
+	/// \frac{\partial^2 f}{\partial x\partial y} \approx \frac{f(x+h, y+h) - f(x-h,y+h) - f(x+h, y-h) + f(x-h, y-h)}{4h^2}
+	///\f]
+	///See numerical_gradient().
+	///@param f Functor to double-differentiate
+    ///@param x Point about which to double-differentiate.
+	///@ingroup gFunctions 
+	template<class F, int S, class P, class B> pair<Matrix<S, S, P>, Matrix<S, S, P> > numerical_hessian_with_errors(const F& f, const Vector<S, P, B>& x)
+	{
+		using namespace Internal;
+		Matrix<S> hess(x.size(), x.size());
+		Matrix<S> errors(x.size(), x.size());
+
+		CentralDifferenceSecond<F, P, S, B> curv(x, f);
+		CentralCrossDifferenceSecond<F, P, S, B> cross(x, f);
+
+		//Perform the cross differencing.
+
+		for(int r=0; r < x.size(); r++)
+			for(int c=r+1; c < x.size(); c++)
+			{
+				cross.i = r;
+				cross.j = c;
+				pair<double, double> e =  extrapolate_to_zero<CentralCrossDifferenceSecond<F, P, S, B>, P >(cross);
+				hess[r][c] = hess[c][r] = e.first;
+				errors[r][c] = errors[c][r] = e.second;
+			}
+
+		for(int i=0; i < x.size(); i++)
+		{
+			curv.i = i;
+			pair<double, double> e = extrapolate_to_zero<CentralDifferenceSecond<F, P, S, B>, P>(curv);
+			hess[i][i] = e.first;
+			errors[i][i] = e.second;
+		}
+
+		return make_pair(hess, errors);
+	}
+	
+	///Compute the numerical Hessian and errors. The Hessian is returned as the first
+	///element, and the errors as the second.
+	///See numerical_hessian().
+	///@param f Functor to double-differentiate
+    ///@param x Point about which to double-differentiate.
+	///@ingroup gFunctions 
+	template<class F, int S, class P, class B> Matrix<S, S, P> numerical_hessian(const F& f, const Vector<S, P, B>& x)
+	{
+		using namespace Internal;
+		Matrix<S> hess(x.size(), x.size());
+
+		CentralDifferenceSecond<F, P, S, B> curv(x, f);
+		CentralCrossDifferenceSecond<F, P, S, B> cross(x, f);
+
+		//Perform the cross differencing.
+		for(int r=0; r < x.size(); r++)
+			for(int c=r+1; c < x.size(); c++)
+			{
+				cross.i = r;
+				cross.j = c;
+				pair<double, double> e =  extrapolate_to_zero<CentralCrossDifferenceSecond<F, P, S, B>, P >(cross);
+				hess[r][c] = hess[c][r] = e.first;
+			}
+
+		for(int i=0; i < x.size(); i++)
+		{
+			curv.i = i;
+			pair<double, double> e = extrapolate_to_zero<CentralDifferenceSecond<F, P, S, B>, P>(curv);
+			hess[i][i] = e.first;
+		}
+
+		return hess;
 	}
 }
 
