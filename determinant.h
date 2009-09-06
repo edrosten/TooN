@@ -1,5 +1,8 @@
 #ifndef TOON_INCLUDE_DETERMINANT_H
 #define TOON_INCLUDE_DETERMINANT_H
+#include <TooN/TooN.h>
+#include <cstdlib>
+#include <utility>
 #ifdef TOON_DETERMINANT_LAPACK
 	#include <TooN/LU.h>
 #endif
@@ -65,15 +68,15 @@ namespace TooN
 		Matrix<Internal::Square<R,C>::Size, Internal::Square<R,C>::Size,Precision> A = A_;
 		TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
 		using std::swap;
+		using std::abs;
 
 		int size=A.num_rows();
 		
 		//If row operations of the form row_a += alpha * row_b
 		//then the determinant is unaffected. However, if a row
 		//is scaled, then the determinant is scaled by the same 
-		//amount. The total scaling is held in divisor.
+		//amount. 
 		Precision determinant=1;
-		Precision divisor=1;
 
 		for (int i=0; i<size; ++i) {
 
@@ -93,7 +96,9 @@ namespace TooN
 			//assert(abs(pivot) > 1e-16);
 			
 			//Swap the current row with the pivot row if necessary.
+			//A row swap negates the determinant.
 			if (argmax != i) {
+				determinant*=-1;
 				for (int j=i; j<size; ++j)
 					swap(A[i][j], A[argmax][j]);
 			}
@@ -104,20 +109,16 @@ namespace TooN
 				return 0;
 			
 			for (int u=i+1; u<size; ++u) {
-				//Multiply out the usual 1/pivot term
-				//to avoid division.
-				double factor = A[u][i];
-				//A[u][i] = 0;
-				divisor*=pivot;
+				//Do not multiply out the usual 1/pivot term
+				//to avoid division. It causes poor scaling.
+				double factor = A[u][i]/pivot;
+
 				for (int j=i+1; j<size; ++j)
-					A[u][j] = A[u][j]*pivot - factor * A[i][j];
+					A[u][j] = A[u][j] - factor * A[i][j];
 			}
 		}
 
-		if(size %2 == 0) 
-			return -determinant/divisor;
-		else
-			return determinant/divisor;
+		return determinant;
 	}
 	
 	/** Compute the determinant using TooN::LU.

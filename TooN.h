@@ -40,13 +40,20 @@
 #include <TooN/internal/typeof.hh>
 #include <TooN/internal/deprecated.hh>
 
+#if defined TOON_NDEBUG || defined NDEBUG
+	#define TOON_NDEBUG_MISMATCH
+	#define TOON_NDEBUG_SLICE
+	#define TOON_NDEBUG_SIZE
+	#define TOON_NDEBUG_FILL
+#endif
+
 #ifdef TOON_INITIALIZE_RANDOM
 #include <ctime>
 #endif
 
 #ifdef TOON_USE_LAPACK
 	#ifndef TOON_DETERMINANT_LAPACK
-		#define TOON_DETERMINANT_LAPACK 30
+		#define TOON_DETERMINANT_LAPACK 35
 	#endif
 #endif
 
