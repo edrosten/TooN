@@ -128,9 +128,14 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 	int size() const {
 		return Size;
 	}
+
+	void try_resize(int)
+	{}
+	template<class Op> void try_resize(const Operator<Op>&)
+	{}
 };
 
-template<class Precision> struct VectorAlloc<-1, Precision> {
+template<class Precision> struct VectorAlloc<Dynamic, Precision> {
 	Precision * const my_data;
 	const int my_size;
 
@@ -162,8 +167,82 @@ template<class Precision> struct VectorAlloc<-1, Precision> {
 		delete[] my_data;
 	}
 
+	void try_resize(int)
+	{}
+
+	template<class Op> void try_resize(const Operator<Op>&)
+	{}
 };
 
+
+template<class Precision> struct VectorAlloc<Resizable, Precision> {
+	protected: 
+		Precision * my_data;
+		int my_size;
+
+	
+	public:
+
+		VectorAlloc(const VectorAlloc& v)
+		:my_data(new Precision[v.my_size]), my_size(v.my_size)
+		{ 
+			for(int i=0; i < my_size; i++)
+				my_data[i] = v.my_data[i];
+		}
+
+		VectorAlloc()
+		:my_data(0), my_size(0)
+		{ 
+		}
+
+		VectorAlloc(int s)
+		:my_data(new Precision[s]), my_size(s)
+		{ 
+			debug_initialize(my_data, my_size);	
+		}
+
+		template <class Op>
+		VectorAlloc(const Operator<Op>& op) 
+		: my_data(new Precision[op.size()]), my_size(op.size()) 
+		{
+			debug_initialize(my_data, my_size);	
+		}
+
+		int size() const {
+			return my_size;
+		}
+
+		~VectorAlloc(){
+			delete[] my_data;
+		}
+
+		void resize(int s)
+		{
+			if(s != my_size)
+			{
+				//First, invalidate the old data
+				my_size=0;
+				delete[] my_data;
+				
+				my_data = new Precision[s];
+				my_size = s;
+			}
+
+			debug_initialize(my_data, my_size);
+		}
+
+		void try_resize(int s)
+		{
+			resize(s);
+		}
+
+
+		template<class Op> void try_resize(const Operator<Op>& op)
+		{
+			resize(op.size());
+		}
+
+};
 
 template<int S, class Precision> struct VectorSlice
 {
@@ -182,6 +261,12 @@ template<int S, class Precision> struct VectorSlice
 
 	template<class Op>
 	VectorSlice(const Operator<Op>& op) : my_data(op.data()) {}
+
+	void try_resize(int)
+	{}
+
+	template<class Op> void try_resize(const Operator<Op>&)
+	{}
 };
 
 template<class Precision> struct VectorSlice<-1, Precision>
@@ -199,6 +284,12 @@ template<class Precision> struct VectorSlice<-1, Precision>
 	int size() const {
 		return my_size;
 	}
+
+	void try_resize(int)
+	{}
+
+	template<class Op> void try_resize(const Operator<Op>&)
+	{}
 };
 
 

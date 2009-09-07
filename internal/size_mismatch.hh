@@ -33,16 +33,16 @@ namespace TooN {
 // class to generate compile time error
 // general case which doesn't exist
 template<int Size1, int Size2>
-struct SizeMismatch;
+struct SizeMismatch_;
 
 // special cases which do exist
 template<int Size>
-struct SizeMismatch<Size,Size>{
+struct SizeMismatch_<Size,Size>{
   static inline void test(int, int){}
 };
 
 template<int Size>
-struct SizeMismatch<-1,Size>{
+struct SizeMismatch_<Dynamic,Size>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
@@ -56,7 +56,7 @@ struct SizeMismatch<-1,Size>{
 };
 
 template<int Size>
-struct SizeMismatch<Size,-1>{
+struct SizeMismatch_<Size,Dynamic>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
@@ -70,7 +70,7 @@ struct SizeMismatch<Size,-1>{
 };
 
 template <>
-struct SizeMismatch<-1,-1>{
+struct SizeMismatch_<Dynamic,Dynamic>{
   static inline void test(int size1, int size2){
     if(size1!=size2){
 	  #ifdef TOON_TEST_INTERNALS
@@ -89,7 +89,7 @@ namespace Internal
 }
 
 template<int Size1, int Size2>
-struct SizeMismatch
+struct SizeMismatch_
 {
 	static inline void test(int, int)
 	{
@@ -98,6 +98,16 @@ struct SizeMismatch
 		#else
 			Internal::BadSize size_mismatch;
 		#endif
+	}
+};
+
+template<int Size1, int Size2>
+struct SizeMismatch
+{
+	static inline void test(int s1, int s2)
+	{
+		SizeMismatch_< (Size1 == Dynamic || Size1 == Resizable)?Dynamic:Size1,
+		               (Size2 == Dynamic || Size2 == Resizable)?Dynamic:Size2 >::test(s1, s2);
 	}
 };
 
