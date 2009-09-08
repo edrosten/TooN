@@ -238,6 +238,7 @@ namespace TooN {
 
 	///Template size value used to indicate dynamically sized vectors and matrices.
 	static const int Dynamic = -1;
+	static const int Resizable = -0x7fffffff;
 
 	namespace Internal
 	{
