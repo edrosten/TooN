@@ -275,7 +275,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		Matrices can be filled from data in row-major order:
 		@code
-			Matrix<3> m = data(1, 2, 3, 4, 5, 6, 7, 8, 9);
+			Matrix<3> m = Data(1, 2, 3, 4, 5, 6, 7, 8, 9);
 		@endcode
 
 		A less general, but visually more pleasing syntax can also be used:
@@ -335,6 +335,15 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	is checked at run-time in the dynamic case (with some additions). Checks can
 	be disabled with various macros. Note that the optimizer will usually
 	remove run-time checks on static objects if the test passes.
+	
+	Bounds are not checked by default. Bounds checking can be enabled by
+	defining the macro \c TOON_CHECK_BOUNDS. None of these macros change the
+	interface, so debugging code can be freely mixed with optimized code.
+
+	The debugging checks can be disabled by defining either of the following macros:
+	- \c TOON_NDEBUG
+	- \c NDEBUG 
+	Additionally, individual checks can be disabled with the following macros:
 	- Static/Dynamic mismatch
 		- Statically determined functions accept and ignore dynamically specified
 		  sizes. Nevertheless, it is an error if they do not match.
@@ -348,10 +357,6 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	- underfilling using Fill (run-time check)
 		- Disable with \c TOON_NDEBUG_FILL
 	
-	Bounds are
-	not checked by default. Bounds checking can be enabled by defining the macro
-	\c TOON_CHECK_BOUNDS. None of these macros change the interface, so debugging
-	code can be freely mixed with optimized code.
 
 
 
