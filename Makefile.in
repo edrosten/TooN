@@ -34,3 +34,31 @@ clean:
 
 docs:
 	doxygen 
+
+
+TESTS=invert slice
+
+
+TEST_RESULT=$(TESTS:%=regressions/%.result)
+TEST_FILES=$(TESTS:%=regressions/%.out) $(TESTS:%=regressions/%.test) $(TEST_RESULT)
+
+testclean:
+	rm -f $(TEST_FILES)
+
+test:regressions/results
+	@cat regressions/results
+
+regressions/results:$(TEST_RESULT)
+	cat $(TEST_RESULT) > regressions/results
+
+.PRECIOUS: regressions/%.out regressions/%.test
+
+regressions/%.test: regressions/%.cc
+	$(CXX) -I. $< -o $@ -llapack -DTOON_INITIALIZE_SNAN 
+	
+regressions/%.out: regressions/%.test
+	$< > $@ || ( echo Crash!!! > $@ )
+
+regressions/%.result: regressions/%.out
+	awk -vname=$* -f numdiff.awk -vf1=$< -vf2=regressions/$*.txt > $@	
+	
