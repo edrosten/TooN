@@ -33,6 +33,7 @@
 #define GAUSSIAN_ELIMINATION_H
 
 #include <utility>
+#include <cmath>
 #include <TooN/TooN.h>
 
 namespace TooN {
@@ -43,6 +44,7 @@ namespace TooN {
     template<int N, typename Precision>
 	inline Vector<N, Precision> gaussian_elimination (Matrix<N,N,Precision> A, Vector<N, Precision> b) {
 		using std::swap;
+		using std::abs;
 
 		int size=b.size();
 
@@ -104,6 +106,7 @@ namespace TooN {
     template<int R1, int C1, int R2, int C2, typename Precision>
 	inline Matrix<Internal::Size3<R1, C1, R2>::s, C2, Precision> gaussian_elimination (Matrix<R1,C1,Precision> A, Matrix<R2, C2, Precision> b) {
 		using std::swap;
+		using std::abs;
 		SizeMismatch<R1, C1>::test(A.num_rows(), A.num_cols());
 		SizeMismatch<R1, R2>::test(A.num_rows(), b.num_rows());
 
