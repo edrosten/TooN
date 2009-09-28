@@ -11,9 +11,9 @@ function abs(x)
 
 function ignore_and_process(line,       a)
 {
-	if(line ~ /^[[:space:]]*$/)
+	if(line ~ /^[[:space:]]*$/) #Ignore blank linkes
 		return 1
-	else if (line ~ /^[[:space:]]*#>/)
+	else if (line ~ /^[[:space:]]*#>/) #Process directives, then ignore the line
 	{
 		split(line, a)
 		if(a[2] == "t")
@@ -21,9 +21,9 @@ function ignore_and_process(line,       a)
 
 		return 1
 	}
-	else if (line ~ /^[[:space:]]*#/)
+	else if (line ~ /^[[:space:]]*#/) #Ignore comments
 		return 1
-	else
+	else   #The line should not be ignored
 		return 0
 }
 
@@ -64,6 +64,9 @@ BEGIN{
 
 		if(s1 == "Crash!!!" || s2 == "Crash!!!")
 			fail("Crash!!!")
+
+		if(s1 == "Compile error!" || s2 == "Compile error!")
+			fail("Compile error!")
 
 		#If there are valid lines left, then split them
 		#into fields

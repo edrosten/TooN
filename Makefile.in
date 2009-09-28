@@ -36,7 +36,7 @@ docs:
 	doxygen 
 
 
-TESTS=invert slice vector_resize
+TESTS=lu slice vector_resize gauss_jordan
 
 
 TEST_RESULT=$(TESTS:%=regressions/%.result)
@@ -44,6 +44,9 @@ TEST_FILES=$(TESTS:%=regressions/%.out) $(TESTS:%=regressions/%.test) $(TEST_RES
 
 testclean:
 	rm -f $(TEST_FILES)
+
+foo:
+	echo $(MAKEFLAGS)
 
 test:regressions/results
 	@echo -------------- Test Results ---------------
@@ -54,12 +57,18 @@ regressions/results:$(TEST_RESULT)
 
 .PRECIOUS: regressions/%.out regressions/%.test
 
+#Build a test executable from a test program. On compile error,
+#create an execuaable which decalres the error.
 regressions/%.test: regressions/%.cc
-	$(CXX) -I. $< -o $@ -llapack -DTOON_INITIALIZE_SNAN 
+	$(CXX) -I. $< -o $@ -llapack -DTOON_INITIALIZE_SNAN -I .. -I .  ||\
+	{ \
+	  echo "echo 'Compile error!'" > $@ ; \
+	  chmod +x $@; \
+	}
 	
 regressions/%.out: regressions/%.test
 	$< > $@ || ( echo Crash!!! > $@ )
 
-regressions/%.result: regressions/%.out
+regressions/%.result: regressions/%.out regressions/%.txt
 	awk -vname=$* -f numdiff.awk -vf1=$< -vf2=regressions/$*.txt > $@	
 	
