@@ -127,7 +127,6 @@ Matrix<3,3> M = v.as_col() * v.as_row(); // creates a symmetric rank 1 matrix fr
 template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=Internal::VBase>
 struct Vector : public Base::template VLayout<Size, Precision> {
 protected:
-	using Base::template VLayout<Size, Precision>::try_resize;
 public:
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
@@ -232,7 +231,6 @@ public:
 
 	/// operator = from copy
 	inline Vector& operator= (const Vector& from){
-		try_resize(from.size()); //This might do nothing
 		SizeMismatch<Size,Size>::test(size(), from.size());
 		const int s=size();
 		for(int i=0; i<s; i++){
@@ -244,7 +242,6 @@ public:
 	/// operator = another Vector
 	template<int Size2, typename Precision2, typename Base2>
 	Vector<Size,Precision,Base >& operator= (const Vector<Size2, Precision2, Base2>& from){
-		try_resize(from.size()); //This might do nothing
 		SizeMismatch<Size,Size2>::test(size(), from.size());
 		const int s=size();
 		for(int i=0; i<s; i++){
@@ -256,7 +253,6 @@ public:
 	/// assignment from an Operator object
 	template <class Op>
 	inline Vector & operator=(const Operator<Op>& op){
-		try_resize(op); //This might do nothing
 		op.eval(*this);
 		return *this;
 	}

@@ -9,8 +9,36 @@ function abs(x)
 	return x<0?-x:x
 }
 
+function ignore_and_process(line,       a)
+{
+	if(line ~ /^[[:space:]]*$/)
+		return 1
+	else if (line ~ /^[[:space:]]*#>/)
+	{
+		split(line, a)
+		if(a[2] == "t")
+			t = a[3]
+
+		return 1
+	}
+	else if (line ~ /^[[:space:]]*#/)
+		return 1
+	else
+		return 0
+}
+
 BEGIN{
-	
+
+	#This program compares two files to see if they are the same
+	#Whitespace is ignored
+	#Numbers must match to within a given threshold.
+
+	#Lines starting with a # are also ignored.
+	#If a # is *not* the first non-whitespace, then it is not ignored.
+	#Lines starting with #> are directives and are processed further
+	#Directives are
+	#   #> t xx                 Set t to xx
+
 	if(t == "")
 		t = 1e-6
 
@@ -19,11 +47,11 @@ BEGIN{
 		#Get the next non blank line from the two files
 		do
 		 status1 = (getline s1 < f1)
-		while(status1 && s1 ~ /^[[:space:]]*$/)
+		while(status1 && ignore_and_process(s1))
 
 		do
 		 status2 = (getline s2 < f2)
-		while(status2 && s2 ~ /^[[:space:]]*$/)
+		while(status2 && ignore_and_process(s2))
 		
 		#Check to see if the files have both ended
 		if(status1 != status2)

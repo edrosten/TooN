@@ -36,6 +36,7 @@
 #include <limits>
 #include <new>
 #include <utility>
+#include <vector>
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 #include <TooN/internal/deprecated.hh>

@@ -36,7 +36,7 @@ docs:
 	doxygen 
 
 
-TESTS=invert slice
+TESTS=invert slice vector_resize
 
 
 TEST_RESULT=$(TESTS:%=regressions/%.result)
@@ -46,6 +46,7 @@ testclean:
 	rm -f $(TEST_FILES)
 
 test:regressions/results
+	@echo -------------- Test Results ---------------
 	@cat regressions/results
 
 regressions/results:$(TEST_RESULT)

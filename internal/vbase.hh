@@ -107,30 +107,30 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	template<class Op>
 	GenericVBase(const Operator<Op> & op) : Mem(op), StrideHolder<Stride>(op) {}
 
-	using Mem::my_data;
+	using Mem::data;
 	using Mem::size;
 
 	Precision& operator[](int i) {
 		Internal::check_index(size(), i);
-		return my_data[i * stride()];
+		return data()[i * stride()];
 	}
 
 	const Precision& operator[](int i) const {
 		Internal::check_index(size(), i);
-		return my_data[i * stride()];
+		return data()[i * stride()];
 	}
 
 	//Completely generic Vector slice operations below:
 	template<int Start, int Length> 
 	Vector<Length, Precision, SliceVBase<Stride> > slice(int start, int length){
 		Internal::CheckSlice<Size, Start, Length>::check(size(), start, length);	
-		return Vector<Length, Precision, SliceVBase<Stride> >(my_data + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(data() + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
 	}
 
 	template<int Start, int Length> 
 	const Vector<Length, Precision, SliceVBase<Stride> > slice(int start, int length) const{
 		Internal::CheckSlice<Size, Start, Length>::check(size(), start, length);	
-		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data) + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
+		return Vector<Length, Precision, SliceVBase<Stride> >(const_cast<Precision*>(data()) + stride() * (Start==Dynamic?start:Start), Length==Dynamic?length:Length, stride(), Slicing());
 	}
 
 	
@@ -217,37 +217,37 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 
 	//Other slices below
 	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
-		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(my_data), 1, size(), 1, stride(), Slicing());
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(data()), 1, size(), 1, stride(), Slicing());
 	}
 
 	Matrix<1, Size, Precision, Slice<1,Stride> > as_row(){
-		return Matrix<1, Size, Precision, Slice<1,Stride> >(my_data, 1, size(), 1, stride(), Slicing());
+		return Matrix<1, Size, Precision, Slice<1,Stride> >(data(), 1, size(), 1, stride(), Slicing());
 	}
 
 	const Matrix<Size, 1, Precision, Slice<Stride,1> > as_col() const{
-		return Matrix<Size, 1, Precision, Slice<Stride,1> >(const_cast<Precision*>(my_data), size(), 1, stride(), 1, Slicing());
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(const_cast<Precision*>(data()), size(), 1, stride(), 1, Slicing());
 	}
 
 	Matrix<Size, 1, Precision, Slice<Stride,1> > as_col(){
-		return Matrix<Size, 1, Precision, Slice<Stride,1> >(my_data, size(), 1, stride(), 1, Slicing());
+		return Matrix<Size, 1, Precision, Slice<Stride,1> >(data(), size(), 1, stride(), 1, Slicing());
 	}
 
 	typedef Vector<Size, Precision, SliceVBase<Stride> > as_slice_type;
 	
 	Vector<Size, Precision, SliceVBase<Stride> > as_slice(){                 
-		return Vector<Size, Precision, SliceVBase<Stride> >(my_data, size(), stride(), Slicing());         
+		return Vector<Size, Precision, SliceVBase<Stride> >(data(), size(), stride(), Slicing());         
 	}
 
 	const Vector<Size, Precision, SliceVBase<Stride> > as_slice() const {                 
-		return Vector<Size, Precision, SliceVBase<Stride> >(const_cast<Precision*>(my_data), size(), stride(), Slicing());         
+		return Vector<Size, Precision, SliceVBase<Stride> >(const_cast<Precision*>(data()), size(), stride(), Slicing());         
 	}
 
 	DiagonalMatrix<Size,Precision, SliceVBase<Stride> > as_diagonal() {
-		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (my_data, size(), stride(), Slicing());
+		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (data(), size(), stride(), Slicing());
 	}
 
 	const DiagonalMatrix<Size,Precision, SliceVBase<Stride> > as_diagonal() const {
-		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (const_cast<Precision*>(my_data), size(), stride(), Slicing());
+		return DiagonalMatrix<Size, Precision, SliceVBase<Stride> > (const_cast<Precision*>(data()), size(), stride(), Slicing());
 	}
 
 };

@@ -58,6 +58,15 @@ public:
 		debug_initialize(my_data, Size);	
 	}
 
+	Precision *data()
+	{
+		return my_data;
+	};
+
+	const Precision *data() const
+	{
+		return my_data;
+	};
 	Precision my_data[Size];
 };
 
@@ -68,6 +77,16 @@ public:
 	{
 		debug_initialize(my_data, Size);	
 	}
+
+	double *data()
+	{
+		return my_data;
+	};
+
+	const double *data() const
+	{
+		return my_data;
+	};
 
 	double my_data[Size] TOON_ALIGN8 ;
 };
@@ -89,6 +108,16 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 		}
 
 		Precision *my_data;
+
+		Precision *data()
+		{
+			return my_data;
+		};
+
+		const Precision *data() const
+		{
+			return my_data;
+		};
 	
 		StackOrHeap(const StackOrHeap& from)
 		:my_data(new Precision[Size])
@@ -129,10 +158,6 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 		return Size;
 	}
 
-	void try_resize(int)
-	{}
-	template<class Op> void try_resize(const Operator<Op>&)
-	{}
 };
 
 template<class Precision> struct VectorAlloc<Dynamic, Precision> {
@@ -167,81 +192,61 @@ template<class Precision> struct VectorAlloc<Dynamic, Precision> {
 		delete[] my_data;
 	}
 
-	void try_resize(int)
-	{}
+	Precision *data()
+	{
+		return my_data;
+	};
 
-	template<class Op> void try_resize(const Operator<Op>&)
-	{}
+	const Precision *data() const
+	{
+		return my_data;
+	};
+
 };
 
 
 template<class Precision> struct VectorAlloc<Resizable, Precision> {
 	protected: 
-		Precision * my_data;
-		int my_size;
-
+		std::vector<Precision> numbers;
 	
 	public:
 
-		VectorAlloc(const VectorAlloc& v)
-		:my_data(new Precision[v.my_size]), my_size(v.my_size)
-		{ 
-			for(int i=0; i < my_size; i++)
-				my_data[i] = v.my_data[i];
-		}
-
 		VectorAlloc()
-		:my_data(0), my_size(0)
 		{ 
 		}
 
 		VectorAlloc(int s)
-		:my_data(new Precision[s]), my_size(s)
+		:numbers(s)
 		{ 
-			debug_initialize(my_data, my_size);	
+			debug_initialize(data(), size());	
 		}
 
 		template <class Op>
 		VectorAlloc(const Operator<Op>& op) 
-		: my_data(new Precision[op.size()]), my_size(op.size()) 
+		:numbers(op.size()) 
 		{
-			debug_initialize(my_data, my_size);	
+			debug_initialize(data(), size());	
 		}
 
 		int size() const {
-			return my_size;
+			return numbers.size();
 		}
 
-		~VectorAlloc(){
-			delete[] my_data;
+		Precision* data() {
+			return &numbers[0];
+		}
+
+		const Precision* data()const  {
+			return &numbers[0];
 		}
 
 		void resize(int s)
 		{
-			if(s != my_size)
-			{
-				//First, invalidate the old data
-				my_size=0;
-				delete[] my_data;
-				
-				my_data = new Precision[s];
-				my_size = s;
-			}
-
-			debug_initialize(my_data, my_size);
+			int old_size = size();
+			numbers.resize(s);
+			if(s > old_size)
+				debug_initialize(data()+old_size, s-old_size);
 		}
-
-		void try_resize(int s)
-		{
-			resize(s);
-		}
-
-
-		template<class Op> void try_resize(const Operator<Op>& op)
-		{
-			resize(op.size());
-		}
-
 };
 
 template<int S, class Precision> struct VectorSlice
@@ -262,11 +267,15 @@ template<int S, class Precision> struct VectorSlice
 	template<class Op>
 	VectorSlice(const Operator<Op>& op) : my_data(op.data()) {}
 
-	void try_resize(int)
-	{}
+	Precision *data()
+	{
+		return my_data;
+	};
 
-	template<class Op> void try_resize(const Operator<Op>&)
-	{}
+	const Precision *data() const
+	{
+		return my_data;
+	};
 };
 
 template<class Precision> struct VectorSlice<-1, Precision>
@@ -285,11 +294,15 @@ template<class Precision> struct VectorSlice<-1, Precision>
 		return my_size;
 	}
 
-	void try_resize(int)
-	{}
+	Precision *data()
+	{
+		return my_data;
+	};
 
-	template<class Op> void try_resize(const Operator<Op>&)
-	{}
+	const Precision *data() const
+	{
+		return my_data;
+	};
 };
 
 
