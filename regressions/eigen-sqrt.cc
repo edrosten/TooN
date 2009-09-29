@@ -7,11 +7,9 @@ using namespace TooN;
 
 int main() {
   // construct M
-  double d1[][3] = {{1,2,3},{2,5,6},{3,6,7}};
-  Matrix<3> M(3,3);
-  M[0]=makeVector(4,0,2);
-  M[1]=makeVector(0,5,3);
-  M[2]=makeVector(2,3,6);
+  Matrix<3> M = Data(4,0,2,
+                     0,5,3,
+                     2,3,6);
  
   Vector<3> dg(makeVector(2,4,9));
   // create the eigen decomposition of M
