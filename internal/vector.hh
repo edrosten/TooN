@@ -145,7 +145,7 @@ public:
 	/// Constructor for dynamically-size vectors.  This can also be
 	/// used for statically sized vectors in which case the argument
 	/// is ignored.  The values of the vector are uninitialised
-	inline Vector(int size_in) : Base::template VLayout<Size, Precision>(size_in) {}
+	explicit inline Vector(int size_in) : Base::template VLayout<Size, Precision>(size_in) {}
 
 	/// Constructor used when constructing a vector which references
 	/// other data, e.g.
@@ -153,7 +153,7 @@ public:
 	/// double[] d = {1,2,3};
 	/// Vector<3,double,Reference> v(d);
 	/// @endcode
-	inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
+	explicit inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
 
 
 	/// Constructor used when constructing a dynamic vector which references
