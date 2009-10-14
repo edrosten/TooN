@@ -57,16 +57,6 @@ public:
 	{
 		debug_initialize(my_data, Size);	
 	}
-
-	Precision *data()
-	{
-		return my_data;
-	};
-
-	const Precision *data() const
-	{
-		return my_data;
-	};
 	Precision my_data[Size];
 };
 
@@ -77,17 +67,6 @@ public:
 	{
 		debug_initialize(my_data, Size);	
 	}
-
-	double *data()
-	{
-		return my_data;
-	};
-
-	const double *data() const
-	{
-		return my_data;
-	};
-
 	double my_data[Size] TOON_ALIGN8 ;
 };
 
@@ -109,16 +88,6 @@ template<int Size, class Precision> class StackOrHeap<Size, Precision, 1>
 
 		Precision *my_data;
 
-		Precision *data()
-		{
-			return my_data;
-		};
-
-		const Precision *data() const
-		{
-			return my_data;
-		};
-	
 		StackOrHeap(const StackOrHeap& from)
 		:my_data(new Precision[Size])
 		{
@@ -158,6 +127,30 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 		return Size;
 	}
 
+	using StaticSizedAllocator<Size, Precision>::my_data;
+
+	Precision *get_data_ptr()
+	{
+		return my_data;
+	};
+
+	const Precision *get_data_ptr() const
+	{
+		return my_data;
+	}
+	
+	protected:
+
+		Precision *data()
+		{
+			return my_data;
+		};
+
+		const Precision *data() const
+		{
+			return my_data;
+		};
+
 };
 
 template<class Precision> struct VectorAlloc<Dynamic, Precision> {
@@ -192,16 +185,27 @@ template<class Precision> struct VectorAlloc<Dynamic, Precision> {
 		delete[] my_data;
 	}
 
-	Precision *data()
+	Precision *get_data_ptr()
 	{
 		return my_data;
 	};
 
-	const Precision *data() const
+	const Precision *get_data_ptr() const
 	{
 		return my_data;
-	};
+	}
 
+	protected:
+
+		Precision *data()
+		{
+			return my_data;
+		};
+
+		const Precision *data() const
+		{
+			return my_data;
+		};
 };
 
 
@@ -232,6 +236,18 @@ template<class Precision> struct VectorAlloc<Resizable, Precision> {
 			return numbers.size();
 		}
 
+		Precision *get_data_ptr()
+		{
+			return data();
+		};
+
+		const Precision *get_data_ptr() const
+		{
+			return data();
+		}
+
+	protected:
+
 		Precision* data() {
 			return &numbers[0];
 		}
@@ -239,6 +255,8 @@ template<class Precision> struct VectorAlloc<Resizable, Precision> {
 		const Precision* data()const  {
 			return &numbers[0];
 		}
+
+	public:
 
 		void resize(int s)
 		{
@@ -266,16 +284,17 @@ template<int S, class Precision> struct VectorSlice
 
 	template<class Op>
 	VectorSlice(const Operator<Op>& op) : my_data(op.data()) {}
+	
+	protected:
+		Precision *data()
+		{
+			return my_data;
+		};
 
-	Precision *data()
-	{
-		return my_data;
-	};
-
-	const Precision *data() const
-	{
-		return my_data;
-	};
+		const Precision *data() const
+		{
+			return my_data;
+		};
 };
 
 template<class Precision> struct VectorSlice<-1, Precision>
@@ -294,15 +313,17 @@ template<class Precision> struct VectorSlice<-1, Precision>
 		return my_size;
 	}
 
-	Precision *data()
-	{
-		return my_data;
-	};
+	protected:
 
-	const Precision *data() const
-	{
-		return my_data;
-	};
+		Precision *data()
+		{
+			return my_data;
+		};
+
+		const Precision *data() const
+		{
+			return my_data;
+		};
 };
 
 
@@ -423,6 +444,18 @@ struct MatrixAlloc: public StaticSizedAllocator<R*C, Precision>
 	int num_cols() const {
 		return C;
 	}
+
+	using  StaticSizedAllocator<R*C, Precision>::my_data;
+
+	Precision* get_data_ptr()
+	{
+		return my_data;
+	}
+
+	const Precision* get_data_ptr() const 
+	{
+		return my_data;
+	}
 };
 
 
@@ -464,6 +497,16 @@ template<int R, int C, class Precision> struct MatrixAlloc<R, C, Precision, fals
 
 	~MatrixAlloc() {
 		delete[] my_data;
+	}
+
+	Precision* get_data_ptr()
+	{
+		return my_data;
+	}
+
+	const Precision* get_data_ptr() const 
+	{
+		return my_data;
 	}
 };
 
