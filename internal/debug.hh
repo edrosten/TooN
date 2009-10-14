@@ -32,7 +32,7 @@ namespace Internal
 			for(int i=0; i < n; i++)
 				data[i] = numeric_limits<P>::signaling_NaN();
 		}
-	#elif defined TOON_INITIALIZE_QNAN
+	#elif defined TOON_INITIALIZE_QNAN || defined TOON_INITIALIZE_NAN
 		template<class P> static void debug_initialize(P* data, int n)
 		{	
 			using std::numeric_limits;

@@ -364,7 +364,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	TooN does not initialize data in a Vector or Matrix.  For debugging purposes
 	the following macros can be defined:
-	- \c TOON_INITIALIZE_QNAN Sets every element of newly defined Vectors or
+	- \c TOON_INITIALIZE_QNAN or TOON_INITIALIZE_NAN Sets every element of newly defined Vectors or
 	  Matrixs to quiet NaN, if it exists, and 0 otherwise. Your code will not compile
 	  if you have made a Vector or Matrix of a type which cannot be constructed
 	  from a number.
