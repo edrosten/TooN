@@ -65,7 +65,7 @@ namespace Internal
 			static intbits random = { ((std::time(NULL) & 0xffffffff) *1664525L + 1013904223L)& 0xffffffff};
 			unsigned char* cdata = reinterpret_cast<unsigned char*>(data);
 
-			int bytes = sizeof(P)*n, i=0;
+			size_t bytes = sizeof(P)*n, i=0;
 			
 			//Do nothing except for noisy failure with non-POD types.
 			datafail<P> d={0};
