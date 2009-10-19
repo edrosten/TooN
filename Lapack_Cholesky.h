@@ -67,10 +67,6 @@ This uses the non-sqrt version of the decomposition
 giving symmetric M = L*D*L.T() where the diagonal of L contains ones
 @param Size the size of the matrix
 @param Precision the precision of the entries in the matrix and its decomposition
-
-@note Always uses double precision LAPACK routines. On-line checking of 
-precision or template specialization could be used to implement single 
-precision if necessary.
 **/
 template <int Size, typename Precision=DefaultPrecision>
 class Lapack_Cholesky {
