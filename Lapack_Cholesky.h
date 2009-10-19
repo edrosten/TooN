@@ -100,7 +100,7 @@ public:
 	void do_compute(){
 		int N = my_cholesky.num_rows();
 		int info;
-		dpotrf_("L", &N, (double*) my_cholesky_lapack.my_data, &N, &info);
+		potrf_("L", &N, my_cholesky_lapack.my_data, &N, &info);
 		for (int i=0;i<N;i++) {
 		  int j;
 		  for (j=0;j<=i;j++) {
@@ -128,7 +128,7 @@ public:
 		int N=my_cholesky.num_rows();
 		int NRHS=1;
 		int info;
-		dpotrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
+		potrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
 	}
@@ -141,7 +141,7 @@ public:
 		int N=my_cholesky.num_rows();
 		int NRHS=m.num_cols();
 		int info;
-		dpotrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
+		potrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
 	}
@@ -167,7 +167,7 @@ public:
 		M=my_cholesky_lapack;
 		int N = my_cholesky.num_rows();
 		int info;
-		dpotri_("L", &N, M.my_data, &N, &info);
+		potri_("L", &N, M.my_data, &N, &info);
 		assert(info == 0);
 		for (int i=1;i<N;i++) {
 		  for (int j=0;j<i;j++) {
@@ -178,7 +178,7 @@ public:
 	}
 
 private:
-	Matrix<Size,Size,double> my_cholesky_lapack;     
+	Matrix<Size,Size,Precision> my_cholesky_lapack;     
 	Matrix<Size,Size,Precision> my_cholesky;     
 	int my_rank;
 };
