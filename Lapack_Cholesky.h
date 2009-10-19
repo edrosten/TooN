@@ -33,6 +33,10 @@
 
 #include <TooN/TooN.h>
 
+#include <TooN/lapack.h>
+
+#include <assert.h>
+
 namespace TooN {
 
 
@@ -63,16 +67,20 @@ This uses the non-sqrt version of the decomposition
 giving symmetric M = L*D*L.T() where the diagonal of L contains ones
 @param Size the size of the matrix
 @param Precision the precision of the entries in the matrix and its decomposition
+
+@note Always uses double precision LAPACK routines. On-line checking of 
+precision or template specialization could be used to implement single 
+precision if necessary.
 **/
-template <int Size, typename Precision>
+template <int Size, typename Precision=DefaultPrecision>
 class Lapack_Cholesky {
 public:
 
     Lapack_Cholesky(){}
 	
 	template<class P2, class B2>
-	Lapack_Cholesky(const Matrix<Size, Size, P2, B2>& m) {
-		: my_cholesky(m) {
+	Lapack_Cholesky(const Matrix<Size, Size, P2, B2>& m) 
+	  : my_cholesky(m), my_cholesky_lapack(m) {
 		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
 		do_compute();
 	}
@@ -83,7 +91,7 @@ public:
 	template<class P2, class B2> void compute(const Matrix<Size, Size, P2, B2>& m){
 		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
 		SizeMismatch<Size,Size>::test(m.num_rows(), my_cholesky.num_rows());
-		my_cholesky=m;
+		my_cholesky_lapack=m;
 		do_compute();
 	}
 
@@ -92,7 +100,18 @@ public:
 	void do_compute(){
 		int N = my_cholesky.num_rows();
 		int info;
-		dpotrf_("L", &N, L.get_data_ptr(), &N, &info);
+		dpotrf_("L", &N, (double*) my_cholesky_lapack.my_data, &N, &info);
+		for (int i=0;i<N;i++) {
+		  int j;
+		  for (j=0;j<=i;j++) {
+		    my_cholesky[i][j]=my_cholesky_lapack[j][i];
+		  }
+		  // LAPACK does not set upper triangle to zero, 
+		  // must be done here
+		  for (;j<N;j++) {
+		    my_cholesky[i][j]=0;
+		  }
+		}
 		assert(info >= 0);
 		if (info > 0) {
 			my_rank = info-1;
@@ -102,64 +121,66 @@ public:
 	int rank() const { return my_rank; }
 
 	template <int Size2, typename P2, typename B2>
-		Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) {
+		Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) const {
 		SizeMismatch<Size,Size2>::test(my_cholesky.num_cols(), v.size());
 
 		Vector<Size> result(v);
-		int N=L.num_rows();
+		int N=my_cholesky.num_rows();
 		int NRHS=1;
 		int info;
-		dpotrs_("L", &N, &NRHS, my_cholesky.my_data, &N, result.my_data, &N, &info);     
+		dpotrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
 	}
 
 	template <int Size2, int Cols2, typename P2, typename B2>
-		Matrix<Size, Cols2, Precision, ColMajor> backsub (const Matrix<Size2, Cols2, P2, B2>& m) {
+		Matrix<Size, Cols2, Precision, ColMajor> backsub (const Matrix<Size2, Cols2, P2, B2>& m) const {
 		SizeMismatch<Size,Size2>::test(my_cholesky.num_cols(), m.num_rows());
 
 		Matrix<Size, Cols2, Precision, ColMajor> result(m);
 		int N=my_cholesky.num_rows();
 		int NRHS=m.num_cols();
 		int info;
-		dpotrs_("L", &N, &NRHS, my_cholesky.my_data, &N, result.my_data, &N, &info);     
+		dpotrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
 	}
-
-
-
-
 
 	template <int Size2, typename P2, typename B2>
 		Precision mahalanobis(const Vector<Size2, P2, B2>& v) const {
 		return v * backsub(v);
 	}
 
-	const Matrix<>& get_L() const {
+	Matrix<Size,Size,Precision> get_L() const {
 		return my_cholesky;
 	}
 
 	Precision determinant() const {
-		Precision det = L[0][0];
+		Precision det = my_cholesky[0][0];
 		for (int i=1; i<my_cholesky.num_rows(); i++)
-			det *= L[i][i];
+			det *= my_cholesky[i][i];
 		return det*det;
 	}
 
 	Matrix<> get_inverse() const {
-		Matrix<Size> M(my_cholesky);
+		Matrix<Size> M(my_cholesky.num_rows(),my_cholesky.num_rows());
+		M=my_cholesky_lapack;
 		int N = my_cholesky.num_rows();
 		int info;
 		dpotri_("L", &N, M.my_data, &N, &info);
 		assert(info == 0);
-		TooN::Symmetrize(M);
+		for (int i=1;i<N;i++) {
+		  for (int j=0;j<i;j++) {
+		    M[i][j]=M[j][i];
+		  }
+		}
 		return M;
 	}
 
 private:
+	Matrix<Size,Size,double> my_cholesky_lapack;     
 	Matrix<Size,Size,Precision> my_cholesky;     
-	int rank;
+	int my_rank;
 };
 
 

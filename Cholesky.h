@@ -38,7 +38,8 @@ namespace TooN {
 
 /**
 Decomposes a positive-semidefinite symmetric matrix A (such as a covariance) into L*D*L^T, where L is lower-triangular and D is diagonal.
-Also can compute A = S*S^T, with S lower triangular.  The LDL^T form is faster to compute than the class Cholesky decomposition.
+Also can compute the classic A = L*L^T, with L lower triangular.  The LDL^T form is faster to compute than the classical Cholesky decomposition. 
+Use get_unscaled_L() and get_D() to access the individual matrices of L*D*L^T decomposition. Use get_L() to access the lower triangular matrix of the classic Cholesky decomposition L*L^T.
 The decomposition can be used to compute A^-1*x, A^-1*M, M*A^-1*M^T, and A^-1 itself, though the latter rarely needs to be explicitly represented.
 Also efficiently computes det(A) and rank(A).
 It can be used as follows:
@@ -122,7 +123,7 @@ public:
 	/// Compute x = A^-1*v
     /// Run time is O(N^2)
 	template<int Size2, class P2, class B2>
-	Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) {
+	Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) const {
 		int size=my_cholesky.num_rows();
 		SizeMismatch<Size,Size2>::test(size, v.size());
 
@@ -157,7 +158,7 @@ public:
 	/**overload
 	*/
 	template<int Size2, int C2, class P2, class B2>
-	Matrix<Size, C2, Precision> backsub (const Matrix<Size2, C2, P2, B2>& m) {
+	Matrix<Size, C2, Precision> backsub (const Matrix<Size2, C2, P2, B2>& m) const {
 		int size=my_cholesky.num_rows();
 		SizeMismatch<Size,Size2>::test(size, m.num_rows());
 
@@ -204,6 +205,47 @@ public:
 			answer*=my_cholesky(i,i);
 		}
 		return answer;
+	}
+
+	template <int Size2, typename P2, typename B2>
+	Precision mahalanobis(const Vector<Size2, P2, B2>& v) const {
+		return v * backsub(v);
+	}
+
+	Matrix<Size,Size,Precision> get_unscaled_L() const {
+		Matrix<Size,Size,Precision> m(my_cholesky.num_rows(),
+					      my_cholesky.num_rows());
+		m=Identity;
+		for (int i=1;i<my_cholesky.num_rows();i++) {
+			for (int j=0;j<i;j++) {
+				m(i,j)=my_cholesky(i,j);
+			}
+		}
+		return m;
+	}
+			
+	Matrix<Size,Size,Precision> get_D() const {
+		Matrix<Size,Size,Precision> m(my_cholesky.num_rows(),
+					      my_cholesky.num_rows());
+		m=Zeros;
+		for (int i=0;i<my_cholesky.num_rows();i++) {
+			m(i,i)=my_cholesky(i,i);
+		}
+		return m;
+	}
+	
+	Matrix<Size,Size,Precision> get_L() const {
+		Matrix<Size,Size,Precision> m(my_cholesky.num_rows(),
+					      my_cholesky.num_rows());
+		m=Zeros;
+		for (int j=0;j<my_cholesky.num_cols();j++) {
+			Precision sqrtd=sqrt(my_cholesky(j,j));
+			m(j,j)=sqrtd;
+			for (int i=j+1;i<my_cholesky.num_rows();i++) {
+				m(i,j)=my_cholesky(i,j)*sqrtd;
+			}
+		}
+		return m;
 	}
 
 private:
