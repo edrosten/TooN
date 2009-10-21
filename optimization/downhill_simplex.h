@@ -90,7 +90,7 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 		///                  is used to determine the dimension of the run-time sized version.
 		///@param spread     Size of the initial simplex.
 		template<class Function> DownhillSimplex(const Function& func, const Vector<N>& c, Precision spread=1)
-		:simplex(c.size()+1, c.size()),values(c.size())
+		:simplex(c.size()+1, c.size()),values(c.size()+1)
 		{
 			alpha = 1.0;
 			rho = 2.0;
