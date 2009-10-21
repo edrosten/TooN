@@ -161,13 +161,13 @@ template<int N=-1, typename Precision=double> class DownhillSimplex
 		///Get the index of the best vertex
 		int get_best() const 
 		{
-			return min_element(&values[0], &values[0] + values.size()) - &values[0];
+			return std::min_element(&values[0], &values[0] + values.size()) - &values[0];
 		}
 		
 		///Get the index of the worst vertex
 		int get_worst() const 
 		{
-			return max_element(&values[0], &values[0] + values.size()) - &values[0];
+			return std::max_element(&values[0], &values[0] + values.size()) - &values[0];
 		}
 
 		///Perform one iteration of the downhill Simplex algorithm
