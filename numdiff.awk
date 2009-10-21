@@ -18,13 +18,17 @@ function ignore_and_process(line,       a)
 		split(line, a)
 		if(a[2] == "t")
 			t = a[3]
+		else if(a[2] == "ignore")
+			ignore++
+		else if(a[2] == "resume")
+			ignore--
 
 		return 1
 	}
 	else if (line ~ /^[[:space:]]*#/) #Ignore comments
 		return 1
 	else   #The line should not be ignored
-		return 0
+		return (ignore != 0)
 }
 
 BEGIN{
@@ -38,6 +42,10 @@ BEGIN{
 	#Lines starting with #> are directives and are processed further
 	#Directives are
 	#   #> t xx                 Set t to xx
+	#   #> ignore               Start ignoring text (nestable)
+	#   #> resume               Stop ignoring text 
+
+	ignore=0
 
 	if(t == "")
 		t = 1e-6
