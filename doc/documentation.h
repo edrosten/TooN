@@ -60,7 +60,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sInitialize
  - \ref sScalars
  - \ref ssExamples
- - \ref sNoResize
+ - \ref sResize
  - \ref sDebug
  - \ref sSlices
  - \ref sPrecision
@@ -275,7 +275,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		Matrices can be filled from data in row-major order:
 		@code
-			Matrix<3> m = Data(1, 2, 3, 4, 5, 6, 7, 8, 9);
+			Matrix<3> m = Data(1, 2, 3, 
+			                   4, 5, 6, 
+							   7, 8, 9);
 		@endcode
 
 		A less general, but visually more pleasing syntax can also be used:
@@ -321,13 +323,30 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	\subsection sResize How do I resize a dynamic vector/matrix?
 
-	You can't. Preventing resize allow all sorts of things to be const
-	which is great for optimization. If you want a genuinely resizable
-	structure, you may consider using a <code>std::vector</code>, and accessing
-	it as a TooN object when appropriate. See \ref sWrap. Also, the
-	speed and complexity of resizable matrices depends on the memory layout, so
-	you may wish to use column major matrices as opposed to the default row
-	major layout.
+	Do you really want to? If you do, then you have to declare it:
+
+	@code
+	     Vector<Resizable> v;
+		 v.resize(3);
+		 v = makeVector(1, 2, 3);
+
+		 v = makeVector(1, 2); //Error!
+	@endcode
+
+	The policy behind the design of TooN is that it is a linear algebra library,
+	not a generic container library, so resizable vectors <b>ONLY</b> change
+	their size with a call to <code>.resize()</code>.  Assigning mismatched
+	sizes is a fatal error, just like with static and dynamic vectors. Resizing
+	is efficient since it is implemented internally with
+	<code>std::vector</code>.  Note that upon resize, existing data elements are
+	retained but new data elements are uninitialized.
+
+	Currently, resizable matrices are unimplemented.  If you want a resizable
+	matrix, you may consider using a <code>std::vector</code>, and accessing it
+	as a TooN object when appropriate. See \ref sWrap. Also, the speed and
+	complexity of resizable matrices depends on the memory layout, so you may
+	wish to use column major matrices as opposed to the default row major
+	layout.
 
 	\subsection sDebug What debugging options are there?
 

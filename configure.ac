@@ -1,4 +1,4 @@
-AC_INIT(TooN, version-2.0.0-beta2)
+AC_INIT(TooN, version-2.0.0-beta6)
 AC_COPYRIGHT([Copyright T. Drummond, E. Rosten, G. Reitmayr 2006, 2007, 2008, 2009])
 AC_LANG(C++)
 AC_PROG_CXX

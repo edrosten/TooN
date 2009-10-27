@@ -354,6 +354,26 @@ public:
 
 	/// What is the size of this vector?
 	int size() const;
+	
+	/// Resize the vector. This is only provided if the vector is
+	/// declared as Resizable. Existing elements are retained, new
+	/// elements are uninitialized. Resizing has the same efficiency
+	/// guarantees as <code>std::vector</code>.
+	/// @param s The new size.
+	///
+	/// @internal
+	/// This method is not defined by Vector: it is inherited.
+	void resize(int s);
+
+	/// Return a pointer to the first element of the vector. This method
+	/// is only provided for non-slice vectors, i.e. a subset of the cases
+	/// where the memory is guaranteed to be contiguous.
+	///
+	/// @internal
+	/// This method is not defined by Vector: it is inherited.
+	Precision* get_data_ptr();
+
+
 
 	/// @}
 
