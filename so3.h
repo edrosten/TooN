@@ -235,6 +235,9 @@ inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision 
 template <typename Precision>
 template<int S, typename VA>
 inline SO3<Precision> SO3<Precision>::exp(const Vector<S,Precision,VA>& w){
+	using std::sqrt;
+	using std::sin;
+	using std::cos;
 	SizeMismatch<3,S>::test(3, w.size());
 	
 	static const Precision one_6th = 1.0/6.0;

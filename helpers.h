@@ -37,7 +37,10 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#define M_SQRT1_2 0.70710678118654752440
+#endif
+
+#ifndef M_SQRT1_2
+#define M_SQRT1_2 0.707106781186547524401
 #endif
 
 namespace TooN {
@@ -99,7 +102,8 @@ namespace TooN {
 	///@param v \e v
 	///@ingroup gLinAlg
 	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size-1), Precision> project( const Vector<Size, Precision, Base> & v){
-		return v.template slice<0, End<-1> >() / v[v.size() - 1];
+		static const int Len = (Size==Dynamic?Dynamic:Size-1);
+		return v.template slice<0, Len>(0, v.size()-1) / v[v.size() - 1];
 	}
 	
 	//This should probably be done with an operator to prevent an extra new[] for dynamic vectors.
@@ -108,7 +112,8 @@ namespace TooN {
 	///@ingroup gLinAlg
 	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size+1), Precision> unproject( const Vector<Size, Precision, Base> & v){
 		Vector<(Size==Dynamic?Dynamic:Size+1), Precision> result(v.size()+1);
-		result.template slice<0,End<-1> >() = v;
+		static const int Len = (Size==Dynamic?Dynamic:Size);
+		result.template slice<0, Len>(0, v.size()) = v;
 		result[v.size()] = 1;
 		return result;
 	}

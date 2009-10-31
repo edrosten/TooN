@@ -33,7 +33,6 @@ namespace TooN {
 namespace Internal{
 template<int Size, class Precision, int Stride, class Mem> struct GenericVBase;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Slice holding class
@@ -179,7 +178,8 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	TOON_INTERNAL_MAKE_END(D0##8);\
 	TOON_INTERNAL_MAKE_END(D0##9); 
 
-	TOON_INTERNAL_MAKE_END_99(-0x);
+#ifndef WIN32 
+	TOON_INTERNAL_MAKE_END_99(-);
 	TOON_INTERNAL_MAKE_END_99(-1);
 	TOON_INTERNAL_MAKE_END_99(-2);
 	TOON_INTERNAL_MAKE_END_99(-3);
@@ -189,7 +189,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	TOON_INTERNAL_MAKE_END_99(-7);
 	TOON_INTERNAL_MAKE_END_99(-8);
 	TOON_INTERNAL_MAKE_END_99(-9);
-
+#endif
 	#undef TOON_INTERNAL_MAKE_END
 	#undef TOON_INTERNAL_MAKE_END99
 
