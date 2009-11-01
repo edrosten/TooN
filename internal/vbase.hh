@@ -179,7 +179,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 	TOON_INTERNAL_MAKE_END(D0##9); 
 
 #ifndef WIN32 
-	TOON_INTERNAL_MAKE_END_99(-);
+	TOON_INTERNAL_MAKE_END_99(-0x);
 	TOON_INTERNAL_MAKE_END_99(-1);
 	TOON_INTERNAL_MAKE_END_99(-2);
 	TOON_INTERNAL_MAKE_END_99(-3);
