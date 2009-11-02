@@ -153,68 +153,6 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return slice<Dynamic, Dynamic>(start, length);
 	}
 		
-	//Static slicing with End
-	#define TOON_INTERNAL_MAKE_END(X)\
-	template<int Start, StaticEndMarker<(X)>(*End)()> \
-	Vector<(Size==Dynamic?Dynamic:Size-Start+(X)), Precision, SliceVBase<Stride> > slice(){\
-		static const int Len = (Size==Dynamic?Dynamic:Size-Start+(X));\
-		return slice<Start, Len>(Start, size() - Start + (X));\
-	}\
-	template<int Start, StaticEndMarker<(X)>(*End)()> \
-	const Vector<(Size==Dynamic?Dynamic:Size-Start+(X)), Precision, SliceVBase<Stride> > slice() const {\
-		static const int Len = (Size==Dynamic?Dynamic:Size-Start+(X));\
-		return slice<Start, Len>(Start, size() - Start + (X));\
-	}
-	
-	#define TOON_INTERNAL_MAKE_END_99(D0)\
-	TOON_INTERNAL_MAKE_END(D0##0);\
-	TOON_INTERNAL_MAKE_END(D0##1);\
-	TOON_INTERNAL_MAKE_END(D0##2);\
-	TOON_INTERNAL_MAKE_END(D0##3);\
-	TOON_INTERNAL_MAKE_END(D0##4);\
-	TOON_INTERNAL_MAKE_END(D0##5);\
-	TOON_INTERNAL_MAKE_END(D0##6);\
-	TOON_INTERNAL_MAKE_END(D0##7);\
-	TOON_INTERNAL_MAKE_END(D0##8);\
-	TOON_INTERNAL_MAKE_END(D0##9); 
-
-#ifndef WIN32 
-	TOON_INTERNAL_MAKE_END_99(-0x);
-	TOON_INTERNAL_MAKE_END_99(-1);
-	TOON_INTERNAL_MAKE_END_99(-2);
-	TOON_INTERNAL_MAKE_END_99(-3);
-	TOON_INTERNAL_MAKE_END_99(-4);
-	TOON_INTERNAL_MAKE_END_99(-5);
-	TOON_INTERNAL_MAKE_END_99(-6);
-	TOON_INTERNAL_MAKE_END_99(-7);
-	TOON_INTERNAL_MAKE_END_99(-8);
-	TOON_INTERNAL_MAKE_END_99(-9);
-#endif
-	#undef TOON_INTERNAL_MAKE_END
-	#undef TOON_INTERNAL_MAKE_END99
-
-	//Dynamic slicing with End
-	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker e)
-	{		
-		return slice(i, size()-i+e.e);
-	}		
-
-	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker e) const
-	{		
-		return slice(i, size()-i+e.e);
-	}		
-
-	//Alternate form of dynamic slicing with End:
-	Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker(*)())
-	{		
-		return slice(i, size()-i);
-	}		
-
-	const Vector<Dynamic, Precision, SliceVBase<Stride> > slice(int i, Internal::DynamicEndMarker(*)()) const
-	{		
-		return slice(i, size()-i);
-	}		
-
 	//Other slices below
 	const Matrix<1, Size, Precision, Slice<1,Stride> > as_row() const{
 		return Matrix<1, Size, Precision, Slice<1,Stride> >(const_cast<Precision*>(data()), 1, size(), 1, stride(), Slicing());
