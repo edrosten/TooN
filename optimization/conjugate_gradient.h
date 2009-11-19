@@ -164,6 +164,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	const int size;      ///< Dimensionality of the space.
 	Vector<Size> g;      ///< Gradient vector used by the next call to iterate()
 	Vector<Size> h;      ///< Conjugate vector to be searched along in the next call to iterate()
+	Vector<Size> minus_h;///< negative of h as this is required to be passed into a function which uses references (so can't be temporary)
 	Vector<Size> old_g;  ///< Gradient vector used to compute $h$ in the last call to iterate()
 	Vector<Size> old_h;  ///< Conjugate vector searched along in the last call to iterate()
 	Vector<Size> x;      ///< Current position (best known point)
@@ -190,7 +191,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	///@param deriv  Function to compute \f$\nabla f(x)\f$
 	template<class Func, class Deriv> ConjugateGradient(const Vector<Size>& start, const Func& func, const Deriv& deriv)
 	: size(start.size()),
-	  g(size),h(size),old_g(size),old_h(size),x(start),old_x(size)
+	  g(size),h(size),minus_h(size),old_g(size),old_h(size),x(start),old_x(size)
 	{
 		init(start, func(start), deriv(start));
 	}	
@@ -201,7 +202,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	///@param deriv  \f$\nabla f(x)\f$
 	template<class Func> ConjugateGradient(const Vector<Size>& start, const Func& func, const Vector<Size>& deriv)
 	: size(start.size()),
-	  g(size),h(size),old_g(size),old_h(size),x(start),old_x(size)
+	  g(size),h(size),minus_h(size),old_g(size),old_h(size),x(start),old_x(size)
 	{
 		init(start, func(start), deriv);
 	}	
@@ -220,6 +221,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		//the gradient
 		g = deriv;
 		h = g;
+		minus_h=-h;
 
 		y = func;
 		old_y = y;
@@ -255,7 +257,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	/// @param func Functor returning the function value at a given point.
 	template<class Func> void find_next_point(const Func& func)
 	{
-		Internal::LineSearch<Size, Precision, Func> line(x, -h, func);
+		Internal::LineSearch<Size, Precision, Func> line(x, minus_h, func);
 
 		//Always search in the conjugate direction (h)
 		//First bracket a minimum.
@@ -318,6 +320,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 		//Precision gamma = (g * g - oldg*g)/(oldg * oldg);
 		Precision gamma = (g * g - old_g*g)/(old_g * old_g);
 		h = g + gamma * old_h;
+		minus_h=-h;
 	}
 
 	///Use this function to iterate over the optimization. Note that after
