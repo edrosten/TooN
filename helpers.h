@@ -597,10 +597,11 @@ namespace TooN {
         };
     }
 
+
 	/// Finds the minimal value of a vector.
 	/// @param v a vector
 	/// @return the smallest value of v
-    template<int Size, typename Precision, typename Base> inline Precision min( const Vector<Size, Precision, Base>& v) {
+    template<int Size, typename Precision, typename Base> inline Precision min_value( const Vector<Size, Precision, Base>& v) {
         typedef Internal::accumulate_functor_vector<Precision, std::less<Precision> > vector_accumulate_functor;
         return Internal::accumulate<Size,Precision,Base,
             vector_accumulate_functor, Precision >( v ); 
@@ -608,15 +609,16 @@ namespace TooN {
 	/// Finds the largest value of a vector.
 	/// @param v a vector
 	/// @return the largest value of v
-    template<int Size, typename Precision, typename Base> inline Precision max( const Vector<Size, Precision, Base>& v) {
+    template<int Size, typename Precision, typename Base> inline Precision max_value( const Vector<Size, Precision, Base>& v) {
         typedef Internal::accumulate_functor_vector<Precision, std::greater<Precision> > vector_accumulate_functor;
         return Internal::accumulate<Size,Precision,Base,
             vector_accumulate_functor, Precision >( v ); 
     }
+
 	/// Finds the smallest value of a matrix.
 	/// @param m a matrix
 	/// @return the smallest value of m
-    template<int R, int C, typename Precision, typename Base> inline Precision min( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Precision min_value( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_functor_matrix<Precision, std::less<Precision> > matrix_accumulate_functor;
         return Internal::accumulate<R,C,Precision,Base,
             matrix_accumulate_functor, Precision>( m );
@@ -624,7 +626,7 @@ namespace TooN {
 	/// Finds the largest value of a matrix.
 	/// @param m a matrix
 	/// @return the largest value of m
-    template<int R, int C, typename Precision, typename Base> inline Precision max( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Precision max_value( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_functor_matrix<Precision, std::greater<Precision> > matrix_accumulate_functor;
         return Internal::accumulate<R,C,Precision,Base,
             matrix_accumulate_functor, Precision>( m );
@@ -632,7 +634,7 @@ namespace TooN {
 	/// Finds the smallest values of each column of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size C
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_value_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_vertical_functor<Precision,std::less<Precision> > matrix_accumulate_vertical_functor;
         return Internal::accumulate_vertical<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Vector<Dynamic,Precision> >( m );
@@ -640,7 +642,7 @@ namespace TooN {
 	/// Finds the largest values of each column of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size C
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_vertical( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_value_vertical( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_vertical_functor<Precision,std::greater<Precision> > matrix_accumulate_vertical_functor;
         return Internal::accumulate_vertical<R,C,Precision,Base,
             matrix_accumulate_vertical_functor, Vector<Dynamic,Precision> >( m );
@@ -648,7 +650,7 @@ namespace TooN {
 	/// Finds the smallest values of each row of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size R
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> min_value_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_horizontal_functor<Precision,std::less<Precision> > matrix_accumulate_horizontal_functor;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
             matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision> >( m );
@@ -656,7 +658,7 @@ namespace TooN {
 	/// Finds the largest values of each row of a matrix.
 	/// @param m a matrix
 	/// @return a vector of size R
-    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_horizontal( const Matrix<R, C, Precision, Base> & m) {
+    template<int R, int C, typename Precision, typename Base> inline Vector<Dynamic,Precision> max_value_horizontal( const Matrix<R, C, Precision, Base> & m) {
         typedef Internal::accumulate_horizontal_functor<Precision,std::greater<Precision> > matrix_accumulate_horizontal_functor;
         return Internal::accumulate_horizontal<R,C,Precision,Base,
             matrix_accumulate_horizontal_functor, Vector<Dynamic,Precision> >( m );
