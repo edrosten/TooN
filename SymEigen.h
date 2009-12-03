@@ -33,24 +33,25 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <complex>
 #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
 
 namespace TooN {
-
+static const double root3=1.73205080756887729352744634150587236694280525381038062805580;
 
 namespace Internal{
 	///Default condition number for SymEigen::backsub, SymEigen::get_pinv and SymEigen::get_inv_diag
 	static const double symeigen_condition_no=1e9;
-	
+
 	///@internal
 	///@brief Compute eigensystems for sizes > 2
 	///Helper struct for computing eigensystems, to allow for specialization on
 	///2x2 matrices.
 	///@ingroup gInternal
 	template <int Size> struct ComputeSymEigen {
-		
+
 		///@internal
 		///Compute an eigensystem.
 		///@param m Input matrix (assumed to be symmetric)
@@ -74,7 +75,7 @@ namespace Internal{
 			syev_((char*)"V",(char*)"U",&N,&evectors[0][0],&lda,&evalues[0], &WORK[0],&lwork,&info);
 
 			if(info!=0){
-				std::cerr << "In SymEigen<"<<Size<<">: " << info 
+				std::cerr << "In SymEigen<"<<Size<<">: " << info
 						<< " off-diagonal elements of an intermediate tridiagonal form did not converge to zero." << std::endl
 						<< "M = " << m << std::endl;
 			}
@@ -82,7 +83,7 @@ namespace Internal{
 	};
 
 	///@internal
-	///@brief Compute 2x2 eigensystems 
+	///@brief Compute 2x2 eigensystems
 	///Helper struct for computing eigensystems, specialized on 2x2 matrices.
 	///@ingroup gInternal
 	template <> struct ComputeSymEigen<2> {
@@ -118,6 +119,85 @@ namespace Internal{
 		}
 	};
 
+    ///@internal
+	///@brief Compute 3x3 eigensystems
+	///Helper struct for computing eigensystems, specialized on 3x3 matrices.
+	///@ingroup gInternal
+	template <> struct ComputeSymEigen<3> {
+
+		///@internal
+		///Compute an eigensystem.
+		///@param m Input matrix (assumed to be symmetric)
+		///@param eig Eigen vector output
+		///@param ev Eigen values output
+		template<typename P, typename B>
+		static inline void compute(const Matrix<3,3,P,B>& m, Matrix<3,3,P>& eig, Vector<3, P>& ev) {
+            //method uses closed form solution of cubic equation to obtain roots of characteristic equation.
+
+            //Polynomial terms of |a - l * Identity|
+            //l^3 + a*l^2 + b*l + c
+
+            const double& a11 = m[0][0];
+            const double& a12 = m[0][1];
+            const double& a13 = m[0][2];
+
+            const double& a22 = m[1][1];
+            const double& a23 = m[1][2];
+
+            const double& a33 = m[2][2];
+
+            //From matlab:
+            double a = -a11-a22-a33;
+            double b = a11*a22+a11*a33+a22*a33-a12*a12-a13*a13-a23*a23;
+            double c = a11*(a23*a23)+(a13*a13)*a22+(a12*a12)*a33-a12*a13*a23*2.0-a11*a22*a33;
+
+            //Using Cardano's method:
+            double p = b - a*a/3;
+            double q = c + (2*a*a*a - 9*a*b)/27;
+
+            double alpha = -q/2;
+            double beta_descriminant = q*q/4 + p*p*p/27;
+
+            //beta_descriminant <= 0 for real roots!
+            double beta = sqrt(-beta_descriminant);
+            double r2 = alpha*alpha  - beta_descriminant;
+
+            ///Need A,B = cubert(alpha +- beta)
+            ///Turn in to r, theta
+            /// r^(1/3) * e^(i * theta/3)
+
+            double cuberoot_r = pow(r2, 1./6);
+            double theta3 = atan2(beta, alpha)/3;
+
+            double A_plus_B = 2*cuberoot_r*cos(theta3);
+            double A_minus_B = -2*cuberoot_r*sin(theta3);
+
+            //calculate eigenvalues
+            ev =  makeVector(A_plus_B, -A_plus_B/2 + A_minus_B * sqrt(3)/2, -A_plus_B/2 - A_minus_B * sqrt(3)/2) - Ones * a/3;
+
+            if(ev[0] > ev[1])
+                swap(ev[0], ev[1]);
+            if(ev[1] > ev[2])
+                swap(ev[1], ev[2]);
+            if(ev[0] > ev[1])
+                swap(ev[0], ev[1]);
+
+            //calculate the eigenvectors
+            eig[0][0]=a12 * a23 - a13 * (a22 - ev[0]);
+            eig[0][1]=a12 * a13 - a23 * (a11 - ev[0]);
+            eig[0][2]=(a11-ev[0])*(a22-ev[0]) - a12*a12;
+            normalize(eig[0]);
+            eig[1][0]=a12 * a23 - a13 * (a22 - ev[1]);
+            eig[1][1]=a12 * a13 - a23 * (a11 - ev[1]);
+            eig[1][2]=(a11-ev[1])*(a22-ev[1]) - a12*a12;
+            normalize(eig[1]);
+            eig[2][0]=a12 * a23 - a13 * (a22 - ev[2]);
+            eig[2][1]=a12 * a13 - a23 * (a11 - ev[2]);
+            eig[2][2]=(a11-ev[2])*(a22-ev[2]) - a12*a12;
+            normalize(eig[2]);
+		}
+	};
+
 };
 
 /**
@@ -134,7 +214,7 @@ Matrix<3> M(3,3);
 M[0]=makeVector(4,0,2);
 M[1]=makeVector(0,5,3);
 M[2]=makeVector(2,3,6);
- 
+
 // create the eigen decomposition of M
 SymEigen<3> eigM(M);
 cout << "A=" << M << endl;
@@ -194,28 +274,28 @@ public:
 		Internal::ComputeSymEigen<Size>::compute(m, my_evectors, my_evalues);
 	}
 
-	/// Calculate result of multiplying the (pseudo-)inverse of M by a vector. 
-	/// For a vector \f$b\f$, this calculates \f$M^{\dagger}b\f$ by back substitution 
-	/// (i.e. without explictly calculating the (pseudo-)inverse). 
+	/// Calculate result of multiplying the (pseudo-)inverse of M by a vector.
+	/// For a vector \f$b\f$, this calculates \f$M^{\dagger}b\f$ by back substitution
+	/// (i.e. without explictly calculating the (pseudo-)inverse).
 	/// See the SVD detailed description for a description of condition variables.
 	template <int S, typename P, typename B>
 	Vector<Size, Precision> backsub(const Vector<S,P,B>& rhs) const {
 		return (my_evectors.T() * diagmult(get_inv_diag(Internal::symeigen_condition_no),(my_evectors * rhs)));
 	}
 
-	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix. 
-	/// For a matrix \f$A\f$, this calculates \f$M^{\dagger}A\f$ by back substitution 
-	/// (i.e. without explictly calculating the (pseudo-)inverse). 
+	/// Calculate result of multiplying the (pseudo-)inverse of M by another matrix.
+	/// For a matrix \f$A\f$, this calculates \f$M^{\dagger}A\f$ by back substitution
+	/// (i.e. without explictly calculating the (pseudo-)inverse).
 	/// See the SVD detailed description for a description of condition variables.
 	template <int R, int C, typename P, typename B>
 	Matrix<Size,C, Precision> backsub(const Matrix<R,C,P,B>& rhs) const {
 		return (my_evectors.T() * diagmult(get_inv_diag(Internal::symeigen_condition_no),(my_evectors * rhs)));
 	}
 
-	/// Calculate (pseudo-)inverse of the matrix. This is not usually needed: 
-	/// if you need the inverse just to multiply it by a matrix or a vector, use 
+	/// Calculate (pseudo-)inverse of the matrix. This is not usually needed:
+	/// if you need the inverse just to multiply it by a matrix or a vector, use
 	/// one of the backsub() functions, which will be faster.
-	/// See the SVD detailed description for a description of the pseudo-inverse 
+	/// See the SVD detailed description for a description of the pseudo-inverse
 	/// and condition variables.
 	Matrix<Size, Size, Precision> get_pinv(const double condition=Internal::symeigen_condition_no) const {
 		return my_evectors.T() * diagmult(get_inv_diag(condition),my_evectors);
@@ -224,8 +304,8 @@ public:
 	/// Calculates the reciprocals of the eigenvalues of the matrix.
 	/// The vector <code>invdiag</code> lists the eigenvalues in order, from
 	/// the largest (i.e. smallest reciprocal) to the smallest.
-	/// These are also the diagonal values of the matrix \f$Lambda^{-1}\f$. 
-	/// Any eigenvalues which are too small are set to zero (see the SVD 
+	/// These are also the diagonal values of the matrix \f$Lambda^{-1}\f$.
+	/// Any eigenvalues which are too small are set to zero (see the SVD
 	/// detailed description for a description of the and condition variables).
 	Vector<Size, Precision> get_inv_diag(const double condition) const {
 		Precision max_diag = -my_evalues[0] > my_evalues[my_evalues.size()-1] ? -my_evalues[0]:my_evalues[my_evalues.size()-1];
@@ -239,7 +319,7 @@ public:
 		}
 		return invdiag;
 	}
-	
+
 	/// Returns the eigenvectors of the matrix.
 	/// This returns \f$U^T\f$, so that the rows of the matrix are the eigenvectors,
 	/// which can be extracted using usual Matrix::operator[]() subscript operator.
@@ -254,12 +334,12 @@ public:
 
 	/// Returns the eigenvalues of the matrix.
 	/// The eigenvalues are listed in order, from the smallest to the largest.
-	/// These are also the diagonal values of the matrix \f$\Lambda\f$. 
+	/// These are also the diagonal values of the matrix \f$\Lambda\f$.
 	Vector<Size, Precision>& get_evalues() {return my_evalues;}
 	/**\overload
 	*/
 	const Vector<Size, Precision>& get_evalues() const {return my_evalues;}
-	
+
 	/// Is the matrix positive definite?
 	bool is_posdef() const {
 		for (int i = 0; i < my_evalues.size(); ++i) {
@@ -268,7 +348,7 @@ public:
 		}
 		return true;
 	}
-	
+
 	/// Is the matrix negative definite?
 	bool is_negdef() const {
 		for (int i = 0; i < my_evalues.size(); ++i) {
@@ -277,7 +357,7 @@ public:
 		}
 		return true;
 	}
-	
+
 	/// Get the determinant of the matrix
 	Precision get_determinant () const {
 		Precision det = 1.0;
@@ -333,3 +413,4 @@ private:
 }
 
 #endif
+
