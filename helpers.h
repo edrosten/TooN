@@ -61,7 +61,7 @@ namespace TooN {
 			for(int j=0; j < m.num_cols(); j++)
 				m[i][j] = p;
 	}
-	
+
 	///Compute the \f$L_2\f$ norm of \e v
 	///@param v \e v
 	///@ingroup gLinAlg
@@ -78,6 +78,29 @@ namespace TooN {
 	{
 		return v*v;
 	}
+	
+	///Compute the \f$L_1\f$ norm of \e v
+	///@param v \e v
+	///@ingroup gLinAlg
+	template<int Size, class Precision, class Base> inline Precision norm_1(const Vector<Size, Precision, Base>& v)
+	{
+		using std::abs;
+		Precision n = 0;
+		for(int i=0; i < v.size(); i++)
+			n += abs(v[i]);
+		return n;
+	}
+	
+	///Compute the \f$L_2\f$ norm of \e v.
+	///Synonym for norm()
+	///@param v \e v
+	///@ingroup gLinAlg
+	template<int Size, class Precision, class Base> inline Precision norm_2(const Vector<Size, Precision, Base>& v)
+	{
+		return norm(v);
+	}
+	
+
 
 
 	///Compute a the unit vector \f$\hat{v}\f$.
