@@ -57,8 +57,13 @@ namespace Internal{
 		///@param m Input matrix (assumed to be symmetric)
 		///@param evectors Eigen vector output
 		///@param evalues Eigen values output
-		template<typename P, typename B>
-		static inline void compute(const Matrix<Size,Size,P, B>& m, Matrix<Size,Size,P> & evectors, Vector<Size, P>& evalues) {
+		template<int Rows, int Cols, typename P, typename B>
+		static inline void compute(const Matrix<Rows,Cols,P, B>& m, Matrix<Size,Size,P> & evectors, Vector<Size, P>& evalues) {
+
+			SizeMismatch<Rows, Cols>::test(m.num_rows(), m.num_cols());	 //m must be square
+			SizeMismatch<Size, Rows>::test(m.num_rows(), evalues.size()); //m must be the size of the system
+			
+
 			evectors = m;
 			int N = evalues.size();
 			int lda = evalues.size();
