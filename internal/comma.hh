@@ -71,7 +71,7 @@ namespace Internal
 			Internal::CheckMOverFill<N, R, C>::check(m.num_rows() * m.num_cols());
 			m[r][c] = p;
 			c++;
-			if(c == m.num_rows())
+			if(c == m.num_cols())
 			{
 				c=0;
 				r++;
