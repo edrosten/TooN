@@ -156,7 +156,7 @@ public:
 
 
 private:
-	Matrix<Size,Size,Precision> my_C_inv, my_C_inv2;
+	Matrix<Size,Size,Precision> my_C_inv;
 	Vector<Size,Precision> my_vector;
 	Decomposition<Size,Precision> my_decomposition;
 	Vector<Size,Precision> my_mu;
