@@ -32,9 +32,9 @@ The %TooN library is a set of C++ header files which provide basic numerics faci
 	- @link gFunctions Functions (eg numerical derivatives) @endlink
 
 It provides classes for statically- (known at compile time) and dynamically-
-(unknown at compile time) sized vectors and matrices and it delegates advanced
-functions (like SVD or multiplication of large matrices) to LAPACK and BLAS
-(this means you will need libblas and liblapack).
+(unknown at compile time) sized vectors and matrices and it can delegate
+advanced functions (like large SVD or multiplication of large matrices) to
+LAPACK and BLAS (this means you will need libblas and liblapack).
 
 The library makes substantial internal use of templates to achieve run-time
 speed efficiency whilst retaining a clear programming syntax.
@@ -45,6 +45,7 @@ Why use this library?
  - Because it supports transposition, subscripting and slicing of matrices (to obtain a vector) very efficiently.
  - Because it interfaces well to other libraries.
  - Because it exploits LAPACK and BLAS (for which optimised versions exist on many platforms).
+ - Because it is fast, \link sCramerIsBad but not at the expense of numerical stability. \endlink
 
 \section sUsage How to use TooN
 This section is arranged as a FAQ. Most answers include code fragments. Assume
@@ -231,23 +232,6 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector.slice<Dynamic, 2>(3, 2);   //Slice starting at index 3, of length 2.
 		@endcode
 
-		Slicing can also be perferformed relative to the end of a vector.
-
-		WARNING:
-		 - NOT YET IMPLEMENTED FOR MATRIX
-		 - EXPERIMANTAL: MAY BE SUBJECT TO CHANGE
-		 - STATIC SLICES ONLY GO UP TO <code>End<-99></code>
-
-		@code
-		Vector<6> v;
-		v.slice<1, End<0> >();    //Equivalent to v.slice<1, 5>
-		v.slice<2, End<-1> >();   //Equivalent to v.slice<2, 3>
-
-		v.slice(1, End);          //Equivalent to v.slice(1, 5);
-		v.slice(3, End(-2));      //Equivalent to v.slice(3, 2);
-		@endcode
-
-
 		See also \ref sSlices
 
 	\subsection sInitialize How I initialize a vector/matrix?
@@ -360,21 +344,22 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	interface, so debugging code can be freely mixed with optimized code.
 
 	The debugging checks can be disabled by defining either of the following macros:
-	- \c TOON_NDEBUG
-	- \c NDEBUG 
+		- \c TOON_NDEBUG
+		- \c NDEBUG 
+
 	Additionally, individual checks can be disabled with the following macros:
-	- Static/Dynamic mismatch
-		- Statically determined functions accept and ignore dynamically specified
-		  sizes. Nevertheless, it is an error if they do not match.
-		- Disable with \c TOON_NDEBUG_MISMATCH
-	- Slices
-		- Disable with \c TOON_NDEBUG_SLICE
-	- Size checks (for assignment)
-		- Disable with \c TOON_NDEBUG_SIZE
-	- overfilling using Fill 
-		- Disable with \c TOON_NDEBUG_FILL
-	- underfilling using Fill (run-time check)
-		- Disable with \c TOON_NDEBUG_FILL
+		- Static/Dynamic mismatch
+			- Statically determined functions accept and ignore dynamically specified
+			  sizes. Nevertheless, it is an error if they do not match.
+			- Disable with \c TOON_NDEBUG_MISMATCH
+		- Slices
+			- Disable with \c TOON_NDEBUG_SLICE
+		- Size checks (for assignment)
+			- Disable with \c TOON_NDEBUG_SIZE
+		- overfilling using Fill 
+			- Disable with \c TOON_NDEBUG_FILL
+		- underfilling using Fill (run-time check)
+			- Disable with \c TOON_NDEBUG_FILL
 	
 
 
