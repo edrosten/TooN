@@ -28,8 +28,8 @@
 // the GNU General Public License.
 
 
-#ifndef TOON_INCLUDE_CHOLESKY_H
-#define TOON_INCLUDE_CHOLESKY_H
+#ifndef TOON_INCLUDE_LAPACK_CHOLESKY_H
+#define TOON_INCLUDE_LAPACK_CHOLESKY_H
 
 #include <TooN/TooN.h>
 
@@ -82,7 +82,7 @@ public:
 	}
 
 	/// Constructor for Size=Dynamic
-	Lapack_Cholesky(int size) : my_cholesky(size,size) {}
+	Lapack_Cholesky(int size) : my_cholesky(size,size), my_cholesky_lapack(size,size) {}
 
 	template<class P2, class B2> void compute(const Matrix<Size, Size, P2, B2>& m){
 		SizeMismatch<Size,Size>::test(m.num_rows(), m.num_cols());
