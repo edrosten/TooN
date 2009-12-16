@@ -35,6 +35,7 @@
 #include <TooN/TooN.h>
 #include <cmath>
 #include <functional>
+#include <utility>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -89,6 +90,21 @@ namespace TooN {
 		Precision n = 0;
 		for(int i=0; i < v.size(); i++)
 			n += abs(v[i]);
+		return n;
+	}
+
+	///Compute the \f$L_\infty\f$ norm of \e v
+	///@param v \e v
+	///@ingroup gLinAlg
+	template<int Size, class Precision, class Base> inline Precision norm_inf(const Vector<Size, Precision, Base>& v)
+	{
+		using std::abs;
+		using std::max;
+		Precision n = 0;
+		n = abs(v[0]);
+
+		for(int i=1; i < v.size(); i++)
+			n = max(n, abs(v[i]));
 		return n;
 	}
 	
