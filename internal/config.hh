@@ -3,12 +3,12 @@
 
 /* #undef TOON_TYPEOF_TYPEOF */
 
-#define TOON_TYPEOF___TYPEOF__ 1
+/* #undef TOON_TYPEOF___TYPEOF__ */
 
 /* #undef TOON_TYPEOF_BOOST */
 
 /* #undef TOON_TYPEOF_BUILTIN */
 
-#define TOON_DEPRECATED_GCC 1
+/* #undef TOON_DEPRECATED_GCC */
 
 #define TOON_USE_LAPACK 1
