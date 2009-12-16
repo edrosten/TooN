@@ -33,8 +33,9 @@
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
-#include <TooN/LU.h>
+#include <TooN/gaussian_elimination.h>
 #include <cassert>
+
 namespace TooN {
 
 template <int N, typename P> class SL;
@@ -93,12 +94,15 @@ public:
 
 private:
 	struct Invert {};
-	SL( const SL & from, struct Invert ) : my_matrix(LU<N>(from.get_matrix()).get_inverse()) {}
+	SL( const SL & from, struct Invert ) {
+		Matrix<N> id = Identity;
+		my_matrix = gaussian_elimination(from.my_matrix, id);
+	}
 	SL( const SL & a, const SL & b) : my_matrix(a.get_matrix() * b.get_matrix()) {}
 
 	void coerce(){
 		using std::abs;
-		Precision det = LU<N>(my_matrix).determinant();
+		Precision det = determinant(my_matrix);
 		assert(abs(det) > 0);
         using std::pow;
 		my_matrix /= pow(det, 1.0/N);
