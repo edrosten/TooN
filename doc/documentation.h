@@ -744,6 +744,8 @@ macros can be defined to control the behaviour:
   - The default option (does not need to be defined)
   - Only works for the standard builtin integral types and <code>std::complex<float></code> and <code>std::complex<double></code>.
 
+Under Win32, the builtin typeof needs to be used. Comment out all the TOON_TYPEOF_ defines to use it.
+
 \subsection sConfigLapack Functions using LAPACK
 
 Some functions use internal implementations for small sizes and may switch over
