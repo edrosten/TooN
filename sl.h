@@ -34,6 +34,7 @@
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
 #include <TooN/gaussian_elimination.h>
+#include <TooN/determinant.h>
 #include <cassert>
 
 namespace TooN {
