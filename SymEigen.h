@@ -42,6 +42,9 @@ namespace TooN {
 static const double root3=1.73205080756887729352744634150587236694280525381038062805580;
 
 namespace Internal{
+
+        using std::swap;
+
 	///Default condition number for SymEigen::backsub, SymEigen::get_pinv and SymEigen::get_inv_diag
 	static const double symeigen_condition_no=1e9;
 
