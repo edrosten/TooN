@@ -48,6 +48,8 @@ testclean:
 foo:
 	echo $(MAKEFLAGS)
 
+.PHONY: test
+
 test:regressions/results
 	@echo -------------- Test Results ---------------
 	@cat regressions/results
