@@ -57,6 +57,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sCreateMatrix
  - \ref sFunctionVector
  - \ref sGenericCode
+ - \ref sConst
  - \ref sElemOps
  - \ref sInitialize
  - \ref sScalars
@@ -147,9 +148,74 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 		To write a function taking any type of vector by reference:
 		@code
-		template<int Size, typename Base> void func(const Vector<Size, double, Base>& v);
+		template<int Size, typename Precision, typename Base> void func(const Vector<Size, Precision, Base>& v);
 		@endcode
 		See also \ref sPrecision, \ref sGenericCode and \ref sNoInplace
+
+
+		Slices are strange types. If you want to write a function which
+		uniformly accepts <code>const</code> whole objects as well as slices,
+		you need to template on the precision.
+
+		Note that constness in C++ is tricky (see \ref sConst). If you write
+		the function to accept <code> Vector<3, double, B>& </code>, then you
+		will not be able to pass it slices from <code> const Vector</code>s.
+		If, however you write it to accept <code> Vector<3, const double, B>&
+		</code>, then the only way to pass in a <code>Vector<3></code> is to
+		use the <code>.as_slice()</code> method.
+
+		See also \ref sGenericCode
+
+	\subsection sConst What is wrong with constness?
+
+		In TooN, the behaviour of a Vector or Matrix is controlled by the third
+		template parameter. With one parameter, it owns the data, with another
+		parameter, it is a slice. A static sized object uses the variable:
+		@code
+			 double my_data[3];
+		@endcode
+		to hold the data. A slice object uses:
+		@code
+			 double* my_data;
+		@endcode
+		When a Vector is made <code>const</code>, C++ inserts <code>const</code> in
+		to those types.  The <code>const</code> it inserts it top level, so these
+		become (respectively):
+		@code
+			 const double my_data[3];
+			 double * const my_data;
+		@endcode
+		Now the types behave very differently. In the first case
+		<code>my_data[0]</code> is immutable. In the second case,
+		<code>my_data</code> is immutable, but
+		<code>my_data[0]</code> is mutable.
+		
+		Therefore a slice <code>const Vector</code> behaves like an immutable
+		pointer to mutable data. TooN attempts to make <code>const</code>
+		objects behave as much like pointers to \e immutable data as possible.
+
+		The semantics that TooN tries to enforce can be bypassed with 
+		sufficient steps:
+		@code
+			//Make v look immutable
+			template<class P, class B> void fake_immutable(const Vector<2, P, B>& v)
+			{
+				Vector<2, P, B> nonconst_v(v);
+				nonconst_v[0] = 0; //Effectively mutate v
+			}
+
+			void bar()
+			{
+				Vector<3> v;
+				...
+				fake_immutable(v.slice<0,2>());
+				//Now v is mutated
+			}
+
+		@endcode
+
+		See also \ref sFunctionVector
+
 
 
 	\subsection sElemOps What elementary operations are supported?
@@ -222,7 +288,12 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector.slice(start, length);                           //Dynamic slice
 		Matrix.slice<RowStart, ColStart, NumRows, NumCols>();  //Static slice
 		Matrix.slice(rowstart, colstart, numrows, numcols);    //Dynamic slice
+		@endcode
+		
+		Slicing diagonals:
+		@code
 		Matrix.diagonal_slice();                               //Get the leading diagonal as a vector.
+		Vector.as_diagonal();                                  //Represent a Vector as a DiagonalMatrix
 		@endcode
 		
 		Like other features of TooN, mixed static/dynamic slicing is allowed.
@@ -368,7 +439,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	TooN does not initialize data in a Vector or Matrix.  For debugging purposes
 	the following macros can be defined:
-	- \c TOON_INITIALIZE_QNAN or TOON_INITIALIZE_NAN Sets every element of newly defined Vectors or
+	- \c TOON_INITIALIZE_QNAN or \c TOON_INITIALIZE_NAN Sets every element of newly defined Vectors or
 	  Matrixs to quiet NaN, if it exists, and 0 otherwise. Your code will not compile
 	  if you have made a Vector or Matrix of a type which cannot be constructed
 	  from a number.
@@ -402,6 +473,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		m[0][0]=6;
 	@endcode
 
+	Slices are usually strange types. See \ref sFunctionVector
 
 	\subsection sPrecision Can I have a precision other than double?
 
@@ -411,7 +483,17 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		Vector<Dynamic, float> v(4); //Dynamic sized vector of floats
 	@endcode
 
-	Likewise for matrix.
+	Likewise for matrix. By default, TooN supports all builtin types
+	and std::complex. Using custom types requires some work. If the 
+	custom type understands +,-,*,/ with builtin types, then specialize
+	TooN::IsField on the types.
+
+	If the type only understands +,-,*,/ with itself, then specialize
+	TooN::Field on the type.
+
+	Note that this is required so that TooN can follow the C++ promotion 
+	rules. The result of multiplying a <code>Matrix<double></code> by a 
+	<code>Vector<float></code> is a <code>Vector<double></code>.
 
 	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
 	
@@ -503,6 +585,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@endcode
 
 	\subsection sWrap I have a pointer to a bunch of data. How do I turn it in to a vector/matrix without copying?
+
 	To create a vector use:
 	@code
 	double d[]={1,2,3,4};
@@ -528,6 +611,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	Matrix<Dynamic, Dynamic, double, Reference::RowMajor> m3(d, 2, 3);
 	Matrix<Dynamic, 3, double, Reference::RowMajor> m4(d, 2, 3); // note two size arguments are required for semi-dynamic matrices
 	@endcode
+
+	See also wrapVector() and wrapMatrix().
 
 	\subsection sGenericCode How do I write generic code?
 	
@@ -574,6 +659,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	}
 	@endcode
+
+	For issues relating to constness, see \sFunctionVector and \sConst
 
 
 \subsection ssExamples Are there any examples?

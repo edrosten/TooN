@@ -88,6 +88,17 @@ namespace TooN {
 		static const int value = numeric_limits<C>::is_specialized; ///<Is C a field?
 	};
 	
+	///Specialized for const types
+	///@internal
+	///Internal::Field determines if two classes are in the same field.
+	///@ingroup gLinAlg
+	template<class C> struct IsField<const C>
+	{
+		static const int value = IsField<C>::value; ///<Is C a field?
+	};
+
+	template<class C, class D> struct These_Types_Do_Not_Form_A_Field;
+	
 	///@internal
 	///@brief The namaespace holding all the internal code.
 	namespace Internal
