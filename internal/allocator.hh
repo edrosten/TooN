@@ -108,7 +108,9 @@ template<int Size, class Precision> class StaticSizedAllocator: public StackOrHe
 
 
 ///@internal
-///@brief Allocate memory for a Vector.
+///@brief Allocate memory for a static sized Vector.
+///The class switches to heap allocation automatically for large Vectors.
+///Naturally, the vector is not resizable.
 ///@ingroup gInternal
 template<int Size, class Precision> struct VectorAlloc : public StaticSizedAllocator<Size, Precision> {
 	
@@ -150,9 +152,19 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 		{
 			return my_data;
 		};
+		
+		void try_destructive_resize(int)
+		{}
+
+		template<class Op> void try_destructive_resize(const Operator<Op>&) 
+		{}
 
 };
 
+///@internal
+///@brief Allocate memory for a dynamic sized Vector.
+///This is not resizable.
+///@ingroup gInternal
 template<class Precision> struct VectorAlloc<Dynamic, Precision> {
 	Precision * const my_data;
 	const int my_size;
@@ -206,9 +218,20 @@ template<class Precision> struct VectorAlloc<Dynamic, Precision> {
 		{
 			return my_data;
 		};
+
+		void try_destructive_resize(int)
+		{}
+
+		template<class Op> void try_destructive_resize(const Operator<Op>&) 
+		{}
 };
 
 
+///@internal
+///@brief Allocate memory for a resizable Vector.
+///New elements available after a resize are treated as
+///uninitialized. 
+///@ingroup gInternal
 template<class Precision> struct VectorAlloc<Resizable, Precision> {
 	protected: 
 		std::vector<Precision> numbers;
@@ -256,6 +279,37 @@ template<class Precision> struct VectorAlloc<Resizable, Precision> {
 			return &numbers[0];
 		}
 
+	private:
+		//Dymmy class for implementing sfinae
+		//in order to test for a .size() member
+		template<int S> struct SFINAE_dummy{};
+	
+	protected:
+
+		//SFINAE implementation of try_destructive_resize
+		//to avoid calling .size if it does not exist!
+
+		//Force the function TYPE to depend on a property
+		//of the Operator<Op> type, so that it simply does
+		//not exist if the property is missing.
+		//Therefore this method only uses .size() if it exists.
+		template<class Op> 
+		SFINAE_dummy<sizeof(&Operator<Op>::size)> try_destructive_resize(const Operator<Op>& op) 
+		{
+			try_destructive_resize(op.size());
+		}
+		
+		//Catch-all do nothing for operators with no size method.
+		template<class Op>
+		void try_destructive_resize(const Op&)
+		{}
+
+		void try_destructive_resize(int newsize)
+		{
+			numbers.resize(newsize);
+			debug_initialize(data(), newsize);
+		}
+
 	public:
 
 		void resize(int s)
@@ -267,6 +321,10 @@ template<class Precision> struct VectorAlloc<Resizable, Precision> {
 		}
 };
 
+///@internal
+///@brief Hold a pointer to yield a statically sized slice of a Vector.
+///Not resizable.
+///@ingroup gInternal
 template<int S, class Precision> struct VectorSlice
 {
 	int size() const {
@@ -295,9 +353,19 @@ template<int S, class Precision> struct VectorSlice
 		{
 			return my_data;
 		};
+
+		void try_destructive_resize(int)
+		{}
+
+		template<class Op> void try_destructive_resize(const Operator<Op>&) 
+		{}
 };
 
-template<class Precision> struct VectorSlice<-1, Precision>
+///@internal
+///@brief Hold a pointer to yield a dynamically sized slice of a Vector.
+///Not resizable.
+///@ingroup gInternal
+template<class Precision> struct VectorSlice<Dynamic, Precision>
 {
 	Precision* const my_data;
 	const int my_size;
@@ -324,6 +392,12 @@ template<class Precision> struct VectorSlice<-1, Precision>
 		{
 			return my_data;
 		};
+
+		void try_destructive_resize(int)
+		{}
+
+		template<class Op> void try_destructive_resize(const Operator<Op>&) 
+		{}
 };
 
 

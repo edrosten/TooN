@@ -62,6 +62,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sInitialize
  - \ref sScalars
  - \ref ssExamples
+ - \ref sSTL
  - \ref sResize
  - \ref sDebug
  - \ref sSlices
@@ -376,6 +377,11 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	trying to assign a vector of length 2 to a vector of length 3 is an error,
 	so it fails. See also \ref sResize
 
+	\subsection sSTL How do I store Dynamic vectors in STL containers.
+
+	As C++ does not yet support move semantics, you can only safely store
+	static and resizable Vectors in STL containers.
+
 	\subsection sResize How do I resize a dynamic vector/matrix?
 
 	Do you really want to? If you do, then you have to declare it:
@@ -385,16 +391,27 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		 v.resize(3);
 		 v = makeVector(1, 2, 3);
 
-		 v = makeVector(1, 2); //Error!
+		 v = makeVector(1, 2); //resize
+		 v = Ones(5); //resize
+		 v = Zeros; // no resize
 	@endcode
 
-	The policy behind the design of TooN is that it is a linear algebra library,
-	not a generic container library, so resizable vectors <b>ONLY</b> change
-	their size with a call to <code>.resize()</code>.  Assigning mismatched
-	sizes is a fatal error, just like with static and dynamic vectors. Resizing
-	is efficient since it is implemented internally with
-	<code>std::vector</code>.  Note that upon resize, existing data elements are
-	retained but new data elements are uninitialized.
+	The policy behind the design of TooN is that it is a linear algebra
+	library, not a generic container library, so resizable Vectors are only
+	created on request. They provide fewer guarantees than other vectors, so
+	errors are likely to be more subtle and harder to track down.  One of the
+	main purposes is to be able to store Dynamic vectors of various sizes in
+	STL containers.
+
+	Assigning vectors of mismatched sizes will cause an automatic resize. Likewise
+	assigning from entities like Ones with a size specified will cause a resize.
+	Assigning from an entities like Ones with no size specified will not cause
+	a resize.
+
+	They can also be resized with an explicit call to .resize().
+	Resizing is efficient since it is implemented internally with
+	<code>std::vector</code>.  Note that upon resize, existing data elements
+	are retained but new data elements are uninitialized.
 
 	Currently, resizable matrices are unimplemented.  If you want a resizable
 	matrix, you may consider using a <code>std::vector</code>, and accessing it

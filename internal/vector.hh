@@ -230,7 +230,10 @@ public:
 	/// @{
 
 	/// operator = from copy
+	/// A size mismatch is a fatal error, unless the destination
+	/// is resizable.
 	inline Vector& operator= (const Vector& from){
+		try_destructive_resize(from.size());
 		SizeMismatch<Size,Size>::test(size(), from.size());
 		const int s=size();
 		for(int i=0; i<s; i++){
@@ -240,8 +243,11 @@ public:
 	}
 
 	/// operator = another Vector
+	/// A size mismatch is a fatal error, unless the destination
+	/// is resizable.
 	template<int Size2, typename Precision2, typename Base2>
 	Vector<Size,Precision,Base >& operator= (const Vector<Size2, Precision2, Base2>& from){
+		try_destructive_resize(from.size());
 		SizeMismatch<Size,Size2>::test(size(), from.size());
 		const int s=size();
 		for(int i=0; i<s; i++){
@@ -251,8 +257,12 @@ public:
 	}
 
 	/// assignment from an Operator object
+	/// Assignment from sized operators causes a resize
+	/// of Resizable Vectors. Assignment from unsized
+	/// operators dows not.
 	template <class Op>
 	inline Vector & operator=(const Operator<Op>& op){
+		try_destructive_resize(op);
 		op.eval(*this);
 		return *this;
 	}
