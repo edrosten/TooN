@@ -36,7 +36,7 @@ docs:
 	doxygen 
 
 
-TESTS=lu slice vector_resize gauss_jordan eigen-sqrt determinant chol_toon chol_lapack simplex sym_eigen fill
+TESTS=lu slice vector_resize gauss_jordan eigen-sqrt determinant chol_toon chol_lapack simplex sym_eigen fill so3
 
 
 TEST_RESULT=$(TESTS:%=regressions/%.result)
@@ -62,7 +62,7 @@ regressions/results:$(TEST_RESULT)
 #Build a test executable from a test program. On compile error,
 #create an execuaable which decalres the error.
 regressions/%.test: regressions/%.cc
-	$(CXX) -g -ggdb -I. $< -o $@ -llapack -DTOON_CHECK_BOUNDS -DTOON_INITIALIZE_SNAN -I .. -I .  ||\
+	$(CXX) -g -ggdb $< -o $@ -llapack -DTOON_CHECK_BOUNDS -DTOON_INITIALIZE_SNAN -I ..  ||\
 	{ \
 	  echo "echo 'Compile error!'" > $@ ; \
 	  chmod +x $@; \

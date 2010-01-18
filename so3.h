@@ -111,7 +111,7 @@ public:
 	
 	/// Exponentiate a vector in the Lie algebra to generate a new SO3.
 	/// See the Detailed Description for details of this vector.
-	template<int S, typename A> inline static SO3 exp(const Vector<S,Precision,A>& vect);
+	template<int S, typename VP, typename A> inline static SO3 exp(const Vector<S,VP,A>& vect);
 	
 	/// Take the logarithm of the matrix, generating the corresponding vector in the Lie Algebra.
 	/// See the Detailed Description for details of this vector.
@@ -199,12 +199,12 @@ inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 ///@param B \f$\frac{1 - \cos \theta}{\theta^2}\f$
 ///@param R Matrix to hold the return value.
 ///@relates SO3
-template <typename Precision, typename VA, typename MA>
-inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
+template <typename Precision, typename VP, typename VA, typename MA>
+inline void rodrigues_so3_exp(const Vector<3,VP, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
 	{
-		const Precision wx2 = w[0]*w[0];
-		const Precision wy2 = w[1]*w[1];
-		const Precision wz2 = w[2]*w[2];
+		const Precision wx2 = (Precision)w[0]*w[0];
+		const Precision wy2 = (Precision)w[1]*w[1];
+		const Precision wz2 = (Precision)w[2]*w[2];
 	
 		R[0][0] = 1.0 - B*(wy2 + wz2);
 		R[1][1] = 1.0 - B*(wx2 + wz2);
@@ -233,8 +233,8 @@ inline void rodrigues_so3_exp(const Vector<3,Precision, VA>& w, const Precision 
 ///Perform the exponential of the matrix \f$ \sum_i w_iG_i\f$
 ///@param w Weightings of the generator matrices.
 template <typename Precision>
-template<int S, typename VA>
-inline SO3<Precision> SO3<Precision>::exp(const Vector<S,Precision,VA>& w){
+template<int S, typename VP, typename VA>
+inline SO3<Precision> SO3<Precision>::exp(const Vector<S,VP,VA>& w){
 	using std::sqrt;
 	using std::sin;
 	using std::cos;
