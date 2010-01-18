@@ -252,6 +252,29 @@ namespace TooN {
 	static const int Dynamic = -1;
 	static const int Resizable = -0x7fffffff;
 
+	namespace Internal
+	{
+		template<int i, int j> struct SimpleSizer{static const int size=i;};
+		template<int i> struct SimpleSizer<Dynamic, i>{static const int size=i;};
+		template<int i> struct SimpleSizer<i, Dynamic>{static const int size=i;};
+		template<> struct SimpleSizer<Dynamic, Dynamic>    {static const int size=-1;};
+
+		template<int i> struct IsStatic
+		{
+			static const bool is = (i!=Dynamic && i != Resizable);
+		};
+
+		//Choose an output size, given a pair of input sizes. Be static if possible.
+		template<int i, int j=i> struct Sizer{
+			static const int size=SimpleSizer<Sizer<i>::size, Sizer<j>::size>::size;
+		};
+
+		//Choose an output size, given an input size. Be static if possible.
+		//Otherwise be dynamic. Never generate a resizable vector.
+		template<int i> struct Sizer<i,i>{
+			static const int size = IsStatic<i>::is?i:Dynamic;
+		};
+	}
 	
 	///All TooN classes default to using this precision for computations and storage.
 	typedef double DefaultPrecision;

@@ -86,12 +86,6 @@ namespace Internal {
 		template<class P1, class P2> struct Return { typedef typename DivideType<P1,P2>::type Type;};
 	};
 
-
-	//Output size, given input size. Be static if possible.
-	template<int i, int j> struct Sizer{static const int size=i;};
-	template<int i> struct Sizer<-1, i>{static const int size=i;};
-	template<int i> struct Sizer<i, -1>{static const int size=i;};
-	template<> struct Sizer<-1, -1>    {static const int size=-1;};
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
