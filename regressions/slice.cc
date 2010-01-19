@@ -10,4 +10,7 @@ int main()
 
 	cout << m.slice<0,0,2,2>() << endl;
 	cout << n.slice<0,0,2,2>() << endl;
+
+	cout << m.slice(0,0,2,2) << endl;
+	cout << n.slice(0,0,2,2) << endl;
 }

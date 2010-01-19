@@ -221,7 +221,7 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 		return slice<Dynamic, Dynamic, Dynamic, Dynamic>(rs, cs, rl, cl);
 	}
 
-	const Matrix<-1, -1, Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl) const {
+	const Matrix<-1, -1, const Precision, Slice<SliceRowStride,SliceColStride> > slice(int rs, int cs, int rl, int cl) const {
 		return slice<Dynamic, Dynamic, Dynamic, Dynamic>(rs, cs, rl, cl);
 	}
 
