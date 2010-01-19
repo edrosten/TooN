@@ -210,7 +210,7 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	}
 
 	template<int Rstart, int Cstart, int Rlength, int Clength>
-	const Matrix<Rlength, Clength, Precision, Slice<SliceRowStride,SliceColStride> > slice() const
+	const Matrix<Rlength, Clength, const Precision, Slice<SliceRowStride,SliceColStride> > slice() const
 	{
 		Internal::CheckSlice<Rows, Rstart, Rlength>::check();
 		Internal::CheckSlice<Cols, Cstart, Clength>::check();

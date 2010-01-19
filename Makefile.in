@@ -62,7 +62,7 @@ regressions/results:$(TEST_RESULT)
 #Build a test executable from a test program. On compile error,
 #create an execuaable which decalres the error.
 regressions/%.test: regressions/%.cc
-	$(CXX) -g -ggdb $< -o $@ -llapack -DTOON_CHECK_BOUNDS -DTOON_INITIALIZE_SNAN -I ..  ||\
+	$(CXX) -g -ggdb $< -o $@ -llapack -DTOON_CHECK_BOUNDS -DTOON_INITIALIZE_SNAN -I ..  -I . ||\
 	{ \
 	  echo "echo 'Compile error!'" > $@ ; \
 	  chmod +x $@; \
