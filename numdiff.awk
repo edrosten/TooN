@@ -9,6 +9,29 @@ function abs(x)
 	return x<0?-x:x
 }
 
+
+function isfloat(x)
+{
+	return x ~ /^-?(([0-9]+\.[0-9]*)|(\.?[0-9]+))([eE][-+][0-9]+)?$/
+}
+
+function iscomplex(x)
+{
+	return x ~ /^\(-?(([0-9]+\.[0-9]*)|(\.?[0-9]+))([eE][-+][0-9]+)?,-?(([0-9]+\.[0-9]*)|(\.?[0-9]+))([eE][-+][0-9]+)?\)$/
+}
+
+function complexdiff(a, b,       as, bs)
+{
+	gsub(/[()]/,"", a)
+	sub(/,/," ", a)
+	gsub(/[()]/,"", b)
+	sub(/,/," ", b)
+	split(a, as)
+	split(b, bs)
+
+	return abs(as[1] - bs[1]) + abs(as[2] - bs[2]);
+}
+
 function ignore_and_process(line,       a)
 {
 	if(line ~ /^[[:space:]]*$/) #Ignore blank linkes
@@ -90,10 +113,14 @@ BEGIN{
 		{
 			#If both fields are floats, then use a threshold based
 			#match otherwise use an exact match
-			if(a1[i] ~ /^-?(([0-9]+\.[0-9]*)|(\.?[0-9]+))([eE][-+][0-9]+)?$/ &&
-			   a2[i] ~ /^-?(([0-9]+\.[0-9]*)|(\.?[0-9]+))([eE][-+][0-9]+)?$/)
+			if(isfloat(a1[i]) && isfloat(a2[i]))
 			{
 				if(abs(a1[i] - a2[i]) > t)
+					fail("number  " a1[i] " " a2[i])
+			}
+			else if(iscomplex(a1[i]) && iscomplex(a2[i]))
+			{
+				if(complexdiff(a1[i], a2[i]) > t)
 					fail("number  " a1[i] " " a2[i])
 			}
 			else if(a1[i] != a2[i])
