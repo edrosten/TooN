@@ -60,6 +60,10 @@ namespace TooN {
 		void dsyev_(const char* JOBZ, const char* UPLO, int* N, double* A, int* lda, double* W, double* WORK, int* LWORK, int* INFO);
 		void ssyev_(const char* JOBZ, const char* UPLO, int* N, float* A, int* lda, float* W, float* WORK, int* LWORK, int* INFO);
 
+		// Eigen decomposition of a non-symmetric matrix
+		void dgeev_(const char* JOBVL, const char* JOBVR, int* N, double* A, int* lda, double* WR, double* WI, double* VL, int* LDVL, double* VR, int* LDVR , double* WORK, int* LWORK, int* INFO);
+		void sgeev_(const char* JOBVL, const char* JOBVR, int* N, float* A, int* lda, float* WR, float* WI, float* VL, int* LDVL, float* VR, int* LDVR , float* WORK, int* LWORK, int* INFO);
+
 		// Cholesky decomposition
 		void dpotrf_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
 		void spotrf_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
@@ -148,5 +152,12 @@ namespace TooN {
 		ssyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
 	}
 
+	inline void geev_(const char* JOBVL, const char* JOBVR, int* N, double* A, int* lda, double* WR, double* WI, double* VL, int* LDVL, double* VR, int* LDVR , double* WORK, int* LWORK, int* INFO){
+		dgeev_(JOBVL, JOBVR, N,  A,  lda,  WR,  WI,  VL,  LDVL,  VR,  LDVR ,  WORK,  LWORK,  INFO);
+	}
+
+	inline void geev_(const char* JOBVL, const char* JOBVR, int* N, float* A,  int* lda, float* WR,  float* WI,  float* VL,  int* LDVL, float* VR,  int* LDVR , float* WORK,  int* LWORK, int* INFO){
+		sgeev_(JOBVL, JOBVR, N,  A,  lda,  WR,  WI,  VL,  LDVL,  VR,  LDVR ,  WORK,  LWORK,  INFO);
+	}
 }
 #endif
