@@ -154,7 +154,7 @@ void test_so3(){
     TooN::Matrix<3> m;
     m[0] = TooN::makeVector(0.5, 1,2);
     m[1] = TooN::makeVector(1,1,0);
-    m[2] = TooN::makeVector(0,-1,0);
+    m[2] = TooN::makeVector(0,1,0);
     cout << "set from matrix (uses coerce)\n" << m << "\n";
     r = m;
     cout << r << endl;

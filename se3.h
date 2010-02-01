@@ -136,21 +136,21 @@ public:
 	/// \f$ B \f$, 
 	/// \f$ e^{\text{Adj}(v)} = Be^{v}B^{-1} \f$
 	/// @param M The Matrix to transfer
-	template<int S, typename Accessor>
-	inline Vector<6, Precision> adjoint(const Vector<S,Precision, Accessor>& vect)const;
+	template<int S, typename P2, typename Accessor>
+	inline Vector<6, Precision> adjoint(const Vector<S,P2, Accessor>& vect)const;
 
 	/// Transfer covectors between frames (using the transpose of the inverse of the adjoint)
 	/// so that trinvadjoint(vect1) * adjoint(vect2) = vect1 * vect2
-	template<int S, typename Accessor>
-	inline Vector<6, Precision> trinvadjoint(const Vector<S,Precision,Accessor>& vect)const;
+	template<int S, typename P2, typename Accessor>
+	inline Vector<6, Precision> trinvadjoint(const Vector<S,P2,Accessor>& vect)const;
 	
 	///@overload
-	template <int R, int C, typename Accessor>
-	inline Matrix<6,6,Precision> adjoint(const Matrix<R,C,Precision,Accessor>& M)const;
+	template <int R, int C, typename P2, typename Accessor>
+	inline Matrix<6,6,Precision> adjoint(const Matrix<R,C,P2,Accessor>& M)const;
 
 	///@overload
-	template <int R, int C, typename Accessor>
-	inline Matrix<6,6,Precision> trinvadjoint(const Matrix<R,C,Precision,Accessor>& M)const;
+	template <int R, int C, typename P2, typename Accessor>
+	inline Matrix<6,6,Precision> trinvadjoint(const Matrix<R,C,P2,Accessor>& M)const;
 
 private:
 	SO3<Precision> my_rotation;
@@ -161,8 +161,8 @@ private:
 // from one coord frame to another
 // so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())
 template<typename Precision>
-template<int S, typename Accessor>
-inline Vector<6, Precision> SE3<Precision>::adjoint(const Vector<S,Precision, Accessor>& vect) const{
+template<int S, typename P2, typename Accessor>
+inline Vector<6, Precision> SE3<Precision>::adjoint(const Vector<S,P2, Accessor>& vect) const{
 	SizeMismatch<6,S>::test(6, vect.size());
 	Vector<6, Precision> result;
 	result.template slice<3,3>() = get_rotation() * vect.template slice<3,3>();
@@ -175,8 +175,8 @@ inline Vector<6, Precision> SE3<Precision>::adjoint(const Vector<S,Precision, Ac
 // (using the transpose of the inverse of the adjoint)
 // so that trinvadjoint(vect1) * adjoint(vect2) = vect1 * vect2
 template<typename Precision>
-template<int S, typename Accessor>
-inline Vector<6, Precision> SE3<Precision>::trinvadjoint(const Vector<S,Precision, Accessor>& vect) const{
+template<int S, typename P2, typename Accessor>
+inline Vector<6, Precision> SE3<Precision>::trinvadjoint(const Vector<S,P2, Accessor>& vect) const{
 	SizeMismatch<6,S>::test(6, vect.size());
 	Vector<6, Precision> result;
 	result.template slice<3,3>() = get_rotation() * vect.template slice<3,3>();
@@ -186,8 +186,8 @@ inline Vector<6, Precision> SE3<Precision>::trinvadjoint(const Vector<S,Precisio
 }
 
 template<typename Precision>
-template<int R, int C, typename Accessor>
-inline Matrix<6,6,Precision> SE3<Precision>::adjoint(const Matrix<R,C,Precision,Accessor>& M)const{
+template<int R, int C, typename P2, typename Accessor>
+inline Matrix<6,6,Precision> SE3<Precision>::adjoint(const Matrix<R,C,P2,Accessor>& M)const{
 	SizeMismatch<6,R>::test(6, M.num_cols());
 	SizeMismatch<6,C>::test(6, M.num_rows());
 
@@ -202,8 +202,8 @@ inline Matrix<6,6,Precision> SE3<Precision>::adjoint(const Matrix<R,C,Precision,
 }
 
 template<typename Precision>
-template<int R, int C, typename Accessor>
-inline Matrix<6,6,Precision> SE3<Precision>::trinvadjoint(const Matrix<R,C,Precision,Accessor>& M)const{
+template<int R, int C, typename P2, typename Accessor>
+inline Matrix<6,6,Precision> SE3<Precision>::trinvadjoint(const Matrix<R,C,P2,Accessor>& M)const{
 	SizeMismatch<6,R>::test(6, M.num_cols());
 	SizeMismatch<6,C>::test(6, M.num_rows());
 

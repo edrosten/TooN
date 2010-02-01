@@ -32,6 +32,7 @@
 
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
+#include <cassert>
 
 namespace TooN {
 
@@ -107,6 +108,8 @@ public:
 		my_matrix[2] -= my_matrix[0] * (my_matrix[0]*my_matrix[2]);
 		my_matrix[2] -= my_matrix[1] * (my_matrix[1]*my_matrix[2]);
 		my_matrix[2] = unit(my_matrix[2]);
+		// check for positive determinant <=> right handed coordinate system of row vectors
+		assert( (my_matrix[0] ^ my_matrix[1]) * my_matrix[2] > 0 ); 
 	}
 	
 	/// Exponentiate a vector in the Lie algebra to generate a new SO3.
