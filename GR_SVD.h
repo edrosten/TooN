@@ -53,8 +53,9 @@ namespace TooN
      
      The template parameters WANT_U and WANT_V may be set to false to
      indicate that U and/or V are not needed for a minor speed-up.
-  **/
 
+	 @ingroup gDecomps
+  **/
   template<int M, int N, class Precision = DefaultPrecision, bool WANT_U = 1, bool WANT_V = 1> 
   class GR_SVD
   {
