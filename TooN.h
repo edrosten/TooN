@@ -37,6 +37,7 @@
 #include <new>
 #include <utility>
 #include <vector>
+#include <complex>
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 #include <TooN/internal/deprecated.hh>
@@ -80,10 +81,29 @@ namespace TooN {
 	using std::numeric_limits;
 	///Is a number a field? ie, +, -, *, / defined.
 	///Specialize this to make TooN work properly with new types.
+	///The primary reason for this is to allow SFINAE to work properly.
+	///This is required if there are the following two functions:
+	///@code 
+	///   Vector<> * X  //Generic type X
+	///   Vector<> * DiagonalMatrix<>
+	///@endcode
+	///If one of the functions is a substitution failure, then it will be
+	///ignored, allowing the functions to coexist happily. However, not all
+	///types of failure are substitution failures. TooN's type deduction happens
+	///when determining the return type of the function. This is too early, so
+	///the wrong kind of error in the return type deduction causes an error, rather
+	///than a substitution failure. The IsField mechanism makes it the right kind of
+	///error, thereby allowing a substitution failuer to occur.
+	///
 	///@internal
 	///Internal::Field determines if two classes are in the same field.
 	///@ingroup gLinAlg
 	template<class C> struct IsField
+	{
+		static const int value = numeric_limits<C>::is_specialized; ///<Is C a field?
+	};
+
+	template<class C> struct IsField<std::complex<C> >
 	{
 		static const int value = numeric_limits<C>::is_specialized; ///<Is C a field?
 	};

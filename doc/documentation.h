@@ -498,6 +498,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	@code
 		Vector<3, float> v;          //Static sized vector of floats
 		Vector<Dynamic, float> v(4); //Dynamic sized vector of floats
+		Vector<Dynamic, std::complex<double> > v(4); //Dynamic sized vector of complex numbers
 	@endcode
 
 	Likewise for matrix. By default, TooN supports all builtin types
