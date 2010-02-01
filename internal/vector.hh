@@ -128,6 +128,7 @@ template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=In
 struct Vector : public Base::template VLayout<Size, Precision> {
 protected:
 public:
+	typedef typename Base::template VLayout<Size, Precision>::PointerType PointerType;
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
   // although the error message may be less than helpful - maybe this can be changed?
@@ -153,7 +154,7 @@ public:
 	/// double[] d = {1,2,3};
 	/// Vector<3,double,Reference> v(d);
 	/// @endcode
-	explicit inline Vector(Precision* data) : Base::template VLayout<Size, Precision> (data) {}
+	explicit inline Vector(PointerType data) : Base::template VLayout<Size, Precision> (data) {}
 
 
 	/// Constructor used when constructing a dynamic vector which references
@@ -162,10 +163,10 @@ public:
 	/// double[] d = {1,2,3};
 	/// Vector<Dynamic,double,Reference> v(d,3);
 	/// @endcode
-	inline Vector(Precision* data, int size_in) : Base::template VLayout<Size, Precision> (data, size_in) {}
+	inline Vector(PointerType data, int size_in) : Base::template VLayout<Size, Precision> (data, size_in) {}
 
 	/// internal constructor
-	inline Vector(Precision* data_in, int size_in, int stride_in, Internal::Slicing)
+	inline Vector(PointerType data_in, int size_in, int stride_in, Internal::Slicing)
   : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
 	
 	using Base::template VLayout<Size, Precision>::size;
