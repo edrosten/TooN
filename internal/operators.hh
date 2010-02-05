@@ -118,8 +118,8 @@ struct Operator<Internal::VPairwise<Op, S1, P1, B1, S2, P2, B2> > {
 
 	Operator(const Vector<S1, P1, B1> & lhs_in, const Vector<S2, P2, B2> & rhs_in) : lhs(lhs_in), rhs(rhs_in) {}
 
-	template<int S0, typename P0, typename B0>
-	void eval(Vector<S0, P0, B0>& res) const
+	template<int S0, typename P0, typename Ba0>
+	void eval(Vector<S0, P0, Ba0>& res) const
 	{
 		for(int i=0; i < res.size(); ++i)
 			res[i] = Op::template op<P0,P1, P2>(lhs[i],rhs[i]);
@@ -227,8 +227,8 @@ struct Operator<Internal::MPairwise<Op, R1, C1, P1, B1, R2, C2, P2, B2> > {
 
 	Operator(const Matrix<R1, C1, P1, B1> & lhs_in, const Matrix<R2, C2, P2, B2> & rhs_in) : lhs(lhs_in), rhs(rhs_in) {}
 
-	template<int R0, int C0, typename P0, typename B0>
-	void eval(Matrix<R0, C0, P0, B0>& res) const
+	template<int R0, int C0, typename P0, typename Ba0>
+	void eval(Matrix<R0, C0, P0, Ba0>& res) const
 	{
 		for(int r=0; r < res.num_rows(); ++r){
 			for(int c=0; c < res.num_cols(); ++c){
@@ -288,8 +288,8 @@ struct Operator<Internal::MatrixMultiply<R1, C1, P1, B1, R2, C2, P2, B2> > {
 
 	Operator(const Matrix<R1, C1, P1, B1> & lhs_in, const Matrix<R2, C2, P2, B2> & rhs_in) : lhs(lhs_in), rhs(rhs_in) {}
 
-	template<int R0, int C0, typename P0, typename B0>
-	void eval(Matrix<R0, C0, P0, B0>& res) const
+	template<int R0, int C0, typename P0, typename Ba0>
+	void eval(Matrix<R0, C0, P0, Ba0>& res) const
 	{
 
 		for(int r=0; r < res.num_rows(); ++r) {
@@ -480,8 +480,8 @@ struct Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Op> > {
 
 	Operator(const Vector<Size,P1,B1>& v, const P2& s) : lhs(v), rhs(s) {}
 		
-	template<int S0, typename P0, typename B0>
-	void eval(Vector<S0,P0,B0>& v) const {
+	template<int S0, typename P0, typename Ba0>
+	void eval(Vector<S0,P0,Ba0>& v) const {
 		for(int i=0; i<v.size(); i++){
 			v[i]= Op::template op<P0,P1,P2> (lhs[i],rhs);
 		}
@@ -508,8 +508,8 @@ struct Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Op> > {
 
 	Operator(const P2& s, const Vector<Size,P1,B1>& v) : lhs(s), rhs(v) {}
 		
-	template<int S0, typename P0, typename B0>
-	void eval(Vector<S0,P0,B0>& v) const {
+	template<int S0, typename P0, typename Ba0>
+	void eval(Vector<S0,P0,Ba0>& v) const {
 		for(int i=0; i<v.size(); i++){
 			v[i]= Op::template op<P0,P2,P1> (lhs,rhs[i]);
 		}
@@ -535,8 +535,8 @@ struct Operator<Internal::ApplyScalarM<R,C,P1,B1,P2,Op> > {
 
 	Operator(const Matrix<R,C,P1,B1>& m, const P2& s) : lhs(m), rhs(s) {}
 		
-	template<int R0, int C0, typename P0, typename B0>
-	void eval(Matrix<R0,C0,P0,B0>& m) const {
+	template<int R0, int C0, typename P0, typename Ba0>
+	void eval(Matrix<R0,C0,P0,Ba0>& m) const {
 		for(int r=0; r<m.num_rows(); r++){
 			for(int c=0; c<m.num_cols(); c++){
 				m(r,c)= Op::template op<P0,P1,P2> (lhs(r,c),rhs);
@@ -568,8 +568,8 @@ struct Operator<Internal::ApplyScalarML<R,C,P1,B1,P2,Op> > {
 
 	Operator( const P2& s,const Matrix<R,C,P1,B1>& m) : lhs(s), rhs(m) {}
 		
-	template<int R0, int C0, typename P0, typename B0>
-	void eval(Matrix<R0,C0,P0,B0>& m) const {
+	template<int R0, int C0, typename P0, typename Ba0>
+	void eval(Matrix<R0,C0,P0,Ba0>& m) const {
 		for(int r=0; r<m.num_rows(); r++){
 			for(int c=0; c<m.num_cols(); c++){
 				m(r,c)= Op::template op<P0,P1,P2> (lhs,rhs(r,c));
