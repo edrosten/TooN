@@ -53,6 +53,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
  - \ref sDownload
  - \ref sStart
+ - \ref sWindowsErrors
  - \ref sCreateVector
  - \ref sCreateMatrix
  - \ref sFunctionVector
@@ -111,6 +112,15 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		against LAPACK, BLAS and any required support libraries. On a modern
 		unix system, linking against LAPACK will do this automatically.
 
+	\subsection sWindowsErrors Comilation errors on Win32 involving TOON_TYPEOF
+	
+		If you get errors compiling code that uses TooN, look for the macro TOON_TYPEOF 
+		in the messages. Most likely the file <code>internal/config.hh</code> is clobbered. 
+		Open it and remove all the defines present there. 
+		
+		Also see @ref sManualConfiguration for more details on configuring TooN, 
+		and @ref sConfigLapack, if you want to use LAPACK and BLAS. Define the macro
+		in <code>internal/config.hh</code>.
 
 	\subsection sCreateVector How do I create a vector?
 
@@ -827,7 +837,7 @@ class Vector: public Base::template VLayout<Size, Precision> {
 then take a look at the source code ... 
 
 
-\section sManualConfiguration Manual configuration.
+\section sManualConfiguration Manual configuration
 	
 Configuration is controlled by <code>internal/config.hh</code>. If this file is empty
 then the default configuration will be used and TooN will work. There are several options.
