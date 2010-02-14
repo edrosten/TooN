@@ -13,4 +13,8 @@ int main()
 
 	cout << m.slice(0,0,2,2) << endl;
 	cout << n.slice(0,0,2,2) << endl;
+
+	const Vector<4> cv = makeVector(3,4,5,6);
+	cout << cv.slice<0,2>() << endl;
+	cout << cv.slice(0,2) << endl;
 }

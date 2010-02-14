@@ -181,7 +181,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return slice<Dynamic, Dynamic>(start, length);
 	}
 
-	const Vector<Dynamic, Precision, ConstSliceBase> slice(int start, int length) const{
+	const Vector<Dynamic, const Precision, ConstSliceBase> slice(int start, int length) const{
 		return slice<Dynamic, Dynamic>(start, length);
 	}
 		
