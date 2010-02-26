@@ -67,6 +67,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sResize
  - \ref sDebug
  - \ref sSlices
+ - \ref sFuncSlices
  - \ref sPrecision
  - \ref sSolveLinear
  - \ref sOtherStuff
@@ -502,6 +503,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	Slices are usually strange types. See \ref sFunctionVector
 
+	See also \sFuncSlices
+
 	\subsection sPrecision Can I have a precision other than double?
 
 	Yes!
@@ -522,6 +525,31 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	Note that this is required so that TooN can follow the C++ promotion 
 	rules. The result of multiplying a <code>Matrix<double></code> by a 
 	<code>Vector<float></code> is a <code>Vector<double></code>.
+
+
+	\subsection sFuncSlices How do I return a slice from a function?
+
+	Each vector has a <code>SliceBase</code> type indicating the type of a slice.
+
+	They can be slightly tricky to use:
+	@code
+		Vector<2, double, Vector<4>::SliceBase> sliceof(Vector<4>& v)
+		{
+			return v.slice<1,2>();
+		}
+
+		template<int S, class P, class B>
+		Vector<2, P, Vector<S, P, B>::SliceBase> sliceof(Vector<S, P, B>& v)
+		{
+			return v.template slice<1,2>();
+		}
+
+		template<int S, class P, class B>
+		const Vector<2, const P, typename Vector<S, P, B>::ConstSliceBase > foo(const Vector<S, P, B>& v)
+		{
+			return v.template slice<1,2>();
+		}
+	@endcode
 
 	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
 	
