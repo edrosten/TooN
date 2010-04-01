@@ -69,6 +69,7 @@ public:
 	
 	/// creates an SO3 as a rotation that takes Vector a into the direction of Vector b
 	/// with the rotation axis along a ^ b. If |a ^ b| == 0, it creates the identity rotation.
+	/// An assertion will fail if Vector a and Vector b are in exactly opposite directions. 
 	/// @param a source Vector
 	/// @param b target Vector
 	template <int S1, int S2, typename P1, typename P2, typename A1, typename A2>
@@ -77,6 +78,9 @@ public:
 		SizeMismatch<3,S2>::test(3, b.size());
 		Vector<3, Precision> n = a ^ b;
 		if(norm_sq(n) == 0) {
+			//check that the vectors are in the same direction if cross product is 0. If not,
+			//this means that the rotation is 180 degrees, which leads to an ambiguity in the rotation axis.
+			assert(a*b>=0);
 			my_matrix = Identity;
 			return;
 		}
