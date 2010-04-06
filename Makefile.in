@@ -36,7 +36,7 @@ docs:
 	doxygen 
 
 
-TESTS=lu slice vector_resize gauss_jordan eigen-sqrt determinant chol_toon chol_lapack simplex sym_eigen fill so3 complex
+TESTS=lu slice vector_resize gauss_jordan eigen-sqrt determinant chol_toon chol_lapack simplex sym_eigen fill so3 complex qr
 
 
 TEST_RESULT=$(TESTS:%=regressions/%.result)

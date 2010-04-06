@@ -1,6 +1,6 @@
 // -*- c++ -*-
 
-// Copyright (C) 2005,2009 Tom Drummond (twd20@cam.ac.uk)
+// Copyright (C) 2005,2009,2010 Tom Drummond (twd20@cam.ac.uk), E. Rosten
 //
 // This file is part of the TooN Library.  This library is free
 // software; you can redistribute it and/or modify it under the
@@ -75,6 +75,14 @@ namespace TooN {
 		// Cholesky inverse given decomposition
 		void dpotri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
 		void spotri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
+		
+		// Computes a QR factorization of a general rectangular matrix.
+		void sgeqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info);
+		void dgeqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info);
+		
+		//Reconstruct Q from a QR decomposition
+		void sorgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO );
+		void dorgqr_(int* M,int* N,int* K, double* A, int* LDA, double* TAU, double* WORK, int* LWORK, int* INFO );
 	}
 
 
@@ -152,6 +160,28 @@ namespace TooN {
 		ssyev_(JOBZ, UPLO, N, A, lda, W, WORK, LWORK, INFO);
 	}
 
+	//QR decomposition
+	void geqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info)
+	{
+		sgeqrf_(m, n, a, lda, tau, work, lwork, info);
+	}
+
+	void geqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info)
+	{
+		dgeqrf_(m, n, a, lda, tau, work, lwork, info);
+	}
+	
+	void orgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO )
+	{
+		sorgqr_(M, N, K, A, LDA, TAU, WORK, LWORK, INFO);
+	}
+
+	void orgqr_(int* M,int* N,int* K, double* A, int* LDA, double* TAU, double* WORK, int* LWORK, int* INFO )
+	{
+		dorgqr_(M, N, K, A, LDA, TAU, WORK, LWORK, INFO);
+	}
+
+	//Non symmetric (general) eigen decomposition
 	inline void geev_(const char* JOBVL, const char* JOBVR, int* N, double* A, int* lda, double* WR, double* WI, double* VL, int* LDVL, double* VR, int* LDVR , double* WORK, int* LWORK, int* INFO){
 		dgeev_(JOBVL, JOBVR, N,  A,  lda,  WR,  WI,  VL,  LDVL,  VR,  LDVR ,  WORK,  LWORK,  INFO);
 	}
