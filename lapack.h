@@ -76,9 +76,9 @@ namespace TooN {
 		void dpotri_(const char* UPLO, const int* N, double* A, const int* LDA, int* INFO);
 		void spotri_(const char* UPLO, const int* N, float* A, const int* LDA, int* INFO);
 		
-		// Computes a QR factorization of a general rectangular matrix.
-		void sgeqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info);
-		void dgeqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info);
+		// Computes a QR decomposition of a general rectangular matrix with column pivoting
+		void sgeqp3_(int* M, int* N, float* A, int* LDA, int* JPVT, float* TAU, float* WORK, int* LWORK, int* INFO );
+		void dgeqp3_(int* M, int* N, double* A, int* LDA, int* JPVT, double* TAU, double* WORK, int* LWORK, int* INFO );
 		
 		//Reconstruct Q from a QR decomposition
 		void sorgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO );
@@ -161,14 +161,14 @@ namespace TooN {
 	}
 
 	//QR decomposition
-	inline void geqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info)
+	inline void geqp3_(int* M, int* N, float* A, int* LDA, int* JPVT, float* TAU, float* WORK, int* LWORK, int* INFO )
 	{
-		sgeqrf_(m, n, a, lda, tau, work, lwork, info);
+		sgeqp3_(M, N, A, LDA, JPVT, TAU, WORK, LWORK, INFO);
 	}
 
-	inline void geqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info)
+	inline void geqp3_(int* M, int* N, double* A, int* LDA, int* JPVT, double* TAU, double* WORK, int* LWORK, int* INFO )
 	{
-		dgeqrf_(m, n, a, lda, tau, work, lwork, info);
+		dgeqp3_(M, N, A, LDA, JPVT, TAU, WORK, LWORK, INFO);
 	}
 	
 	inline void orgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO )

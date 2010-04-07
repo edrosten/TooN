@@ -11,8 +11,19 @@ namespace TooN{
 /**
 Performs %QR decomposition.
 
-***WARNING*** this will only work if the number of columns is greater than 
+@warning this will only work if the number of columns is greater than 
 the number of rows!
+
+The QR decomposition operates on a matrix A. It can be performed with
+or without column pivoting. In general:
+\f[
+AP = QR
+\f]
+Where \f$P\f$ is a permutation matrix constructed to permute the columns
+of A. In practise, \f$P\f$ is stored as a vector of integer elements.
+
+With column pivoting, the elements of the leading diagonal of \f$R\f$ will
+be sorted from largest in magnitude to smallest in magnitude.
 
 @ingroup gDecomps
 */
@@ -25,14 +36,19 @@ class QR_Lapack{
 	public:	
 		/// Construct the %QR decomposition of a matrix. This initialises the class, and
 		/// performs the decomposition immediately.
+		/// @param m The matrix to decompose
+		/// @param p Whether or not to perform pivoting
 		template<int R, int C, class P, class B> 
-		QR_Lapack(const Matrix<R,C,P,B>& m)
-		:copy(m),tau(square_size()), Q(square_size(), square_size())
+		QR_Lapack(const Matrix<R,C,P,B>& m, bool p=0)
+		:copy(m),tau(square_size()), Q(square_size(), square_size()), do_pivoting(p), pivot(Zeros(square_size()))
 		{
+			//pivot is set to all zeros, which means all columns are free columns
+			//and can take part in column pivoting.
+
 			compute();
 		}
 		
-		///Return L
+		///Return R
 		const Matrix<Rows, Cols, Precision, ColMajor>& get_R()
 		{
 			return copy;
@@ -44,6 +60,12 @@ class QR_Lapack{
 			return Q;
 		}	
 
+		///Return the permutation vector. The definition is that column \f$i\f$ of A is
+		///column \f$P(i)\f$ of \f$QR\f$.
+		const Vector<Cols, int>& get_P()
+		{
+			return pivot;
+		}
 
 	private:
 
@@ -58,14 +80,22 @@ class QR_Lapack{
 
 			Precision size;
 			
+			//Set up the pivot vector
+			if(do_pivoting)
+				pivot = Zeros;
+			else
+				for(int i=0; i < pivot.size(); i++)
+					pivot[i] = i+1;
+
+			
 			//Compute the working space
-			geqrf_(&M, &N, copy.get_data_ptr(), &lda, tau.get_data_ptr(), &size, &LWORK, &INFO);
+			geqp3_(&M, &N, copy.get_data_ptr(), &lda, pivot.get_data_ptr(), tau.get_data_ptr(), &size, &LWORK, &INFO);
 
 			LWORK = (int) size;
 
 			Precision* work = new Precision[LWORK];
-
-			geqrf_(&M, &N, copy.get_data_ptr(), &lda, tau.get_data_ptr(), work, &LWORK, &INFO);
+			
+			geqp3_(&M, &N, copy.get_data_ptr(), &lda, pivot.get_data_ptr(), tau.get_data_ptr(), work, &LWORK, &INFO);
 
 
 			if(INFO < 0)
@@ -93,19 +123,23 @@ class QR_Lapack{
 				for(int c=0; c<r; c++)
 					copy[r][c] = 0;
 
+			//Now fix the pivot matrix.
+			//We need to go from FORTRAN to C numbering. 
+			for(int i=0; i < pivot.size(); i++)
+				pivot[i]--;
 		}
 
 		Matrix<Rows, Cols, Precision, ColMajor> copy;
 		Matrix<square_Size, square_Size, Precision, ColMajor> Q;
 		Vector<square_Size, Precision> tau;
-
+		Vector<Cols, int> pivot;
+		
+		bool do_pivoting;
 
 		int square_size()
 		{
 			return std::min(copy.num_rows(), copy.num_cols());	
 		}
-
-
 };
 
 }
