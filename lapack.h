@@ -161,22 +161,22 @@ namespace TooN {
 	}
 
 	//QR decomposition
-	void geqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info)
+	inline void geqrf_(int *m, int *n, float *a, int *lda, float *tau, float *work, int *lwork, int *info)
 	{
 		sgeqrf_(m, n, a, lda, tau, work, lwork, info);
 	}
 
-	void geqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info)
+	inline void geqrf_(int *m, int *n, double *a, int *lda, double *tau, double *work, int *lwork, int *info)
 	{
 		dgeqrf_(m, n, a, lda, tau, work, lwork, info);
 	}
 	
-	void orgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO )
+	inline void orgqr_(int* M,int* N,int* K, float* A, int* LDA, float* TAU, float* WORK, int* LWORK, int* INFO )
 	{
 		sorgqr_(M, N, K, A, LDA, TAU, WORK, LWORK, INFO);
 	}
 
-	void orgqr_(int* M,int* N,int* K, double* A, int* LDA, double* TAU, double* WORK, int* LWORK, int* INFO )
+	inline void orgqr_(int* M,int* N,int* K, double* A, int* LDA, double* TAU, double* WORK, int* LWORK, int* INFO )
 	{
 		dorgqr_(M, N, K, A, LDA, TAU, WORK, LWORK, INFO);
 	}
