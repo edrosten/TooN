@@ -121,18 +121,20 @@ namespace TooN
 		return determinant;
 	}
 	
-	/** Compute the determinant using TooN::LU.
-		@param A The matrix to find the determinant of.
-		@returns determinant.
-		@ingroup gLinAlg
-	*/
-	template<int R, int C, class P, class B>
-	P determinant_LU(const Matrix<R, C, P, B>& A)
-	{
-		TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
-		LU<Internal::Square<R,C>::Size, P> lu(A);
-		return lu.determinant();
-	}
+	#ifdef TOON_DETERMINANT_LAPACK
+		/** Compute the determinant using TooN::LU.
+			@param A The matrix to find the determinant of.
+			@returns determinant.
+			@ingroup gLinAlg
+		*/
+		template<int R, int C, class P, class B>
+		P determinant_LU(const Matrix<R, C, P, B>& A)
+		{
+			TooN::SizeMismatch<R, C>::test(A.num_rows(), A.num_cols());
+			LU<Internal::Square<R,C>::Size, P> lu(A);
+			return lu.determinant();
+		}
+	#endif
 
 	/** 
 		Compute the determinant of a matrix using an appropriate method. The
