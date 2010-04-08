@@ -394,7 +394,7 @@ inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
 	const Vector<3,Precision> w = mu.template slice<3,3>();
 	const Precision theta_sq = w*w;
 	const Precision theta = sqrt(theta_sq);
-	double A, B;
+	Precision A, B;
 	
 	const Vector<3,Precision> cross = w ^ mu.template slice<0,3>();
 	if (theta_sq < 1e-8) {
@@ -402,13 +402,13 @@ inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
 		B = 0.5;
 		result.get_translation() = mu.template slice<0,3>() + 0.5 * cross;
 	} else {
-		double C;
+		Precision C;
 		if (theta_sq < 1e-6) {
 			C = one_6th*(1.0 - one_20th * theta_sq);
 			A = 1.0 - theta_sq * C;
 			B = 0.5 - 0.25 * one_6th * theta_sq;
 		} else {
-			const double inv_theta = 1.0/theta;
+			const Precision inv_theta = 1.0/theta;
 			A = sin(theta) * inv_theta;
 			B = (1 - cos(theta)) * (inv_theta * inv_theta);
 			C = (1 - A) * (inv_theta * inv_theta);
