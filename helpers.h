@@ -156,7 +156,7 @@ namespace TooN {
 	///@ingroup gLinAlg
 	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size-1), Precision> project( const Vector<Size, Precision, Base> & v){
 		static const int Len = (Size==Dynamic?Dynamic:Size-1);
-		return v.template slice<0, Len>(0, v.size()-1) / v[v.size() - 1];
+		return TooN::operator/(v.template slice<0, Len>(0, v.size()-1),v[v.size() - 1]);
 	}
 	
 	//This should probably be done with an operator to prevent an extra new[] for dynamic vectors.

@@ -54,17 +54,20 @@ class SO2 {
 public:
 	/// Default constructor. Initialises the matrix to the identity (no rotation)
 	SO2() : my_matrix(Identity) {} 
- 	
-	/// Construct from a rotation matrix.
-	SO2(const Matrix<2,2,Precision>& rhs) {  *this = rhs; }
 	
+	/// Construct from a rotation matrix.
+	SO2(const Matrix<2,2,Precision>& rhs) {  
+		*this = rhs; 
+		coerce();
+	}
+
 	/// Construct from an angle.
 	SO2(const Precision l) { *this = exp(l); }
   
 	/// Assigment operator from a general matrix. This also calls coerce()
 	/// to make sure that the matrix is a valid rotation matrix.
 	template <int R, int C, typename P, typename A> 
-	inline SO2& operator=(const Matrix<R,C,P,A>& rhs){
+	SO2& operator=(const Matrix<R,C,P,A>& rhs){
 		my_matrix = rhs;
 		coerce();
 		return *this;
@@ -93,13 +96,17 @@ public:
 	SO2 inverse() const { return SO2(*this, Invert()); }
 
 	/// Self right-multiply by another rotation matrix
-	SO2& operator *=(const SO2& rhs){
-		my_matrix=my_matrix*rhs.my_matrix;
+	template <typename P>
+	SO2& operator *=(const SO2<P>& rhs){
+		my_matrix=my_matrix*rhs.get_matrix();
 		return *this;
 	}
 
 	/// Right-multiply by another rotation matrix
-	SO2 operator *(const SO2& rhs) const { return SO2(*this,rhs); }
+	template <typename P>
+	SO2<typename Internal::MultiplyType<Precision, P>::type> operator *(const SO2<P>& rhs) const { 
+		return SO2<typename Internal::MultiplyType<Precision, P>::type>(*this,rhs); 
+	}
 
 	/// Returns the SO2 as a Matrix<2>
 	const Matrix<2,2,Precision>& get_matrix() const {return my_matrix;}
@@ -112,10 +119,11 @@ public:
 		return result;
 	}
 
- private:
+private:
 	struct Invert {};
 	inline SO2(const SO2& so2, const Invert&) : my_matrix(so2.my_matrix.T()) {}
-	inline SO2(const SO2& a, const SO2& b) : my_matrix(a.my_matrix*b.my_matrix) {}
+	template <typename PA, typename PB>
+	inline SO2(const SO2<PA>& a, const SO2<PB>& b) : my_matrix(a.get_matrix()*b.get_matrix()) {}
 
 	Matrix<2,2,Precision> my_matrix;
 };

@@ -95,7 +95,7 @@ public:
 		my_matrix = my_matrix * R1.T();
 	}
 	
-	/// Assigment operator from a general matrix. This also calls coerce()
+	/// Assignment operator from a general matrix. This also calls coerce()
 	/// to make sure that the matrix is a valid rotation matrix.
 	template <int R, int C, typename P, typename A>
 	SO3& operator=(const Matrix<R,C,P,A> & rhs) {
@@ -134,7 +134,10 @@ public:
 	}
 
 	/// Right-multiply by another rotation matrix
-	SO3 operator *(const SO3& rhs) const { return SO3(*this,rhs); }
+	template<typename P>
+	SO3<typename Internal::MultiplyType<Precision, P>::type> operator *(const SO3<P>& rhs) const { 
+	    return SO3<typename Internal::MultiplyType<Precision, P>::type>(*this,rhs); 
+	}
 
 	/// Returns the SO3 as a Matrix<3>
 	const Matrix<3,3, Precision> & get_matrix() const {return my_matrix;}
@@ -175,7 +178,8 @@ public:
 private:
 	struct Invert {};
 	inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
-	inline SO3(const SO3& a, const SO3& b) : my_matrix(a.my_matrix*b.my_matrix) {}
+	template <typename PA, typename PB>
+	inline SO3(const SO3<PA>& a, const SO3<PB>& b) : my_matrix(a.get_matrix()*b.get_matrix()) {}
 	
 	Matrix<3,3, Precision> my_matrix;
 };

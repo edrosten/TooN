@@ -43,5 +43,10 @@ int main(int , char ** ){
 	
 	cout << endl;
 	
+/*
+	SO3<> so3(makeVector(1,0,1));
+	h = so3;
+	cout << so3.get_matrix() << h.get_matrix() << "\n";
+*/	
 	return 0;
 }

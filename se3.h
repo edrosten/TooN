@@ -98,7 +98,10 @@ public:
 
 	/// Right-multiply by another SE3 (concatenate the two transformations)
 	/// @param rhs The multipier
-	inline SE3 operator *(const SE3& rhs) const { return SE3(get_rotation()*rhs.get_rotation(), get_translation() + get_rotation()*rhs.get_translation()); }
+	template<typename P>
+	inline SE3<typename Internal::MultiplyType<Precision, P>::type> operator *(const SE3<P>& rhs) const { 
+	    return SE3<typename Internal::MultiplyType<Precision, P>::type>(get_rotation()*rhs.get_rotation(), get_translation() + get_rotation()*rhs.get_translation()); 
+	}
 
 	inline SE3& left_multiply_by(const SE3& left) {
 		get_translation() = left.get_translation() + left.get_rotation() * get_translation();
@@ -413,7 +416,7 @@ inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
 			B = (1 - cos(theta)) * (inv_theta * inv_theta);
 			C = (1 - A) * (inv_theta * inv_theta);
 		}
-		result.get_translation() = mu.template slice<0,3>() + B * cross + C * (w ^ cross);
+		result.get_translation() = mu.template slice<0,3>() + TooN::operator*(B, cross) + TooN::operator*(C, (w ^ cross));
 	}
 	rodrigues_so3_exp(w, A, B, result.get_rotation().my_matrix);
 	return result;
