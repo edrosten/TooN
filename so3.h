@@ -210,8 +210,9 @@ inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
 ///@param B \f$\frac{1 - \cos \theta}{\theta^2}\f$
 ///@param R Matrix to hold the return value.
 ///@relates SO3
-template <typename Precision, typename VP, typename VA, typename MA>
-inline void rodrigues_so3_exp(const Vector<3,VP, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
+template <typename Precision, int S, typename VP, typename VA, typename MA>
+inline void rodrigues_so3_exp(const Vector<S,VP, VA>& w, const Precision A, const Precision B, Matrix<3,3,Precision,MA>& R){
+    SizeMismatch<3,S>::test(3, w.size());
 	{
 		const Precision wx2 = (Precision)w[0]*w[0];
 		const Precision wy2 = (Precision)w[1]*w[1];
