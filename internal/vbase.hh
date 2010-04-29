@@ -142,7 +142,7 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return data()[i * stride()];
 	}
 
-	const ConstReferenceType operator[](int i) const {
+	ConstReferenceType operator[](int i) const {
 		Internal::check_index(size(), i);
 		return data()[i * stride()];
 	}
