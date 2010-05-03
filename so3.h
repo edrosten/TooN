@@ -174,12 +174,13 @@ public:
 		SizeMismatch<3, S>::test(3, vect.size());
 		return *this * vect; 
 	}
+
+	template <typename PA, typename PB>
+	inline SO3(const SO3<PA>& a, const SO3<PB>& b) : my_matrix(a.get_matrix()*b.get_matrix()) {}
 	
 private:
 	struct Invert {};
 	inline SO3(const SO3& so3, const Invert&) : my_matrix(so3.my_matrix.T()) {}
-	template <typename PA, typename PB>
-	inline SO3(const SO3<PA>& a, const SO3<PB>& b) : my_matrix(a.get_matrix()*b.get_matrix()) {}
 	
 	Matrix<3,3, Precision> my_matrix;
 };
@@ -294,7 +295,7 @@ inline Vector<3, Precision> SO3<Precision>::ln() const{
 			result *= asin(sin_angle_abs) / sin_angle_abs;
 		}
 	} else if( cos_angle > -M_SQRT1_2) {    // [Pi/4 - 3Pi/4[ use acos, but antisymmetric part
-		double angle = acos(cos_angle);
+		const Precision angle = acos(cos_angle);
 		result *= angle / sin_angle_abs;        
 	} else {  // rest use symmetric part
 		// antisymmetric part vanishes, but still large rotation, need information from symmetric part
@@ -302,12 +303,12 @@ inline Vector<3, Precision> SO3<Precision>::ln() const{
 		const Precision d0 = my_matrix[0][0] - cos_angle,
 			d1 = my_matrix[1][1] - cos_angle,
 			d2 = my_matrix[2][2] - cos_angle;
-		TooN::Vector<3> r2;
-		if(fabs(d0) > fabs(d1) && fabs(d0) > fabs(d2)){ // first is largest, fill with first column
+		TooN::Vector<3, Precision> r2;
+		if(d0*d0 > d1*d1 && d0*d0 > d2*d2){ // first is largest, fill with first column
 			r2[0] = d0;
 			r2[1] = (my_matrix[1][0]+my_matrix[0][1])/2;
 			r2[2] = (my_matrix[0][2]+my_matrix[2][0])/2;
-		} else if(fabs(d1) > fabs(d2)) { 			    // second is largest, fill with second column
+		} else if(d1*d1 > d2*d2) { 			    // second is largest, fill with second column
 			r2[0] = (my_matrix[1][0]+my_matrix[0][1])/2;
 			r2[1] = d1;
 			r2[2] = (my_matrix[2][1]+my_matrix[1][2])/2;
@@ -320,7 +321,7 @@ inline Vector<3, Precision> SO3<Precision>::ln() const{
 		if(r2 * result < 0)
 			r2 *= -1;
 		r2 = unit(r2);
-		result = angle * r2;
+		result = TooN::operator*(angle,r2);
 	} 
 	return result;
 }

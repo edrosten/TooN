@@ -437,9 +437,9 @@ inline Vector<6, Precision> SE3<Precision>::ln(const SE3<Precision>& se3) {
 	Vector<3, Precision> rottrans = halfrotator * se3.get_translation();
 	
 	if(theta > 0.001){
-		rottrans -= rot * ((se3.get_translation() * rot) * (1-2*shtot) / (rot*rot));
+		rottrans -= TooN::operator*(rot, ((se3.get_translation() * rot) * (1-2*shtot) / (rot*rot)));
 	} else {
-		rottrans -= rot * ((se3.get_translation() * rot)/24);
+		rottrans -= TooN::operator*(rot, ((se3.get_translation() * rot)/24));
 	}
 	
 	rottrans /= (2 * shtot);

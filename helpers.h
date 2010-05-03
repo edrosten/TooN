@@ -126,7 +126,7 @@ namespace TooN {
 	template<int Size, class Precision, class Base> inline Vector<Size, Precision> unit(const Vector<Size, Precision, Base> & v)
 	{
 		using std::sqrt;
-		return v * (1/sqrt(v*v));
+		return TooN::operator*(v,(1/sqrt(v*v)));
 	}
 	
 	//Note because of the overload later, this function will ONLY receive sliced vectors. Therefore
