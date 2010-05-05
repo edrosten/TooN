@@ -6,7 +6,12 @@ AC_PROG_CXX
 typeof=check
 AC_ARG_ENABLE(lapack, [AS_HELP_STRING([--enable-lapack],[Use LAPACK where optional])], [lapack=$enableval])
 AC_ARG_ENABLE(typeof, [AS_HELP_STRING([--enable-typeof=X],[Force typeof to be decltype, __typeof__, typeof, boost or none])], [typeof=$enableval])
+AC_ARG_WITH(default_precision, [AS_HELP_STRING([--with-default_precision=X],[Override default precision from double to X])], [default_precision="$withval"])
 
+if test "$default_precision" != ""
+then
+	AC_DEFINE_UNQUOTED(TOON_DEFAULT_PRECISION, $default_precision)
+fi
 
 if test "$lapack" == "" 
 then

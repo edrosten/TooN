@@ -297,7 +297,11 @@ namespace TooN {
 	}
 	
 	///All TooN classes default to using this precision for computations and storage.
+#ifndef TOON_DEFAULT_PRECISION
 	typedef double DefaultPrecision;
+#else
+	typedef TOON_DEFAULT_PRECISION DefaultPrecision;
+#endif
 }
 
 #include <TooN/internal/dchecktest.hh>
