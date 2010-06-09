@@ -262,7 +262,7 @@ public:
 	}
 
   	template<int Rows2, int Cols2, typename Precision2, typename Base2>
-	bool operator== (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
+	bool operator== const (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
 	{
 		SizeMismatch<Rows, Rows2>::test(num_rows(), rhs.num_rows());
 		SizeMismatch<Cols, Cols2>::test(num_cols(), rhs.num_cols());
@@ -275,7 +275,7 @@ public:
 	}
 
   	template<int Rows2, int Cols2, typename Precision2, typename Base2>
-	bool operator!= (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
+	bool operator!= const (const Matrix<Rows2, Cols2, Precision2, Base2>& rhs)
 	{
 		SizeMismatch<Rows, Rows2>::test(num_rows(), rhs.num_rows());
 		SizeMismatch<Cols, Cols2>::test(num_cols(), rhs.num_cols());

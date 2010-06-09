@@ -332,7 +332,7 @@ public:
 
 	/// Test for equality with another vector
 	template<int Size2, class Precision2, class Base2>
-	bool operator==(const Vector<Size2, Precision2, Base2>& rhs) {
+	bool operator==(const Vector<Size2, Precision2, Base2>& rhs) const {
 		SizeMismatch<Size,Size2>::test(size(),rhs.size());
 		for(int i=0; i<size(); i++)
 		  if((*this)[i]!=rhs[i])
@@ -342,7 +342,7 @@ public:
 
 	/// Test for inequality with another vector
 	template<int Size2, class Precision2, class Base2>
-	bool operator!=(const Vector<Size2, Precision2, Base2>& rhs) {
+	bool operator!=(const Vector<Size2, Precision2, Base2>& rhs) const {
 		SizeMismatch<Size,Size2>::test(size(),rhs.size());
 		for(int i=0; i<size(); i++)
 		  if((*this)[i]!=rhs[i])
