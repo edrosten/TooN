@@ -644,7 +644,9 @@ Matrix<Rows, Cols, typename Internal::Subtract::Return<typename Operator<Op>::Pr
 // output operator <<
 template <int Size, typename Precision, typename Base>
 inline std::ostream& operator<< (std::ostream& os, const Vector<Size,Precision,Base>& v){
+  std::streamsize fw = os.width();
   for(int i=0; i<v.size(); i++){
+    os.width(fw);
     os << v[i] << " ";
   }
   return os;
@@ -661,12 +663,14 @@ std::istream& operator >> (std::istream& is, Vector<Size, Precision, Base>& v){
 
 template<int Rows, int Cols, typename Precision, class Base>
 inline std::ostream& operator<< (std::ostream& os, const Matrix<Rows, Cols, Precision, Base>& m){
+	std::streamsize fw = os.width();
 	for(int i=0; i < m.num_rows(); i++)
 	{
 		for(int j=0; j < m.num_cols(); j++)
 		{
 			if(j != 0)
 				os << " ";
+			os.width(fw);
 			os << m(i,j);
 		}
 		os << std::endl;

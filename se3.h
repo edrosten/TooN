@@ -224,8 +224,12 @@ inline Matrix<6,6,Precision> SE3<Precision>::trinvadjoint(const Matrix<R,C,P2,Ac
 /// @relates SE3
 template <typename Precision>
 inline std::ostream& operator <<(std::ostream& os, const SE3<Precision>& rhs){
+	std::streamsize fw = os.width();
 	for(int i=0; i<3; i++){
-		os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
+		os.width(fw);
+		os << rhs.get_rotation().get_matrix()[i];
+		os.width(fw);
+		os << rhs.get_translation()[i] << '\n';
 	}
 	return os;
 }

@@ -144,8 +144,13 @@ private:
 /// @relates SE2
 template <class Precision>
 inline std::ostream& operator<<(std::ostream& os, const SE2<Precision> & rhs){
-	for(int i=0; i<2; i++)
-		os << rhs.get_rotation().get_matrix()[i] << rhs.get_translation()[i] << std::endl;
+	std::streamsize fw = os.width();
+	for(int i=0; i<2; i++){
+		os.width(fw);
+		os << rhs.get_rotation().get_matrix()[i];
+		os.width(fw);
+		os << rhs.get_translation()[i] << '\n';
+	}
 	return os;
 }
 
