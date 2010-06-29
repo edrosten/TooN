@@ -4,6 +4,7 @@ exec_prefix = @exec_prefix@
 mandir = @mandir@
 includedir = @includedir@
 datarootdir = @datarootdir@
+pkgconfig = @PKGCONFIG_LIBDIR@
 
 hdr = $(DESTDIR)/$(includedir)/TooN
 
@@ -20,6 +21,7 @@ install:
 	cp -r optimization $(hdr)/
 	cp -r internal $(hdr)/
 	cp -r functions $(hdr)/
+	cp TooN.pc $(pkgconfig)/
 
 internal/data_functions.hh:  make_data_functions.awk
 	awk -f make_data_functions.awk > $@

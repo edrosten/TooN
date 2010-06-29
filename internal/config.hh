@@ -11,6 +11,6 @@
 
 #define TOON_DEPRECATED_GCC 1
 
-#define TOON_USE_LAPACK 1
+/* #undef TOON_USE_LAPACK */
 
 /* #undef TOON_DEFAULT_PRECISION */

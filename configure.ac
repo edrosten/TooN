@@ -63,6 +63,35 @@ define([TEST_AND_SET_CXXFLAG],[
 
 
 
+#
+# Test for Package Config
+#
+AC_PATH_PROG(PKG_CONFIG, pkg-config)
+if test "x$PKG_CONFIG" = "x"; then
+	AC_MSG_WARN([Could not find pkg-config, will not create pc file.])
+else
+	# we need sed to find the pkg-config lib directory
+	AC_CHECK_PROG(SED,sed,sed,AC_MSG_ERROR([You Must install sed]))
+	AC_MSG_CHECKING([for pkg-config library dir])
+	PKGCONFIG_LIBDIR="`echo $PKG_CONFIG | $SED -e 's~/bin/pkg-config$~~'`/lib/pkgconfig"
+	AC_MSG_RESULT($PKGCONFIG_LIBDIR)
+	AC_SUBST(PKGCONFIG_LIBDIR)
+	AC_CONFIG_FILES([ TooN.pc ])
+
+	# This will be put into the pc file
+	VERSION=AC_PACKAGE_VERSION()
+	AC_SUBST(VERSION)
+fi
+
+
+# See if we can find LAPACK
+#ACX_LAPACK(
+#			 LAPACK_LINKER_FLAGS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
+#			 AC_SUBST(LAPACK_LINKER_FLAGS)
+#		   , AC_ERROR([Could not find LAPACK])
+#		   )
+#
+
 typeof=check
 AC_ARG_ENABLE(lapack, [AS_HELP_STRING([--enable-lapack],[Use LAPACK where optional])], [lapack=$enableval])
 AC_ARG_ENABLE(typeof, [AS_HELP_STRING([--enable-typeof=X],[Force typeof to be decltype, __typeof__, typeof, boost or none])], [typeof=$enableval])
@@ -75,7 +104,9 @@ fi
 
 if test "$lapack" == "" 
 then
-	AC_CHECK_LIB(lapack, dgesvd_, [lapack=yes], [lapack=no])
+	AC_CHECK_LIB(lapack, dgesvd_)
+	lapack=no
+	test ac_cv_lib_lapack_dgesvd_ = yes && lapack=yes
 fi
 
 if test "$lapack" != "no" 

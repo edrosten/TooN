@@ -602,6 +602,10 @@ PACKAGE_BUGREPORT=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+VERSION
+PKGCONFIG_LIBDIR
+SED
+PKG_CONFIG
 OBJEXT
 EXEEXT
 ac_ct_CXX
@@ -2404,6 +2408,117 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+#
+# Test for Package Config
+#
+# Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKG_CONFIG+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+  { $as_echo "$as_me:$LINENO: result: $PKG_CONFIG" >&5
+$as_echo "$PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "x$PKG_CONFIG" = "x"; then
+	{ $as_echo "$as_me:$LINENO: WARNING: Could not find pkg-config, will not create pc file." >&5
+$as_echo "$as_me: WARNING: Could not find pkg-config, will not create pc file." >&2;}
+else
+	# we need sed to find the pkg-config lib directory
+	# Extract the first word of "sed", so it can be a program name with args.
+set dummy sed; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_SED+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$SED"; then
+  ac_cv_prog_SED="$SED" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_SED="sed"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_SED" && ac_cv_prog_SED="{ { $as_echo "$as_me:$LINENO: error: You Must install sed" >&5
+$as_echo "$as_me: error: You Must install sed" >&2;}
+   { (exit 1); exit 1; }; }"
+fi
+fi
+SED=$ac_cv_prog_SED
+if test -n "$SED"; then
+  { $as_echo "$as_me:$LINENO: result: $SED" >&5
+$as_echo "$SED" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+	{ $as_echo "$as_me:$LINENO: checking for pkg-config library dir" >&5
+$as_echo_n "checking for pkg-config library dir... " >&6; }
+	PKGCONFIG_LIBDIR="`echo $PKG_CONFIG | $SED -e 's~/bin/pkg-config$~~'`/lib/pkgconfig"
+	{ $as_echo "$as_me:$LINENO: result: $PKGCONFIG_LIBDIR" >&5
+$as_echo "$PKGCONFIG_LIBDIR" >&6; }
+
+	ac_config_files="$ac_config_files TooN.pc"
+
+
+	# This will be put into the pc file
+	VERSION=version-2.0.0-beta7
+
+fi
+
+
+# See if we can find LAPACK
+#ACX_LAPACK(
+#			 LAPACK_LINKER_FLAGS="$LAPACK_LIBS $BLAS_LIBS $LIBS $FLIBS"
+#			 AC_SUBST(LAPACK_LINKER_FLAGS)
+#		   , AC_ERROR([Could not find LAPACK])
+#		   )
+#
+
 typeof=check
 # Check whether --enable-lapack was given.
 if test "${enable_lapack+set}" = set; then
@@ -2432,6 +2547,7 @@ fi
 
 if test "$lapack" == ""
 then
+
 
 { $as_echo "$as_me:$LINENO: checking for dgesvd_ in -llapack" >&5
 $as_echo_n "checking for dgesvd_ in -llapack... " >&6; }
@@ -2499,11 +2615,16 @@ fi
 { $as_echo "$as_me:$LINENO: result: $ac_cv_lib_lapack_dgesvd_" >&5
 $as_echo "$ac_cv_lib_lapack_dgesvd_" >&6; }
 if test "x$ac_cv_lib_lapack_dgesvd_" = x""yes; then
-  lapack=yes
-else
-  lapack=no
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBLAPACK 1
+_ACEOF
+
+  LIBS="-llapack $LIBS"
+
 fi
 
+	lapack=no
+	test ac_cv_lib_lapack_dgesvd_ = yes && lapack=yes
 fi
 
 if test "$lapack" != "no"
@@ -3672,6 +3793,7 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
+    "TooN.pc") CONFIG_FILES="$CONFIG_FILES TooN.pc" ;;
     "internal/config.hh") CONFIG_HEADERS="$CONFIG_HEADERS internal/config.hh" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
