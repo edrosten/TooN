@@ -46,7 +46,8 @@ int main()
 
 	DownhillSimplex<> dh_variable(Spiral, starting_point, .001);
 
-	while(dh_variable.iterate(Spiral));
+	while(dh_variable.iterate(Spiral))
+	{}
 
 	cout << dh_variable.get_simplex()[dh_variable.get_best()] << endl
 	     << dh_variable.get_values()[dh_variable.get_best()] << endl;

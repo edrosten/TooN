@@ -3,6 +3,66 @@ AC_COPYRIGHT([Copyright T. Drummond, E. Rosten, G. Reitmayr 2006, 2007, 2008, 20
 AC_LANG(C++)
 AC_PROG_CXX
 
+
+
+
+################################################################################
+#
+# Useful macros
+#
+
+dnl APPEND(var, value)
+dnl This appends vale to a shell variable var
+define(APPEND, [$1="$$1 $2"])
+
+
+
+dnl TEST_AND_SET_CXXFLAG(flag, [program], [run])
+dnl
+dnl This attempts to compile a and run program with a certain compiler flag.
+dnl If no program is given, then the minimal C++ program is compiled, and 
+dnl this tests just the validity of the compiler flag. 
+dnl
+define([TEST_AND_SET_CXXFLAG],[
+	if test "$3" == ""
+	then
+		AC_MSG_CHECKING([if compiler flag $1 works])	
+	else
+		AC_MSG_CHECKING([$3])	
+	fi
+	save_CXXFLAGS="$CXXFLAGS"
+	APPEND(CXXFLAGS, [$1])
+
+	m4_if([$2],[],[pushdef(prog, [int main(){}])], [pushdef(prog, [$2])])
+
+	m4_if([$4],[run],
+		[AC_RUN_IFELSE([prog], [cvd_conf_test=1],[cvd_conf_test=0], [cvd_conf_test=0])],
+		[AC_COMPILE_IFELSE([prog], [cvd_conf_test=1],[cvd_conf_test=0])]
+	)
+	
+	
+	popdef([prog])
+
+	if test $cvd_conf_test = 1
+	then
+		AC_MSG_RESULT(yes)
+		ts_success=yes
+	else
+		AC_MSG_RESULT(no)
+		CXXFLAGS="$save_CXXFLAGS"
+		ts_success=no
+	fi
+])
+
+
+
+
+
+
+
+
+
+
 typeof=check
 AC_ARG_ENABLE(lapack, [AS_HELP_STRING([--enable-lapack],[Use LAPACK where optional])], [lapack=$enableval])
 AC_ARG_ENABLE(typeof, [AS_HELP_STRING([--enable-typeof=X],[Force typeof to be decltype, __typeof__, typeof, boost or none])], [typeof=$enableval])
@@ -66,6 +126,12 @@ int main()
 }
 ], [ AC_MSG_RESULT(yes);AC_DEFINE(TOON_DEPRECATED_GCC,1 )], AC_MSG_RESULT(no))
 
+
+TEST_AND_SET_CXXFLAG(-Wall)
+TEST_AND_SET_CXXFLAG(-Wextra)
+TEST_AND_SET_CXXFLAG(-W)
+TEST_AND_SET_CXXFLAG(-O3)
+TEST_AND_SET_CXXFLAG(-Werror)
 
 
 cat<<FOO

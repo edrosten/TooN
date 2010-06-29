@@ -290,7 +290,7 @@ template<class Precision> struct VectorAlloc<Resizable, Precision>: public Defau
 	private:
 		//Dymmy class for implementing sfinae
 		//in order to test for a .size() member
-		template<int S> struct SFINAE_dummy{};
+		template<int S> struct SFINAE_dummy{typedef void type;};
 	
 	protected:
 
@@ -302,7 +302,7 @@ template<class Precision> struct VectorAlloc<Resizable, Precision>: public Defau
 		//not exist if the property is missing.
 		//Therefore this method only uses .size() if it exists.
 		template<class Op> 
-		SFINAE_dummy<sizeof(&Operator<Op>::size)> try_destructive_resize(const Operator<Op>& op) 
+		typename SFINAE_dummy<sizeof(&Operator<Op>::size)>::type try_destructive_resize(const Operator<Op>& op) 
 		{
 			try_destructive_resize(op.size());
 		}

@@ -130,11 +130,11 @@ class QR_Lapack{
 		}
 
 		Matrix<Rows, Cols, Precision, ColMajor> copy;
-		Matrix<square_Size, square_Size, Precision, ColMajor> Q;
 		Vector<square_Size, Precision> tau;
+		Matrix<square_Size, square_Size, Precision, ColMajor> Q;
+		bool do_pivoting;
 		Vector<Cols, int> pivot;
 		
-		bool do_pivoting;
 
 		int square_size()
 		{

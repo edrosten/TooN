@@ -174,8 +174,8 @@ public:
 	}
 
 private:
-	Matrix<Size,Size,Precision> my_cholesky_lapack;     
 	Matrix<Size,Size,Precision> my_cholesky;     
+	Matrix<Size,Size,Precision> my_cholesky_lapack;     
 	int my_rank;
 };
 
