@@ -133,30 +133,6 @@ TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-Werror)
 
-
-cat<<FOO
-
-You're on the development branch of TooN 2.0. Everything will probably work, but
-the interface is a bit different from TooN-1.x
-
-If you want TooN-1, then get it using:
-
-cvs -z3 -d:pserver:anoncvs@cvs.savannah.nongnu.org:/cvsroot/toon co -r Maintenance_Branch_1_x TooN
-
-or update what you currently have using:
-
-cvs up -r Maintenance_Branch_1_x
-
-or head over to:
-
-http://mi.eng.cam.ac.uk/~er258/cvd/
-
-Otherwise, please report any bugs you come across.
-
-
-FOO
-
-
 AC_CONFIG_HEADERS(internal/config.hh)
 AC_OUTPUT(Makefile)
 
