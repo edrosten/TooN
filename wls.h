@@ -164,12 +164,13 @@ public:
 					   const Matrix<N,N,Precision,B4>& invcov){
 		const Matrix<S1,N,Precision> temp1 = J1.T() * invcov;
 		const Matrix<S2,N,Precision> temp2 = J2.T() * invcov;
+		const Matrix<S1,S2,Precision> mixed = temp1 * J2;
 		const int size1 = J1.num_cols();
 		const int size2 = J2.num_cols();
 		my_C_inv.slice(index1, index1, size1, size1) += temp1 * J1;
 		my_C_inv.slice(index2, index2, size2, size2) += temp2 * J2;
-		my_C_inv.slice(index1, index2, size1, size2) += temp1 * J2;
-		my_C_inv.slice(index2, index1, size2, size1) += temp2 * J1;
+		my_C_inv.slice(index1, index2, size1, size2) += mixed;
+		my_C_inv.slice(index2, index1, size2, size1) += mixed.T();
 		my_vector.slice(index1, size1) += temp1 * m;
 		my_vector.slice(index2, size2) += temp2 * m;
 	}
