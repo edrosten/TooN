@@ -135,15 +135,34 @@ public:
 		my_vector += temp * m;
 	}
 
+	/// Add a single measurement at once with a sparse Jacobian (much, much more efficiently)
+	/// @param m The measurements to add
+	/// @param J1 The first block of the Jacobian matrix \f$\frac{\partial\text{m}_i}{\partial\text{param}_j}\f$
+	/// @param index1 starting index for the first block
+	/// @param invcov The inverse covariance of the measurement values
+	template<int N, typename B1>
+	inline void add_sparse_mJ(const Precision m,
+					   const Vector<N,Precision,B1>& J1, const int index1,
+					   const Precision weight){
+		//Upper right triangle only, for speed
+		for(int r=0; r < J1.size(); r++)
+		{
+			double Jw = weight * J1[r];
+			my_vector[r+index1] += m * Jw;
+			for(int c = r; c < J1.size(); c++)
+				my_C_inv[r+index1][c+index1] += Jw * J1[c];
+		}
+	}
+
 	/// Add multiple measurements at once with a sparse Jacobian (much, much more efficiently)
 	/// @param m The measurements to add
 	/// @param J1 The first block of the Jacobian matrix \f$\frac{\partial\text{m}_i}{\partial\text{param}_j}\f$
 	/// @param index1 starting index for the first block
 	/// @param invcov The inverse covariance of the measurement values
-	template<int N, int S1, class B1, class B2, class B3>
-	inline void add_sparse_mJ_rows(const Vector<N,Precision,B1>& m,
-					   const Matrix<N,S1,Precision,B2>& J1, const int index1,
-					   const Matrix<N,N,Precision,B3>& invcov){
+	template<int N, int S1, class P1, class P2, class P3, class B1, class B2, class B3>
+	inline void add_sparse_mJ_rows(const Vector<N,P1,B1>& m,
+					   const Matrix<N,S1,P2,B2>& J1, const int index1,
+					   const Matrix<N,N,P3,B3>& invcov){
 		const Matrix<S1,N,Precision> temp1 = J1.T() * invcov;
 		const int size1 = J1.num_cols();
 		my_C_inv.slice(index1, index1, size1, size1) += temp1 * J1;
