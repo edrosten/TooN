@@ -120,7 +120,7 @@ public:
 		Vector<Size, Precision> backsub (const Vector<Size2, P2, B2>& v) const {
 		SizeMismatch<Size,Size2>::test(my_cholesky.num_cols(), v.size());
 
-		Vector<Size> result(v);
+		Vector<Size, Precision> result(v);
 		int N=my_cholesky.num_rows();
 		int NRHS=1;
 		int info;
@@ -159,7 +159,7 @@ public:
 	}
 
 	Matrix<> get_inverse() const {
-		Matrix<Size> M(my_cholesky.num_rows(),my_cholesky.num_rows());
+		Matrix<Size, Size, Precision> M(my_cholesky.num_rows(),my_cholesky.num_rows());
 		M=my_cholesky_lapack;
 		int N = my_cholesky.num_rows();
 		int info;
