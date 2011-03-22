@@ -143,7 +143,7 @@ public:
 	template<int N, typename B1>
 	inline void add_sparse_mJ(const Precision m,
 					   const Vector<N,Precision,B1>& J1, const int index1,
-					   const Precision weight){
+					   const Precision weight = 1){
 		//Upper right triangle only, for speed
 		for(int r=0; r < J1.size(); r++)
 		{
