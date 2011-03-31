@@ -33,6 +33,7 @@
 #define TOON_INCLUDE_HELPERS_H
 
 #include <TooN/TooN.h>
+#include <TooN/gaussian_elimination.h>
 #include <cmath>
 #include <functional>
 #include <utility>
@@ -272,6 +273,25 @@ namespace TooN {
 			}
 			return result;
 		}
+
+		///@internal
+		///@brief Logarithm of a matrix using a the Taylor series
+		///This will not work if the norm of the matrix is too large.
+		template <int R, int C, typename P, typename B>
+		inline Matrix<R, C, P> log_taylor( const Matrix<R,C,P,B> & m ){
+			TooN::SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+			Matrix<R,C,P> X = m - TooN::Identity * 1.0;
+			Matrix<R,C,P> F = X;
+			Matrix<R,C,P> sum = TooN::Zeros(m.num_rows(), m.num_cols());
+			P k = 1;
+			while(norm_inf((sum+F/k)-sum) > 0){
+				sum += F/k;
+				F = -F*X;
+				k += 1;
+			}
+			return sum;
+		}
+
 	};
 	
 	/// computes the matrix exponential of a matrix m by 
@@ -290,6 +310,48 @@ namespace TooN {
 		for(int i = 0; i < s; ++i)
 			result = result * result;
 		return result;
+	}
+	
+	/// computes a matrix square root of a matrix m by
+	/// the product form of the Denman and Beavers iteration
+	/// as given in Chen et al. 'Approximating the logarithm of a matrix to specified accuracy', 
+	/// J. Matrix Anal Appl, 2001. This is used for the matrix
+	/// logarithm function, but is useable by on its own.
+	/// @param m input matrix, must be square
+	/// @return a square root of m of the same size/type as input
+	/// @ingroup gLinAlg
+	template <int R, int C, typename P, typename B>
+	inline Matrix<R, C, P> sqrt( const Matrix<R,C,P,B> & m){
+		SizeMismatch<R, C>::test(m.num_rows(), m.num_cols());
+		Matrix<R,C,P> M = m;
+		Matrix<R,C,P> Y = m;
+		Matrix<R,C,P> M_inv(m.num_rows(), m.num_cols());
+		const Matrix<R,C,P> id = Identity(m.num_rows());
+		do {
+			M_inv = gaussian_elimination(M, id);
+			Y = Y * (id + M_inv) * 0.5;
+			M = 0.5 * (id + (M + M_inv) * 0.5);
+		} while(norm_inf(M - M_inv) > 0);
+		return Y;
+	}
+	
+	/// computes the matrix logarithm of a matrix m using the inverse scaling and 
+	/// squaring method. The overall approach is described in
+	/// Chen et al. 'Approximating the logarithm of a matrix to specified accuracy', 
+	/// J. Matrix Anal Appl, 2001, but this implementation only uses a simple
+	/// taylor series after the repeated square root operation.
+	/// @param m input matrix, must be square
+	/// @return the log of m of the same size/type as input
+	/// @ingroup gLinAlg
+	template <int R, int C, typename P, typename B>
+	inline Matrix<R, C, P> log( const Matrix<R,C,P,B> & m){
+		int counter = 0;
+		Matrix<R,C,P> A = m;
+		while(norm_inf(A - Identity*1.0) > 0.5){
+			++counter;
+			A = sqrt(A);
+		}
+		return Internal::log_taylor(A) * pow(2.0, counter);
 	}
 	
 	/// Returns true if every element is finite

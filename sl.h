@@ -88,6 +88,8 @@ public:
 	template <int S, typename P, typename B>
 	static inline SL exp( const Vector<S,P,B> &);
 
+	inline Vector<N*N-1, Precision> ln() const ;
+
 	/// returns one generator of the group. see SL for a detailed description of 
 	/// the generators used.
 	/// @arg i number of the generator between 0 and SL::dim -1 inclusive
@@ -96,7 +98,7 @@ public:
 private:
 	struct Invert {};
 	SL( const SL & from, struct Invert ) {
-		Matrix<N> id = Identity;
+		const Matrix<N> id = Identity;
 		my_matrix = gaussian_elimination(from.my_matrix, id);
 	}
 	SL( const SL & a, const SL & b) : my_matrix(a.get_matrix() * b.get_matrix()) {}
@@ -132,6 +134,28 @@ inline SL<N, Precision> SL<N, Precision>::exp( const Vector<S,P,B> & v){
 	SL<N, Precision> result;
 	result.my_matrix = TooN::exp(t);
 	return result;
+}
+
+template <int N, typename Precision>
+inline Vector<N*N-1, Precision> SL<N, Precision>::ln() const {
+	const Matrix<N> l = TooN::log(my_matrix);
+	Vector<SL<N,Precision>::dim, Precision> v;
+	Precision last = 0;
+	for(int i = 0; i < DIAG_LIMIT; ++i){	// diagonal elements
+		v[i] = l(i,i) + last;
+		last = l(i,i);
+	}
+	for(int i = DIAG_LIMIT, row = 0, col = 1; i < SYMM_LIMIT; ++i) {	// calculate symmetric and antisymmetric in one go
+		// do the right thing here to calculate the correct indices !
+		v[i] = (l(row, col) + l(col, row))*0.5;
+		v[i+COUNT_SYMM] = (-l(row, col) + l(col, row))*0.5;
+		++col;
+		if( col == N ){
+			++row;
+			col = row+1;
+		}
+	}
+	return v;
 }
 
 template <int N, typename Precision>

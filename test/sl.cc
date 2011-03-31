@@ -43,6 +43,9 @@ int main(int , char ** ){
 	
 	cout << endl;
 	
+	cout << "log(h)\t" << h.ln() << endl;
+	cout << "diff\n" << h.get_matrix() - SL<3>::exp(h.ln()).get_matrix() << endl;
+	
 /*
 	SO3<> so3(makeVector(1,0,1));
 	h = so3;
