@@ -48,7 +48,7 @@ namespace TooN {
 /// three numbers (in the space of the Lie Algebra). In this class, the first two parameters are a
 /// translation vector while the third is the amount of rotation in the plane as for SO2.
 /// @ingroup gTransforms
-template <typename Precision = double>
+template <typename Precision = DefaultPrecision>
 class SE2 {
 public:
 	/// Default constructor. Initialises the the rotation to zero (the identity) and the translation to zero

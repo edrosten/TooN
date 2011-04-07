@@ -46,7 +46,7 @@ namespace TooN {
 /// translation vector while the second three are a rotation vector, whose direction is the axis of rotation
 /// and length the amount of rotation (in radians), as for SO3
 /// @ingroup gTransforms
-template <typename Precision = double>
+template <typename Precision = DefaultPrecision>
 class SE3 {
 public:
 	/// Default constructor. Initialises the the rotation to zero (the identity) and the translation to zero

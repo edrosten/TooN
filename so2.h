@@ -46,7 +46,7 @@ template<typename Precision> inline std::istream & operator>>(std::istream &, SE
 /// matrices are members of the Special Orthogonal Lie group SO2. This group can be parameterised with
 /// one number (the rotation angle).
 /// @ingroup gTransforms
-template<typename Precision = double>
+template<typename Precision = DefaultPrecision>
 class SO2 {
 	friend std::istream& operator>> <Precision>(std::istream&, SO2& );
 	friend std::istream& operator>> <Precision>(std::istream&, SE2<Precision>& );

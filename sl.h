@@ -55,7 +55,7 @@ template <int N, typename P> std::istream & operator>>(std::istream &, SL<N, P> 
 /// This choice represents the fact that SL(n) can be interpreted as the product
 /// of all symmetric matrices with det() = 1 times SO(n).
 /// @ingroup gTransforms
-template <int N, typename Precision = double>
+template <int N, typename Precision = DefaultPrecision>
 class SL {
 	friend std::istream & operator>> <N,Precision>(std::istream &, SL &);
 public:

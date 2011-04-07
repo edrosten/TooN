@@ -49,7 +49,7 @@ template<class Precision> inline std::istream & operator>>(std::istream &, SE3<P
 /// and whose length is the angle of rotation in radians. Exponentiating this vector gives the matrix,
 /// and the logarithm of the matrix gives this vector.
 /// @ingroup gTransforms
-template <typename Precision = double>
+template <typename Precision = DefaultPrecision>
 class SO3 {
 public:
 	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
