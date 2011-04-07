@@ -282,6 +282,7 @@ inline SO3<Precision> SO3<Precision>::exp(const Vector<S,VP,VA>& w){
 
 template <typename Precision>
 inline Vector<3, Precision> SO3<Precision>::ln() const{
+    using std::sqrt;
 	Vector<3, Precision> result;
 	
 	const Precision cos_angle = (my_matrix[0][0] + my_matrix[1][1] + my_matrix[2][2] - 1.0) * 0.5;
