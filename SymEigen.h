@@ -141,7 +141,8 @@ namespace Internal{
 		template<typename P, typename B>
 		static inline void compute(const Matrix<3,3,P,B>& m, Matrix<3,3,P>& eig, Vector<3, P>& ev) {
             //method uses closed form solution of cubic equation to obtain roots of characteristic equation.
-
+            using std::sqrt;
+            
             //Polynomial terms of |a - l * Identity|
             //l^3 + a*l^2 + b*l + c
 

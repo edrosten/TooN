@@ -332,5 +332,6 @@ namespace TooN {
 #include <TooN/internal/data_functions.hh>
 
 #include <TooN/helpers.h>
+#include <TooN/determinant.h>
 
 #endif

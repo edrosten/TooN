@@ -395,6 +395,7 @@ inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
 	SizeMismatch<6,S>::test(6, mu.size());
 	static const Precision one_6th = 1.0/6.0;
 	static const Precision one_20th = 1.0/20.0;
+	using std::sqrt;
 	
 	SE3<Precision> result;
 	
@@ -428,6 +429,7 @@ inline SE3<Precision> SE3<Precision>::exp(const Vector<S, P, VA>& mu){
 
 template <typename Precision>
 inline Vector<6, Precision> SE3<Precision>::ln(const SE3<Precision>& se3) {
+	using std::sqrt;
 	Vector<3,Precision> rot = se3.get_rotation().ln();
 	const Precision theta = sqrt(rot*rot);
 
