@@ -45,6 +45,11 @@ inline std::ostream & operator<<( std::ostream & out, const F<P> & val ){
 	return out << val.val();
 }
 
+template <typename P>
+inline F<P> abs( const F<P> & val ){
+    return (val.val() < 0) ? -val : val;
+}
+
 }
 
 namespace TooN {
@@ -54,12 +59,20 @@ template<class C> struct IsField<fadbad::F<C> >
 	static const int value = numeric_limits<C>::is_specialized; ///<Is C a field?
 };
 
+template <int N, typename T, typename A>
+inline Vector<N, T> get_value( const Vector<N, fadbad::F<T>, A> & v ){
+    Vector<N,T> result(v.size());
+    for(int i = 0; i < result.size(); ++i)
+        result[i] = v[i].val();
+    return result;
+}
+
 template <int N> 
 inline Vector<N, fadbad::F<double> > make_fad_vector( const Vector<N, double> & val, const int start = 0, const int size = N ){
 	using std::min;
 	Vector<N, fadbad::F<double> > result = val;
-	for(int i = start; i < min(size, start+N); ++i)
-		result[i].diff(i,size);
+	for(int i = 0, d = start; i < val.size() && d < size; ++i, ++d)
+		result[i].diff(d,size);
 	return result;
 }
 
@@ -88,40 +101,40 @@ inline Matrix<R, C, double> get_derivative( const Matrix<R,C, fadbad::F<double> 
 	return result;
 }
 
-inline SO3<fadbad::F<double> > make_fad_so3(){
-	const Vector<3, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0));
+inline SO3<fadbad::F<double> > make_fad_so3(int start = 0, int size = 3){
+	const Vector<3, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0), start, size);
 	return SO3<fadbad::F<double> >(p);
 }
 
-inline SE3<fadbad::F<double> > make_fad_se3(){
-	const Vector<6, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0, 0, 0, 0));
+inline SE3<fadbad::F<double> > make_fad_se3( int start = 0, int size = 6){
+	const Vector<6, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0, 0, 0, 0), start, size);
 	return SE3<fadbad::F<double> >(p);
 }
 
-inline SE2<fadbad::F<double> > make_fad_se2() {
-	return SE2<fadbad::F<double> >(make_fad_vector(makeVector(0.0, 0, 0)));
+inline SE2<fadbad::F<double> > make_fad_se2(int start = 0, int size = 3) {
+	return SE2<fadbad::F<double> >(make_fad_vector(makeVector(0.0, 0, 0), start, size));
 }
 
-inline SO2<fadbad::F<double> > make_fad_so2() {
+inline SO2<fadbad::F<double> > make_fad_so2(int start = 0, int size = 1) {
 	fadbad::F<double> r = 0.0;
-	r.diff(0,1) = 1.0;
+	r.diff(start,size) = 1.0;
 	return SO2<fadbad::F<double> >(r);
 }
 
-inline SO3<fadbad::F<double> > make_left_fad_so3( const SO3<double> & r ){
-	return make_fad_so3() * r;
+inline SO3<fadbad::F<double> > make_left_fad_so3( const SO3<double> & r, int start = 0, int size = 3 ){
+	return make_fad_so3(start, size) * r;
 }
 
-inline SE3<fadbad::F<double> > make_left_fad_se3( const SE3<double> & t ){
-	return make_fad_se3() * t;
+inline SE3<fadbad::F<double> > make_left_fad_se3( const SE3<double> & t,  int start = 0, int size = 6 ){
+	return make_fad_se3(start, size) * t;
 }
 
-inline SO2<fadbad::F<double> > make_left_fad_so2( const SO2<double> & r ){
-	return make_fad_so2() * r;
+inline SO2<fadbad::F<double> > make_left_fad_so2( const SO2<double> & r, int start = 0, int size = 1 ){
+	return make_fad_so2(start, size) * r;
 }
 
-inline SE2<fadbad::F<double> > make_left_fad_se2( const SE2<double> & t ){
-	return make_fad_se2() * t;
+inline SE2<fadbad::F<double> > make_left_fad_se2( const SE2<double> & t, int start = 0, int size = 3 ){
+	return make_fad_se2(start, size) * t;
 }
 
 }

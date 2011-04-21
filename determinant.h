@@ -85,7 +85,7 @@ namespace TooN
 			Precision maxval = abs(A[i][i]);
 			
 			for (int ii=i+1; ii<size; ++ii) {
-				double v =  abs(A[ii][i]);
+				Precision v =  abs(A[ii][i]);
 				if (v > maxval) {
 					maxval = v;
 					argmax = ii;
@@ -111,7 +111,7 @@ namespace TooN
 			for (int u=i+1; u<size; ++u) {
 				//Do not multiply out the usual 1/pivot term
 				//to avoid division. It causes poor scaling.
-				double factor = A[u][i]/pivot;
+				Precision factor = A[u][i]/pivot;
 
 				for (int j=i+1; j<size; ++j)
 					A[u][j] = A[u][j] - factor * A[i][j];
