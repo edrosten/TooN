@@ -61,10 +61,10 @@ template<class C> struct IsField<fadbad::F<C> >
 
 template <int N, typename T, typename A>
 inline Vector<N, T> get_value( const Vector<N, fadbad::F<T>, A> & v ){
-    Vector<N,T> result(v.size());
-    for(int i = 0; i < result.size(); ++i)
-        result[i] = v[i].val();
-    return result;
+	Vector<N,T> result(v.size());
+	for(int i = 0; i < result.size(); ++i)
+		result[i] = v[i].val();
+	return result;
 }
 
 template <int N> 
