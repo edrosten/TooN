@@ -102,13 +102,25 @@ inline Matrix<R, C, double> get_derivative( const Matrix<R,C, fadbad::F<double> 
 }
 
 inline SO3<fadbad::F<double> > make_fad_so3(int start = 0, int size = 3){
-	const Vector<3, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0), start, size);
-	return SO3<fadbad::F<double> >(p);
+	// const Vector<3, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0), start, size);
+	// return SO3<fadbad::F<double> >(p);
+	SO3<fadbad::F<double> > r;
+	// this is a hack
+	Matrix<3,3,fadbad::F<double> > & m = const_cast<Matrix<3,3,fadbad::F<double> > &>(r.get_matrix());
+	m(2,1).diff(start, size);
+	m(1,2) = m(2,1) * -1;
+
+	m(0,2).diff(start+1, size);
+	m(2,0) = m(0,2) * -1;
+
+	m(1,0).diff(start+2, size);
+	m(0,1) = m(1,0) * -1;
+
+	return r;
 }
 
 inline SE3<fadbad::F<double> > make_fad_se3( int start = 0, int size = 6){
-	const Vector<6, fadbad::F<double> > p = make_fad_vector(makeVector(0.0, 0, 0, 0, 0, 0), start, size);
-	return SE3<fadbad::F<double> >(p);
+	return SE3<fadbad::F<double> >(make_fad_so3( start+3, size ), make_fad_vector(makeVector(0.0, 0, 0), start, size));
 }
 
 inline SE2<fadbad::F<double> > make_fad_se2(int start = 0, int size = 3) {
