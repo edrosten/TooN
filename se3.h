@@ -267,7 +267,7 @@ struct Operator<Internal::SE3VMult<S,PV,A,P> > {
 	void eval(Vector<S0, P0, A0> & res ) const {
 		SizeMismatch<4,S>::test(4, rhs.size());
 		res.template slice<0,3>()=lhs.get_rotation() * rhs.template slice<0,3>();
-		res.template slice<0,3>()+=lhs.get_translation() * rhs[3];
+		res.template slice<0,3>()+=TooN::operator*(lhs.get_translation(),rhs[3]);
 		res[3] = rhs[3];
 	}
 	int size() const { return 4; }
