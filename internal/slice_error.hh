@@ -79,7 +79,7 @@ namespace Internal
 			//Sanity check all basic static sizes
 			BadSlice<!(Size== Dynamic || Size==Resizable || Size > 0)>::check();
 			BadSlice<!(Start >= 0)>::check();
-			BadSlice<!(Length > 0)>::check();
+			BadSlice<!(Length >= 0)>::check();
 			BadSlice<(Size != Dynamic && Size != Resizable && (Start + Length > Size))>::check();
 		}	
 
@@ -97,13 +97,13 @@ namespace Internal
 			//Sanity check all basic static sizes
 			BadSlice<!(Size   == Dynamic || Size==Resizable || Size > 0)>::check();
 			BadSlice<!(Start  == Dynamic || Start >= 0)>::check();
-			BadSlice<!(Length == Dynamic || Length > 0)>::check();
+			BadSlice<!(Length == Dynamic || Length >= 0)>::check();
 			
 			//We can make sure Length <= Size, even if Start is unknown
 			BadSlice<(Size!=Dynamic && Size != Resizable &&  Length != Dynamic && Length > Size)>::check();
 			
 			//We can make sure Start < Size even if Length is unknown
-			BadSlice<(Start != Dynamic && Size != Dynamic && Size != Resizable && Start >= Size)>::check();
+			BadSlice<(Start != Dynamic && Size != Dynamic && Size != Resizable && Start > Size)>::check();
 
 			BadSlice<(Size != Dynamic && Size != Resizable && Start != Dynamic && Length != Dynamic && Start + Length > Size)>::check();
 			#ifndef TOON_NDEBUG_MISMATCH
