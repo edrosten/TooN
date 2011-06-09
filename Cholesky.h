@@ -235,6 +235,7 @@ public:
 	}
 	
 	Matrix<Size,Size,Precision> get_L() const {
+		using std::sqrt;
 		Matrix<Size,Size,Precision> m(my_cholesky.num_rows(),
 					      my_cholesky.num_rows());
 		m=Zeros;
