@@ -36,11 +36,13 @@
 
 namespace TooN {
 
-template<typename Precision> class SO2;
+template <typename Precision> class SO2;
 template <typename Precision> class SE2;
+template <typename Precision> class SIM2;
 
 template<typename Precision> inline std::istream & operator>>(std::istream &, SO2<Precision> & );
 template<typename Precision> inline std::istream & operator>>(std::istream &, SE2<Precision> & );
+template<typename Precision> inline std::istream & operator>>(std::istream &, SIM2<Precision> & );
 
 /// Class to represent a two-dimensional rotation matrix. Two-dimensional rotation
 /// matrices are members of the Special Orthogonal Lie group SO2. This group can be parameterised with
@@ -50,6 +52,7 @@ template<typename Precision = DefaultPrecision>
 class SO2 {
 	friend std::istream& operator>> <Precision>(std::istream&, SO2& );
 	friend std::istream& operator>> <Precision>(std::istream&, SE2<Precision>& );
+	friend std::istream& operator>> <Precision>(std::istream&, SIM2<Precision>& );
 
 public:
 	/// Default constructor. Initialises the matrix to the identity (no rotation)

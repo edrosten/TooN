@@ -38,9 +38,11 @@ namespace TooN {
 
 template <typename Precision> class SO3;
 template <typename Precision> class SE3;
+template <typename Precision> class SIM3;
 
 template<class Precision> inline std::istream & operator>>(std::istream &, SO3<Precision> & );
 template<class Precision> inline std::istream & operator>>(std::istream &, SE3<Precision> & );
+template<class Precision> inline std::istream & operator>>(std::istream &, SIM3<Precision> & );
 
 /// Class to represent a three-dimensional rotation matrix. Three-dimensional rotation
 /// matrices are members of the Special Orthogonal Lie group SO3. This group can be parameterised
@@ -54,8 +56,10 @@ class SO3 {
 public:
 	friend std::istream& operator>> <Precision> (std::istream& is, SO3<Precision> & rhs);
 	friend std::istream& operator>> <Precision> (std::istream& is, SE3<Precision> & rhs);
+	friend std::istream& operator>> <Precision> (std::istream& is, SIM3<Precision> & rhs);
 	friend class SE3<Precision>;
-	
+	friend class SIM3<Precision>;
+
 	/// Default constructor. Initialises the matrix to the identity (no rotation)
 	SO3() : my_matrix(Identity) {}
 	

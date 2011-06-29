@@ -7,6 +7,8 @@ using namespace std;
 #include <TooN/se2.h>
 #include <TooN/so3.h>
 #include <TooN/se3.h>
+#include <TooN/sim2.h>
+#include <TooN/sim3.h>
 
 void test_so2(){
     cout << "---------------SO2 Tests---------------\n";
@@ -246,6 +248,158 @@ void test_se3(){
     cout << r << endl;
 }
 
+void test_sim3(){
+    cout << "---------------SIM3 Tests---------------\n";
+    
+    TooN::SIM3<> r1;
+    cout << "default constructor\n";
+    cout << r1 << endl;
+    cout << "default constructor <int>\n";
+    TooN::SIM3<int> r2;
+    cout << r2 << endl;
+    TooN::SIM3<> r(TooN::makeVector(0.1, 0.1, 0.1, 0.2, -0.2, 0.2, 0.5));
+    cout << "constructor\n";
+    cout << r << endl;
+    cout << "generator 0,1,2,3,4,5,6\n";
+    cout << TooN::SIM3<>::generator(0) ;
+    cout << TooN::SIM3<>::generator(1) ;
+    cout << TooN::SIM3<>::generator(2) << endl;
+    cout << TooN::SIM3<>::generator(3) ;
+    cout << TooN::SIM3<>::generator(4) ;
+    cout << TooN::SIM3<>::generator(5) << endl;
+    cout << TooN::SIM3<>::generator(6) << endl;
+    cout << "ln()\n";
+    cout << r.ln() << endl;
+    cout << "inverse\n";
+    cout << r.inverse() << endl;
+    cout << "inverse.ln()\n";
+    cout << r.inverse().ln() << endl;
+    cout << "times\n";
+    cout << r * r.inverse() << endl;
+    cout << (r *= r.inverse()) << endl;
+    r = TooN::SIM3<>::exp(TooN::makeVector(0.1, 0.1, 0.1, 0.2, -0.2, 0.2, 0.5));
+
+    TooN::Vector<4> t = TooN::makeVector(0,1,2,3);
+    cout << "right and left multiply with vector " << t << "\n";
+    cout << r * t << endl;
+    cout << t * r << endl;
+    TooN::Vector<3> t3 = TooN::makeVector(0,1,2);
+    cout << "right with a 3 vector " << t3 << "\n";
+    cout << r * t3 << endl;
+
+    TooN::Matrix<4> l = TooN::Identity;
+    cout << "right and left multiply with matrix\n" << l << "\n";
+    cout << r * l << endl;
+    cout << l * r << endl;
+    TooN::Matrix<4,6> l2(TooN::Zeros);
+    l2[0] = TooN::makeVector(0,1,2,3,4,5);
+    cout << "right with rectangular matrix\n";
+    cout << r * l2 << endl;
+    cout << l2.T() * r << endl;
+
+#if 0    
+    TooN::SO3<> rot(TooN::makeVector(-0.2, 0.2, -0.2));
+    cout << "mult with SO3\n";
+    cout << rot * r << endl;
+    
+    TooN::Vector<6> a = TooN::makeVector(0,1,2,0.1, 0.2, 0.3);
+    cout << "adjoint with a " << a << "\n";
+    cout << r.adjoint(a) << endl;
+    cout << "0 0 0 0 0 0 = " << r.adjoint(a) - (r * TooN::SE3<>(a) * r.inverse()).ln() << endl;
+    cout << "trinvadjoint with a " << a << "\n";
+    cout << r.trinvadjoint(a) << endl;
+    cout << "0 = " << r.trinvadjoint(a) * r.adjoint(a) - a * a << endl; 
+
+    TooN::Matrix<6> ma(TooN::Identity);
+    ma[0] = TooN::makeVector(0.1, 0.2, 0.1, 0.2, 0.1, 0.3);
+    ma = ma.T() * ma;
+    cout << "adjoint with ma\n" << ma << "\n";
+    cout << r.adjoint(ma) << endl;
+    cout << "trinvadjoint with ma\n";
+    cout << r.trinvadjoint(ma) << endl;
+#endif
+
+    cout << "read from istream\n";
+    istringstream is("0 -1 0 1 1 0 0 2 0 0 1 3");
+    is >> r;
+    cout << r << endl;
+    cout << r.get_rotation() << "\n" << r.get_translation() << "\n" << r.get_scale() << endl;
+}
+
+void test_sim2(){
+    cout << "---------------SIM2 Tests---------------\n";
+    
+    TooN::SIM2<> r1;
+    cout << "default constructor\n";
+    cout << r1 << endl;
+    cout << "default constructor <int>\n";
+    TooN::SIM2<int> r2;
+    cout << r2 << endl;
+    TooN::SIM2<> r(TooN::makeVector(0.1, 0.1, 0.1, 0.2));
+    cout << "constructor\n";
+    cout << r << endl;
+    cout << "generator 0,1,2,3\n";
+    cout << TooN::SIM2<>::generator(0);
+    cout << TooN::SIM2<>::generator(1);
+    cout << TooN::SIM2<>::generator(2) << endl;
+    cout << TooN::SIM2<>::generator(3) << endl;
+    cout << "ln()\n";
+    cout << r.ln() << endl;
+    cout << "inverse\n";
+    cout << r.inverse() << endl;
+    cout << "inverse.ln()\n";
+    cout << r.inverse().ln() << endl;
+    cout << "times\n";
+    cout << r * r.inverse() << endl;
+    cout << (r *= r.inverse()) << endl;
+    r = TooN::SIM2<>::exp(TooN::makeVector(0.1, 0.1, 0.1, 0.2));
+
+    TooN::Vector<3> t = TooN::makeVector(0,1,2);
+    cout << "right and left multiply with vector " << t << "\n";
+    cout << r * t << endl;
+    cout << t * r << endl;
+    TooN::Vector<2> t3 = TooN::makeVector(0,1);
+    cout << "right with a 2 vector " << t3 << "\n";
+    cout << r * t3 << endl;
+
+    TooN::Matrix<3> l = TooN::Identity;
+    cout << "right and left multiply with matrix\n" << l << "\n";
+    cout << r * l << endl;
+    cout << l * r << endl;
+    TooN::Matrix<3,6> l2(TooN::Zeros);
+    l2[0] = TooN::makeVector(0,1,2,3,4,5);
+    cout << "right with rectangular matrix\n" << l2 << "\n";
+    cout << r * l2 << endl;
+    cout << l2.T() * r << endl;
+
+#if 0    
+    TooN::SO3<> rot(TooN::makeVector(-0.2, 0.2, -0.2));
+    cout << "mult with SO3\n";
+    cout << rot * r << endl;
+    
+    TooN::Vector<6> a = TooN::makeVector(0,1,2,0.1, 0.2, 0.3);
+    cout << "adjoint with a " << a << "\n";
+    cout << r.adjoint(a) << endl;
+    cout << "0 0 0 0 0 0 = " << r.adjoint(a) - (r * TooN::SE3<>(a) * r.inverse()).ln() << endl;
+    cout << "trinvadjoint with a " << a << "\n";
+    cout << r.trinvadjoint(a) << endl;
+    cout << "0 = " << r.trinvadjoint(a) * r.adjoint(a) - a * a << endl; 
+
+    TooN::Matrix<6> ma(TooN::Identity);
+    ma[0] = TooN::makeVector(0.1, 0.2, 0.1, 0.2, 0.1, 0.3);
+    ma = ma.T() * ma;
+    cout << "adjoint with ma\n" << ma << "\n";
+    cout << r.adjoint(ma) << endl;
+    cout << "trinvadjoint with ma\n";
+    cout << r.trinvadjoint(ma) << endl;
+#endif
+
+    cout << "read from istream\n";
+    istringstream is("0 -1 0 1 1 0");
+    is >> r;
+    cout << r << endl;
+    cout << r.get_rotation() << "\n" << r.get_translation() << "\n" << r.get_scale() << endl;
+}
 
 void test_se2_exp(){
     cout << "------------------SE2 check------------------\n";
@@ -261,12 +415,17 @@ void test_se2_exp(){
 
 int main(int, char* *){
  
+ #if 0
     test_so2();
     test_so3();
     test_se2();
     test_se3();
+    test_sim3();
  
     test_se2_exp();
- 
+#endif
+
+    test_sim2();
+    
     return 0;
 }
