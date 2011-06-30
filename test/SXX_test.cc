@@ -260,6 +260,11 @@ void test_sim3(){
     TooN::SIM3<> r(TooN::makeVector(0.1, 0.1, 0.1, 0.2, -0.2, 0.2, 0.5));
     cout << "constructor\n";
     cout << r << endl;
+    cout << "different cases\n";
+    cout << TooN::SIM3<>(TooN::makeVector(0.0, 0, 0, 0, 0, 0, 0)) << endl;
+    cout << TooN::SIM3<>(TooN::makeVector(0.0001, 0, 0, 0, 0, 0, 0)) << endl;
+    cout << TooN::SIM3<>(TooN::makeVector(0.0, 0, 0, 0.01, 0, 0, 0)) << endl;
+    cout << TooN::SIM3<>(TooN::makeVector(0.0, 0, 0, 0.0, 0, 0, 0.0001)) << endl;
     cout << "generator 0,1,2,3,4,5,6\n";
     cout << TooN::SIM3<>::generator(0) ;
     cout << TooN::SIM3<>::generator(1) ;
@@ -338,6 +343,11 @@ void test_sim2(){
     TooN::SIM2<> r(TooN::makeVector(0.1, 0.1, 0.1, 0.2));
     cout << "constructor\n";
     cout << r << endl;
+    cout << "different cases\n";
+    cout << TooN::SIM2<>(TooN::makeVector(0.0, 0, 0, 0)) << endl;
+    cout << TooN::SIM2<>(TooN::makeVector(0.0001, 0, 0, 0)) << endl;
+    cout << TooN::SIM2<>(TooN::makeVector(0.0, 0, 0.0001, 0)) << endl;
+    cout << TooN::SIM2<>(TooN::makeVector(0.0, 0, 0, 0.0001)) << endl;
     cout << "generator 0,1,2,3\n";
     cout << TooN::SIM2<>::generator(0);
     cout << TooN::SIM2<>::generator(1);
@@ -420,11 +430,13 @@ int main(int, char* *){
     test_so3();
     test_se2();
     test_se3();
+    test_sim2();
     test_sim3();
  
     test_se2_exp();
 #endif
 
+    test_sim3();
     test_sim2();
     
     return 0;
