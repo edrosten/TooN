@@ -39,7 +39,7 @@ namespace TooN {
 /// This can be represented by a \f$3\times\f$4 matrix operating on a homogeneous co-ordinate, 
 /// so that a vector \f$\underline{x}\f$ is transformed to a new location \f$\underline{x}'\f$
 /// by
-/// \f[\begin{aligned}\underline{x}' &= E\times\underline{x}\\ \begin{bmatrix}x'\\y'\\z'\end{bmatrix} &= \begin{pmatrix}r_{11} & r_{12} & r_{13} & t_1\\r_{21} & r_{22} & r_{23} & t_2\\r_{31} & r_{32} & r_{33} & t_3\end{pmatrix}\begin{bmatrix}x\\y\\z\\1\end{bmatrix}\end{aligned}\f]
+/// \f[\begin{aligned}\underline{x}' &= E\times\underline{x}\\ \begin{bmatrix}x'\\y'\\z'\end{bmatrix} &= \begin{pmatrix}s r_{11} & s r_{12} & s r_{13} & t_1\\s r_{21} & s r_{22} & s r_{23} & t_2\\s r_{31} & s r_{32} & s r_{33} & t_3\end{pmatrix}\begin{bmatrix}x\\y\\z\\1\end{bmatrix}\end{aligned}\f]
 /// 
 /// This transformation is a member of the Lie group SIM3. These can be parameterised with
 /// seven numbers (in the space of the Lie Algebra). In this class, the first three parameters are a
@@ -404,56 +404,68 @@ Matrix<Rows,4, typename Internal::MultiplyType<PM,P>::type> operator*(const Matr
 	return Matrix<Rows,4,typename Internal::MultiplyType<PM,P>::type>(Operator<Internal::MSIM3Mult<Rows, C, PM, A, P> >(lhs,rhs));
 }
 
+namespace Internal {
+
+/// internal function that calculates the coefficients for the Rodrigues formula for SIM3 translation
+template <typename Precision>
+inline Vector<3, Precision> compute_rodrigues_coefficients_sim3( const Precision & s, const Precision & t ){
+	using std::exp;
+
+	Vector<3, Precision> coeff;
+	const Precision es = exp(s);
+
+	// 4 cases for s -> 0 and/or theta -> 0
+	// the Taylor expansions were calculated with Maple 12 and truncated at the 3rd power,
+	// such that eps^3 < 1e-18 which results in approximately 1 + eps^3 = 1
+	static const Precision eps = 1e-6;
+
+	if(fabs(s) < eps && fabs(t) < eps){
+		coeff[0] = 1 + s/2 + s*s/6;
+		coeff[1] = 1/2 + s/3 - t*t/24 + s*s/8;
+		coeff[2] = 1/6 + s/8 - t*t/120 + s*s/20;
+	} else if(fabs(s) < eps) {
+		coeff[0] = 1 + s/2 + s*s/6;
+		coeff[1] = (1-cos(t))/(t*t) + (sin(t)-cos(t)*t)*s/(t*t*t)+(2*sin(t)*t-t*t*cos(t)-2+2*cos(t))*s*s/(2*t*t*t*t);
+		coeff[2] = (t-sin(t))/(t*t*t) - (-t*t-2+2*cos(t)+2*sin(t)*t)*s/(2*t*t*t*t) - (-t*t*t+6*cos(t)*t+3*sin(t)*t*t-6*sin(t))*s*s/(6*t*t*t*t*t);
+	} else if(fabs(t) < eps) {
+		coeff[0] = (es - 1)/s;
+		coeff[1] = (s*es+1-es)/(s*s) - (6*s*es+6-6*es+es*s*s*s-3*es*s*s)*t*t/(6*s*s*s*s);
+		coeff[2] = (es*s*s-2*s*es+2*es-2)/(2*s*s*s) - (es*s*s*s*s-4*es*s*s*s+12*es*s*s-24*s*es+24*es-24)*t*t/(24*s*s*s*s*s);
+	} else {
+		const Precision a = es * sin(t);
+		const Precision b = es * cos(t);
+		const Precision inv_s_theta = 1/(s*s + t*t);
+
+		coeff[0] = (es - 1)/s;
+		coeff[1] = (a*s + (1-b)*t) * inv_s_theta / t;
+		coeff[2] = (coeff[0] - ((b-1)*s + a*t) * inv_s_theta) / (t*t);
+	}
+
+	return coeff;
+}
+
+}
+
 template <typename Precision>
 template <int S, typename P, typename VA>
 inline SIM3<Precision> SIM3<Precision>::exp(const Vector<S, P, VA>& mu){
 	SizeMismatch<7,S>::test(7, mu.size());
-	static const Precision one_6th = 1.0/6.0;
-	static const Precision one_20th = 1.0/20.0;
-
-	using std::sqrt;
 	using std::exp;
 	
 	SIM3<Precision> result;
-	
-	const Vector<3,Precision> w = mu.template slice<3,3>();
-	const Precision theta_sq = w*w;
-	const Precision theta = sqrt(theta_sq);
-	
+
 	// scale
-	const Precision s = mu[6];
-	const Precision es = exp(s);
-	result.get_scale() = es;
+	result.get_scale() = exp(mu[6]);
 	
 	// rotation
-	Precision A, B;
-	if (theta_sq < 1e-8) {
-		A = 1.0 - one_6th * theta_sq;
-		B = 0.5;
-	} else {
-		if (theta_sq < 1e-6) {
-			A = 1.0 - theta_sq * one_6th*(1.0 - one_20th * theta_sq);
-			B = 0.5 - 0.25 * one_6th * theta_sq;
-		} else {
-			const Precision inv_theta = 1.0/theta;
-			A = sin(theta) * inv_theta;
-			B = (1 - cos(theta)) * (inv_theta * inv_theta);
-		}
-	}
-	rodrigues_so3_exp(w, A, B, result.get_rotation().my_matrix);
-	
-	// translation
-	const Precision a = es * sin(theta);
-	const Precision b = es * cos(theta);
-	const Precision c = (fabs(s) < 1e-6) ? (1 + s/2 + s*s/6) : expm1(s)/s;
+	const Vector<3,Precision> w = mu.template slice<3,3>();
+	const Precision t = norm(w);
+	result.get_rotation() = SO3<>::exp(w);
 
-	const Precision inv_s_theta = 1/(s*s + theta_sq);
-	
-	const Precision CC = (a*s + (1-b)*theta) * inv_s_theta / theta;
-	const Precision CCC = (c - ((b-1)*s + a*theta) * inv_s_theta) / (theta * theta);
-	
+	// translation
+	const Vector<3, Precision> coeff = Internal::compute_rodrigues_coefficients_sim3(mu[6],t); 
 	const Vector<3,Precision> cross = w ^ mu.template slice<0,3>();
-	result.get_translation() = c * mu.template slice<0,3>() + TooN::operator*(CC, cross) + TooN::operator*(CCC, (w ^ cross));	
+	result.get_translation() = coeff[0] * mu.template slice<0,3>() + TooN::operator*(coeff[1], cross) + TooN::operator*(coeff[2], (w ^ cross));
 
 	return result;
 }
@@ -467,8 +479,7 @@ inline Vector<7, Precision> SIM3<Precision>::ln(const SIM3<Precision>& sim3) {
 	
 	// rotation
 	result.template slice<3,3>() = sim3.get_rotation().ln();
-	const Precision theta_sq = norm_sq(result.template slice<3,3>());
-	const Precision theta = sqrt(theta_sq);
+	const Precision theta = norm(result.template slice<3,3>());
 
 	// scale 
 	const Precision es = sim3.get_scale();
@@ -476,15 +487,9 @@ inline Vector<7, Precision> SIM3<Precision>::ln(const SIM3<Precision>& sim3) {
 	result[6] = s;
 
 	// Translation
-	const Precision a = es * sin(theta);
-	const Precision b = es * cos(theta);
-	const Precision c = (fabs(s) < 1e-6) ? (1 + s/2 + s*s/6) : expm1(s)/s;
-	const Precision inv_s_theta = 1/(s*s + theta_sq);
-	
-	const Precision CC = (a*s + (1-b)*theta) * inv_s_theta / theta;
-	const Precision CCC = (c - ((b-1)*s + a*theta) * inv_s_theta) / (theta * theta);
+	const Vector<3, Precision> coeff = Internal::compute_rodrigues_coefficients_sim3(s, theta);
 	const Matrix<3,3, Precision> cross = cross_product_matrix(result.template slice<3,3>());
-	const Matrix<3,3, Precision> W = Identity * c + cross * CC + cross * cross * CCC;
+	const Matrix<3,3, Precision> W = Identity * coeff[0] + cross * coeff[1] + cross * cross * coeff[2];
 	
 	result.template slice<0,3>() = gaussian_elimination(W, sim3.get_translation());
 

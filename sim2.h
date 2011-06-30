@@ -34,6 +34,7 @@
 #define TOON_INCLUDE_SIM2_H
 
 #include <TooN/se2.h>
+#include <TooN/sim3.h>
 
 namespace TooN {
 
@@ -340,26 +341,16 @@ inline SIM2<Precision> SIM2<Precision>::exp(const Vector<S, PV, Accessor>& mu){
 	result.get_rotation() = SO2<Precision>::exp(theta);
 
 	// scale
-	const Precision s = mu[3];
-	const Precision es = exp(s);
-	result.get_scale() = es;
+	result.get_scale() = exp(mu[3]);
 
 	// translation
-	const Precision a = es * sin(theta);
-	const Precision b = es * cos(theta);
-	const Precision c = (fabs(s) < 1e-6) ? (1 + s/2 + s*s/6) : expm1(s)/s;
-
-	const Precision inv_s_theta = 1/(s*s + theta * theta);
-
-	const Precision CC = (a*s + (1-b)*theta) * inv_s_theta / theta;
-	const Precision CCC = ((b-1)*s + a*theta) * inv_s_theta;
-
+	const Vector<3, Precision> coeff = Internal::compute_rodrigues_coefficients_sim3(mu[3], theta);
 	const Vector<2, Precision> cross = makeVector( -theta * mu[1], theta * mu[0]);
-	result.get_translation() = CCC * mu.template slice<0,2>() + TooN::operator*(CC, cross);	
+	result.get_translation() = coeff[2] * mu.template slice<0,2>() + TooN::operator*(coeff[1], cross);
 
 	return result;
 }
- 
+
 template <typename Precision>
 inline Vector<4, Precision> SIM2<Precision>::ln(const SIM2<Precision> & sim2) {
 	using std::log;
@@ -371,22 +362,12 @@ inline Vector<4, Precision> SIM2<Precision>::ln(const SIM2<Precision> & sim2) {
 	result[2] = theta;
 
 	// scale 
-	const Precision es = sim2.get_scale();
-	const Precision s = log(sim2.get_scale());
-	result[3] = s;
+	result[3] = log(sim2.get_scale());
 
 	// translation
-	const Precision a = es * sin(theta);
-	const Precision b = es * cos(theta);
-	const Precision c = (fabs(s) < 1e-6) ? (1 + s/2 + s*s/6) : expm1(s)/s;
-
-	const Precision inv_s_theta = 1/(s*s + theta * theta);
-
-	const Precision CC = (a*s + (1-b)*theta) * inv_s_theta / theta;
-	const Precision CCC = ((b-1)*s + a*theta) * inv_s_theta;
-	
+	const Vector<3, Precision> coeff = Internal::compute_rodrigues_coefficients_sim3(result[3], theta);
 	Matrix<2,2, Precision> cross = Zeros; cross(0,1) = -theta; cross(1,0) = theta;
-	const Matrix<2,2, Precision> W = CCC * Identity + CC * cross;	
+	const Matrix<2,2, Precision> W = coeff[2] * Identity + coeff[1] * cross;
 	result.template slice<0,2>() = gaussian_elimination(W, sim2.get_translation());
 
 	return result;
