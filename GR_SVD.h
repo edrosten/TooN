@@ -160,6 +160,7 @@ namespace TooN
   {
     using std::abs;
     using std::max;
+    using std::sqrt;
     // ------------  Householder reduction to bidiagonal form
     Precision g = 0.0;
     Precision scale = 0.0;
@@ -347,6 +348,7 @@ namespace TooN
   bool GR_SVD<M,N,Precision,WANT_U, WANT_V>::Diagonalize_SubLoop(int k, Precision &z)
   {
     using std::abs;
+    using std::sqrt;
     const int k1 = k-1;
     // 520 is here!
     for(int l=k; l>=0; --l)
