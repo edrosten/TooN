@@ -111,6 +111,8 @@ public:
 		assert(info >= 0);
 		if (info > 0) {
 			my_rank = info-1;
+		} else {
+		    my_rank = N;
 		}
 	}
 
