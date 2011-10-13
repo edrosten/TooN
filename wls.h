@@ -44,7 +44,7 @@ namespace TooN {
 /// @param Decomposition The class used to invert the inverse Covariance matrix (must have one integer size and one typename precision template arguments) this is Cholesky by default, but could also be SQSVD
 /// @ingroup gEquations
 template <int Size=Dynamic, class Precision=DefaultPrecision,
-		  template<int Size, class Precision> class Decomposition = Cholesky>
+		  template<int DecompSize, class DecompPrecision> class Decomposition = Cholesky>
 class WLS {
 public:
 
@@ -233,8 +233,8 @@ private:
 	Vector<Size,Precision> my_mu;
 
 	// comment out to allow bitwise copying
-	WLS( WLS& copyof );
-	int operator = ( WLS& copyof );
+	// WLS( WLS& copyof );
+	// int operator = ( WLS& copyof );
 };
 
 }

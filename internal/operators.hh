@@ -49,7 +49,7 @@ namespace Internal {
 	template<class L, class R> struct Field
 	{	
 		///<Set to 1 if the two classes are in the same field.
-		static const int is = IsField<L>::value && IsField<R>::value;
+		static const int is = IsField<L>::value & IsField<R>::value;
 	};
 	
 

@@ -170,6 +170,7 @@ public:
   : Base::template VLayout<Size, Precision>(data_in, size_in, stride_in) {}
 	
 	using Base::template VLayout<Size, Precision>::size;
+	using Base::template VLayout<Size, Precision>::try_destructive_resize;
 
 	/// construction from Operator object
 	///
