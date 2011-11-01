@@ -176,7 +176,7 @@ namespace TooN {
        \overload
 	*/
 	template<int R, int C, typename Precision, typename Base> inline Matrix<R-1, C, Precision> project( const Matrix<R,C, Precision, Base> & m){
-        Matrix<R-1, C, Precision> result = m.template slice(0,0,R-1,m.num_cols());
+        Matrix<R-1, C, Precision> result = m.slice(0,0,R-1,m.num_cols());
         for( int c = 0; c < m.num_cols(); ++c ) {
             result.slice(0,c,R-1,1) /= m[R-1][c];
         }
@@ -184,7 +184,7 @@ namespace TooN {
     }
 
     template<int C, typename Precision, typename Base> inline Matrix<-1, C, Precision> project( const Matrix<-1,C, Precision, Base> & m){
-        Matrix<-1, C, Precision> result = m.template slice(0,0,m.num_rows()-1,m.num_cols());
+        Matrix<-1, C, Precision> result = m.slice(0,0,m.num_rows()-1,m.num_cols());
         for( int c = 0; c < m.num_cols(); ++c ) {
             result.slice(0,c,m.num_rows()-1,1) /= m[m.num_rows()-1][c];
         }
@@ -203,7 +203,7 @@ namespace TooN {
 
     template<int C, typename Precision, typename Base> inline Matrix<-1, C, Precision> unproject( const Matrix<-1, C, Precision, Base> & m){
         Matrix<-1, C, Precision> result( m.num_rows()+1, m.num_cols() );
-        result.template slice(0,0,m.num_rows(),m.num_cols()) = m;
+        result.slice(0,0,m.num_rows(),m.num_cols()) = m;
         result[m.num_rows()] = Ones;
         return result;
     }

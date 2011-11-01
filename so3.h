@@ -200,8 +200,9 @@ inline std::ostream& operator<< (std::ostream& os, const SO3<Precision>& rhs){
 /// @relates SO3
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO3<Precision>& rhs){
-	return is >> rhs.my_matrix;
+	is >> rhs.my_matrix;
 	rhs.coerce();
+	return is;
 }
 
 ///Compute a rotation exponential using the Rodrigues Formula.
