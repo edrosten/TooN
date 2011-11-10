@@ -56,7 +56,7 @@ namespace TooN
 
 	 @ingroup gDecomps
   **/
-  template<int M, int N, class Precision = DefaultPrecision, bool WANT_U = 1, bool WANT_V = 1> 
+  template<int M, int N = M, class Precision = DefaultPrecision, bool WANT_U = 1, bool WANT_V = 1> 
   class GR_SVD
   {
   public:
