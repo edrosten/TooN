@@ -142,8 +142,9 @@ inline std::ostream& operator<< (std::ostream& os, const SO2<Precision> & rhs){
 /// @relates SO2
 template <typename Precision>
 inline std::istream& operator>>(std::istream& is, SO2<Precision>& rhs){
-	return is >> rhs.my_matrix;
+	is >> rhs.my_matrix;
 	rhs.coerce();
+	return is;
 }
 
 /// Right-multiply by a Vector

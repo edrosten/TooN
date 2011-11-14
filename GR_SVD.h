@@ -282,7 +282,7 @@ namespace TooN
   void GR_SVD<M,N,Precision,WANT_U,WANT_V>::Accumulate_LHS()
   {
     // Same thing; remove loop over dummy ii and do straight over i
-    // Some implementations start from N here (??)
+    // Some implementations start from N here
     for(int i=SmallDim-1; i>=0; --i)
       { // 500
 	const int l = i+1;
@@ -455,7 +455,7 @@ namespace TooN
       } // 530
     // Code should never get here!
     throw(0);
-    return false;
+    //return false;
   }
 
   
