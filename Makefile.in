@@ -6,7 +6,12 @@ includedir = @includedir@
 datarootdir = @datarootdir@
 pkgconfig = @PKGCONFIG_LIBDIR@
 
-hdr = $(DESTDIR)/$(includedir)/TooN
+ifneq "$(DESTDIR)" ""
+DESTDIR+=/
+endif
+
+
+hdr = $(DESTDIR)$(includedir)/TooN
 
 
 .PHONY: all
