@@ -79,9 +79,12 @@ public:
 	SL inverse() const { return SL(*this, Invert()); }
 
 	/// multiplies to SLs together by multiplying the underlying matrices
-	SL operator*( const SL & rhs) const { return SL(*this, rhs); }
+	template <typename P>
+	SL<N,typename Internal::MultiplyType<Precision, P>::type> operator*( const SL<N,P> & rhs) const { return SL<N,typename Internal::MultiplyType<Precision, P>::type>(*this, rhs); }
+
 	/// right multiplies this SL with another one
-	SL operator*=( const SL & rhs) { *this = *this*rhs; return *this; }
+	template <typename P>
+	SL operator*=( const SL<N,P> & rhs) { *this = *this*rhs; return *this; }
 
 	/// exponentiates a vector in the Lie algebra to compute the corresponding element
 	/// @arg v a vector of dimension SL::dim

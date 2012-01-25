@@ -92,7 +92,8 @@ public:
 
 	/// Self right-multiply by another SE2 (concatenate the two transformations)
 	/// @param rhs The multipier
-	inline SE2& operator *=(const SE2& rhs) { 
+	template <typename P>
+	inline SE2& operator *=(const SE2<P>& rhs) { 
 		*this = *this * rhs; 
 		return *this; 
 	}

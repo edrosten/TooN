@@ -132,7 +132,8 @@ public:
 	SO3 inverse() const { return SO3(*this, Invert()); }
 
 	/// Right-multiply by another rotation matrix
-	SO3& operator *=(const SO3& rhs) {
+	template <typename P>
+	SO3& operator *=(const SO3<P>& rhs) {
 		*this = *this * rhs;
 		return *this;
 	}

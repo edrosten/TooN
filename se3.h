@@ -90,7 +90,8 @@ public:
 
 	/// Right-multiply by another SE3 (concatenate the two transformations)
 	/// @param rhs The multipier
-	inline SE3& operator *=(const SE3& rhs) {
+	template<typename P>
+	inline SE3& operator *=(const SE3<P> & rhs) {
 		get_translation() += get_rotation() * rhs.get_translation();
 		get_rotation() *= rhs.get_rotation();
 		return *this;
