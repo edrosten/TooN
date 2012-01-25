@@ -302,6 +302,17 @@ namespace TooN {
 #else
 	typedef TOON_DEFAULT_PRECISION DefaultPrecision;
 #endif
+
+#if defined  TOON_FORTRAN_INTEGER && defined TOON_CLAPACK
+	#error Error: both TOON_FORTRAN_INTEGER and TOON_CLAPACK defined
+#elif defined TOON_CLAPACK
+	typedef long FortranInteger;
+#elif defined TOON_FORTRAN_INTEGER
+	typedef TOON_FORTRAN_INTEGER FortranInteger;
+#else
+	typedef int FortranInteger;
+#endif
+
 }
 
 #include <TooN/internal/debug.hh>

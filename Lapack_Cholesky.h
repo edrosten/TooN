@@ -94,8 +94,8 @@ public:
 
 
 	void do_compute(){
-		int N = my_cholesky.num_rows();
-		int info;
+		FortranInteger N = my_cholesky.num_rows();
+		FortranInteger info;
 		potrf_("L", &N, my_cholesky_lapack.my_data, &N, &info);
 		for (int i=0;i<N;i++) {
 		  int j;
@@ -123,9 +123,9 @@ public:
 		SizeMismatch<Size,Size2>::test(my_cholesky.num_cols(), v.size());
 
 		Vector<Size, Precision> result(v);
-		int N=my_cholesky.num_rows();
-		int NRHS=1;
-		int info;
+		FortranInteger N=my_cholesky.num_rows();
+		FortranInteger NRHS=1;
+		FortranInteger info;
 		potrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
@@ -136,9 +136,9 @@ public:
 		SizeMismatch<Size,Size2>::test(my_cholesky.num_cols(), m.num_rows());
 
 		Matrix<Size, Cols2, Precision, ColMajor> result(m);
-		int N=my_cholesky.num_rows();
-		int NRHS=m.num_cols();
-		int info;
+		FortranInteger N=my_cholesky.num_rows();
+		FortranInteger NRHS=m.num_cols();
+		FortranInteger info;
 		potrs_("L", &N, &NRHS, my_cholesky_lapack.my_data, &N, result.my_data, &N, &info);     
 		assert(info==0);
 		return result;
@@ -163,8 +163,8 @@ public:
 	Matrix<> get_inverse() const {
 		Matrix<Size, Size, Precision> M(my_cholesky.num_rows(),my_cholesky.num_rows());
 		M=my_cholesky_lapack;
-		int N = my_cholesky.num_rows();
-		int info;
+		FortranInteger N = my_cholesky.num_rows();
+		FortranInteger info;
 		potri_("L", &N, M.my_data, &N, &info);
 		assert(info == 0);
 		for (int i=1;i<N;i++) {
@@ -178,7 +178,7 @@ public:
 private:
 	Matrix<Size,Size,Precision> my_cholesky;     
 	Matrix<Size,Size,Precision> my_cholesky_lapack;     
-	int my_rank;
+	FortranInteger my_rank;
 };
 
 

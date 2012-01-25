@@ -71,12 +71,12 @@ class QR_Lapack{
 
 		void compute()
 		{	
-			int M = copy.num_rows();
-			int N = copy.num_cols();
+			FortranInteger M = copy.num_rows();
+			FortranInteger N = copy.num_cols();
 			
-			int LWORK=-1;
-			int INFO;
-			int lda = M;
+			FortranInteger LWORK=-1;
+			FortranInteger INFO;
+			FortranInteger lda = M;
 
 			Precision size;
 			
@@ -91,7 +91,7 @@ class QR_Lapack{
 			//Compute the working space
 			geqp3_(&M, &N, copy.get_data_ptr(), &lda, pivot.get_data_ptr(), tau.get_data_ptr(), &size, &LWORK, &INFO);
 
-			LWORK = (int) size;
+			LWORK = (FortranInteger) size;
 
 			Precision* work = new Precision[LWORK];
 			
@@ -107,7 +107,7 @@ class QR_Lapack{
 			//LAPACK provides a handy function to do the reconstruction
 			Q = copy.template slice<0,0,square_Size, square_Size>(0,0,square_size(), square_size());
 			
-			int K = square_size();
+			FortranInteger K = square_size();
 			M=K;
 			N=K;
 			lda = K;
@@ -133,7 +133,7 @@ class QR_Lapack{
 		Vector<square_Size, Precision> tau;
 		Matrix<square_Size, square_Size, Precision, ColMajor> Q;
 		bool do_pivoting;
-		Vector<Cols, int> pivot;
+		Vector<Cols, FortranInteger> pivot;
 		
 
 		int square_size()

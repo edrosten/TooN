@@ -68,10 +68,10 @@ namespace Internal{
 			
 
 			evectors = m;
-			int N = evalues.size();
-			int lda = evalues.size();
-			int info;
-			int lwork=-1;
+			FortranInteger N = evalues.size();
+			FortranInteger lda = evalues.size();
+			FortranInteger info;
+			FortranInteger lwork=-1;
 			P size;
 
 			// find out how much space fortran needs
