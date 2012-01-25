@@ -36,8 +36,8 @@ define([TEST_AND_SET_CXXFLAG],[
 	m4_if([$2],[],[pushdef(prog, [int main(){}])], [pushdef(prog, [$2])])
 
 	m4_if([$4],[run],
-		[AC_RUN_IFELSE([prog], [cvd_conf_test=1],[cvd_conf_test=0], [cvd_conf_test=0])],
-		[AC_COMPILE_IFELSE([prog], [cvd_conf_test=1],[cvd_conf_test=0])]
+		[AC_RUN_IFELSE([AC_LANG_SOURCE([prog])], [cvd_conf_test=1],[cvd_conf_test=0], [cvd_conf_test=0])],
+		[AC_COMPILE_IFELSE([AC_LANG_SOURCE([prog])], [cvd_conf_test=1],[cvd_conf_test=0])]
 	)
 	
 	
@@ -104,9 +104,7 @@ fi
 
 if test "$lapack" == "" 
 then
-	AC_CHECK_LIB(lapack, dgesvd_)
-	lapack=no
-	test ac_cv_lib_lapack_dgesvd_ = yes && lapack=yes
+	AC_CHECK_LIB(lapack, dgesvd_, [lapack=yes], [lapack=no])
 fi
 
 if test "$lapack" != "no" 
@@ -119,13 +117,13 @@ define(TYPEOF_TEST,[
 	if test "$typeof" == check
 	then
 		AC_MSG_CHECKING([for $1])
-		AC_COMPILE_IFELSE([
+		AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 		$3
 		int main()
 		{
 			typedef $2(int()*double()) foo;
 		}
-		], [ AC_MSG_RESULT(yes);typeof=$1], AC_MSG_RESULT(no))
+		])], [ AC_MSG_RESULT(yes);typeof=$1], AC_MSG_RESULT(no))
 	fi
 ])
 
@@ -149,13 +147,13 @@ then
 fi
 
 AC_MSG_CHECKING([for __attribute__((deprecated))])
-AC_COMPILE_IFELSE([
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 __attribute__((deprecated)) void foo(){}
 int main()
 {
 	foo();
 }
-], [ AC_MSG_RESULT(yes);AC_DEFINE(TOON_DEPRECATED_GCC,1 )], AC_MSG_RESULT(no))
+])], [ AC_MSG_RESULT(yes);AC_DEFINE(TOON_DEPRECATED_GCC,1 )], AC_MSG_RESULT(no))
 
 
 TEST_AND_SET_CXXFLAG(-Wall)
