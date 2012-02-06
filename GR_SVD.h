@@ -354,9 +354,13 @@ namespace TooN
     for(int l=k; l>=0; --l)
       { // 530
 	const int l1 = l-1;
-	const bool rv1_test = ((abs(vOffDiagonal[l]) + anorm) == anorm);
-	const bool w_test = ((abs(vDiagonal[l1]) + anorm) == anorm);
-	if(!rv1_test && w_test) // 540 to 565
+	if((abs(vOffDiagonal[l]) + anorm) == anorm)	
+		goto line_565;
+	if((abs(vDiagonal[l1]) + anorm) == anorm)
+		goto line_540;
+	continue;
+
+	line_540:
 	  {
 	    Precision c = 0;
 	    Precision s = 1.0;
@@ -381,7 +385,8 @@ namespace TooN
 		    }
 	      } // 560
 	  }
-	if(rv1_test || w_test) // line 565
+
+	line_565:
 	  {
 	    // Check for convergence..
 	    z = vDiagonal[k];

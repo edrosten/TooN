@@ -64,7 +64,7 @@ test:regressions/results
 regressions/results:$(TEST_RESULT)
 	cat $(TEST_RESULT) > regressions/results
 
-.PRECIOUS: regressions/%.out regressions/%.test
+.PRECIOUS: regressions/%.testout regressions/%.test
 
 #Build a test executable from a test program. On compile error,
 #create an execuaable which decalres the error.
@@ -75,9 +75,9 @@ regressions/%.test: regressions/%.cc
 	  chmod +x $@; \
 	}
 	
-regressions/%.out: regressions/%.test
+regressions/%.testout: regressions/%.test
 	$< > $@ || ( echo Crash!!! > $@ )
 
-regressions/%.result: regressions/%.out regressions/%.txt
+regressions/%.result: regressions/%.testout regressions/%.txt
 	awk -vname=$* -f numdiff.awk -vf1=$< -vf2=regressions/$*.txt > $@	
 	
