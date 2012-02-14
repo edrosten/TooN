@@ -47,7 +47,7 @@ TESTS=lu slice vector_resize gauss_jordan eigen-sqrt determinant chol_toon chol_
 
 
 TEST_RESULT=$(TESTS:%=regressions/%.result)
-TEST_FILES=$(TESTS:%=regressions/%.out) $(TESTS:%=regressions/%.test) $(TEST_RESULT)
+TEST_FILES=$(TESTS:%=regressions/%.testout) $(TESTS:%=regressions/%.test) $(TEST_RESULT)
 
 testclean:
 	rm -f $(TEST_FILES)
