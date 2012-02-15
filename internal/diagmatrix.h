@@ -154,6 +154,11 @@ public:
 	const typename Vector<Size, Precision, Base>::as_slice_type diagonal_slice() const {
 		return this->my_vector.as_slice();
 	}
+
+	DiagonalMatrix<Size, Precision> operator-() const
+	{
+		return -this->my_vector;
+	}
 };
 
 
