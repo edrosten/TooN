@@ -41,8 +41,8 @@ namespace TooN {
 	///Return the solution for \f$Ax = b\f$, given \f$A\f$ and \f$b\f$
 	///@param A \f$A\f$
 	///@param b \f$b\f$
-    template<int N, typename Precision>
-	inline Vector<N, Precision> gaussian_elimination (Matrix<N,N,Precision> A, Vector<N, Precision> b) {
+    template<int N, typename Precision, typename A1, typename A2>
+	inline Vector<N, Precision> gaussian_elimination (Matrix<N,N,Precision, A1> A, Vector<N, Precision, A2> b) {
 		using std::swap;
 		using std::abs;
 
@@ -103,8 +103,8 @@ namespace TooN {
 	///Return the solution for \f$Ax = b\f$, given \f$A\f$ and \f$b\f$
 	///@param A \f$A\f$
 	///@param b \f$b\f$
-    template<int R1, int C1, int R2, int C2, typename Precision>
-	inline Matrix<Internal::Size3<R1, C1, R2>::s, C2, Precision> gaussian_elimination (Matrix<R1,C1,Precision> A, Matrix<R2, C2, Precision> b) {
+    template<int R1, int C1, int R2, int C2, typename Precision, typename A1, typename A2>
+	inline Matrix<Internal::Size3<R1, C1, R2>::s, C2, Precision> gaussian_elimination (Matrix<R1,C1,Precision, A1> A, Matrix<R2, C2, Precision, A2> b) {
 		using std::swap;
 		using std::abs;
 		SizeMismatch<R1, C1>::test(A.num_rows(), A.num_cols());
