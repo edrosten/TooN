@@ -46,6 +46,15 @@
 #define M_SQRT1_2 0.707106781186547524401
 #endif
 
+#ifdef WIN32
+namespace std {
+	inline int isfinite( const double & v ){ return _finite(v); }
+	inline int isfinite( const float & v ){ return _finite(v); }
+	inline int isnan( const double & v ){ return _isnan(v); }
+	inline int isnan( const float & v ){ return _isnan(v); }
+}
+#endif
+
 namespace TooN {
 
 	///\deprecated
@@ -151,20 +160,23 @@ namespace TooN {
 		normalize(v.as_slice());
 	}
 
-
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i-1}] / v_i \f$
 	///@param v \e v
 	///@ingroup gLinAlg
-	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size-1), Precision> project( const Vector<Size, Precision, Base> & v){
+	// Don't remove the +0 in the first template parameter of the return type. It is a work around for a Visual Studio 2010 bug:
+	// https://connect.microsoft.com/VisualStudio/feedback/details/735283/vc-2010-parse-error-in-template-parameters-using-ternary-operator
+	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size-1)+0, Precision> project( const Vector<Size, Precision, Base> & v){
 		static const int Len = (Size==Dynamic?Dynamic:Size-1);
-		return TooN::operator/(v.template slice<0, Len>(0, v.size()-1),v[v.size() - 1]);
+		return TooN::operator/(v.template slice<0, Len>(0 , v.size() - 1) , v[v.size() - 1]);
 	}
-	
+
 	//This should probably be done with an operator to prevent an extra new[] for dynamic vectors.
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i}, 1]\f$
 	///@param v \e v
 	///@ingroup gLinAlg
-	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size+1), Precision> unproject( const Vector<Size, Precision, Base> & v){
+	// Don't remove the +0 in the first template parameter of the return type. It is a work around for a Visual Studio 2010 bug:
+	// https://connect.microsoft.com/VisualStudio/feedback/details/735283/vc-2010-parse-error-in-template-parameters-using-ternary-operator
+	template<int Size, typename Precision, typename Base> inline Vector<(Size==Dynamic?Dynamic:Size+1)+0, Precision> unproject( const Vector<Size, Precision, Base> & v){
 		Vector<(Size==Dynamic?Dynamic:Size+1), Precision> result(v.size()+1);
 		static const int Len = (Size==Dynamic?Dynamic:Size);
 		result.template slice<0, Len>(0, v.size()) = v;
@@ -411,7 +423,7 @@ namespace TooN {
 	{
 		SizeMismatch<Size,3>::test(vec.size(), 3);
 
-		TooN::Matrix<3> result;
+		TooN::Matrix<3, 3, P> result;
 
 		result(0,0) = 0; 
 		result(0,1) = -vec[2]; 
