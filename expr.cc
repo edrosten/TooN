@@ -36,6 +36,8 @@ template<class Expr> struct SliceExpr
 
 template<class Base, class Precision = typename Base::Precision> struct BaseUtilities
 {
+	//This class is used only as part of the curiously recurring template pattern.
+	//This is the class that BaseUtilities muse have been derived from.
 	typedef Vector<Dynamic,  Precision, Base> Derived;
 
 	Vector<Dynamic, Precision, SliceExpr<Base> > slice(int start, int length)
@@ -57,10 +59,16 @@ template<class Base, class Precision = typename Base::Precision> struct BaseUtil
 		return (cost() * passes > 1000);
 	}
 
+
+	//Things that Vector<> expects. They aren't meaningful, but cause a compile
+	//error if they are missing.
 	typedef void* PointerType;
 	typedef void  try_destructive_resize;
 
 
+	//The class can optionally cache values. It makes sense to do this
+	//when there are multiple passes of the vector, and the cost of allocating memory
+	//is less than the cost of recmoputing an complex expression many times.
 	mutable Precision* cache;
 
 	BaseUtilities()
@@ -73,11 +81,12 @@ template<class Base, class Precision = typename Base::Precision> struct BaseUtil
 			delete[] cache;
 	}
 
-
+	//This is an advisory function which will may cause an expression template
+	//to precompute and cache the values.
 	void perhaps_cache(int passes) const
 	{
 		const Derived& derived = static_cast<const Derived&>(*this);
-		if(should_cache(passes))
+		if(!cache && should_cache(passes))
 		{
 			cache = new Precision[derived.size()];
 			for(int i=0; i < derived.size(); i++)
