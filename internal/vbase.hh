@@ -220,6 +220,15 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 		return DiagonalMatrix<Size, const Precision, ConstSliceBase> (data(), size(), stride(), Slicing());
 	}
 
+
+	static const int NumberOfAdds = 0;
+	static const int NumberOfMuls = 0;
+	static const int NumberOfDivs = 0;
+
+	void perhaps_cache(int) const
+	{
+	}
+
 };
 
 }

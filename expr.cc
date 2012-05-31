@@ -3,11 +3,11 @@
 using namespace std;
 namespace TooN{
 
-template<class B, class P> struct MakeSlice;
+template<class B, class P> struct BaseUtilities;
 
 template<class Expr> struct SliceExpr
 {
-	template<int I, class P> struct VLayout: public MakeSlice<SliceExpr<Expr>, P>
+	template<int I, class P> struct VLayout: public BaseUtilities<SliceExpr<Expr>, P>
 	{
 		typedef P Precision;
 		const int start, length;
@@ -18,7 +18,7 @@ template<class Expr> struct SliceExpr
 			return length;
 		}
 
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return vec[start + i];
 		}
@@ -27,28 +27,80 @@ template<class Expr> struct SliceExpr
 		:start(start_),length(length_),vec(vec_)
 		{
 		}
+
+		static const int NumberOfMuls =     Vector<Dynamic, Precision, Expr>::NumberOfMuls;
+		static const int NumberOfAdds =     Vector<Dynamic, Precision, Expr>::NumberOfAdds;
+		static const int NumberOfDivs =     Vector<Dynamic, Precision, Expr>::NumberOfDivs;
 	};
 };
 
-template<class Base, class Precision = typename Base::Precision> struct MakeSlice
+template<class Base, class Precision = typename Base::Precision> struct BaseUtilities
 {
+	typedef Vector<Dynamic,  Precision, Base> Derived;
+
 	Vector<Dynamic, Precision, SliceExpr<Base> > slice(int start, int length)
 	{
-		typedef Vector<Dynamic,  Precision, Base> Derived;
-		const Derived& derived = static_cast<Derived&>(*this);
+		const Derived& derived = static_cast<const Derived&>(*this);
 
 		return typename SliceExpr<Base>::template VLayout<Dynamic, Precision>(start, length, derived);
+	}
+	
+	//Magic numbers to trade off various operations
+	int cost() const
+	{
+		const Derived& derived = static_cast<const Derived&>(*this);
+		return (Derived::NumberOfMuls * 2 + Derived::NumberOfAdds + 30 * Derived::NumberOfDivs)*derived.size();
+	}
+
+	bool should_cache(int passes) const
+	{
+		return (cost() * passes > 1000);
 	}
 
 	typedef void* PointerType;
 	typedef void  try_destructive_resize;
+
+
+	mutable Precision* cache;
+
+	BaseUtilities()
+	:cache(0)
+	{}
+
+	~BaseUtilities()
+	{
+		if(cache)
+			delete[] cache;
+	}
+
+
+	void perhaps_cache(int passes) const
+	{
+		const Derived& derived = static_cast<const Derived&>(*this);
+		if(should_cache(passes))
+		{
+			cache = new Precision[derived.size()];
+			for(int i=0; i < derived.size(); i++)
+				cache[i] = derived.index[i];
+		}
+	}
+
+	Precision operator[](int i) const
+	{
+		const Derived& derived = static_cast<const Derived&>(*this);
+		if(cache)
+			return cache[i];
+		else
+			return derived.index(i);
+	}
+	
 };
 
 template<class P1, class P2, class B2> struct ScalarMulExpr
 {
 	typedef typename Internal::MultiplyType<P1,P2>::type Precision;
 
-	template<int I, class P> struct VLayout: public MakeSlice<ScalarMulExpr<P1, P2, B2> >
+	template<int I, class P> struct VLayout: public BaseUtilities<ScalarMulExpr<P1, P2, B2> >
 	{
 		typedef typename Internal::MultiplyType<P1,P2>::type Precision;
 		const P1& mul;
@@ -59,7 +111,7 @@ template<class P1, class P2, class B2> struct ScalarMulExpr
 			return vec.size();
 		}
 
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return vec[i]*mul;
 		}
@@ -68,6 +120,10 @@ template<class P1, class P2, class B2> struct ScalarMulExpr
 		:mul(m),vec(vec_)
 		{
 		}
+
+		static const int NumberOfMuls = 1 + Vector<Dynamic, P2, B2>::NumberOfMuls;
+		static const int NumberOfAdds =     Vector<Dynamic, P2, B2>::NumberOfAdds;
+		static const int NumberOfDivs =     Vector<Dynamic, P2, B2>::NumberOfDivs;
 	};
 };
 
@@ -75,7 +131,7 @@ template<class P1, class P2, class B2> struct ScalarDivExpr
 {
 	typedef typename Internal::MultiplyType<P1,P2>::type Precision;
 
-	template<int I, class P> struct VLayout: public MakeSlice<ScalarDivExpr<P1, P2, B2> >
+	template<int I, class P> struct VLayout: public BaseUtilities<ScalarDivExpr<P1, P2, B2> >
 	{
 		typedef typename Internal::MultiplyType<P1,P2>::type Precision;
 		const P1& div;
@@ -86,7 +142,7 @@ template<class P1, class P2, class B2> struct ScalarDivExpr
 			return vec.size();
 		}
 
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return vec[i]/div;
 		}
@@ -95,6 +151,10 @@ template<class P1, class P2, class B2> struct ScalarDivExpr
 		:div(d),vec(vec_)
 		{
 		}
+
+		static const int NumberOfMuls =     Vector<Dynamic, P2, B2>::NumberOfMuls;
+		static const int NumberOfAdds =     Vector<Dynamic, P2, B2>::NumberOfAdds;
+		static const int NumberOfDivs = 1+  Vector<Dynamic, P2, B2>::NumberOfDivs;
 	};
 };
 
@@ -102,7 +162,7 @@ template<class P1, class B1> struct NegExpr
 {
 	typedef P1 Precision;
 
-	template<int I, class P> struct VLayout: public MakeSlice<NegExpr<P1, B1> >
+	template<int I, class P> struct VLayout: public BaseUtilities<NegExpr<P1, B1> >
 	{
 		typedef P1 Precision;
 		const Vector<Dynamic, P1, B1>& vec;
@@ -112,7 +172,7 @@ template<class P1, class B1> struct NegExpr
 			return vec.size();
 		}
 
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return -vec[i];
 		}
@@ -121,6 +181,10 @@ template<class P1, class B1> struct NegExpr
 		:vec(vec_)
 		{
 		}
+
+		static const int NumberOfMuls =     Vector<Dynamic, P1, B1>::NumberOfMuls;
+		static const int NumberOfAdds =     Vector<Dynamic, P1, B1>::NumberOfAdds;
+		static const int NumberOfDivs =     Vector<Dynamic, P1, B1>::NumberOfDivs;
 	};
 };
 
@@ -132,13 +196,13 @@ struct AddExpr
 	typedef Vector<Dynamic, P1, B1> LHS;
 	typedef Vector<Dynamic, P2, B2> RHS;
 
-	template<int I,class P> struct VLayout: public MakeSlice<AddExpr<P1,P2,B1,B2> >
+	template<int I,class P> struct VLayout: public BaseUtilities<AddExpr<P1,P2,B1,B2> >
 	{
 		typedef AddExpr<P1,P2,B1,B2>::Precision Precision;
 		const LHS& lhs;
 		const RHS& rhs;
 		
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return lhs[i] + rhs[i];
 		}
@@ -154,6 +218,9 @@ struct AddExpr
 			SizeMismatch<Dynamic,Dynamic>:: test(lhs.size(),rhs.size());
 		}
 
+		static const int NumberOfMuls =     Vector<Dynamic, P1, B1>::NumberOfMuls + Vector<Dynamic, P2, B2>::NumberOfMuls;
+		static const int NumberOfAdds = 1+  Vector<Dynamic, P1, B1>::NumberOfAdds + Vector<Dynamic, P2, B2>::NumberOfAdds;
+		static const int NumberOfDivs =     Vector<Dynamic, P1, B1>::NumberOfDivs + Vector<Dynamic, P2, B2>::NumberOfDivs;
 	};
 };
 
@@ -164,13 +231,13 @@ struct SubExpr
 	typedef typename Internal::SubtractType<P1,P2>::type Precision;
 	typedef Vector<Dynamic, P1, B1> LHS;
 	typedef Vector<Dynamic, P2, B2> RHS;
-	template<int I,class P> struct VLayout: public MakeSlice<SubExpr<P1,P2,B1,B2> >
+	template<int I,class P> struct VLayout: public BaseUtilities<SubExpr<P1,P2,B1,B2> >
 	{
 		typedef SubExpr<P1,P2,B1,B2>::Precision Precision;
 		const LHS& lhs;
 		const RHS& rhs;
 		
-		Precision operator[](int i) const
+		Precision index(int i) const
 		{
 			return lhs[i] - rhs[i];
 		}
@@ -186,6 +253,10 @@ struct SubExpr
 			SizeMismatch<Dynamic,Dynamic>:: test(lhs.size(),rhs.size());
 		}
 
+
+		static const int NumberOfMuls =     Vector<Dynamic, P1, B1>::NumberOfMuls + Vector<Dynamic, P2, P2>::NumberOfMuls;
+		static const int NumberOfAdds = 1+  Vector<Dynamic, P1, B1>::NumberOfAdds + Vector<Dynamic, P2, B2>::NumberOfAdds;
+		static const int NumberOfDivs =     Vector<Dynamic, P1, B1>::NumberOfDivs + Vector<Dynamic, P2, B2>::NumberOfDivs;
 	};
 };
 
@@ -250,11 +321,11 @@ using namespace std;
 extern "C"{
 void foo(const Vector<>& v1, const Vector<>& v2, Vector<>& v3, int i)
 {
-	v3 =-3*(v1+2.4*v2).slice(0,i)/2;
+	v3 =-(v1+2.4*v2).slice(0,i)/2.8;
 }
 }
 
-
+/*
 int main()
 {
 	Vector<> v1 = makeVector(1,2,3);
@@ -262,6 +333,15 @@ int main()
 
 	Vector<> v3 = -3*(v1 + 2*v2).slice(0,2) / 2;
 
+
+	typedef decltype(-3*(v1 + 2*v2).slice(0,2) / 2) A;
+
 	cout << (v1+v2)[0] << endl;
 	cout << v3 << endl;
-}
+	
+	
+	cout <<  (-3*(v1 + 2*v2).slice(0,2) / 2).cost() << endl;
+
+//	cout << IsExpressionTemplate<decltype(v3)>::is << endl;
+	//cout << IsExpressionTemplate<decltype(v1+v2)>::is << endl;
+}*/
