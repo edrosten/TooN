@@ -184,6 +184,11 @@ public:
 		op.eval(*this);
 	}
 
+	inline Vector(const typename Base::template VLayout<Size, Precision>& b)
+	:Base::template VLayout<Size, Precision>(b)
+	{
+	}
+
 	// Copy construction is a very special case. Copy construction goes all the
 	// way down to the bottom. GenericVBase has no idea how to copy itself.
 	// However, the underlying allocator objects do.  In the case of static sized
