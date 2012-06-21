@@ -277,6 +277,11 @@ template<class Precision> struct VectorAlloc<Resizable, Precision>: public Defau
 			return data();
 		}
 
+		void swap(VectorAlloc& s)
+		{
+			numbers.swap(s.numbers);
+		}
+
 	protected:
 
 		Precision* data() {
