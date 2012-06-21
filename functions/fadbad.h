@@ -114,7 +114,7 @@ inline SO3<fadbad::F<P> > make_fad_so3(int start = 0, int size = 3){
 	// return SO3<fadbad::F<double> >(p);
 	SO3<fadbad::F<P> > r;
 	// this is a hack
-	Matrix<3,3,fadbad::F<double> > & m = const_cast<Matrix<3,3,fadbad::F<P> > &>(r.get_matrix());
+	Matrix<3,3,fadbad::F<P> > & m = const_cast<Matrix<3,3,fadbad::F<P> > &>(r.get_matrix());
 	m(2,1).diff(start, size);
 	m(1,2) = m(2,1) * -1;
 
