@@ -689,4 +689,46 @@ std::istream& operator >> (std::istream& is, Matrix<Rows, Cols, Precision, Base>
 	return is;
 }
 
+
+//Overloads of swap
+namespace Internal
+{
+	TOON_CREATE_METHOD_DETECTOR(swap);
+	template<class V1, class V2, bool has_swap = Has_swap_Method<V1>::Has>
+	struct Swap
+	{
+		static void swap(V1& v1, V2& v2)
+		{
+			using std::swap;
+			SizeMismatch<V1::SizeParameter,V2::SizeParameter>::test(v1.size(), v2.size());
+			for(int i=0; i < v1.size(); i++)
+				swap(v1[i], v2[i]);
+		}
+	};
+	
+	template<class V>
+	struct Swap<V, V, true>
+	{
+		static void swap(V& v1, V& v2)
+		{
+			v1.swap(v2);
+		}
+	};
+
+};
+
+
+template<int S1, class P1, class B1, int S2, class P2, class B2>
+void swap(Vector<S1, P1, B1>& v1, Vector<S2, P2, B2>& v2)
+{
+	Internal::Swap<Vector<S1, P1, B1>, Vector<S2, P2, B2> >::swap(v1, v2);
+}
+
+
+template<int S1, class P1, class B1>
+void swap(Vector<S1, P1, B1>& v1, Vector<S1, P1, B1>& v2)
+{
+	Internal::Swap<Vector<S1, P1, B1>, Vector<S1, P1, B1> >::swap(v1, v2);
+}
+
 }

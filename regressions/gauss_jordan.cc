@@ -31,4 +31,35 @@ int main()
 
 	Matrix<> md = m;
 	test(md);
+
+	
+	int id_failures=0;
+	double max_error=0;
+
+	for(int i=0; i < 1000; i++)
+	{
+		int s = 1 + xor128u() % 99;
+		Matrix<> m(s, s*2);
+		
+		for(int r=0; r < s; r++)
+			for(int c=0; c < s; c++)
+				m[r][c] = xor128d();
+		m.slice(0,s,s,s) = Identity;
+
+		Matrix<> orig = m;
+		
+		gauss_jordan(m);
+
+
+		//Check identity block
+		bool ok_id = (m.slice(0,0,s,s) == Matrix<>(Identity(s)));
+		id_failures+=!ok_id;
+
+		//Check inversion quality
+		max_error = max(max_error, norm_fro(m.slice(0,s,s,s) * orig.slice(0,0,s,s) - Matrix<>(Identity(s))));
+	}
+
+	cout << id_failures << endl;
+	cout << max_error << endl;
+
 }

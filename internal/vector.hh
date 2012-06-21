@@ -128,6 +128,12 @@ template<int Size=Dynamic, typename Precision=DefaultPrecision, typename Base=In
 struct Vector : public Base::template VLayout<Size, Precision> {
 protected:
 public:
+	
+	///Value of template Size parameter. Used by internal classes to reduce
+	///parameter list sizes.
+	///@internal
+	static const int SizeParameter = Size;
+
 	typedef typename Base::template VLayout<Size, Precision>::PointerType PointerType;
   // sneaky hack: only one of these constructors will work with any given base
   // class but they don't generate errors unless the user tries to use one of them
@@ -233,6 +239,7 @@ public:
 
 #endif
 
+	
 	/// @name Assignment
 	/// @{
 
