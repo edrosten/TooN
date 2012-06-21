@@ -317,6 +317,9 @@ namespace TooN {
 
 #include <TooN/internal/debug.hh>
 
+#include <TooN/internal/introspection.hh>
+
+
 #include <TooN/internal/dchecktest.hh>
 #include <TooN/internal/allocator.hh>
 
