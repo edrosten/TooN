@@ -30,12 +30,18 @@ double global_sum;
 
 #include "solvers.cc"
 
+#define STATIC 1
+
 
 struct UseCompiledCramer
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{	
-		solve_direct(a, b, x);
+		#ifdef STATIC
+			solve_direct(a, b, x);
+		#else
+
+		#endif
 	}
 
 	static string name()
@@ -48,7 +54,7 @@ struct UseLU
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
-		LU<R> lu(a);
+		LU<STATIC?R:Dynamic> lu(a);
 
 		x = lu.backsub(b);
 	}
@@ -63,7 +69,7 @@ struct UseLUInv
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
-		LU<R> lu(a);
+		LU<STATIC?R:Dynamic> lu(a);
 
 		x = lu.get_inverse() * b;
 		//x = lu.backsub(b);
@@ -80,7 +86,11 @@ struct UseGaussianElimination
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
-		x = gaussian_elimination(a, b);
+		#ifdef STATIC
+			x = gaussian_elimination(a, b);
+		#else
+			x = gaussian_elimination(a.slice(0,0,a.num_rows(), a.num_cols()), b.slice(0, b.size()));
+		#endif
 	}
 
 	static string name()
@@ -93,7 +103,7 @@ struct UseGaussianEliminationInverse
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
-		Matrix<R> i, inv;
+		Matrix<STATIC?R:Dynamic> i=Identity(a.num_rows()), inv(a.num_rows(), a.num_rows());
 		i = Identity;
 		inv = gaussian_elimination(a, i);
 		x = inv * b;
@@ -109,9 +119,9 @@ struct UseGaussJordanInverse
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
-		Matrix<R, 2*R> m;
-		m.template slice<0,0,R,R>() = a;
-		m.template slice<0,R,R,R>() = Identity;
+		Matrix<STATIC?R:Dynamic, STATIC?2*R:Dynamic> m(a.num_rows(), a.num_rows()*2);
+		m.template slice<0,0,STATIC?R:Dynamic,STATIC?R:Dynamic>(0,0,a.num_rows(), a.num_rows()) = a;
+		m.template slice<0,STATIC?R:Dynamic,STATIC?R:Dynamic,STATIC?R:Dynamic>(0, a.num_rows(), a.num_rows(), a.num_rows()) = Identity;
 		gauss_jordan(m);
 		x = m.template slice<0,R,R,R>() * b;
 	}
@@ -209,7 +219,7 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		for(unsigned int i=0; i < res.size(); i++)
 			cout << res[i].second << " " << setprecision(5) << setw(10) << res[i].first << "            ";
 		cout << endl;
-		ColIter<Size, C+1, (Cols> Size*1000)>::iter();
+		ColIter<Size, C+1, (Cols> Size*10)>::iter();
 	}
 };
 
@@ -222,7 +232,7 @@ template<int Size, int C> struct ColIter<Size, C, 1>
 };
 
 #ifndef SIZE
-	#define SIZE 2
+	#define SIZE 100
 #endif
 
 int main()
