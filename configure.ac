@@ -73,7 +73,8 @@ else
 	# we need sed to find the pkg-config lib directory
 	AC_CHECK_PROG(SED,sed,sed,AC_MSG_ERROR([You Must install sed]))
 	AC_MSG_CHECKING([for pkg-config library dir])
-	PKGCONFIG_LIBDIR="`echo $PKG_CONFIG | $SED -e 's~/bin/pkg-config$~~'`/lib/pkgconfig"
+	PKGCONFIG_LIBDIR="`echo $PKG_CONFIG | $SED -e 's~.*/bin/pkg-config$~~'`${libdir}/pkgconfig"
+
 	AC_MSG_RESULT($PKGCONFIG_LIBDIR)
 	AC_SUBST(PKGCONFIG_LIBDIR)
 	AC_CONFIG_FILES([ TooN.pc ])

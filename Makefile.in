@@ -26,7 +26,8 @@ install:
 	cp -r optimization $(hdr)/
 	cp -r internal $(hdr)/
 	cp -r functions $(hdr)/
-	cp TooN.pc $(pkgconfig)/
+	mkdir -p $(DESTDIR)$(pkgconfig)
+	cp TooN.pc $(DESTDIR)$(pkgconfig)/
 
 internal/data_functions.hh:  make_data_functions.awk
 	awk -f make_data_functions.awk > $@
