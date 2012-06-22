@@ -93,8 +93,9 @@ template<int R, int C, class Precision, class Base> void gauss_jordan(Matrix<R, 
 				//Subtract the pivot row from all other rows, to make 
 				//column col zero.
 				m[row][col] = 0;
-				for(int c=col+1; c < m.num_cols(); c++)
-					m[row][c] = m[row][c] - m[col][c] * multiple;
+
+				int len = m.num_cols()-(col+1);
+				m[row].slice(col+1, len) -= m[col].slice(col+1,len)*multiple;
 			}
 		}
 	}
