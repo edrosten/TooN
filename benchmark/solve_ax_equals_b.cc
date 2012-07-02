@@ -31,6 +31,71 @@ double global_sum;
 #include "solvers.cc"
 
 #define STATIC 1
+template<int R, int C, class Precision, class Base> void gauss_jordan_old(Matrix<R, C, Precision, Base>& m)
+{
+	using std::swap;
+
+	//Loop over columns to reduce.
+	for(int col=0; col < m.num_rows(); col++)
+	{
+		//Reduce the current column to a single element
+
+
+		//Search down the current column in the lower triangle for the largest
+		//absolute element (pivot).  Then swap the pivot row, so that the pivot
+		//element is on the diagonal. The benchmarks show that it is actually
+		//faster to swap whole rows than it is to access the rows via indirection 
+		//and swap the indirection element. This holds for both pointer indirection
+		//and using a permutation vector over rows.
+		{
+		  using std::abs;
+			int pivotpos = col;
+			double pivotval = abs(m[pivotpos][col]);
+			for(int p=col+1; p <m.num_rows(); p++)
+			  if(abs(m[p][col]) > pivotval)
+				{
+					pivotpos = p;
+					pivotval = abs(m[pivotpos][col]);
+				}
+			
+			if(col != pivotpos)
+				swap(m[col].ref(), m[pivotpos].ref());
+		}
+
+		//Reduce the current column in every row to zero, excluding elements on
+		//the leading diagonal.
+		for(int row = 0; row < m.num_rows(); row++)
+		{
+			if(row != col)
+			{
+				double multiple = m[row][col] / m[col][col];
+		
+				//We could eliminate some of the computations in the augmented
+				//matrix, if the augmented half is the identity. In general, it
+				//is not. 
+
+				//Subtract the pivot row from all other rows, to make 
+				//column col zero.
+				m[row][col] = 0;
+				for(int c=col+1; c < m.num_cols(); c++)
+					m[row][c] = m[row][c] - m[col][c] * multiple;
+			}
+		}
+	}
+	
+	//Final pass to make diagonal elements one. Performing this in a final
+	//pass allows us to avoid any significant computations on the left-hand
+	//square matrix, since it is diagonal, and ends up as the identity.
+	for(int row=0;row < m.num_rows(); row++)
+	{
+		double mul = 1/m[row][row];
+
+		m[row][row] = 1;
+
+		for(int col=m.num_rows(); col < m.num_cols(); col++)
+			m[row][col] *= mul;
+	}
+}
 
 
 struct UseCompiledCramer
@@ -133,6 +198,24 @@ struct UseGaussJordanInverse
 };
 
 
+struct UseGaussJordanOldInverse
+{
+	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
+	{
+		Matrix<STATIC?R:Dynamic, STATIC?2*R:Dynamic> m(a.num_rows(), a.num_rows()*2);
+		m.template slice<0,0,STATIC?R:Dynamic,STATIC?R:Dynamic>(0,0,a.num_rows(), a.num_rows()) = a;
+		m.template slice<0,STATIC?R:Dynamic,STATIC?R:Dynamic,STATIC?R:Dynamic>(0, a.num_rows(), a.num_rows(), a.num_rows()) = Identity;
+		gauss_jordan(m);
+		x = m.template slice<0,R,R,R>() * b;
+	}
+
+	static string name()
+	{
+		return "GO";
+	}
+};
+
+
 template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, vector<double> >& results)
 {
 	double time=0, t_tmp, start = get_time_of_day(), t_tmp2;
@@ -199,6 +282,7 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		for(int i=0; i < 10; i++)
 		{
 			benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
+			benchmark_ax_eq_b<Size, Cols, UseGaussJordanOldInverse>(results);
 			benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
 			benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
 			benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
@@ -219,7 +303,7 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		for(unsigned int i=0; i < res.size(); i++)
 			cout << res[i].second << " " << setprecision(5) << setw(10) << res[i].first << "            ";
 		cout << endl;
-		ColIter<Size, C+1, (Cols> Size*10)>::iter();
+		ColIter<Size, C+1, (Cols> Size*50)>::iter();
 	}
 };
 
@@ -232,7 +316,7 @@ template<int Size, int C> struct ColIter<Size, C, 1>
 };
 
 #ifndef SIZE
-	#define SIZE 100
+	#define SIZE 5
 #endif
 
 int main()
