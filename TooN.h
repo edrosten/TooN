@@ -41,6 +41,7 @@
 #include <TooN/internal/config.hh>
 #include <TooN/internal/typeof.hh>
 #include <TooN/internal/deprecated.hh>
+#include <TooN/internal/enable_if.h>
 
 #if defined TOON_NDEBUG || defined NDEBUG
 	#define TOON_NDEBUG_MISMATCH
@@ -294,6 +295,24 @@ namespace TooN {
 		template<int i> struct Sizer<i,i>{
 			static const int size = IsStatic<i>::is?i:Dynamic;
 		};
+		
+
+		///@internal
+		///This template determines if its parameter is a vector.
+		///the value convention is used for compatibility with the 
+		///included Boost enable_if library.
+		template<class C> 
+		struct NotVector
+		{
+			static const bool value=true;
+		};
+		
+		template<int S, class P, class B>
+		struct NotVector<Vector<S, P, B> >
+		{
+			static const bool value=false;
+		};
+
 	}
 	
 	///All TooN classes default to using this precision for computations and storage.

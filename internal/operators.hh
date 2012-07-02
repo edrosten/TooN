@@ -493,7 +493,10 @@ struct Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Op> > {
 };
 
 template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Multiply::Return<P1,P2>::Type> operator*(const Vector<Size, P1, B1>& v, const P2& s){
+typename Internal::enable_if<
+	Internal::NotVector<P2>, 
+	Vector<Size, typename Internal::Multiply::Return<P1,P2>::Type> 
+>::type operator*(const Vector<Size, P1, B1>& v, const P2& s){
 	return Operator<Internal::ApplyScalarV<Size,P1,B1,P2,Internal::Multiply> > (v,s);
 }
 template <int Size, typename P1, typename B1, typename P2>
@@ -520,7 +523,10 @@ struct Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Op> > {
 	}
 };
 template <int Size, typename P1, typename B1, typename P2>
-Vector<Size, typename Internal::Multiply::Return<P2,P1>::Type> operator*(const P2& s, const Vector<Size, P1, B1>& v){
+typename Internal::enable_if<
+	Internal::NotVector<P2>, 
+	Vector<Size, typename Internal::Multiply::Return<P1,P2>::Type> 
+>::type operator*(const P2& s, const Vector<Size, P1, B1>& v){
 	return Operator<Internal::ApplyScalarVL<Size,P1,B1,P2,Internal::Multiply> > (s,v);
 }
 // no left division

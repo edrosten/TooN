@@ -288,7 +288,10 @@ Vector<Dynamic, typename Internal::AddExpr<P1,P2,B1,B2>::Precision, Internal::Ad
 }
 
 template<class P1, class P2, class B2>
-Vector<Dynamic, typename Internal::ScalarMulExpr<P1,P2,B2>::Precision, Internal::ScalarMulExpr<P1,P2,B2> > operator*(const P1& lhs, const Vector<Dynamic, P2, B2>& rhs)
+typename Internal::enable_if<
+	Internal::NotVector<P1>,
+    Vector<Dynamic, typename Internal::ScalarMulExpr<P1,P2,B2>::Precision, Internal::ScalarMulExpr<P1,P2,B2> >
+>::type operator*(const P1& lhs, const Vector<Dynamic, P2, B2>& rhs)
 {
 	typedef Internal::ScalarMulExpr<P1,P2,B2> Expr;
 	typedef typename Expr::Precision Precision;
@@ -297,7 +300,10 @@ Vector<Dynamic, typename Internal::ScalarMulExpr<P1,P2,B2>::Precision, Internal:
 }
 
 template<class P1, class P2, class B2>
-Vector<Dynamic, typename Internal::ScalarMulExpr<P1,P2,B2>::Precision, Internal::ScalarMulExpr<P1,P2,B2> > operator*(const Vector<Dynamic, P2, B2>& lhs, const P1& rhs)
+typename Internal::enable_if<
+	Internal::NotVector<P1>,
+	Vector<Dynamic, typename Internal::ScalarMulExpr<P1,P2,B2>::Precision, Internal::ScalarMulExpr<P1,P2,B2> > 
+>::type operator*(const Vector<Dynamic, P2, B2>& lhs, const P1& rhs)
 {
 	typedef Internal::ScalarMulExpr<P1,P2,B2> Expr;
 	typedef typename Expr::Precision Precision;
