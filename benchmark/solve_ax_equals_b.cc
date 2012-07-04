@@ -227,7 +227,7 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, ve
 	double sum=0;
 	int n=0;
 
-	while(get_time_of_day() - start < .0001)
+	while(get_time_of_day() - start < .1)
 	{
 		Matrix<Size> a;
 		for(int r=0; r < Size; r++)
@@ -284,7 +284,7 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		cout << Size << "\t" << Cols << "\t";
 		
 		//Run each menchmark 10 times and select the median result
-		for(int i=0; i < 10000; i++)
+		for(int i=0; i < 10; i++)
 		{
 			benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
 			benchmark_ax_eq_b<Size, Cols, UseGaussJordanNewInverse>(results);
