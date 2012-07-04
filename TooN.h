@@ -362,9 +362,9 @@ namespace TooN {
 
 #include <TooN/internal/diagmatrix.h>
 
-//#ifdef TOON_EXPR_TEMPLATES
+#ifdef TOON_EXPR_TEMPLATES
 	#include <TooN/internal/expression_templates.hh>
-//#endif
+#endif
 
 #include <TooN/internal/data.hh>
 #include <TooN/internal/data_functions.hh>
