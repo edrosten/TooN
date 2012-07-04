@@ -1,3 +1,4 @@
+#define TOON_EXPR_TEMPLATES
 #include <TooN/TooN.h>
 #include <TooN/LU.h>
 #include <TooN/helpers.h>
@@ -31,7 +32,7 @@ double global_sum;
 #include "solvers.cc"
 
 #define STATIC 1
-template<int R, int C, class Precision, class Base> void gauss_jordan_old(Matrix<R, C, Precision, Base>& m)
+template<int R, int C, class Precision, class Base> void gauss_jordan_new(Matrix<R, C, Precision, Base>& m)
 {
 	using std::swap;
 
@@ -77,8 +78,12 @@ template<int R, int C, class Precision, class Base> void gauss_jordan_old(Matrix
 				//Subtract the pivot row from all other rows, to make 
 				//column col zero.
 				m[row][col] = 0;
-				for(int c=col+1; c < m.num_cols(); c++)
-					m[row][c] = m[row][c] - m[col][c] * multiple;
+
+				int len = m.num_cols()-(col+1);
+				m[row].slice(col+1, len) -= m[col].slice(col+1,len)*multiple;
+
+				//for(int c=col+1; c < m.num_cols(); c++)
+				//	m[row][c] = m[row][c] - m[col][c] * multiple;
 			}
 		}
 	}
@@ -198,20 +203,20 @@ struct UseGaussJordanInverse
 };
 
 
-struct UseGaussJordanOldInverse
+struct UseGaussJordanNewInverse
 {
 	template<int R, int C> static void solve(const Matrix<R, R>& a, const Matrix<R, C>& b, Matrix<R, C>& x)
 	{
 		Matrix<STATIC?R:Dynamic, STATIC?2*R:Dynamic> m(a.num_rows(), a.num_rows()*2);
 		m.template slice<0,0,STATIC?R:Dynamic,STATIC?R:Dynamic>(0,0,a.num_rows(), a.num_rows()) = a;
 		m.template slice<0,STATIC?R:Dynamic,STATIC?R:Dynamic,STATIC?R:Dynamic>(0, a.num_rows(), a.num_rows(), a.num_rows()) = Identity;
-		gauss_jordan(m);
+		gauss_jordan_new(m);
 		x = m.template slice<0,R,R,R>() * b;
 	}
 
 	static string name()
 	{
-		return "GO";
+		return "GN";
 	}
 };
 
@@ -222,7 +227,7 @@ template<int Size, int Cols, class Solver> void benchmark_ax_eq_b(map<string, ve
 	double sum=0;
 	int n=0;
 
-	while(get_time_of_day() - start < .1)
+	while(get_time_of_day() - start < .0001)
 	{
 		Matrix<Size> a;
 		for(int r=0; r < Size; r++)
@@ -279,15 +284,15 @@ template<int Size, int C=1, bool End=0> struct ColIter
 		cout << Size << "\t" << Cols << "\t";
 		
 		//Run each menchmark 10 times and select the median result
-		for(int i=0; i < 10; i++)
+		for(int i=0; i < 10000; i++)
 		{
 			benchmark_ax_eq_b<Size, Cols, UseGaussJordanInverse>(results);
-			benchmark_ax_eq_b<Size, Cols, UseGaussJordanOldInverse>(results);
-			benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
-			benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
-			benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
-			benchmark_ax_eq_b<Size, Cols, UseLU>(results);
-			Optional<Size, Cols, UseCompiledCramer, (Size<=highest_solver)>::solve(results);
+			benchmark_ax_eq_b<Size, Cols, UseGaussJordanNewInverse>(results);
+			//benchmark_ax_eq_b<Size, Cols, UseGaussianElimination>(results);
+			//benchmark_ax_eq_b<Size, Cols, UseGaussianEliminationInverse>(results);
+			//benchmark_ax_eq_b<Size, Cols, UseLUInv>(results);
+			//benchmark_ax_eq_b<Size, Cols, UseLU>(results);
+			//Optional<Size, Cols, UseCompiledCramer, (Size<=highest_solver)>::solve(results);
 		}
 		
 		vector<pair<double, string> > res;
