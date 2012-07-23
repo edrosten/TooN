@@ -1,4 +1,5 @@
 #include "regressions/regression.h"
+#include <TooN/QR.h>
 using namespace TooN;
 using namespace std;
 
@@ -22,12 +23,40 @@ int main()
 	cout << setprecision(20) << scientific;
 	cout << m << endl;
 
-	QR_Lapack<3, 4> q(m);
+	QR<3, 4> q(m);
 
 	cout << q.get_R() << endl;
 	cout << q.get_Q() << endl;
 
 	cout << q.get_Q() * q.get_R() - m << endl;
+
+	
+	double err=0;
+
+	
+	for(int i=0; i < 1000; i++)
+	{
+		int rows = xor128u() % 100 + 2;
+		int cols = rows  + xor128u() % 20;
+
+		Matrix<> m(rows, cols);
+
+		for(int r=0; r < rows; r++)
+			for(int c=0; c < cols; c++)
+				m[r][c] = xor128d();
+
+		QR<> q(m);
+
+
+		double edecomp = norm_fro(q.get_Q() * q.get_R() - m);
+		double e_ortho = norm_fro(q.get_Q() * q.get_Q().T() - Matrix<>(Identity(rows)));
+		
+		err = max(err, max(edecomp, e_ortho));
+
+	}
+
+
+	cout << err << endl;
 
 }
 
