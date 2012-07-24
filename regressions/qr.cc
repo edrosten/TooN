@@ -3,6 +3,42 @@
 using namespace TooN;
 using namespace std;
 
+
+template<class C> void test()
+{
+	double err=0;
+	
+	//Test a bunch of matrices 
+	
+	for(int i=0; i < 1000; i++)
+	{
+		int rows = xor128u() % 100 + 2;
+		int cols = rows  + xor128u() % 20;
+
+		Matrix<> m(rows, cols);
+
+		for(int r=0; r < rows; r++)
+			for(int c=0; c < cols; c++)
+				m[r][c] = xor128d();
+
+		C q(m);
+
+
+		double edecomp = norm_fro(q.get_Q() * q.get_R() - m);
+		double e_ortho = norm_fro(q.get_Q() * q.get_Q().T() - Matrix<>(Identity(rows)));
+
+		for(int r=0; r < rows; r++)
+			for(int c=0; c < r; c++)
+				err = max(err, (q.get_R()[r][c] != 0)*1.0);
+		
+		err = max(err, max(edecomp, e_ortho));
+
+	}
+
+
+	cout << err << endl;
+}
+
 int main()
 {
 	Matrix<3,4> m;
@@ -31,32 +67,7 @@ int main()
 	cout << q.get_Q() * q.get_R() - m << endl;
 
 	
-	double err=0;
-
-	
-	for(int i=0; i < 1000; i++)
-	{
-		int rows = xor128u() % 100 + 2;
-		int cols = rows  + xor128u() % 20;
-
-		Matrix<> m(rows, cols);
-
-		for(int r=0; r < rows; r++)
-			for(int c=0; c < cols; c++)
-				m[r][c] = xor128d();
-
-		QR<> q(m);
-
-
-		double edecomp = norm_fro(q.get_Q() * q.get_R() - m);
-		double e_ortho = norm_fro(q.get_Q() * q.get_Q().T() - Matrix<>(Identity(rows)));
-		
-		err = max(err, max(edecomp, e_ortho));
-
-	}
-
-
-	cout << err << endl;
-
+	test<QR<> >();
+	test<QR_Lapack<> >();
 }
 

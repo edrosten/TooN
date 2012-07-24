@@ -127,7 +127,7 @@ template<int Rows=Dynamic, int Cols=Rows, typename Precision=double> class QR
 
 				//Compute the reflection on a submatrix
 				//such that it never breaks the triangular 
-				//ptoperties of the matrix being created.
+				//properties of the matrix being created.
 
 				Matrix<Dynamic, Dynamic, Precision, typename Matrix<Rows,Cols,Precision>::SliceBase> s = m.slice(n, n, sz, nc);
 
