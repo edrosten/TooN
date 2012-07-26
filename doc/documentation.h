@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005 Paul Smith, 2009 Edward Rosten
+    Copyright (c) 2005 Paul Smith, 2009, 2010, 2011, 2012 Edward Rosten
 
 	Permission is granted to copy, distribute and/or modify this document under
 	the terms of the GNU Free Documentation License, Version 1.2 or any later
@@ -47,6 +47,29 @@ Why use this library?
  - Because it exploits LAPACK and BLAS (for which optimised versions exist on many platforms).
  - Because it is fast, \link sCramerIsBad but not at the expense of numerical stability. \endlink
 
+\section sDesign Design philosophy of TooN
+
+- TooN is designed to represent mathematics as closely as possible.
+
+- TooN is a linear algebra library.
+  - TooN is designed as a linear algebra library and not a generic container
+	and array mathematics library. 
+	
+- Vectors are not matrices.
+  - The Vector and Matrix objects are distinct. Vectors and matrices are closely
+	related, but distinct objects which makes things like outer versus inner
+	product clearer, removes ambiguity and special cases and generally makes the code
+	shorter.
+
+- TooN generally doesn't allow things which don't make much sense.
+  - Why would you want to multiply or add Zeros?
+
+- A vector is always a Vector and a matrix is always a Matrix
+  - Both concrete and generic functions take variations on the Vector and Matrix class,
+    no matter where the data comes from.  You will never see anything like a BaseVector.
+
+
+
 \section sUsage How to use TooN
 This section is arranged as a FAQ. Most answers include code fragments. Assume
 <code>using namespace TooN;</code>.
@@ -76,6 +99,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sColMajor
  - \ref sWrap
  - \ref sWrap "How do I interface to other libraries?"
+ - \ref sCpp11
  - \ref sImplementation
 
  	\subsection sDownload Getting the code and installing
@@ -718,6 +742,14 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	For issues relating to constness, see \sFunctionVector and \sConst
 
+	\subsection sCpp11 What about C++ 11 support?
+
+	TooN compiles cleanly under C++ 11, but does not require it. It can also
+	make use of some C++11 features where present. Internally, it will make use
+	of \c decltype if a C++11 compiler is present and no overriding configuration
+	has been set.  See  \rec stypeof for more information.
+
+	
 
 \subsection ssExamples Are there any examples?
 
@@ -875,7 +907,7 @@ then the default configuration will be used and TooN will work. There are severa
 TooN needs a mechanism to determine the type of the result of an expression. One of the following
 macros can be defined to control the behaviour:
 - \c TOON_TYPEOF_DECLTYPE
-  - Use the C++0x decltype operator.
+  - Use the C++11 decltype operator.
 - \c TOON_TYPEOF_TYPEOF
   - Use GCC's \c typeof extension. Only works with GCC and will fail with -pedantic
 - \c TOON_TYPEOF___TYPEOF__
@@ -888,6 +920,8 @@ macros can be defined to control the behaviour:
   - Only works for the standard builtin integral types and <code>std::complex<float></code> and <code>std::complex<double></code>.
 
 Under Win32, the builtin typeof needs to be used. Comment out all the TOON_TYPEOF_ defines to use it.
+
+If no configuration is present and C++11 is detected, then \c decltype will be used.
 
 \subsection sConfigLapack Functions using LAPACK
 

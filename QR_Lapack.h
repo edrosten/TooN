@@ -40,7 +40,10 @@ class QR_Lapack{
 		/// @param p Whether or not to perform pivoting
 		template<int R, int C, class P, class B> 
 		QR_Lapack(const Matrix<R,C,P,B>& m, bool p=0)
-		:copy(m),tau(square_size()), Q(square_size(), square_size()), do_pivoting(p), pivot(Zeros(square_size()))
+		:copy(m),tau(square_size()), 
+		 Q(square_size(), square_size()), 
+		 do_pivoting(p), 
+		 pivot(Zeros(m.num_cols()))
 		{
 			//pivot is set to all zeros, which means all columns are free columns
 			//and can take part in column pivoting.

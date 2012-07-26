@@ -86,6 +86,8 @@ template<int Rows, int Cols, class Precision, int RowStride, int ColStride, clas
 	//Slices can never have tied strides
 	static const int SliceRowStride = RowStride == -2?-1: RowStride;
 	static const int SliceColStride = ColStride == -2?-1: ColStride;
+	
+	typedef Slice<SliceRowStride,SliceColStride> SliceBase;
 
 	int rowstride() const {
 		if(RowStride == -2) { //Normal tied stride
