@@ -601,7 +601,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	\subsection sDecompos  Which decomposisions are there?
 
 	For general size matrices (not necessarily square) there are:
-	@link TooN::LU LU @endlink, @link TooN::SVD SVD @endlink and gauss_jordan()
+	@link TooN::LU LU @endlink, @link TooN::SVD SVD @endlink, @link TooN::QR QR@endlink, @link TooN::QR_Lapack LAPACK's QR@endlink and gauss_jordan()
 
 	For square symmetric matrices there are:
 	@link TooN::SymEigen SymEigen @endlink and @link TooN::Cholesky Cholesky @endlink
@@ -950,7 +950,8 @@ around LAPACK.
 
 /// @defgroup gDecomps Matrix decompositions
 /// Classes to perform matrix decompositions, used to solve 
-/// linear equations and provide information about matrices. These are wrappers for functionality
+/// linear equations and provide information about matrices. 
+/// Some of these are wrappers around LAPACK, others are built in.
 /// provided by the LAPACK library.
 
 /// @defgroup gTransforms Transformation matrices
