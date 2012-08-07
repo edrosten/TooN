@@ -598,6 +598,8 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	
 	Similarly for the other \ref sDecompos "decomposition objects"
 
+	For 2x2 matrices, the TooN::inv function can ve used.
+
 	\subsection sDecompos  Which decomposisions are there?
 
 	For general size matrices (not necessarily square) there are:
