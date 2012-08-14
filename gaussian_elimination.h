@@ -94,7 +94,7 @@ namespace TooN {
 	{
 		template<int i, int j, int k> struct Size3
 		{
-			static const int is = !IsStatic<i>::is?i: (!IsStatic<j>::is?j:k);
+			static const int s = !IsStatic<i>::is?i: (!IsStatic<j>::is?j:k);
 		};
 
 	};
