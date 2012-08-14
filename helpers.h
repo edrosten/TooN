@@ -63,7 +63,7 @@ namespace TooN {
 	///
 	///@param m Matrix to invert.
 	///@ingroup gDecomps
-	static Matrix<2> inv(const Matrix<2>& m)
+	inline Matrix<2> inv(const Matrix<2>& m)
 	{
 		double d = 1./(m[0][0]*m[1][1] - m[1][0]*m[0][1]);
 
