@@ -1,5 +1,5 @@
 #include <complex>
-#include "TooN/regressions/regression.h"
+#include "regressions/regression.h"
 #include <TooN/internal/planar_complex.hh>
 
 int main()
