@@ -56,6 +56,24 @@ namespace std {
 #endif
 
 namespace TooN {
+	
+	///Invert a matrix.
+	///
+	///For sizes other than 2x2, @link gDecomps decompositions @endlink provide a suitable solition.
+	///
+	///@param m Matrix to invert.
+	///@ingroup gDecomps
+	inline Matrix<2> inv(const Matrix<2>& m)
+	{
+		double d = 1./(m[0][0]*m[1][1] - m[1][0]*m[0][1]);
+
+		return Data(
+		     m[1][1]*d, -m[0][1]*d,
+		    -m[1][0]*d,  m[0][0]*d
+		);
+	}
+
+
 
 	///\deprecated
 	///@ingroup gLinAlg

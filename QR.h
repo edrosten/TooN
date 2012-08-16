@@ -35,7 +35,20 @@
 
 namespace TooN
 {
+/**
+Performs %QR decomposition.
 
+@warning this will only work if the number of columns is greater than 
+the number of rows!
+
+The QR decomposition operates on a matrix A. 
+In general:
+\f[
+A = QR
+\f]
+
+@ingroup gDecomps
+*/
 template<int Rows=Dynamic, int Cols=Rows, typename Precision=double> class QR
 {
 	
