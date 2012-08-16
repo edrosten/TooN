@@ -1,6 +1,13 @@
 namespace TooN{
 namespace Internal{
 
+	template<>
+	struct HaveExprTemplates<ExprTemplatePresenceDummy>
+	{
+		static const bool have=1;
+	};
+
+
 template<class B, class P> struct BaseUtilities;
 
 template<class Expr> struct SliceExpr

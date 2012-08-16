@@ -312,9 +312,16 @@ namespace TooN {
 		{
 			static const bool value=false;
 		};
-
+		
+		struct ExprTemplatePresenceDummy;
+		template<class C=ExprTemplatePresenceDummy> 
+		struct HaveExprTemplates
+		{
+			static const bool have=0;
+		};
 	}
 	
+
 	///All TooN classes default to using this precision for computations and storage.
 #ifndef TOON_DEFAULT_PRECISION
 	typedef double DefaultPrecision;
@@ -333,6 +340,7 @@ namespace TooN {
 #endif
 
 }
+
 
 #include <TooN/internal/debug.hh>
 
