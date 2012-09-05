@@ -610,7 +610,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	
 	Similarly for the other \ref sDecompos "decomposition objects"
 
-	For 2x2 matrices, the TooN::inv function can ve used.
+	For 2x2 matrices, the TooN::inv function can be used.
 
 	\subsection sDecompos  Which decomposisions are there?
 
@@ -761,7 +761,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	TooN compiles cleanly under C++ 11, but does not require it. It can also
 	make use of some C++11 features where present. Internally, it will make use
 	of \c decltype if a C++11 compiler is present and no overriding configuration
-	has been set.  See  \rec stypeof for more information.
+	has been set.  See  \ref stypeof for more information.
 
 	
 
