@@ -553,6 +553,16 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	\subsection sFuncSlices How do I return a slice from a function?
 
+	
+	If you are using C++11, returning slices is now easy:
+	@code
+		auto sliceof(Vector<4>& v)->decltype (v.slice<1,2>())
+		{
+			return v.slice<1,2>();
+		}
+	@endcode
+
+	If not, some tricks are required.
 	Each vector has a <code>SliceBase</code> type indicating the type of a slice.
 
 	They can be slightly tricky to use:
@@ -573,7 +583,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		{
 			return v.template slice<1,2>();
 		}
+
 	@endcode
+
 
 	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
 	
