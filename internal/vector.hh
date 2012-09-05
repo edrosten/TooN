@@ -281,14 +281,14 @@ public:
 	/// @{
 
 	/// divide this vector by a constant
-	Vector& operator/=(const Precision& rhs) {
+	Vector& operator/=(const Precision rhs) {
 		for(int i=0; i<size(); i++)
 			(*this)[i]/=rhs;
 		return *this;
 	}
 	
 	/// multiply this vector by a constant
-	Vector& operator*=(const Precision& rhs) {
+	Vector& operator*=(const Precision rhs) {
 		for(int i=0; i<size(); i++)
 			(*this)[i]*=rhs;
 		return *this;
