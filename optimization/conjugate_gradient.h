@@ -253,6 +253,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	{
 
 		using std::numeric_limits;
+		using std::sqrt;
 		x = start;
 
 		//Start with the conjugate direction aligned with
