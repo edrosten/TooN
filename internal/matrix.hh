@@ -283,6 +283,13 @@ public:
 		      return 1;
 	    return 0;
 	}
+
+	template<class Op>
+	bool operator!=(const Operator<Op>& op)
+	{
+		return op.notequal(*this);
+	}
+
 	
 	///@}
 	

@@ -197,7 +197,7 @@ will not be necessary.
 
 @ingroup gOptimize
 */
-template<int Size, class Precision=double> struct ConjugateGradient
+template<int Size=Dynamic, class Precision=double> struct ConjugateGradient
 {
 	const int size;      ///< Dimensionality of the space.
 	Vector<Size> g;      ///< Gradient vector used by the next call to iterate()
@@ -253,6 +253,7 @@ template<int Size, class Precision=double> struct ConjugateGradient
 	{
 
 		using std::numeric_limits;
+		using std::sqrt;
 		x = start;
 
 		//Start with the conjugate direction aligned with

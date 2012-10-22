@@ -145,6 +145,25 @@ template<> struct Operator<Internal::Zero> {
 	}
 	///@}
 
+	template<int R, int C, class P, class B>
+	bool notequal(Matrix<R,C,P,B>& m) const {
+		for(int r=0; r<m.num_rows(); r++)
+			for(int c=0; c<m.num_cols(); c++)
+				if(m[r][c] != 0)
+					return 1;
+		
+		return 0;
+	}
+
+
+	template<int S, class P, class B>
+	bool notequal(Vector<S,P,B>& v) const {
+		for(int i=0; i<v.size(); i++)
+			if(v[i] != 0)
+				return 1;
+		return 0;
+	}
+
 	///Generate a sized Zero object for constructing dynamic vectors.
 	Operator<Internal::SizedZero> operator()(int s);
 	///Generate a sized Zero object for constructing dynamic matrices.

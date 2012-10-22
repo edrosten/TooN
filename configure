@@ -565,6 +565,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+use_lapack
 VERSION
 PKGCONFIG_LIBDIR
 SED
@@ -2501,6 +2502,8 @@ fi
 if test "$lapack" != "no"
 then
 	$as_echo "#define TOON_USE_LAPACK 1" >>confdefs.h
+
+	use_lapack=yes
 
 fi
 

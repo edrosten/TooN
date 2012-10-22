@@ -111,6 +111,7 @@ fi
 if test "$lapack" != "no" 
 then
 	AC_DEFINE(TOON_USE_LAPACK, 1)
+	AC_SUBST(use_lapack, yes)
 fi
 
 
