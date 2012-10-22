@@ -12,8 +12,7 @@ endif
 
 CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
-LDFALGS=@LDFALGS@
-LIBS=@LIBS@
+LDFLAGS=@LDFLAGS@ @LIBS@
 
 hdr = $(DESTDIR)$(includedir)/TooN
 

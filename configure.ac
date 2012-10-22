@@ -105,7 +105,13 @@ fi
 
 if test "$lapack" == "" 
 then
-	AC_CHECK_LIB(lapack, dgesvd_, [lapack=yes], [lapack=no])
+	AC_CHECK_LIB(lapack, dgesvd_)
+	if test $ac_cv_lib_lapack_dgesvd_ = yes
+	then
+		lapack=yes
+	else
+		lapack=no
+	fi
 fi
 
 if test "$lapack" != "no" 
