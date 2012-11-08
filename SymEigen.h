@@ -104,9 +104,15 @@ namespace Internal{
 		template<typename P, typename B>
 		static inline void compute(const Matrix<2,2,P,B>& m, Matrix<2,2,P>& eig, Vector<2, P>& ev) {
 			double trace = m[0][0] + m[1][1];
-			double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+			//Only use the upper triangular elements.
+			double det = m[0][0]*m[1][1] - m[0][1]*m[0][1]; 
 			double disc = trace*trace - 4 * det;
-			assert(disc>=0);
+			
+			//Mathematically, disc >= 0 always.
+			//Numerically, it can drift very slightly below zero.
+			if(disc < 0)
+				disc = 0;
+
 			using std::sqrt;
 			double root_disc = sqrt(disc);
 			ev[0] = 0.5 * (trace - root_disc);
