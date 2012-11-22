@@ -34,9 +34,9 @@ function complexdiff(a, b,       as, bs)
 
 function ignore_and_process(line,       a)
 {
-	if(line ~ /^[[:space:]]*$/) #Ignore blank linkes
+	if(line ~ /^[ 	]*$/) #Ignore blank linkes
 		return 1
-	else if (line ~ /^[[:space:]]*#>/) #Process directives, then ignore the line
+	else if (line ~ /^[ 	]*#>/) #Process directives, then ignore the line
 	{
 		split(line, a)
 		if(a[2] == "t")
@@ -48,7 +48,7 @@ function ignore_and_process(line,       a)
 
 		return 1
 	}
-	else if (line ~ /^[[:space:]]*#/) #Ignore comments
+	else if (line ~ /^[ 	]*#/) #Ignore comments
 		return 1
 	else   #The line should not be ignored
 		return (ignore != 0)
