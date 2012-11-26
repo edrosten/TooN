@@ -1,3 +1,8 @@
+#Check eigen values are sorted and obey Ax=lx
+Sorted 0
+Errors 0
+
+
 #Some simple matrices with easy decompositions
 0 1
 1 0
@@ -29,6 +34,7 @@
 1 0 0 0
 -4 -3 -2 -1
 
+#Some other matrices
 
 -7.330437713167527e-01 6.801814679434544e-01 
 6.801814679434544e-01 7.330437713167527e-01 

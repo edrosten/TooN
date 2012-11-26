@@ -1,6 +1,7 @@
 #include <TooN/SymEigen.h>
-#include <TooN/SymEigen.h>
+#include "regressions/regression.h"
 #include <iomanip>
+#include <algorithm>
 
 using namespace TooN;
 using namespace std;
@@ -23,8 +24,72 @@ void test(const Matrix<Size>& m)
 	test_<Size, Dynamic>(m);
 }
 
+
+
+template<int Size1>
+void test_things_(int S2, int & sorted, double & n)
+{
+	Matrix<Size1> m = Zeros(S2);
+	
+	for(int r=0; r < m.num_rows(); r++)
+		for(int c=r; c < m.num_cols(); c++)
+			m[r][c] = m[c][r] = xor128d();
+
+	SymEigen<Size1> sm(m);
+
+	//Check the results are sorted low to high
+	for(int i=1; i < m.num_rows(); i++)
+		if(sm.get_evalues()[i-1] > sm.get_evalues()[i])
+		{
+			sorted++;
+			break;
+		}
+	
+	//Check that  Mx = lX
+
+	n = max(n, norm_inf(m * sm.get_evectors()[0] - sm.get_evalues()[0] * sm.get_evectors()[0]));
+}
+
+void test_things()
+{
+	int s=0;
+	double e=0;
+	for(int n=0; n < 200; n++)
+	{
+		test_things_<2>(2, s, e);
+		test_things_<3>(3, s, e);
+		test_things_<4>(4, s, e);
+		test_things_<5>(5, s, e);
+		test_things_<6>(6, s, e);
+		test_things_<7>(7, s, e);
+		test_things_<8>(8, s, e);
+		test_things_<9>(9, s, e);
+
+		test_things_<Dynamic>(2, s, e);
+		test_things_<Dynamic>(3, s, e);
+		test_things_<Dynamic>(4, s, e);
+		test_things_<Dynamic>(5, s, e);
+		test_things_<Dynamic>(6, s, e);
+		test_things_<Dynamic>(7, s, e);
+		test_things_<Dynamic>(8, s, e);
+		test_things_<Dynamic>(9, s, e);
+
+
+		test_things_<Dynamic>(n+9, s, e);
+	}
+
+	cout << "Sorted " << s << endl;
+	cout << "Errors " << e << endl;
+
+}
+
+
 int main()
 {
+	
+	test_things();
+
+
 	//Size 2 (special case)
 	test<2>(Data(
 		  -1,  0,
