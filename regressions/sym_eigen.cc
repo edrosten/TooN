@@ -1,3 +1,9 @@
+#undef TOON_CHECK_BOUNDS
+#define TOON_CHECK_BOUNDS
+#undef TOON_INITIALIZE_SNAN
+#define TOON_INITIALIZE_NAN
+
+
 #include <TooN/SymEigen.h>
 #include "regressions/regression.h"
 #include <iomanip>
@@ -10,7 +16,7 @@ template<int Size, int Size2>
 void test_(const Matrix<Size>& m)
 {
 	Matrix<Size2> M = m;
-	SymEigen<> e(M);
+	SymEigen<Size2> e(M);
 	cout << setprecision(15);
 	cout << e.get_evectors() << endl;
 	cout << e.get_evalues() << endl;
@@ -49,6 +55,7 @@ void test_things_(int S2, int & sorted, double & n)
 
 	n = max(n, norm_inf(m * sm.get_evectors()[0] - sm.get_evalues()[0] * sm.get_evectors()[0]));
 }
+
 
 void test_things()
 {
@@ -89,6 +96,9 @@ int main()
 	
 	test_things();
 
+	test<3>(Data(0, 0, 0,
+	             0, 1, 1,
+	             0, 1, 2));
 
 	//Size 2 (special case)
 	test<2>(Data(
