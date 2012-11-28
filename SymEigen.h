@@ -33,10 +33,13 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <utility>
 #include <complex>
 #include <TooN/lapack.h>
 
 #include <TooN/TooN.h>
+
+using namespace std;
 
 namespace TooN {
 static const double root3=1.73205080756887729352744634150587236694280525381038062805580;
@@ -148,6 +151,7 @@ namespace Internal{
 		static inline void compute(const Matrix<3,3,P,B>& m, Matrix<3,3,P>& eig, Vector<3, P>& ev) {
             //method uses closed form solution of cubic equation to obtain roots of characteristic equation.
             using std::sqrt;
+            using std::min;
             
             //Polynomial terms of |a - l * Identity|
             //l^3 + a*l^2 + b*l + c
@@ -171,17 +175,19 @@ namespace Internal{
             double q = c + (2*a*a*a - 9*a*b)/27;
 
             double alpha = -q/2;
-            double beta_descriminant = q*q/4 + p*p*p/27;
 
             //beta_descriminant <= 0 for real roots!
+			//force to zero to avoid nasty rounding issues.
+            double beta_descriminant = std::min(0.0, q*q/4 + p*p*p/27);
+
             double beta = sqrt(-beta_descriminant);
             double r2 = alpha*alpha  - beta_descriminant;
 
             ///Need A,B = cubert(alpha +- beta)
             ///Turn in to r, theta
             /// r^(1/3) * e^(i * theta/3)
-
             double cuberoot_r = pow(r2, 1./6);
+
             double theta3 = atan2(beta, alpha)/3;
 
             double A_plus_B = 2*cuberoot_r*cos(theta3);
@@ -197,19 +203,107 @@ namespace Internal{
             if(ev[0] > ev[1])
                 swap(ev[0], ev[1]);
 
+			// for the vector [x y z]
+			// eliminate to compute the ratios x/z and y/z
+			// in both cases, the denominator is the same, so in the absence of
+			// any other scaling, choose the denominator to be z and 
+			// tne numerators to be x and y.
+			//
+			// This fails if the vector happens to be 0 0 0
+
             //calculate the eigenvectors
             eig[0][0]=a12 * a23 - a13 * (a22 - ev[0]);
             eig[0][1]=a12 * a13 - a23 * (a11 - ev[0]);
             eig[0][2]=(a11-ev[0])*(a22-ev[0]) - a12*a12;
-            normalize(eig[0]);
             eig[1][0]=a12 * a23 - a13 * (a22 - ev[1]);
             eig[1][1]=a12 * a13 - a23 * (a11 - ev[1]);
             eig[1][2]=(a11-ev[1])*(a22-ev[1]) - a12*a12;
-            normalize(eig[1]);
             eig[2][0]=a12 * a23 - a13 * (a22 - ev[2]);
             eig[2][1]=a12 * a13 - a23 * (a11 - ev[2]);
             eig[2][2]=(a11-ev[2])*(a22-ev[2]) - a12*a12;
-            normalize(eig[2]);
+			
+			//Check to see if we have any zero vectors
+			double a_norm = norm_1(m);
+			double e0norm = norm_1(eig[0]) / a_norm;
+			double e1norm = norm_1(eig[1]) / a_norm;
+			double e2norm = norm_1(eig[2]) / a_norm;
+
+			double eps = 1e-10;
+
+
+			if(a_norm == 0)
+				eig = TooN::Identity;
+			else if(e0norm < eps || e1norm < eps || e2norm < eps)
+			{
+				cout << "\n\n\n\n\n\n\n";
+				cout <<"Hello:\n";
+				cout << m << endl;
+				cout << eig << endl;
+				cout << a_norm << endl;
+
+				cout << "ok, badish...\n";	
+
+				double ns[] = {e0norm, e1norm, e2norm};
+				double is[] = {0, 1, 2};
+				
+				//Sort them
+				if(ns[0] > ns[1])
+				{
+					swap(ns[0], ns[1]);
+					swap(is[0], is[1]);
+				}
+				if(ns[1] > ns[2])
+				{
+					swap(ns[1], ns[2]);
+					swap(is[1], is[2]);
+				}
+				if(ns[0] > ns[1])
+				{
+					swap(ns[0], ns[1]);
+					swap(is[0], is[1]);
+				}
+
+
+				if(ns[1] >= eps)
+				{
+					cout << "one bad\n";
+					//one small one. Use the cross product of the other two
+					normalize(eig[1]);
+					normalize(eig[2]);
+					eig[is[0]] = eig[is[1]]^eig[is[2]];
+				}
+				else if(ns[2] >= eps)
+				{
+					cout << "two bad\n";
+					//Two small ones
+					normalize(eig[is[2]]);
+					Vector<3> p = makeVector(eig[is[2]][is[1]], eig[is[2]][is[2]], eig[is[2]][is[0]]);
+
+					//Vector<3> v1 = p - eig[is[2]] * (p * eig[is[2]]);
+					//Vector<3> v2 = p^eig[is[2]];
+
+					//v1 and b2 now span the space.
+					Matrix<3> h = TooN::Identity;
+					h-=2*p.as_col() * p.as_row();
+
+
+					cout << h * m * h.T() << endl;
+
+				
+				}
+				else
+					eig = TooN::Identity;
+				cout << "res\n";
+				cout << ev << endl;
+				cout << eig << endl;
+			}
+			else
+			{
+				normalize(eig[0]);
+				normalize(eig[1]);
+				normalize(eig[2]);
+			}
+
 		}
 	};
 
