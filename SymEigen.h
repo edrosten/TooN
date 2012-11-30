@@ -39,8 +39,6 @@
 
 #include <TooN/TooN.h>
 
-using namespace std;
-
 namespace TooN {
 static const double root3=1.73205080756887729352744634150587236694280525381038062805580;
 
@@ -153,6 +151,15 @@ namespace Internal{
             using std::sqrt;
             using std::min;
             
+			double a_norm = norm_1(m);
+			double eps = 1e-7 * a_norm;
+
+			if(a_norm == 0)
+			{
+				eig = TooN::Identity;
+				return;
+			}
+
             //Polynomial terms of |a - l * Identity|
             //l^3 + a*l^2 + b*l + c
 
@@ -209,8 +216,8 @@ namespace Internal{
 			// any other scaling, choose the denominator to be z and 
 			// tne numerators to be x and y.
 			//
-			// This fails if the vector happens to be 0 0 0
-
+			// x/z and y/z,  implies ax, ay, az which vanishes
+			// if a=0
             //calculate the eigenvectors
             eig[0][0]=a12 * a23 - a13 * (a22 - ev[0]);
             eig[0][1]=a12 * a13 - a23 * (a11 - ev[0]);
@@ -223,26 +230,71 @@ namespace Internal{
             eig[2][2]=(a11-ev[2])*(a22-ev[2]) - a12*a12;
 			
 			//Check to see if we have any zero vectors
-			double a_norm = norm_1(m);
-			double e0norm = norm_1(eig[0]) / a_norm;
-			double e1norm = norm_1(eig[1]) / a_norm;
-			double e2norm = norm_1(eig[2]) / a_norm;
+			double e0norm = norm_1(eig[0]);
+			double e1norm = norm_1(eig[1]);
+			double e2norm = norm_1(eig[2]);
 
-			double eps = 1e-10;
-
-
-			if(a_norm == 0)
-				eig = TooN::Identity;
-			else if(e0norm < eps || e1norm < eps || e2norm < eps)
+			//Some of the vectors vanish: we're computing
+			// x/z and y/z, which implies ax, ay, az which vanishes
+			// if a=0;
+			//
+			// So compute the other two choices.
+			if(e0norm < eps)
 			{
-				cout << "\n\n\n\n\n\n\n";
-				cout <<"Hello:\n";
-				cout << m << endl;
-				cout << eig << endl;
-				cout << a_norm << endl;
+				eig[0][0] += a12 * (ev[0] - a33) + a23 * a13;
+				eig[0][1] += (ev[0]-a11)*(ev[0]-a33) - a13*a13;
+				eig[0][2] += a23 * (ev[0] - a11) + a12 * a13;
+				e0norm = norm_1(eig[0]);
+			}
 
-				cout << "ok, badish...\n";	
+			if(e1norm < eps)
+			{
+				eig[1][0] += a12 * (ev[1] - a33) + a23 * a13;
+				eig[1][1] += (ev[1]-a11)*(ev[1]-a33) - a13*a13;
+				eig[1][2] += a23 * (ev[1] - a11) + a12 * a13;
+				e1norm = norm_1(eig[1]);
+			}
 
+			if(e2norm < eps)
+			{
+				eig[2][0] += a12 * (ev[2] - a33) + a23 * a13;
+				eig[2][1] += (ev[2]-a11)*(ev[2]-a33) - a13*a13;
+				eig[2][2] += a23 * (ev[2] - a11) + a12 * a13;
+				e2norm = norm_1(eig[2]);
+			}
+
+
+			//OK, a AND b might be 0
+			//Check for vanishing and add in y/x, z/x which implies cx, cy, cz
+			if(e0norm < eps)
+			{
+				eig[0][0] +=(ev[0]-a22)*(ev[0]-a33) - a23*a23;
+				eig[0][1] +=a12 * (ev[0] - a33) + a23 * a13;
+				eig[0][2] +=a13 * (ev[0] - a22) + a23 * a12;
+				e0norm = norm_1(eig[0]);
+			}
+
+			if(e1norm < eps)
+			{
+				eig[1][0] +=(ev[1]-a22)*(ev[1]-a33) - a23*a23;
+				eig[1][1] +=a12 * (ev[1] - a33) + a23 * a13;
+				eig[1][2] +=a13 * (ev[1] - a22) + a23 * a12;
+				e1norm = norm_1(eig[1]);
+			}
+
+			if(e2norm < eps)
+			{
+				eig[2][0] +=(ev[2]-a22)*(ev[2]-a33) - a23*a23;
+				eig[2][1] +=a12 * (ev[2] - a33) + a23 * a13;
+				eig[2][2] +=a13 * (ev[2] - a22) + a23 * a12;
+				e2norm = norm_1(eig[2]);
+			}
+
+			//Oh, COME ON!!!
+			if(e0norm < eps || e1norm < eps || e2norm < eps)
+			{
+				//This is blessedly rare
+		
 				double ns[] = {e0norm, e1norm, e2norm};
 				double is[] = {0, 1, 2};
 				
@@ -266,7 +318,6 @@ namespace Internal{
 
 				if(ns[1] >= eps)
 				{
-					cout << "one bad\n";
 					//one small one. Use the cross product of the other two
 					normalize(eig[1]);
 					normalize(eig[2]);
@@ -274,36 +325,27 @@ namespace Internal{
 				}
 				else if(ns[2] >= eps)
 				{
-					cout << "two bad\n";
-					//Two small ones
 					normalize(eig[is[2]]);
-					Vector<3> p = makeVector(eig[is[2]][is[1]], eig[is[2]][is[2]], eig[is[2]][is[0]]);
+					
+					//Permute vector to get a new vector with some orthogonal components.
+					Vector<3> p = makeVector(eig[is[2]][1], eig[is[2]][2], eig[is[2]][0]);
 
-					//Vector<3> v1 = p - eig[is[2]] * (p * eig[is[2]]);
-					//Vector<3> v2 = p^eig[is[2]];
+					//Gram-Schmit
+					Vector<3> v1 = unit(p - eig[is[2]] * (p * eig[is[2]]));
+					Vector<3> v2 = v1^eig[is[2]];
 
-					//v1 and b2 now span the space.
-					Matrix<3> h = TooN::Identity;
-					h-=2*p.as_col() * p.as_row();
-
-
-					cout << h * m * h.T() << endl;
-
-				
+					eig[is[0]] = v1;
+					eig[is[1]] = v2;
 				}
 				else
 					eig = TooN::Identity;
-				cout << "res\n";
-				cout << ev << endl;
-				cout << eig << endl;
 			}
 			else
 			{
-				normalize(eig[0]);
-				normalize(eig[1]);
-				normalize(eig[2]);
+  				normalize(eig[0]);
+  				normalize(eig[1]);
+  				normalize(eig[2]);
 			}
-
 		}
 	};
 
