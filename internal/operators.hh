@@ -34,6 +34,16 @@ namespace TooN {
 //             Type  and size computation for scalar operations used in this file
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+///Determine if two classes are in the same field. For the purposes of
+///%TooN \c float and \c int are in the same field, since operator
+///+,-,*,/ are defined for any combination of \c float and \c int. 
+///Combinations of builtin types are dea;t with by IsField.
+template<class L, class R> struct Field
+{	
+	///<Set to 1 if the two classes are in the same field.
+	static const int is = IsField<L>::value & IsField<R>::value;
+};
+
 namespace Internal {
 
 	//Automatic type deduction of return types
@@ -42,25 +52,41 @@ namespace Internal {
 	///is not implemented anywhere, the result is used for type deduction.
 	template<class C> C gettype();
 	
-	///@internal
-	///Determine if two classes are in the same field. For the purposes of
-	///%TooN \c float and \c int are in the same field, since operator
-	///+,-,*,/ are defined for any combination of \c float and \c int.
-	template<class L, class R> struct Field
-	{	
-		///<Set to 1 if the two classes are in the same field.
-		static const int is = IsField<L>::value & IsField<R>::value;
+	
+	template<class C> struct Clean
+	{
+		typedef C type;
 	};
 	
+	template<class C> struct Clean<const C>
+	{
+		typedef C type;
+	};
+
+	template<class C> struct Clean<const C&>
+	{
+		typedef C type;
+	};
+
+	template<class C> struct Clean<C&>
+	{
+		typedef C type;
+	};
+
+	template<class L, class R> struct CField
+	{
+		static const int is = TooN::Field<typename Clean<L>::type, typename Clean<R>::type>::is;
+	};
+
 
 	//We have to use the traits here because it is not possible to 
 	//check for the existence of a valid operator *, especially
 	//in the presence of builtin operators. Therefore, the type is
 	//only deduced if both of the input types are fields.
-	template<class L, class R, int F = Field<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
 
 	template<class L, class R> struct AddType<L, R, 0>         { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};
 	template<class L, class R> struct SubtractType<L, R, 0>    { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};

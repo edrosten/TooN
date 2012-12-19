@@ -29,7 +29,7 @@ The %TooN library is a set of C++ header files which provide basic numerics faci
 	- @link gOptimize Function optimization@endlink
 	- @link gTransforms Parameterized matrices (eg transformations)@endlink 
 	- @link gEquations linear equations@endlink
-	- @link gFunctions Functions (eg numerical derivatives) @endlink
+	- @link gFunctions Functions (eg automatic differentiation and numerical derivatives) @endlink
 
 It provides classes for statically- (known at compile time) and dynamically-
 (unknown at compile time) sized vectors and matrices and it can delegate
@@ -92,6 +92,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sSlices
  - \ref sFuncSlices
  - \ref sPrecision
+ - \ref sAutomaticDifferentiation
  - \ref sSolveLinear
  - \ref sOtherStuff
  - \ref sHandyFuncs
@@ -629,6 +630,21 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	\subsection sHandyFuncs What handy functions are there (normalize, identity, fill, etc...)?
 
 	See @link gLinAlg here @endlink.
+
+	\subsection sAutomaticDifferentiation Does TooN support automatic differentiation?
+	
+	TooN has buildin support for <a href="http://www.fadbad.com/fadbad.html">FADBAD++</a>.
+	Just do:
+	@code
+		#include <functions/fadbad.h>
+	@endcode
+	Then create matrices and vectors of FADBAD types. See functions/fadbad.h
+	for available functions and parameterisations.
+
+	TooN is type generic and so can work on any reasonable types including AD types
+	if a small amount of interfacing is performed.
+	See \sPrecision.
+
 
 
 	\subsection sNoInplace Why don't functions work in place?

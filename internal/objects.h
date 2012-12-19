@@ -89,28 +89,29 @@ namespace Internal{
 		///as One.
 		typedef int Type;
 	};
-
-	///@internal
-	///@brief Does One behave as a field with respect to Rhs?
-	///@ingroup gInternal
-	template<class Rhs> struct Field<One, Rhs>
-	{
-		///One can be converted in to anything, so the resulting type is
-		///a field if the other type is a field.
-		static const int is = IsField<Rhs>::value;
-	};
-
-	///@internal
-	///@brief Does One behave as a field with respect to Lhs?
-	///@ingroup gInternal
-	template<class Lhs> struct Field<Lhs, One>
-	{
-		///One can be converted in to anything, so the resulting type is
-		///a field if the other type is a field.
-		static const int is = IsField<Lhs>::value;
-	};
-
 }
+
+///@internal
+///@brief Does One behave as a field with respect to Rhs?
+///Answer: it does is Rhs forms a field.
+///@ingroup gInternal
+template<class Rhs> struct Field<Internal::One, Rhs>
+{
+	///One can be converted in to anything, so the resulting type is
+	///a field if the other type is a field.
+	static const int is = Field<Rhs,Rhs>::is;
+};
+
+///@internal
+///@brief Does One behave as a field with respect to Lhs?
+///Answer: it does is Lhs forms a field.
+///@ingroup gInternal
+template<class Lhs> struct Field<Lhs, Internal::One>
+{
+	///One can be converted in to anything, so the resulting type is
+	///a field if the other type is a field.
+	static const int is = Field<Lhs,Lhs>::is;
+};
 
 ////////////////////
 // Zero

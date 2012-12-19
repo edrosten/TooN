@@ -79,8 +79,23 @@ namespace TooN {
 #endif
 	
 	using std::numeric_limits;
-	///Is a number a field? ie, +, -, *, / defined.
-	///Specialize this to make TooN work properly with new types.
+	///Is a number a field? i.e., +, -, *, / defined.
+	///
+	///Specialize this to make TooN work properly with new types. See, for example functions/fadbad.h
+	///
+	///Specifically, is the type on the default field. Because of the conversion rules
+	///of C++, TooN uses a rather loose definition of field. The a type is on the
+	///default field if arithmetic works between it and any builtin numeric type. So, for
+	///instance unsigned char and float are considered to be on the default field even though 
+	///by themselves they form very different fields.
+	///
+	///See also Field.
+	///
+	///The reason for this is so that <code> makeVector(1, 0, 0) </code> behaves as expected
+	///even though it will actually be a <code> Vector<3,int></code>.
+	///
+	///
+	///
 	///The primary reason for this is to allow SFINAE to work properly.
 	///This is required if there are the following two functions:
 	///@code 
@@ -96,7 +111,7 @@ namespace TooN {
 	///error, thereby allowing a substitution failuer to occur.
 	///
 	///@internal
-	///Internal::Field determines if two classes are in the same field.
+	///Internal::One is on the same field of any type which is also a field.
 	///@ingroup gLinAlg
 	template<class C> struct IsField
 	{
