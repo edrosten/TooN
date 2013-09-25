@@ -2,31 +2,29 @@
 
 // Copyright (C) 2005,2009 Tom Drummond (twd20@cam.ac.uk),
 // Ed Rosten (er258@cam.ac.uk), Gerhard Reitmayr (gr281@cam.ac.uk)
+
+//All rights reserved.
 //
-// This file is part of the TooN Library.  This library is free
-// software; you can redistribute it and/or modify it under the
-// terms of the GNU General Public License as published by the
-// Free Software Foundation; either version 2, or (at your option)
-// any later version.
-
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License along
-// with this library; see the file COPYING.  If not, write to the Free
-// Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-// USA.
-
-// As a special exception, you may use this file as part of a free software
-// library without restriction.  Specifically, if other files instantiate
-// templates or use macros or inline functions from this file, or you compile
-// this file and link it with other files to produce an executable, this
-// file does not by itself cause the resulting executable to be covered by
-// the GNU General Public License.  This exception does not however
-// invalidate any other reasons why the executable file might be covered by
-// the GNU General Public License.
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions
+//are met:
+//1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//2. Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND OTHER CONTRIBUTORS ``AS IS''
+//AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR OTHER CONTRIBUTORS BE
+//LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifndef TOON_INCLUDE_TOON_H
@@ -80,8 +78,23 @@ namespace TooN {
 #endif
 	
 	using std::numeric_limits;
-	///Is a number a field? ie, +, -, *, / defined.
-	///Specialize this to make TooN work properly with new types.
+	///Is a number a field? i.e., +, -, *, / defined.
+	///
+	///Specialize this to make TooN work properly with new types. See, for example functions/fadbad.h
+	///
+	///Specifically, is the type on the default field. Because of the conversion rules
+	///of C++, TooN uses a rather loose definition of field. The a type is on the
+	///default field if arithmetic works between it and any builtin numeric type. So, for
+	///instance unsigned char and float are considered to be on the default field even though 
+	///by themselves they form very different fields.
+	///
+	///See also Field.
+	///
+	///The reason for this is so that <code> makeVector(1, 0, 0) </code> behaves as expected
+	///even though it will actually be a <code> Vector<3,int></code>.
+	///
+	///
+	///
 	///The primary reason for this is to allow SFINAE to work properly.
 	///This is required if there are the following two functions:
 	///@code 
@@ -97,7 +110,7 @@ namespace TooN {
 	///error, thereby allowing a substitution failuer to occur.
 	///
 	///@internal
-	///Internal::Field determines if two classes are in the same field.
+	///Internal::One is on the same field of any type which is also a field.
 	///@ingroup gLinAlg
 	template<class C> struct IsField
 	{

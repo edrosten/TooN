@@ -2,37 +2,45 @@
 
 // Copyright (C) 2009 Tom Drummond (twd20@cam.ac.uk),
 // Ed Rosten (er258@cam.ac.uk)
+
+//All rights reserved.
 //
-// This file is part of the TooN Library.  This library is free
-// software; you can redistribute it and/or modify it under the
-// terms of the GNU General Public License as published by the
-// Free Software Foundation; either version 2, or (at your option)
-// any later version.
-
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License along
-// with this library; see the file COPYING.  If not, write to the Free
-// Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-// USA.
-
-// As a special exception, you may use this file as part of a free software
-// library without restriction.  Specifically, if other files instantiate
-// templates or use macros or inline functions from this file, or you compile
-// this file and link it with other files to produce an executable, this
-// file does not by itself cause the resulting executable to be covered by
-// the GNU General Public License.  This exception does not however
-// invalidate any other reasons why the executable file might be covered by
-// the GNU General Public License.
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions
+//are met:
+//1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//2. Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND OTHER CONTRIBUTORS ``AS IS''
+//AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR OTHER CONTRIBUTORS BE
+//LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//POSSIBILITY OF SUCH DAMAGE.
 
 namespace TooN {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //             Type  and size computation for scalar operations used in this file
 //////////////////////////////////////////////////////////////////////////////////////////////
+
+///Determine if two classes are in the same field. For the purposes of
+///%TooN \c float and \c int are in the same field, since operator
+///+,-,*,/ are defined for any combination of \c float and \c int. 
+///Combinations of builtin types are dea;t with by IsField.
+template<class L, class R> struct Field
+{	
+	///<Set to 1 if the two classes are in the same field.
+	static const int is = IsField<L>::value & IsField<R>::value;
+};
 
 namespace Internal {
 
@@ -42,25 +50,41 @@ namespace Internal {
 	///is not implemented anywhere, the result is used for type deduction.
 	template<class C> C gettype();
 	
-	///@internal
-	///Determine if two classes are in the same field. For the purposes of
-	///%TooN \c float and \c int are in the same field, since operator
-	///+,-,*,/ are defined for any combination of \c float and \c int.
-	template<class L, class R> struct Field
-	{	
-		///<Set to 1 if the two classes are in the same field.
-		static const int is = IsField<L>::value & IsField<R>::value;
+	
+	template<class C> struct Clean
+	{
+		typedef C type;
 	};
 	
+	template<class C> struct Clean<const C>
+	{
+		typedef C type;
+	};
+
+	template<class C> struct Clean<const C&>
+	{
+		typedef C type;
+	};
+
+	template<class C> struct Clean<C&>
+	{
+		typedef C type;
+	};
+
+	template<class L, class R> struct CField
+	{
+		static const int is = TooN::Field<typename Clean<L>::type, typename Clean<R>::type>::is;
+	};
+
 
 	//We have to use the traits here because it is not possible to 
 	//check for the existence of a valid operator *, especially
 	//in the presence of builtin operators. Therefore, the type is
 	//only deduced if both of the input types are fields.
-	template<class L, class R, int F = Field<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
-	template<class L, class R, int F = Field<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
 
 	template<class L, class R> struct AddType<L, R, 0>         { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};
 	template<class L, class R> struct SubtractType<L, R, 0>    { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};

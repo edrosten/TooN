@@ -1,31 +1,29 @@
 // -*- c++ -*-
 
 // Copyright (C) 2005,2009 Tom Drummond (twd20@cam.ac.uk)
+
+//All rights reserved.
 //
-// This file is part of the TooN Library.	This library is free
-// software; you can redistribute it and/or modify it under the
-// terms of the GNU General Public License as published by the
-// Free Software Foundation; either version 2, or (at your option)
-// any later version.
-
-// This library is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License along
-// with this library; see the file COPYING.	If not, write to the Free
-// Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-// USA.
-
-// As a special exception, you may use this file as part of a free software
-// library without restriction.	Specifically, if other files instantiate
-// templates or use macros or inline functions from this file, or you compile
-// this file and link it with other files to produce an executable, this
-// file does not by itself cause the resulting executable to be covered by
-// the GNU General Public License.	This exception does not however
-// invalidate any other reasons why the executable file might be covered by
-// the GNU General Public License.
+//Redistribution and use in source and binary forms, with or without
+//modification, are permitted provided that the following conditions
+//are met:
+//1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//2. Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimer in the
+//   documentation and/or other materials provided with the distribution.
+//
+//THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND OTHER CONTRIBUTORS ``AS IS''
+//AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR OTHER CONTRIBUTORS BE
+//LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef __SYMEIGEN_H
 #define __SYMEIGEN_H
@@ -33,6 +31,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
+#include <utility>
 #include <complex>
 #include <TooN/lapack.h>
 
@@ -104,9 +103,15 @@ namespace Internal{
 		template<typename P, typename B>
 		static inline void compute(const Matrix<2,2,P,B>& m, Matrix<2,2,P>& eig, Vector<2, P>& ev) {
 			double trace = m[0][0] + m[1][1];
-			double det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+			//Only use the upper triangular elements.
+			double det = m[0][0]*m[1][1] - m[0][1]*m[0][1]; 
 			double disc = trace*trace - 4 * det;
-			assert(disc>=0);
+			
+			//Mathematically, disc >= 0 always.
+			//Numerically, it can drift very slightly below zero.
+			if(disc < 0)
+				disc = 0;
+
 			using std::sqrt;
 			double root_disc = sqrt(disc);
 			ev[0] = 0.5 * (trace - root_disc);
@@ -142,7 +147,17 @@ namespace Internal{
 		static inline void compute(const Matrix<3,3,P,B>& m, Matrix<3,3,P>& eig, Vector<3, P>& ev) {
             //method uses closed form solution of cubic equation to obtain roots of characteristic equation.
             using std::sqrt;
+            using std::min;
             
+			double a_norm = norm_1(m);
+			double eps = 1e-7 * a_norm;
+
+			if(a_norm == 0)
+			{
+				eig = TooN::Identity;
+				return;
+			}
+
             //Polynomial terms of |a - l * Identity|
             //l^3 + a*l^2 + b*l + c
 
@@ -165,17 +180,19 @@ namespace Internal{
             double q = c + (2*a*a*a - 9*a*b)/27;
 
             double alpha = -q/2;
-            double beta_descriminant = q*q/4 + p*p*p/27;
 
             //beta_descriminant <= 0 for real roots!
+			//force to zero to avoid nasty rounding issues.
+            double beta_descriminant = std::min(0.0, q*q/4 + p*p*p/27);
+
             double beta = sqrt(-beta_descriminant);
             double r2 = alpha*alpha  - beta_descriminant;
 
             ///Need A,B = cubert(alpha +- beta)
             ///Turn in to r, theta
             /// r^(1/3) * e^(i * theta/3)
-
             double cuberoot_r = pow(r2, 1./6);
+
             double theta3 = atan2(beta, alpha)/3;
 
             double A_plus_B = 2*cuberoot_r*cos(theta3);
@@ -191,19 +208,142 @@ namespace Internal{
             if(ev[0] > ev[1])
                 swap(ev[0], ev[1]);
 
+			// for the vector [x y z]
+			// eliminate to compute the ratios x/z and y/z
+			// in both cases, the denominator is the same, so in the absence of
+			// any other scaling, choose the denominator to be z and 
+			// tne numerators to be x and y.
+			//
+			// x/z and y/z,  implies ax, ay, az which vanishes
+			// if a=0
             //calculate the eigenvectors
             eig[0][0]=a12 * a23 - a13 * (a22 - ev[0]);
             eig[0][1]=a12 * a13 - a23 * (a11 - ev[0]);
             eig[0][2]=(a11-ev[0])*(a22-ev[0]) - a12*a12;
-            normalize(eig[0]);
             eig[1][0]=a12 * a23 - a13 * (a22 - ev[1]);
             eig[1][1]=a12 * a13 - a23 * (a11 - ev[1]);
             eig[1][2]=(a11-ev[1])*(a22-ev[1]) - a12*a12;
-            normalize(eig[1]);
             eig[2][0]=a12 * a23 - a13 * (a22 - ev[2]);
             eig[2][1]=a12 * a13 - a23 * (a11 - ev[2]);
             eig[2][2]=(a11-ev[2])*(a22-ev[2]) - a12*a12;
-            normalize(eig[2]);
+			
+			//Check to see if we have any zero vectors
+			double e0norm = norm_1(eig[0]);
+			double e1norm = norm_1(eig[1]);
+			double e2norm = norm_1(eig[2]);
+
+			//Some of the vectors vanish: we're computing
+			// x/z and y/z, which implies ax, ay, az which vanishes
+			// if a=0;
+			//
+			// So compute the other two choices.
+			if(e0norm < eps)
+			{
+				eig[0][0] += a12 * (ev[0] - a33) + a23 * a13;
+				eig[0][1] += (ev[0]-a11)*(ev[0]-a33) - a13*a13;
+				eig[0][2] += a23 * (ev[0] - a11) + a12 * a13;
+				e0norm = norm_1(eig[0]);
+			}
+
+			if(e1norm < eps)
+			{
+				eig[1][0] += a12 * (ev[1] - a33) + a23 * a13;
+				eig[1][1] += (ev[1]-a11)*(ev[1]-a33) - a13*a13;
+				eig[1][2] += a23 * (ev[1] - a11) + a12 * a13;
+				e1norm = norm_1(eig[1]);
+			}
+
+			if(e2norm < eps)
+			{
+				eig[2][0] += a12 * (ev[2] - a33) + a23 * a13;
+				eig[2][1] += (ev[2]-a11)*(ev[2]-a33) - a13*a13;
+				eig[2][2] += a23 * (ev[2] - a11) + a12 * a13;
+				e2norm = norm_1(eig[2]);
+			}
+
+
+			//OK, a AND b might be 0
+			//Check for vanishing and add in y/x, z/x which implies cx, cy, cz
+			if(e0norm < eps)
+			{
+				eig[0][0] +=(ev[0]-a22)*(ev[0]-a33) - a23*a23;
+				eig[0][1] +=a12 * (ev[0] - a33) + a23 * a13;
+				eig[0][2] +=a13 * (ev[0] - a22) + a23 * a12;
+				e0norm = norm_1(eig[0]);
+			}
+
+			if(e1norm < eps)
+			{
+				eig[1][0] +=(ev[1]-a22)*(ev[1]-a33) - a23*a23;
+				eig[1][1] +=a12 * (ev[1] - a33) + a23 * a13;
+				eig[1][2] +=a13 * (ev[1] - a22) + a23 * a12;
+				e1norm = norm_1(eig[1]);
+			}
+
+			if(e2norm < eps)
+			{
+				eig[2][0] +=(ev[2]-a22)*(ev[2]-a33) - a23*a23;
+				eig[2][1] +=a12 * (ev[2] - a33) + a23 * a13;
+				eig[2][2] +=a13 * (ev[2] - a22) + a23 * a12;
+				e2norm = norm_1(eig[2]);
+			}
+
+			//Oh, COME ON!!!
+			if(e0norm < eps || e1norm < eps || e2norm < eps)
+			{
+				//This is blessedly rare
+		
+				double ns[] = {e0norm, e1norm, e2norm};
+				double is[] = {0, 1, 2};
+				
+				//Sort them
+				if(ns[0] > ns[1])
+				{
+					swap(ns[0], ns[1]);
+					swap(is[0], is[1]);
+				}
+				if(ns[1] > ns[2])
+				{
+					swap(ns[1], ns[2]);
+					swap(is[1], is[2]);
+				}
+				if(ns[0] > ns[1])
+				{
+					swap(ns[0], ns[1]);
+					swap(is[0], is[1]);
+				}
+
+
+				if(ns[1] >= eps)
+				{
+					//one small one. Use the cross product of the other two
+					normalize(eig[1]);
+					normalize(eig[2]);
+					eig[is[0]] = eig[is[1]]^eig[is[2]];
+				}
+				else if(ns[2] >= eps)
+				{
+					normalize(eig[is[2]]);
+					
+					//Permute vector to get a new vector with some orthogonal components.
+					Vector<3> p = makeVector(eig[is[2]][1], eig[is[2]][2], eig[is[2]][0]);
+
+					//Gram-Schmit
+					Vector<3> v1 = unit(p - eig[is[2]] * (p * eig[is[2]]));
+					Vector<3> v2 = v1^eig[is[2]];
+
+					eig[is[0]] = v1;
+					eig[is[1]] = v2;
+				}
+				else
+					eig = TooN::Identity;
+			}
+			else
+			{
+  				normalize(eig[0]);
+  				normalize(eig[1]);
+  				normalize(eig[2]);
+			}
 		}
 	};
 

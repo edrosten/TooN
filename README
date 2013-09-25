@@ -1,21 +1,20 @@
-To use:
+To install on a unix system:
 
-1) Make sure you have a suitable compiler (g++ version < 3 is no good)
+./configure && make && sudo make install
 
-2) Make sure all these files are in your include path.
+To verify that everything works, you can optioinally run
 
-3) Then
+make test
 
-#include <numerics.h>
-and
-#include <numhelpers.h> // (if you want a few extras)
-#include <SVD.h>        // (if you want singular value decompositions)
-#include <LU.h>         // (if you want lu triangular decompositions)
-#include <SymEigen.h>   // (if you want Eigen decomposition of symmetric matrices)
 
-4) Finally you need to link with -llapack -lblas 
-(and -lg2c for g++ I'm not sure about other compilers)
+If you use any LAPACK based features (SVD.h, LU.h, QR_Lapack.h,
+SymEigen.h, Lapack_Cholesky.h) you will need to link against LAPACK,
+probablu ysing -llapack and perhaps -lblas.
 
-(this means you will also need liblapack.{a,so} and libblas.{a,so})
 
-That's it.
+The code is ready to go and should work on any system (unix or non-unix)
+without configuring or compiling.
+
+
+For further details, make the documentation with Doxygen, or go to
+http://www.edwardrosten.com/cvd/toon/html-user/index.html

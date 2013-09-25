@@ -29,7 +29,7 @@ The %TooN library is a set of C++ header files which provide basic numerics faci
 	- @link gOptimize Function optimization@endlink
 	- @link gTransforms Parameterized matrices (eg transformations)@endlink 
 	- @link gEquations linear equations@endlink
-	- @link gFunctions Functions (eg numerical derivatives) @endlink
+	- @link gFunctions Functions (eg automatic differentiation and numerical derivatives) @endlink
 
 It provides classes for statically- (known at compile time) and dynamically-
 (unknown at compile time) sized vectors and matrices and it can delegate
@@ -92,6 +92,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sSlices
  - \ref sFuncSlices
  - \ref sPrecision
+ - \ref sAutomaticDifferentiation
  - \ref sSolveLinear
  - \ref sOtherStuff
  - \ref sHandyFuncs
@@ -553,6 +554,16 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	\subsection sFuncSlices How do I return a slice from a function?
 
+	
+	If you are using C++11, returning slices is now easy:
+	@code
+		auto sliceof(Vector<4>& v)->decltype (v.slice<1,2>())
+		{
+			return v.slice<1,2>();
+		}
+	@endcode
+
+	If not, some tricks are required.
 	Each vector has a <code>SliceBase</code> type indicating the type of a slice.
 
 	They can be slightly tricky to use:
@@ -573,7 +584,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		{
 			return v.template slice<1,2>();
 		}
+
 	@endcode
+
 
 	\subsection sSolveLinear How do I invert a matrix / solve linear equations?
 	
@@ -598,7 +611,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	
 	Similarly for the other \ref sDecompos "decomposition objects"
 
-	For 2x2 matrices, the TooN::inv function can ve used.
+	For 2x2 matrices, the TooN::inv function can be used.
 
 	\subsection sDecompos  Which decomposisions are there?
 
@@ -617,6 +630,21 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	\subsection sHandyFuncs What handy functions are there (normalize, identity, fill, etc...)?
 
 	See @link gLinAlg here @endlink.
+
+	\subsection sAutomaticDifferentiation Does TooN support automatic differentiation?
+	
+	TooN has buildin support for <a href="http://www.fadbad.com/fadbad.html">FADBAD++</a>.
+	Just do:
+	@code
+		#include <functions/fadbad.h>
+	@endcode
+	Then create matrices and vectors of FADBAD types. See functions/fadbad.h
+	for available functions and parameterisations.
+
+	TooN is type generic and so can work on any reasonable types including AD types
+	if a small amount of interfacing is performed.
+	See \sPrecision.
+
 
 
 	\subsection sNoInplace Why don't functions work in place?
@@ -749,7 +777,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	TooN compiles cleanly under C++ 11, but does not require it. It can also
 	make use of some C++11 features where present. Internally, it will make use
 	of \c decltype if a C++11 compiler is present and no overriding configuration
-	has been set.  See  \rec stypeof for more information.
+	has been set.  See  \ref stypeof for more information.
 
 	
 

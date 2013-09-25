@@ -565,6 +565,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+use_lapack
 VERSION
 PKGCONFIG_LIBDIR
 SED
@@ -2491,16 +2492,27 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lapack_dgesvd_" >&5
 $as_echo "$ac_cv_lib_lapack_dgesvd_" >&6; }
 if test "x$ac_cv_lib_lapack_dgesvd_" = xyes; then :
-  lapack=yes
-else
-  lapack=no
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBLAPACK 1
+_ACEOF
+
+  LIBS="-llapack $LIBS"
+
 fi
 
+	if test $ac_cv_lib_lapack_dgesvd_ = yes
+	then
+		lapack=yes
+	else
+		lapack=no
+	fi
 fi
 
 if test "$lapack" != "no"
 then
 	$as_echo "#define TOON_USE_LAPACK 1" >>confdefs.h
+
+	use_lapack=yes
 
 fi
 
