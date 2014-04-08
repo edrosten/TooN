@@ -148,6 +148,7 @@ namespace Internal{
             //method uses closed form solution of cubic equation to obtain roots of characteristic equation.
             using std::sqrt;
             using std::min;
+            using std::swap;
             
 			double a_norm = norm_1(m);
 			double eps = 1e-7 * a_norm;
