@@ -9,7 +9,7 @@ make test
 
 If you use any LAPACK based features (SVD.h, LU.h, QR_Lapack.h,
 SymEigen.h, Lapack_Cholesky.h) you will need to link against LAPACK,
-probablu ysing -llapack and perhaps -lblas.
+probably using -llapack and perhaps -lblas.
 
 
 The code is ready to go and should work on any system (unix or non-unix)
