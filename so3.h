@@ -90,10 +90,10 @@ public:
 		Matrix<3> R1;
 		R1.T()[0] = unit(a);
 		R1.T()[1] = n;
-		R1.T()[2] = n ^ R1.T()[0];
+		R1.T()[2] = R1.T()[0] ^ n;
 		my_matrix.T()[0] = unit(b);
 		my_matrix.T()[1] = n;
-		my_matrix.T()[2] = n ^ my_matrix.T()[0];
+		my_matrix.T()[2] = my_matrix.T()[0] ^ n;
 		my_matrix = my_matrix * R1.T();
 	}
 	
