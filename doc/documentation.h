@@ -216,7 +216,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 			 double* my_data;
 		@endcode
 		When a Vector is made <code>const</code>, C++ inserts <code>const</code> in
-		to those types.  The <code>const</code> it inserts it top level, so these
+		to those types.  The <code>const</code> it inserts is top level, so these
 		become (respectively):
 		@code
 			 const double my_data[3];
@@ -363,7 +363,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 			Matrix<2> m = Idendity;
 			Matrix<> m2 = Identity(3);
 		@endcode
-		note that you need to specify the size in the dynamic case.
+		Note that you need to specify the size in the dynamic case.
 
 		Matrices can be filled from data in row-major order:
 		@code
