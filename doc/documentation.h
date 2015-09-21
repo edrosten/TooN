@@ -105,13 +105,13 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
  	\subsection sDownload Getting the code and installing
 	
-	To get the code from cvs use:
+	To get the code from git use:
 
-	cvs -z3 -d:pserver:anoncvs@cvs.savannah.nongnu.org:/cvsroot/toon co TooN
+	git clone git://github.com/edrosten/TooN.git
 
 	The home page for the library with a version of this documentation is at:
 
-	http://mi.eng.cam.ac.uk/~er258/cvd/toon.html
+	http://edwardrosten.com/cvd/toon.html
 
 	The code will work as-is, and comes with a default configuration, which
 	should work on any system.
@@ -562,6 +562,14 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 			return v.slice<1,2>();
 		}
 	@endcode
+	end even easier in C++14:
+	@code
+		auto sliceof(Vector<4>& v)
+		{
+			return v.slice<1,2>();
+		}
+	@endcode
+
 
 	If not, some tricks are required.
 	Each vector has a <code>SliceBase</code> type indicating the type of a slice.
