@@ -5,7 +5,7 @@ TooN aims to be a fast library, and may choose between one of several algorithms
 depending on the size of the arguments. However TooN will never substitute a
 fast but numerically inferior algorithm.  For example LU decomposition, Gaussian
 elimination and Gauss-Jordan reduction all have similar numerical properties for
-computing a matrix inverse. Direct inversino using Cramer's rule is
+computing a matrix inverse. Direct inversion using Cramer's rule is
 significantly less stable, even for 3x3 matrices.
 
 The following code computes a matrix inverse of the ill conditioned matrix:
