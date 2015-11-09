@@ -161,7 +161,7 @@ namespace TooN {
 	///Normalize a vector in place
 	///@param v Vector to normalize
 	///@ingroup gLinAlg
-	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base> v)
+	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base>&& v)
 	{
 		using std::sqrt;
 		v /= sqrt(v*v);
