@@ -4,6 +4,7 @@ AC_LANG(C++)
 AC_PROG_CXX
 
 
+m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
 
 
 ################################################################################
@@ -59,8 +60,7 @@ define([TEST_AND_SET_CXXFLAG],[
 
 
 
-
-
+AX_CXX_COMPILE_STDCXX_11
 
 
 #
@@ -121,48 +121,6 @@ then
 fi
 
 
-define(TYPEOF_TEST,[
-	if test "$typeof" == check
-	then
-		AC_MSG_CHECKING([for $1])
-		AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-		$3
-		int main()
-		{
-			typedef $2(int()*double()) foo;
-		}
-		])], [ AC_MSG_RESULT(yes);typeof=$1], AC_MSG_RESULT(no))
-	fi
-])
-
-TYPEOF_TEST(decltype, decltype)
-TYPEOF_TEST(__typeof__, __typeof__)
-TYPEOF_TEST(typeof, typeof)
-TYPEOF_TEST(boost, BOOST_TYPEOF, [#include<boost/typeof/typeof.hpp>])
-
-if test "$typeof" == typeof
-then
-	AC_DEFINE(TOON_TYPEOF_TYPEOF, 1)
-elif test "$typeof" == __typeof__
-then
-	AC_DEFINE(TOON_TYPEOF___TYPEOF__, 1)
-elif test "$typeof" == decltype
-then
-	AC_DEFINE(TOON_TYPEOF_DECLTYPE, 1)
-elif test "$typeof" == boost
-then
-	AC_DEFINE(TOON_TYPEOF_BOOST, 1)
-fi
-
-AC_MSG_CHECKING([for __attribute__((deprecated))])
-AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-__attribute__((deprecated)) void foo(){}
-int main()
-{
-	foo();
-}
-])], [ AC_MSG_RESULT(yes);AC_DEFINE(TOON_DEPRECATED_GCC,1 )], AC_MSG_RESULT(no))
-
 
 TEST_AND_SET_CXXFLAG(-Wall)
 TEST_AND_SET_CXXFLAG(-Wextra)
@@ -170,6 +128,5 @@ TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-Werror)
 
-AC_CONFIG_HEADERS(internal/config.hh)
 AC_OUTPUT(Makefile)
 

@@ -81,10 +81,10 @@ namespace Internal {
 	//check for the existence of a valid operator *, especially
 	//in the presence of builtin operators. Therefore, the type is
 	//only deduced if both of the input types are fields.
-	template<class L, class R, int F = CField<L,R>::is> struct AddType      { typedef TOON_TYPEOF(gettype<L>()+gettype<R>()) type;};
-	template<class L, class R, int F = CField<L,R>::is> struct SubtractType { typedef TOON_TYPEOF(gettype<L>()-gettype<R>()) type;};
-	template<class L, class R, int F = CField<L,R>::is> struct MultiplyType { typedef TOON_TYPEOF(gettype<L>()*gettype<R>()) type;};
-	template<class L, class R, int F = CField<L,R>::is> struct DivideType   { typedef TOON_TYPEOF(gettype<L>()/gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct AddType      { typedef decltype (gettype<L>()+gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct SubtractType { typedef decltype (gettype<L>()-gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct MultiplyType { typedef decltype (gettype<L>()*gettype<R>()) type;};
+	template<class L, class R, int F = CField<L,R>::is> struct DivideType   { typedef decltype (gettype<L>()/gettype<R>()) type;};
 
 	template<class L, class R> struct AddType<L, R, 0>         { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};
 	template<class L, class R> struct SubtractType<L, R, 0>    { typedef These_Types_Do_Not_Form_A_Field<L, R> type;};
