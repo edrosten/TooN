@@ -1,4 +1,4 @@
-AC_INIT(TooN, version-2.0.0-beta8)
+AC_INIT(TooN, version-2.2)
 AC_COPYRIGHT([Copyright T. Drummond, E. Rosten, G. Reitmayr 2006, 2007, 2008, 2009])
 AC_LANG(C++)
 AC_PROG_CXX
@@ -169,6 +169,8 @@ TEST_AND_SET_CXXFLAG(-Wextra)
 TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-Werror)
+
+AC_WARN([This is the old 2.x branch. It works but probably won't be receiving updates. You might want to switch to the 3.x branch])
 
 AC_CONFIG_HEADERS(internal/config.hh)
 AC_OUTPUT(Makefile)
