@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2005 Paul Smith, 2009, 2010, 2011, 2012 Edward Rosten
+    Copyright (c) 2005 Paul Smith, 2009, 2010, 2011, 2012, 2013, 2014, 2015 Edward Rosten
 
 	Permission is granted to copy, distribute and/or modify this document under
 	the terms of the GNU Free Documentation License, Version 1.2 or any later
@@ -23,7 +23,7 @@
 
 \section sIntro Introduction
 
-The %TooN library is a set of C++ header files which provide basic numerics facilities:
+The %TooN library is a set of C++14 header files which provide basic numerics facilities:
 	- @link TooN::Vector Vectors@endlink, @link TooN::Matrix matrices@endlink and @link gLinAlg etc @endlink
 	- @link gDecomps Matrix decompositions@endlink
 	- @link gOptimize Function optimization@endlink
@@ -113,15 +113,14 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 
 	http://edwardrosten.com/cvd/toon.html
 
-	The code will work as-is, and comes with a default configuration, which
-	should work on any system.
+	The code will work as-is and requires no configuration and so should
+	should work on any system. Some more obscure options (such as interfacing
+	with CLAPACK) require configuration. See \ref sManualConfiguration.
 
 	On a unix system, <code>./configure && make install </code> will  install
 	TooN to the correct place.  Note there is no code to be compiled, but the
-	configure script performs some basic checks.
-
-	On non-unix systems, e.g. Windows and embedded systems, you may wish to 
-	configure the library manually. See \ref sManualConfiguration.
+	configure script performs some basic checks. The unit tests can be built 
+	and run using make.
 
 	\subsection sStart Getting started
 
@@ -138,16 +137,12 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		against LAPACK, BLAS and any required support libraries. On a modern
 		unix system, linking against LAPACK will do this automatically.
 
-	\subsection sWindowsErrors Comilation errors on Win32 involving TOON_TYPEOF
-	
-		If you get errors compiling code that uses TooN, look for the macro TOON_TYPEOF 
-		in the messages. Most likely the file <code>internal/config.hh</code> is clobbered. 
-		Open it and remove all the defines present there. 
-		
-		Also see @ref sManualConfiguration for more details on configuring TooN, 
-		and @ref sConfigLapack, if you want to use LAPACK and BLAS. Define the macro
-		in <code>internal/config.hh</code>.
+	\subsection sWindowsErrors Comilation errors on Win32
 
+		VisualStudio tends to lag behind GCC and CLANG in terms of support for the latest
+		standards. I (E. Rosten) don't develop on windows so TooN doesn't get regular 
+		testing there. If you find a problem, let me know and ideally, submit a patch!
+	
 	\subsection sCreateVector How do I create a vector?
 
 		Vectors can be statically sized or dynamically sized.
@@ -937,30 +932,6 @@ then take a look at the source code ...
 
 \section sManualConfiguration Manual configuration
 	
-Configuration is controlled by <code>internal/config.hh</code>. If this file is empty
-then the default configuration will be used and TooN will work. There are several options.
-
-\subsection stypeof Typeof
-
-TooN needs a mechanism to determine the type of the result of an expression. One of the following
-macros can be defined to control the behaviour:
-- \c TOON_TYPEOF_DECLTYPE
-  - Use the C++11 decltype operator.
-- \c TOON_TYPEOF_TYPEOF
-  - Use GCC's \c typeof extension. Only works with GCC and will fail with -pedantic
-- \c TOON_TYPEOF___TYPEOF__
-  - Use GCC's \c __typeof__ extension. Only works with GCC and will work with -pedantic
-- \c TOON_TYPEOF_BOOST
-  - Use the \link http://www.boost.org/doc/html/typeof.html Boost.Typeof\endlink system.
-    This will work with Visual Studio if Boost is installed.
-- \c TOON_TYPEOF_BUILTIN
-  - The default option (does not need to be defined)
-  - Only works for the standard builtin integral types and <code>std::complex<float></code> and <code>std::complex<double></code>.
-
-Under Win32, the builtin typeof needs to be used. Comment out all the TOON_TYPEOF_ defines to use it.
-
-If no configuration is present and C++11 is detected, then \c decltype will be used.
-
 \subsection sConfigLapack Functions using LAPACK
 
 Some functions use internal implementations for small sizes and may switch over
@@ -977,6 +948,22 @@ The individual functions are:
 
 Note that these macros do not affect classes that are currently only wrappers
 around LAPACK.
+
+\subsubsection sConfigureCLAPAK
+
+CLAPACK is an automated transliteration of LAPACK into C. The main advantage is
+that it's more easily portable as it doesn't require nearly as much in terms
+of the FORTRAN support libraries, though it's slower. It's useful for embedding 
+the LAPACK codes into the program where LAPACK is not a bottleneck.
+
+In normal FORTRAN, the C int maps to Integer (on 32 and 64 bit systems).
+In CLAPACK, long maps to Integer. Note that CLAPACK cannot be used out of
+the box with TooN as it requires libf2c which defines main().
+
+To set the FORTRAN integer type use -DTOON_CLAPACK (to make it long int)  or
+-DTOON_FORTRAN_INTEGER=long to set it to an arbitrary type.
+
+
 
 **/
 
