@@ -172,7 +172,7 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 ///This is not resizable.
 ///@ingroup gInternal
 template<class Precision> struct VectorAlloc<Dynamic, Precision>: public DefaultTypes<Precision> {
-	Precision * const my_data;
+	Precision * my_data;
 	const int my_size;
 
 	VectorAlloc(const VectorAlloc& v)
@@ -180,6 +180,12 @@ template<class Precision> struct VectorAlloc<Dynamic, Precision>: public Default
 	{ 
 		for(int i=0; i < my_size; i++)
 			my_data[i] = v.my_data[i];
+	}
+
+	VectorAlloc(VectorAlloc&& from) noexcept
+	: my_data(from.my_data), my_size(from.my_size)
+	{
+		from.my_data = 0;
 	}
 
 	VectorAlloc(int s)

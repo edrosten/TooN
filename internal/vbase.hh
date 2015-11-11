@@ -92,6 +92,9 @@ struct VBase {
 	
 		VLayout(){}
 
+		VLayout(VLayout&&) = default;
+		VLayout(const VLayout&) = default;
+
 		VLayout(int s)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
 		{}
@@ -115,6 +118,9 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 
 	//Optional constuctors
 	GenericVBase(){}
+
+	GenericVBase(GenericVBase&&) = default;
+	GenericVBase(const GenericVBase&) = default;
 
 	GenericVBase(int s)
 	:Mem(s)

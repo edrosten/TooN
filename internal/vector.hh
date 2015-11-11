@@ -147,6 +147,9 @@ public:
 	/// renders the vector useless because vectors can't be resized
 	inline Vector(){}
 
+	Vector(Vector&&) noexcept = default;
+	Vector(const Vector&) = default;
+
 	/// Constructor for dynamically-size vectors.  This can also be
 	/// used for statically sized vectors in which case the argument
 	/// is ignored.  The values of the vector are uninitialised
