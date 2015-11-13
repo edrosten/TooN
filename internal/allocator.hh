@@ -219,6 +219,12 @@ template<class Precision> struct VectorAlloc<Dynamic, Precision>: public Default
 		return my_data;
 	}
 
+	void swap(VectorAlloc& v)
+	{	
+		SizeMismatch<Dynamic, Dynamic>::test(my_size, v.my_size);
+		std::swap(my_data, v.my_data);
+	}	
+
 	protected:
 
 		Precision *data()

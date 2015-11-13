@@ -328,6 +328,7 @@ namespace TooN {
 
 }
 
+#include <TooN/internal/size_mismatch.hh>
 #include <TooN/internal/debug.hh>
 
 #include <TooN/internal/introspection.hh>
@@ -336,7 +337,6 @@ namespace TooN {
 #include <TooN/internal/dchecktest.hh>
 #include <TooN/internal/allocator.hh>
 
-#include <TooN/internal/size_mismatch.hh>
 #include <TooN/internal/overfill_error.hh>
 #include <TooN/internal/slice_error.hh>
 
@@ -361,5 +361,11 @@ namespace TooN {
 
 #include <TooN/helpers.h>
 #include <TooN/determinant.h>
+
+namespace std
+{
+	//Specialising std templates is explicitly allowed.
+	using TooN::swap;
+}
 
 #endif
