@@ -36,6 +36,7 @@
 #include <utility>
 #include <vector>
 #include <complex>
+#include <TooN/internal/config.hh>
 #include <TooN/internal/deprecated.hh>
 
 #if defined TOON_NDEBUG || defined NDEBUG

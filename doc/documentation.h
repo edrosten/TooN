@@ -114,8 +114,9 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 	http://edwardrosten.com/cvd/toon.html
 
 	The code will work as-is and requires no configuration and so should
-	should work on any system. Some more obscure options (such as interfacing
+	should work on any system. On unix, some more obscure options (such as interfacing
 	with CLAPACK) require configuration. See \ref sManualConfiguration.
+	On non unix platforms, some use of LAPACK requires configuration.
 
 	On a unix system, <code>./configure && make install </code> will  install
 	TooN to the correct place.  Note there is no code to be compiled, but the

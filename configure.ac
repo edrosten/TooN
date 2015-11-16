@@ -95,7 +95,6 @@ fi
 
 typeof=check
 AC_ARG_ENABLE(lapack, [AS_HELP_STRING([--enable-lapack],[Use LAPACK where optional])], [lapack=$enableval])
-AC_ARG_ENABLE(typeof, [AS_HELP_STRING([--enable-typeof=X],[Force typeof to be decltype, __typeof__, typeof, boost or none])], [typeof=$enableval])
 AC_ARG_WITH(default_precision, [AS_HELP_STRING([--with-default_precision=X],[Override default precision from double to X])], [default_precision="$withval"])
 
 if test "$default_precision" != ""
@@ -128,5 +127,6 @@ TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-Werror)
 
+AC_CONFIG_HEADERS(internal/config.hh)
 AC_OUTPUT(Makefile)
 
