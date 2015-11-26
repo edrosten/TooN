@@ -155,9 +155,6 @@ namespace TooN {
 		return TooN::operator*(v,(1/sqrt(v*v)));
 	}
 	
-	//Note because of the overload later, this function will ONLY receive sliced vectors. Therefore
-	//a copy can be made, which is still a slice, so operating on the copy operates on the original
-	//data.
 	///Normalize a vector in place
 	///@param v Vector to normalize
 	///@ingroup gLinAlg
