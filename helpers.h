@@ -75,7 +75,7 @@ namespace TooN {
 
 	///\deprecated
 	///@ingroup gLinAlg
-	template<int Size, class Precision, class Base> TOON_DEPRECATED void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
+	template<int Size, class Precision, class Base> [[deprecated("Use Ones instead")]] void Fill(Vector<Size, Precision, Base>& v, const Precision& p)
 	{
 		for(int i=0; i < v.size(); i++)
 			v[i]= p;
@@ -83,7 +83,7 @@ namespace TooN {
 
 	///\deprecated
 	///@ingroup gLinAlg
-	template<int Rows, int Cols, class Precision, class Base> TOON_DEPRECATED void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
+	template<int Rows, int Cols, class Precision, class Base> [[deprecated("Use Ones instead")]] void Fill(Matrix<Rows, Cols, Precision, Base>& m, const Precision& p)
 	{
 		for(int i=0; i < m.num_rows(); i++)
 			for(int j=0; j < m.num_cols(); j++)

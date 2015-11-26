@@ -4,7 +4,7 @@ AC_LANG(C++)
 AC_PROG_CXX
 
 
-m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
+m4_include([m4/ax_cxx_compile_stdcxx_14.m4])
 
 
 ################################################################################
@@ -60,7 +60,7 @@ define([TEST_AND_SET_CXXFLAG],[
 
 
 
-AX_CXX_COMPILE_STDCXX_11
+AX_CXX_COMPILE_STDCXX_14
 
 
 #
