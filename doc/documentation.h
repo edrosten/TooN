@@ -78,6 +78,7 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
  - \ref sStart
  - \ref sWindowsErrors
  - \ref sCreateVector
+ - \ref sNamedElementVector
  - \ref sCreateMatrix
  - \ref sFunctionVector
  - \ref sGenericCode
@@ -155,6 +156,35 @@ This section is arranged as a FAQ. Most answers include code fragments. Assume
 		@endcode
 
 		See also \ref sPrecision.
+
+	\subsection sNamedElementVector Can I have a vector with .x, .y, .z members (and so on)?
+
+	Yes. You can define new fixed length vectors with named elements of any length. For example:
+
+	@code
+		#include <TooN/TooN.h>
+		#include <TooN/named_elements.h>
+
+		TOON_DECLARE_NAMED_ELEMENT_VECTOR(CMYK, c, m, y, k);
+
+		int main()
+		{
+			CMYK<> v = TooN::makeVector(1, 2, 3, 4);
+
+			std::cout << v << std::endl;
+			std::cout << " c = " << v.c 
+				 << " m = " << v.m 
+				 << " y = " << v.y 
+				 << " k = " << v.k << endl;
+
+			cout << v * TooN::makeVector(1, 2, 3, 4) << endl;
+
+		}
+	@endcode
+
+	Note that the resulting class (CMYK, in this example) is a type of Vector, so it can be used
+	in any place that generically accepts a Vector. See also, \ref sFunctionVector and \ref sGenericCode.
+
 
 
 	\subsection sCreateMatrix How do I create a matrix?
