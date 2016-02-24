@@ -69,7 +69,6 @@ namespace TooN
 }
 
 //Now some variadic macros for generating the correct classes.
-#define TOON_INTERNAL_FIRSTARG(First, ...) First
 #define TOON_MAKE_NAMED_ELEMENT_VECTOR(Name, ...)\
 namespace TooN{namespace Internal{\
 	struct Name##Dummy\
@@ -84,14 +83,21 @@ namespace TooN{namespace Internal{\
 	template<class Precision> struct Name##Alloc<sizeof(Name##Dummy), Precision>: public StaticAllocFunctions<sizeof(Name##Dummy), Precision>\
 	{\
 		using StaticAllocFunctions<sizeof(Name##Dummy), Precision>::StaticAllocFunctions;\
-		Precision __VA_ARGS__;\
+		union\
+		{\
+			struct\
+			{\
+				Precision __VA_ARGS__;\
+			};\
+			Precision my_data[sizeof(Name##Dummy)];\
+		};\
 		Precision *data()\
 		{\
-			return &TOON_INTERNAL_FIRSTARG(__VA_ARGS__);\
+			return my_data;\
 		}\
 		const Precision *data() const\
 		{\
-			return &TOON_INTERNAL_FIRSTARG(__VA_ARGS__);\
+			return my_data;\
 		}\
 	};\
 }}\
