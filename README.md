@@ -23,10 +23,14 @@ without configuring or compiling.
 
 ## Documentation
 
-For further details, make the documentation with Doxygen, or go to
-http://www.edwardrosten.com/cvd/toon/html-user/index.html
+[![Documentation Status](https://codedocs.xyz/edrosten/TooN.svg)](https://codedocs.xyz/edrosten/TooN/)
+
+Latest documentation here: https://codedocs.xyz/edrosten/TooN/ or just run Doxygen.
+
+Documentation for latest release is here: http://www.edwardrosten.com/cvd/toon/html-user/index.html
 
 
 ## Status of unit tests
 
 [![Build Status](https://drone.io/edrosten/TooN/status.png)](https://drone.io/edrosten/TooN/latest)
+
