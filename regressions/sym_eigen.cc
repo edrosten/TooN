@@ -51,6 +51,8 @@ template<int Size1> void test_matrix(const Matrix<Size1>& m, int& sorted, double
 
 	e = max(e, norm_inf(m - sm.get_evectors().T() * sm.get_evalues().as_diagonal() * sm.get_evectors())/m.num_rows());	
 	e = max(e, norm_inf(Matrix<Size1>(Identity(m.num_rows())) - sm.get_evectors().T() * sm.get_evectors())/m.num_rows());	
+
+
 	n = max(n, e);
 }
 
