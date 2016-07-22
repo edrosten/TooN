@@ -158,19 +158,21 @@ namespace TooN {
 	///Normalize a vector in place
 	///@param v Vector to normalize
 	///@ingroup gLinAlg
-	template<int Size, class Precision, class Base> inline void normalize(Vector<Size, Precision, Base>&& v)
+	template<int Size, class Precision, class Base> inline Precision normalize(Vector<Size, Precision, Base>&& v)
 	{
 		using std::sqrt;
-		v /= sqrt(v*v);
+		Precision n = sqrt(v*v);
+		v /= n;
+		return n;
 	}
 	
 	//This overload is required to operate on non-slice vectors
 	/**
 		\overload
 	*/  
-	template<int Size, class Precision> inline void normalize(Vector<Size, Precision> & v)
+	template<int Size, class Precision> inline Precision normalize(Vector<Size, Precision> & v)
 	{
-		normalize(v.as_slice());
+		return normalize(v.as_slice());
 	}
 
 	///For a vector \e v of length \e i, return \f$[v_1, v_2, \cdots, v_{i-1}] / v_i \f$
