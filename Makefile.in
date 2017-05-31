@@ -48,7 +48,7 @@ docs:
 
 
 LAPACK_TESTS=eigen-sqrt chol_lapack sym_eigen qr lu determinant
-BUILTIN_TESTS=slice vector_resize gauss_jordan chol_toon fill so3 complex gr_svd diagonal_matrix gaussian_elimination zeros swap
+BUILTIN_TESTS=slice vector_resize gauss_jordan chol_toon fill so3 complex gr_svd diagonal_matrix gaussian_elimination zeros swap initializer_list initializer_list_fail_1 initializer_list_fail_2
 
 ifeq (@use_lapack@,yes)
 	TESTS=$(BUILTIN_TESTS) $(LAPACK_TESTS)

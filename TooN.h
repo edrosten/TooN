@@ -35,6 +35,7 @@
 #include <new>
 #include <utility>
 #include <vector>
+#include <initializer_list>
 #include <complex>
 #include <TooN/internal/config.hh>
 

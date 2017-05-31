@@ -163,6 +163,24 @@ public:
 	/// @endcode
 	explicit inline Vector(PointerType data) : Base::template VLayout<Size, Precision> (data) {}
 
+	/// Construct from an initializer list
+	/// @code 
+	/// Vector<Resizable> v = {1, 2, 3};
+	/// @endcode
+	template<typename X=Precision>
+	inline  Vector(std::initializer_list<Precision> init, typename std::enable_if<sizeof(X)&&(Size <0)>::type* = 0)
+	:Base::template VLayout<Size, Precision> (init) 
+	{}
+
+
+	/// Construct from an array by reference
+	/// @code 
+	/// Vector<3> v = {1, 2, 3};
+	/// @endcode
+	template<typename Precision2, int Size2>
+	inline  Vector(const Precision2(&init)[Size2])
+	:Base::template VLayout<Size, Precision> (init) 
+	{}
 
 	/// Constructor used when constructing a dynamic vector which references
 	/// other data, e.g.

@@ -95,6 +95,15 @@ struct VBase {
 		VLayout(VLayout&&) = default;
 		VLayout(const VLayout&) = default;
 
+		VLayout(std::initializer_list<Precision> i)
+			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(i)
+		{}
+		
+		template<typename Precision2, int Size2>
+		VLayout(const Precision2(&i)[Size2])
+			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(i)
+		{}
+
 		VLayout(int s)
 			:GenericVBase<Size, Precision, 1, VectorAlloc<Size, Precision> >(s)
 		{}
@@ -124,6 +133,15 @@ template<int Size, typename Precision, int Stride, typename Mem> struct GenericV
 
 	GenericVBase(int s)
 	:Mem(s)
+	{}
+
+	template<typename Precision2, int Size2>
+	GenericVBase(const Precision2(&i)[Size2])
+	:Mem(i)
+	{}
+
+	GenericVBase(std::initializer_list<Precision> i)
+	:Mem(i)
 	{}
 
 	typedef typename Mem::PointerType PointerType;

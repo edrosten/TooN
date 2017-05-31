@@ -126,6 +126,14 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 
 	///Construction from a size (required by damic vectors, ignored otherwise).
 	VectorAlloc(int /*s*/) { }
+	
+	template<class Precision2, int Size2>
+	VectorAlloc(const Precision2(&i)[Size2])
+	{
+		static_assert(Size == Size2, "Wrong number of elements to initialize static vector");
+		for(int j=0; j < Size; j++)
+			my_data[j] = i[j];
+	}
 
 	///Construction from an Operator. See Operator::size().
 	template<class Op>
@@ -174,6 +182,12 @@ template<int Size, class Precision> struct VectorAlloc : public StaticSizedAlloc
 template<class Precision> struct VectorAlloc<Dynamic, Precision>: public DefaultTypes<Precision> {
 	Precision * my_data;
 	const int my_size;
+
+	VectorAlloc(std::initializer_list<Precision> i)
+	:VectorAlloc(i.size())
+	{
+		std::copy(i.begin(), i.end(), my_data);
+	}
 
 	VectorAlloc(const VectorAlloc& v)
 	:my_data(new Precision[v.my_size]), my_size(v.my_size)
@@ -258,6 +272,11 @@ template<class Precision> struct VectorAlloc<Resizable, Precision>: public Defau
 
 		VectorAlloc()
 		{ 
+		}
+
+		VectorAlloc(std::initializer_list<Precision> i)
+		:numbers(i)
+		{
 		}
 
 		VectorAlloc(int s)

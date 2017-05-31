@@ -96,8 +96,10 @@ BEGIN{
 		if(s1 == "Crash!!!" || s2 == "Crash!!!")
 			fail("Crash!!!")
 
+		
 		if(s1 == "Compile error!" || s2 == "Compile error!")
-			fail("Compile error!")
+			if(s1 != s2)
+				fail("Compile error!")
 
 		#If there are valid lines left, then split them
 		#into fields
