@@ -94,8 +94,8 @@ public:
 	/// @param m The value of the measurement
 	/// @param J The Jacobian for the measurement \f$\frac{\partial\text{m}}{\partial\text{param}_i}\f$
 	/// @param weight The inverse variance of the measurement (default = 1)
-	template<class B2>
-	inline void add_mJ(Precision m, const Vector<Size, Precision, B2>& J, Precision weight = 1) {
+	template<class B2, class P2>
+	inline void add_mJ(Precision m, const Vector<Size, P2, B2>& J, Precision weight = 1) {
 		
 		//Upper right triangle only, for speed
 		for(int r=0; r < my_C_inv.num_rows(); r++)
@@ -105,6 +105,19 @@ public:
 			for(int c=r; c < my_C_inv.num_rows(); c++)
 				my_C_inv[r][c] += Jw * J[c];
 		}
+	}
+
+	/// Add a several measurements measurement 
+	/// @param m The value of the measurement
+	/// @param J The Jacobian for the measurement \f$\frac{\partial\text{m}}{\partial\text{param}_i}\f$
+	/// @param weight The inverse variance of the measurement (default = 1)
+	template<class VB, int S2, class B2>
+	inline void add_mJ(const Vector<S2, Precision, VB>& m, const Matrix<S2,Size, Precision, B2>& J, Precision weight = 1) {
+
+		SizeMismatch<S2,S2>::test(m.size(), J.num_rows());
+		for(int r=0; r < J.num_rows(); r++)
+			add_mJ(m[r], J[r], weight);
+			
 	}
 
 	/// Add multiple measurements at once (much more efficiently)
