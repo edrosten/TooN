@@ -157,6 +157,14 @@ public:
 	{
 		return -this->my_vector;
 	}
+
+	DiagonalMatrix<Size, Precision> inverse() const
+	{
+		Vector<Size, Precision> inv(this->my_vector.size());
+		for(int i=0; i < inv.size(); i++)
+			inv[i] = 1 / this->my_vector[i];
+		return inv;
+	}
 };
 
 
