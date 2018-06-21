@@ -101,7 +101,7 @@ namespace TooN {
 	/// @param Reweight The reweighting functor. This structure must provide reweight(), 
 	/// true-scale() and objective() methods. Existing examples are  Robust I, Robust II and ILinear.
 	/// @ingroup gEquations
-	template <int Size, typename Precision, template <typename Precision> class Reweight>
+	template <int Size, typename Precision, template <typename RWPrecision> class Reweight>
 	class IRLS
 		: public Reweight<Precision>,
 		  public WLS<Size,Precision>

@@ -31,9 +31,9 @@
 
 #include <iostream>
 
+#include <TooN/TooN.h>
 #include <TooN/lapack.h>
 
-#include <TooN/TooN.h>
 
 namespace TooN {
 /**
