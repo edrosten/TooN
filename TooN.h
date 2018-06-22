@@ -309,11 +309,7 @@ namespace TooN {
 	}
 	
 	///All TooN classes default to using this precision for computations and storage.
-#ifndef TOON_DEFAULT_PRECISION
-	typedef double DefaultPrecision;
-#else
-	typedef TOON_DEFAULT_PRECISION DefaultPrecision;
-#endif
+typedef double DefaultPrecision;
 
 #if defined  TOON_FORTRAN_INTEGER && defined TOON_CLAPACK
 	#error Error: both TOON_FORTRAN_INTEGER and TOON_CLAPACK defined
