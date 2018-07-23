@@ -401,6 +401,14 @@ namespace TooN {
 		return 0;
 	}
 
+	template<int R, int C, class P, class B> bool isnan(const Matrix<R, C, P, B>& m)
+	{
+		for(int r=0; r < m.num_rows(); r++)
+			if(isnan(m[r]))
+				return 1;
+		return 0;
+	}
+
 	/// Symmetrize a matrix 
 	///@param m \e m
 	///@return \f$ \frac{m + m^{\mathsf T}}{2} \f$
