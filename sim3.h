@@ -96,6 +96,11 @@ public:
 		get_scale() *= rhs.get_scale();
 		return *this;
 	}
+	
+	/// Reset back to the identity transform
+	inline SIM3<>& operator=(const TooN::Operator<TooN::Internal::Identity<TooN::Internal::One>>&) {
+		return *this = SIM3<>();
+	}
 
 	/// Right-multiply by another SIM3 (concatenate the two transformations)
 	/// @param rhs The multipier
