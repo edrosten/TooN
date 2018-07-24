@@ -3040,7 +3040,7 @@ $as_echo "no" >&6; }
 	fi
 
 
-ac_config_headers="$ac_config_headers internal/config.hh"
+ac_config_headers="$ac_config_headers TooN/internal/config.hh"
 
 ac_config_files="$ac_config_files Makefile"
 
@@ -3734,7 +3734,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "TooN.pc") CONFIG_FILES="$CONFIG_FILES TooN.pc" ;;
-    "internal/config.hh") CONFIG_HEADERS="$CONFIG_HEADERS internal/config.hh" ;;
+    "TooN/internal/config.hh") CONFIG_HEADERS="$CONFIG_HEADERS TooN/internal/config.hh" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

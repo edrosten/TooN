@@ -1,4 +1,4 @@
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 int main(){
 	{
 		Matrix<2> m = Data(1.36954561915420e-01, 5.07440445575612e-01, 4.40579637085006e-01, 2.69269087931921e-01);

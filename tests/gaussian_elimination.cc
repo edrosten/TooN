@@ -1,4 +1,4 @@
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 #include <TooN/gaussian_elimination.h>
 using namespace TooN;
 using namespace std;

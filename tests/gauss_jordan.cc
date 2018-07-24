@@ -1,4 +1,4 @@
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 #include <TooN/gauss_jordan.h>
 
 

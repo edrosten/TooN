@@ -1,6 +1,7 @@
-regressions/*.result
-regressions/*.test
-regressions/*.testout
+tests/*.result
+tests/*.test
+tests/*.testout
+tests/results
 tmp
 a.out
 *.s
@@ -17,3 +18,4 @@ Makefile
 regressions/results
 *.o
 TooN-doxy.tag
+TooN.pc

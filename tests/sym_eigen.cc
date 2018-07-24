@@ -5,7 +5,7 @@
 
 
 #include <TooN/SymEigen.h>
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 #include <iomanip>
 #include <algorithm>
 

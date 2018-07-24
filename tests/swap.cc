@@ -1,7 +1,7 @@
 #include <TooN/TooN.h>
 #include <utility>
 #include <cstdlib>
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 using namespace TooN;
 using namespace std;
 

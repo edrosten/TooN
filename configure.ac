@@ -121,6 +121,6 @@ TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
 TEST_AND_SET_CXXFLAG(-Werror)
 
-AC_CONFIG_HEADERS(internal/config.hh)
+AC_CONFIG_HEADERS(TooN/internal/config.hh)
 AC_OUTPUT(Makefile)
 

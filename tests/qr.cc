@@ -1,4 +1,4 @@
-#include "regressions/regression.h"
+#include "tests/test_helper.h"
 #include <TooN/QR.h>
 using namespace TooN;
 using namespace std;
