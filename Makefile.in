@@ -24,6 +24,7 @@ all:
 	@echo It is now ready to be installed.
 
 install:
+	mkdir -p $(hdr)/
 	cp -r TooN $(hdr)/
 	[ "$(pkgconfig)" = "" ] || mkdir -p $(DESTDIR)$(pkgconfig)
 	[ "$(pkgconfig)" = "" ] || cp TooN.pc $(DESTDIR)$(pkgconfig)/
