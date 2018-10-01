@@ -177,6 +177,15 @@ private:
 	Precision my_scale;
 };
 
+/// Multiply SIM3 by SE3 (concatenate the two transformations)
+template<class P>
+SIM3<P> operator *(const SIM3<P>& lhs, const SE3<P>& rhs_) {
+	SIM3<P> rhs;
+	rhs.get_rotation() = rhs_.get_rotation();
+	rhs.get_translation() = rhs_.get_translation();
+	return lhs*rhs;
+}
+
 // transfers a vector in the Lie algebra
 // from one coord frame to another
 // so that exp(adjoint(vect)) = (*this) * exp(vect) * (this->inverse())

@@ -55,5 +55,28 @@ int main() {
 	}
 
 	cout << err << endl;
+
+
+	for(int i=0; i < 10; i++)
+	{
+		Vector<6> v1;
+		Vector<7> v2;
+
+		for(int i=0; i < 6; i++)
+			v1[i] = g(rng);
+		for(int i=0; i < 7; i++)
+			v2[i] = g(rng);
+
+		SE3<> se3{v1};
+		SIM3<> sim3{v2};
+
+		
+		Matrix<4> r1 = (sim3 * Matrix<4>(Identity)) * (se3*Matrix<4>(Identity));
+		Matrix<4> r2 = (sim3 * se3)*Matrix<4>(Identity);
+
+		err = max(err, norm_1(r1 - r2));
+	}
+
+
 }
 
