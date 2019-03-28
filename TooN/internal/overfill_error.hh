@@ -44,8 +44,10 @@ template<int N, int Size> struct CheckOverFill
 
 template<int N> struct CheckOverFill<N, -1>
 {
+	static void use(int){}
 	static void check(int s)
 	{
+		use(s);
 		#ifdef TOON_TEST_INTERNALS
 			if(N >= s)
 				throw VectorOverfill();

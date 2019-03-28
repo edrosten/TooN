@@ -68,9 +68,9 @@ namespace TooN {
 	template<typename Precision>
 	struct ILinear {
 		void set_sd(Precision){} ///<Set the noise standard deviation (does nothing).
-		inline Precision reweight(Precision d){return 1;} ///< Returns \f$w(x)\f$.
+		inline Precision reweight(Precision){return 1;} ///< Returns \f$w(x)\f$.
 		inline Precision true_scale(Precision d){return 1;} ///< Returns \f$w(x) + xw'(x)\f$.
-		inline Precision objective(Precision d){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
+		inline Precision objective(Precision){return d*d;} ///< Returns \f$\int xw(x)dx\f$.
 	};
 	
 	///A reweighting class where the objective function tends to a 

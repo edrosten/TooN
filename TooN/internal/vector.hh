@@ -147,7 +147,7 @@ public:
 	/// renders the vector useless because vectors can't be resized
 	inline Vector(){}
 
-	Vector(Vector&&) noexcept = default;
+	Vector(Vector&&) = default;
 	Vector(const Vector&) = default;
 
 	/// Constructor for dynamically-size vectors.  This can also be
