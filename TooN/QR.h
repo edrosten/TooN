@@ -29,6 +29,7 @@
 #ifndef TOON_INC_QR_H
 #define TOON_INC_QR_H
 #include <TooN/TooN.h>
+#include <algorithm>
 #include <cmath>
 
 namespace TooN

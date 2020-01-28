@@ -29,6 +29,7 @@
 
 #include <TooN/TooN.h>
 #include <TooN/lapack.h>
+#include <algorithm>
 #include <utility>
 
 namespace TooN{
