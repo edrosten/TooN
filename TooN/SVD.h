@@ -30,6 +30,7 @@
 
 #include <TooN/TooN.h>
 #include <TooN/lapack.h>
+#include <algorithm>
 
 namespace TooN {
 

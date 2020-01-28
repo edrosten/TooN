@@ -27,6 +27,7 @@
 #define TOON_BRENT_H
 #include <TooN/TooN.h>
 #include <TooN/helpers.h>
+#include <algorithm>
 #include <limits>
 #include <cmath>
 #include <cstdlib>

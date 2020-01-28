@@ -28,6 +28,7 @@
 #ifndef __SYMEIGEN_H
 #define __SYMEIGEN_H
 
+#include <algorithm>
 #include <iostream>
 #include <cassert>
 #include <cmath>

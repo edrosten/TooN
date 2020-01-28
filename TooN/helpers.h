@@ -32,6 +32,7 @@
 
 #include <TooN/TooN.h>
 #include <TooN/gaussian_elimination.h>
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <utility>
