@@ -10,7 +10,6 @@ To verify that everything works, you can optioinally run
 
 make test
 
-
 If you use any LAPACK based features (SVD.h, LU.h, QR_Lapack.h,
 SymEigen.h, Lapack_Cholesky.h) you will need to link against LAPACK,
 probably using -llapack and perhaps -lblas.
