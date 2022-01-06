@@ -1,15 +1,7 @@
 /*
     Copyright (c) 2005 Paul Smith, 2009, 2010, 2011, 2012, 2013, 2014, 2015 Edward Rosten
 
-	Permission is granted to copy, distribute and/or modify this document under
-	the terms of the GNU Free Documentation License, Version 1.2 or any later
-	version published by the Free Software Foundation; with no Invariant
-	Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-    You should have received a copy of the GNU Free Documentation License
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc.
-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+    This library is free software, see COPYING file for details
 
 */
 ///////////////////////////////////////////////////////
