@@ -109,7 +109,7 @@ fi
 
 if test "$lapack" != "no" 
 then
-	AC_DEFINE(TOON_USE_LAPACK, 1)
+	AC_DEFINE([TOON_USE_LAPACK], [], [Use LAPACK])
 	AC_SUBST(use_lapack, yes)
 fi
 
@@ -119,7 +119,6 @@ TEST_AND_SET_CXXFLAG(-Wall)
 TEST_AND_SET_CXXFLAG(-Wextra)
 TEST_AND_SET_CXXFLAG(-W)
 TEST_AND_SET_CXXFLAG(-O3)
-TEST_AND_SET_CXXFLAG(-Werror)
 
 AC_CONFIG_HEADERS(TooN/internal/config.hh)
 AC_OUTPUT(Makefile)
